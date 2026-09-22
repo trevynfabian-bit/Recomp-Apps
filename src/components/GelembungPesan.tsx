@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { formatJam } from '@recomp/logika';
+import { DaftarRujukan } from './DaftarRujukan';
 import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -70,6 +71,12 @@ export function GelembungPesan({ pesan, tampilkanJam = false, onCobaLagi }: Prop
           {pesan.teks}
         </Text>
       </View>
+
+      {/* Asal angka menempel pada jawaban yang memakainya, bukan di satu
+          tempat terpisah — kalau harus dicari, ia tidak akan dibaca. */}
+      {pesan.rujukan && pesan.rujukan.length > 0 ? (
+        <DaftarRujukan rujukan={pesan.rujukan} />
+      ) : null}
 
       {tampilkanJam && !gagal ? (
         <Text style={{ ...typography.caption, color: colors.textFaint }}>

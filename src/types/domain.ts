@@ -141,6 +141,24 @@ export type BarisUkuran = {
   pasangan?: 'kiri' | 'kanan';
 };
 
+/**
+ * Satu angka yang dikutip coach, beserta ASALNYA.
+ *
+ * PRD menuntut coach membedakan data mentah dari estimasi, dan itu tidak bisa
+ * dijamin lewat kalimat: model bisa saja lupa menulis "estimasi", dan pembaca
+ * tetap tidak punya cara memeriksanya. Karena itu asal angka dikirim sebagai
+ * DATA di samping teksnya, lalu dirender app — bukan dititipkan ke prosa.
+ */
+export type RujukanData = {
+  /** Nama angkanya, mis. "Rata-rata 7 hari". */
+  label: string;
+  /** Nilai yang sudah diformat, mis. "74,5 kg". */
+  nilai: string;
+  jenis: JenisSumber;
+  /** Dari mana angkanya diturunkan, mis. "7 timbangan dalam 7 hari". */
+  dasar?: string;
+};
+
 /** Satu pesan dalam percakapan AI Coach. */
 export type PesanCoach = {
   id: string;
@@ -153,6 +171,11 @@ export type PesanCoach = {
    * dicoba lagi tanpa mengetik ulang — itu satu-satunya alasan field ini ada.
    */
   status?: 'terkirim' | 'mengirim' | 'gagal';
+  /**
+   * Angka-angka yang dipakai jawaban ini, beserta asalnya. Hanya diisi pesan
+   * coach; pesan pengguna tidak mengutip data.
+   */
+  rujukan?: RujukanData[];
 };
 
 /**

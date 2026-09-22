@@ -108,8 +108,11 @@ export default function CoachScreen() {
           {
             id: `${id}-balas`,
             peran: 'coach',
-            teks: jawaban,
+            teks: jawaban.teks,
             waktu: new Date().toISOString(),
+            // Asal angka datang sebagai DATA dari balasan, bukan diurai dari
+            // kalimatnya — itu yang membuat penandanya bisa dipercaya.
+            rujukan: jawaban.rujukan,
           },
         ]);
       } catch {

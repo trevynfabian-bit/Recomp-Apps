@@ -1,5 +1,6 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { Card } from './Card';
+export { DaftarRujukan } from './DaftarRujukan';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { GelembungMengetik, GelembungPesan, PemisahTanggal } from './GelembungPesan';
 export { GrafikTren } from './GrafikTren';
