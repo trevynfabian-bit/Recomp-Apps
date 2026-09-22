@@ -53,7 +53,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                   paddingVertical: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: aktif ? colors.amber : colors.border,
+                  borderColor: aktif ? colors.amber : colors.borderKuat,
                   backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
                   opacity: pressed ? 0.7 : 1,
                 })}
@@ -65,7 +65,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                     height: 18,
                     borderRadius: 9,
                     borderWidth: 2,
-                    borderColor: aktif ? colors.amber : colors.border,
+                    borderColor: aktif ? colors.amber : colors.borderKuat,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
@@ -81,7 +81,9 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                   <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
                     {f.nilai}
                   </Text>
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>{f.ringkas}</Text>
+                  {/* textMuted, bukan textFaint: di atas latar terpilih yang
+                      bertint amber, textFaint cuma 3,94:1 — di bawah AA. */}
+                  <Text style={{ ...typography.caption, color: colors.textMuted }}>{f.ringkas}</Text>
                 </View>
               </Pressable>
             );

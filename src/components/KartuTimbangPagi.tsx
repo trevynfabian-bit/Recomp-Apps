@@ -363,7 +363,9 @@ export function KartuTimbangPagi({
                   borderRadius: radius.md,
                   borderWidth: 1,
                   borderColor: colors.amber + '55',
-                  backgroundColor: colors.amber + '14',
+                  // Tint di atas `surface` membuat teks redup di dalamnya jatuh
+                  // ke 3,9:1; warnanya cukup dibawa tepi dan judulnya.
+                  backgroundColor: colors.surfaceSunken,
                 }}
               >
                 <Text style={{ ...typography.label, color: colors.amber }}>
@@ -384,7 +386,7 @@ export function KartuTimbangPagi({
                   borderRadius: radius.md,
                   borderWidth: 1,
                   borderColor: colors.coral + '55',
-                  backgroundColor: colors.coral + '14',
+                  backgroundColor: colors.surfaceSunken,
                 }}
               >
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
@@ -468,7 +470,7 @@ function TombolGeser({ label, onPress }: { label: string; onPress: () => void })
         borderRadius: radius.pill,
         backgroundColor: colors.surfaceSunken,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderKuat,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,

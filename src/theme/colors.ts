@@ -15,8 +15,18 @@ export const colors = {
   surface: '#2A2D36',
   /** Permukaan yang lebih gelap dari surface, untuk track progress & input. */
   surfaceSunken: '#1C1E25',
-  /** Garis pemisah halus. */
+  /** Garis pemisah HALUS: tepi kartu, pemisah baris, garis bantu grafik. */
   border: '#343845',
+  /**
+   * Tepi KONTROL: field isian, tombol bertepi, chip, stepper.
+   *
+   * Dipisahkan dari `border` karena keduanya punya tugas berbeda menurut WCAG
+   * 1.4.11: pemisah dekoratif boleh (dan sebaiknya) resesif, tapi batas yang
+   * MENANDAI sebuah kontrol adalah informasi dan butuh 3:1. `border` hanya
+   * 1,18:1 terhadap surface — cukup untuk memisahkan, tidak cukup untuk
+   * memberi tahu bahwa sesuatu bisa disentuh.
+   */
+  borderKuat: '#727888',
 
   /** Aksen utama: kalori, angka utama, CTA. Lolos AA untuk teks maupun isian. */
   amber: '#F0A202',

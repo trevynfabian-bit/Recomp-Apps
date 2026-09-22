@@ -23,7 +23,7 @@ export function InputAngka({ label, nilai, unit, onUbah, warna = colors.textMute
           backgroundColor: colors.surfaceSunken,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: colors.borderKuat,
           paddingHorizontal: spacing.md,
         }}
       >

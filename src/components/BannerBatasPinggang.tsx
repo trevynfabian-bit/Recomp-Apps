@@ -148,7 +148,7 @@ function TombolAksi({
         justifyContent: 'center',
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: utama ? warna : colors.border,
+        borderColor: utama ? warna : colors.borderKuat,
         backgroundColor: utama ? warna : 'transparent',
         opacity: pressed ? 0.75 : 1,
       })}

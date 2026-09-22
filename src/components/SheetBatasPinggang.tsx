@@ -191,7 +191,10 @@ export function SheetBatasPinggang({
                   gap: spacing.xs,
                   padding: spacing.md,
                   borderRadius: radius.md,
-                  backgroundColor: sudahLewat ? colors.coral + '14' : colors.surfaceSunken,
+                  // Latarnya tetap surfaceSunken di kedua keadaan; yang berubah
+                  // cuma tepinya, supaya teks redup di dalamnya tidak ikut
+                  // kehilangan kontras saat keadaannya berubah.
+                  backgroundColor: colors.surfaceSunken,
                   borderWidth: 1,
                   borderColor: sudahLewat ? colors.coral + '55' : 'transparent',
                 }}
@@ -238,7 +241,7 @@ export function SheetBatasPinggang({
                       paddingHorizontal: spacing.lg,
                       borderRadius: radius.pill,
                       borderWidth: 1,
-                      borderColor: colors.border,
+                      borderColor: colors.borderKuat,
                       backgroundColor: colors.surfaceSunken,
                       opacity: pressed ? 0.7 : 1,
                     })}
@@ -268,7 +271,7 @@ export function SheetBatasPinggang({
                   borderRadius: radius.md,
                   borderWidth: 1,
                   borderColor: colors.coral + '55',
-                  backgroundColor: colors.coral + '14',
+                  backgroundColor: colors.surfaceSunken,
                 }}
               >
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
@@ -351,7 +354,7 @@ function TombolGeser({
         borderRadius: radius.pill,
         backgroundColor: colors.surfaceSunken,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderKuat,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,

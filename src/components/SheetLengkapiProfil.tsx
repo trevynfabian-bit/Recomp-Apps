@@ -122,7 +122,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   paddingHorizontal: spacing.lg,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: tinggi === '' || tinggiValid ? colors.border : colors.coral,
+                  borderColor: tinggi === '' || tinggiValid ? colors.borderKuat : colors.coral,
                   backgroundColor: colors.surfaceSunken,
                 }}
               >
@@ -185,7 +185,9 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   borderRadius: radius.md,
                   borderWidth: 1,
                   borderColor: colors.coral + '55',
-                  backgroundColor: colors.coral + '14',
+                  // Tint di atas `surface` menjatuhkan kontras teks redup di
+                  // dalamnya ke bawah AA; warnanya cukup dibawa tepi & judul.
+                  backgroundColor: colors.surfaceSunken,
                 }}
               >
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
@@ -276,7 +278,7 @@ function PilihanKelamin({
         paddingHorizontal: spacing.lg,
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: aktif ? colors.amber : colors.border,
+        borderColor: aktif ? colors.amber : colors.borderKuat,
         backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
         opacity: pressed ? 0.7 : 1,
       })}
@@ -287,7 +289,7 @@ function PilihanKelamin({
           height: 18,
           borderRadius: 9,
           borderWidth: 2,
-          borderColor: aktif ? colors.amber : colors.border,
+          borderColor: aktif ? colors.amber : colors.borderKuat,
           alignItems: 'center',
           justifyContent: 'center',
         }}

@@ -155,7 +155,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                       backgroundColor: colors.surfaceSunken,
                       borderRadius: radius.md,
                       borderWidth: 1,
-                      borderColor: colors.border,
+                      borderColor: colors.borderKuat,
                       paddingHorizontal: spacing.md,
                       paddingVertical: spacing.md,
                     }}
@@ -282,7 +282,7 @@ function TombolSekunder({ label, onPress }: { label: string; onPress: () => void
       style={({ pressed }) => ({
         borderRadius: radius.lg,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderKuat,
         backgroundColor: colors.surfaceSunken,
         minHeight: TAP_MIN,
         justifyContent: 'center',

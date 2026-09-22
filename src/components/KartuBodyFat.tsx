@@ -187,7 +187,7 @@ export function KartuBodyFat({
           paddingHorizontal: spacing.md,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: colors.borderKuat,
           backgroundColor: colors.surfaceSunken,
           opacity: pressed ? 0.7 : 1,
         })}
@@ -307,7 +307,7 @@ function KartuKosong({
             justifyContent: 'center',
             borderRadius: radius.md,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.borderKuat,
             backgroundColor: colors.surfaceSunken,
             opacity: pressed ? 0.7 : 1,
           })}

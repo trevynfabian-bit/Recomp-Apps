@@ -108,7 +108,7 @@ export function PanelRedistribusi({
                   paddingVertical: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: aktif ? colors.amber : colors.border,
+                  borderColor: aktif ? colors.amber : colors.borderKuat,
                   backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
                   opacity: sudahDipakai ? 0.5 : pressed ? 0.7 : 1,
                 })}
@@ -119,7 +119,7 @@ export function PanelRedistribusi({
                     height: 18,
                     borderRadius: 9,
                     borderWidth: 2,
-                    borderColor: aktif ? colors.amber : colors.border,
+                    borderColor: aktif ? colors.amber : colors.borderKuat,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
@@ -132,7 +132,9 @@ export function PanelRedistribusi({
                   <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
                     {o.judul}
                   </Text>
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>{o.ringkas}</Text>
+                  {/* textMuted, bukan textFaint: di atas latar terpilih yang
+                      bertint amber, textFaint cuma 3,94:1 — di bawah AA. */}
+                  <Text style={{ ...typography.caption, color: colors.textMuted }}>{o.ringkas}</Text>
                 </View>
               </Pressable>
             );
@@ -165,7 +167,7 @@ export function PanelRedistribusi({
                       paddingHorizontal: spacing.lg,
                       borderRadius: radius.pill,
                       borderWidth: 1,
-                      borderColor: aktif ? colors.amber : colors.border,
+                      borderColor: aktif ? colors.amber : colors.borderKuat,
                       backgroundColor: aktif ? colors.amber : colors.surfaceSunken,
                       opacity: pressed ? 0.7 : 1,
                     })}

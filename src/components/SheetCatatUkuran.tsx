@@ -509,7 +509,7 @@ function BarisInput({
           paddingHorizontal: spacing.md,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: valid ? colors.border : colors.coral,
+          borderColor: valid ? colors.borderKuat : colors.coral,
           backgroundColor: colors.surfaceSunken,
         }}
       >
@@ -557,7 +557,7 @@ function TombolGeser({
         borderRadius: radius.pill,
         backgroundColor: colors.surfaceSunken,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderKuat,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,
@@ -597,13 +597,16 @@ function Kotak({
   const teks = nada === 'amber' ? colors.amber : colors.aksenTeks.coral;
   return (
     <View
+      // Isian memakai surfaceSunken, bukan tint warnanya: tint 8% di atas
+      // `surface` menaikkan luminansi latar sampai teks redup di dalamnya
+      // jatuh ke 3,9:1. Warnanya tetap terbaca dari tepi dan judulnya.
       style={{
         gap: spacing.xs,
         padding: spacing.md,
         borderRadius: radius.md,
         borderWidth: 1,
         borderColor: dasar + '55',
-        backgroundColor: dasar + '14',
+        backgroundColor: colors.surfaceSunken,
       }}
     >
       <Text style={{ ...typography.label, color: teks }}>{judul}</Text>

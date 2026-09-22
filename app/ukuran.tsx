@@ -13,6 +13,7 @@ import {
 import {
   BannerBatasPinggang,
   Card,
+  HeroNumber,
   KartuBodyFat,
   RiwayatPerubahan,
   SheetBatasPinggang,
@@ -128,7 +129,7 @@ export default function UkuranScreen() {
             borderRadius: radius.pill,
             backgroundColor: colors.surface,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.borderKuat,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
@@ -144,26 +145,23 @@ export default function UkuranScreen() {
         </View>
       </View>
 
-      {/* Pinggang jadi angka utama: ia penanda lemak perut yang paling responsif */}
+      {/* Pinggang jadi angka utama: ia penanda lemak perut yang paling responsif.
+          Memakai HeroNumber, bukan hero rakitan sendiri, supaya batas Dynamic
+          Type (MAKS_SKALA_HERO) ikut berlaku seperti di layar lain. */}
       <Card style={{ paddingVertical: spacing.xl }}>
-        <View style={{ alignItems: 'center', gap: spacing.xs }}>
-          <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
-            Pinggang
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
-            <Text style={{ ...typography.hero, color: colors.text }}>
-              {formatDesimal(terbaru.pinggang_cm)}
-            </Text>
-            <Text style={{ ...typography.title, color: colors.textFaint, paddingBottom: spacing.md }}>
-              cm
-            </Text>
-          </View>
-          {pertama ? (
-            <Text style={{ ...typography.label, color: colors.textMuted }}>
-              {selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak{' '}
-              {formatTanggalPanjang(pertama.tanggal)}
-            </Text>
-          ) : null}
+        <HeroNumber
+          label="Pinggang"
+          nilai={formatDesimal(terbaru.pinggang_cm)}
+          unit="cm"
+          keterangan={
+            pertama
+              ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
+              : undefined
+          }
+          warna={colors.text}
+        />
+
+        <View style={{ alignItems: 'center', marginTop: spacing.md }}>
           {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
               punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
           <Pressable
@@ -186,7 +184,7 @@ export default function UkuranScreen() {
               marginTop: spacing.xs,
               borderRadius: radius.pill,
               borderWidth: 1,
-              borderColor: colors.border,
+              borderColor: colors.borderKuat,
               backgroundColor: colors.surfaceSunken,
               opacity: pressed ? 0.7 : 1,
             })}

@@ -73,7 +73,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
                 borderWidth: 1,
-                borderColor: aktif ? colors.amber : colors.border,
+                borderColor: aktif ? colors.amber : colors.borderKuat,
                 backgroundColor: aktif ? colors.amber + '1A' : colors.surfaceSunken,
                 opacity: pressed ? 0.7 : 1,
               })}

@@ -106,7 +106,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
             backgroundColor: colors.surfaceSunken,
             borderRadius: radius.md,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.borderKuat,
             padding: spacing.md,
           }}
         />
