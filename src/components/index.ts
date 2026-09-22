@@ -4,6 +4,7 @@ export { HeroNumber } from './HeroNumber';
 export { InputAngka } from './InputAngka';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
+export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
 export { PemilihTipeHari } from './PemilihTipeHari';

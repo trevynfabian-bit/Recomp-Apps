@@ -1,4 +1,11 @@
-import type { EntriBeratRingkas, RataRata7Hari, SinyalArah, TitikTren } from './tipe';
+import type {
+  EntriBeratRingkas,
+  Fase,
+  KecocokanFase,
+  RataRata7Hari,
+  SinyalArah,
+  TitikTren,
+} from './tipe';
 
 /**
  * Perhitungan tren berat. Tinggal di paket bersama karena web dashboard
@@ -105,4 +112,28 @@ export function majuHari(tanggal: string, hari: number): string {
 function bulatkan(nilai: number, desimal: number): number {
   const f = 10 ** desimal;
   return Math.round(nilai * f) / f;
+}
+
+/**
+ * Apakah arah berat SESUAI dengan yang diharapkan fase saat ini.
+ *
+ * Arah saja tidak bermakna: naik 0,4 kg/minggu itu persis yang diinginkan saat
+ * Lean Gain, dan persis yang tidak diinginkan saat Cut. Tanpa konteks fase,
+ * label "naik" memaksa pengguna menafsirkan sendiri — dan itu tempat orang
+ * salah menyimpulkan.
+ *
+ * Hasilnya tetap deskriptif, bukan penilaian: `berlawanan` berarti arahnya
+ * tidak sejalan dengan rencana, bukan bahwa penggunanya gagal.
+ */
+export function arahSesuaiFase(arah: SinyalArah['arah'], fase: Fase): KecocokanFase {
+  if (arah === 'belum cukup data') return 'belum bisa dinilai';
+
+  // Maintenance memang menargetkan datar; naik atau turun sama-sama menyimpang.
+  if (fase === 'Maintenance') return arah === 'datar' ? 'sesuai' : 'berlawanan';
+
+  const diharapkan = fase === 'Lean Gain' ? 'naik' : 'turun';
+  if (arah === diharapkan) return 'sesuai';
+  // Datar bukan berlawanan — ia hanya belum bergerak ke arah yang dituju.
+  if (arah === 'datar') return 'belum bergerak';
+  return 'berlawanan';
 }

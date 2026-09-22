@@ -108,3 +108,6 @@ export type StatusKoridor = {
   bawahKg: number | null;
   atasKg: number | null;
 };
+
+/** Kecocokan arah berat terhadap yang diharapkan fase aktif. */
+export type KecocokanFase = 'sesuai' | 'belum bergerak' | 'berlawanan' | 'belum bisa dinilai';

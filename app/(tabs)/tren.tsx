@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  arahSesuaiFase,
   deretTren,
   koridorTarget,
   LAJU_PER_MINGGU,
@@ -13,7 +14,15 @@ import {
   rataRata7Hari,
   sinyalArah,
 } from '@recomp/logika';
-import { Card, GrafikTren, HeroNumber, PenandaSumber, Pill, SectionHeader } from '@/components';
+import {
+  Card,
+  GrafikTren,
+  HeroNumber,
+  LabelSinyalArah,
+  PenandaSumber,
+  Pill,
+  SectionHeader,
+} from '@/components';
 import { mockJangkarFase, mockProfile, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -53,11 +62,14 @@ export default function TrenScreen() {
   );
   const posisi = statusKoridor(koridor, hariIni, rata.rataRataKg);
 
+  // Warna mengikuti KECOCOKAN dengan fase, bukan arah — aturan yang sama
+  // dipakai LabelSinyalArah, supaya stat dan label tidak bertentangan warnanya.
+  const cocok = arahSesuaiFase(sinyal.arah, mockProfile.fase_aktif);
   const warnaArah =
-    sinyal.arah === 'naik'
-      ? colors.amber
-      : sinyal.arah === 'turun'
-        ? colors.aksenTeks.jade
+    cocok === 'sesuai'
+      ? colors.aksenTeks.jade
+      : cocok === 'berlawanan'
+        ? colors.amber
         : colors.textMuted;
 
   return (
@@ -180,25 +192,7 @@ export default function TrenScreen() {
         <SectionHeader judul="Sinyal arah" aksi={`ambang ${formatDesimal(sinyal.ambangKg)} kg`} />
         <Card>
           <View style={{ gap: spacing.md }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <View
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.xs + 1,
-                  borderRadius: radius.pill,
-                  backgroundColor: warnaArah + '1A',
-                  borderWidth: 1,
-                  borderColor: warnaArah + '55',
-                }}
-              >
-                <Text style={{ ...typography.label, color: warnaArah, textTransform: 'capitalize' }}>
-                  {sinyal.arah}
-                </Text>
-              </View>
-            </View>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
-              {kalimatSinyal(sinyal.arah, sinyal.perubahanKg, sinyal.ambangKg)}
-            </Text>
+            <LabelSinyalArah sinyal={sinyal} fase={mockProfile.fase_aktif} />
             <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
               Dihitung dari rata-rata {JENDELA_HARI} hari dibanding rata-rata {JENDELA_HARI} hari
               sebelumnya — rata-rata lawan rata-rata, supaya satu hari yang aneh tidak
@@ -290,27 +284,6 @@ function asalHari(tanggal: string) {
   if (!entri) return null;
   const jenis = sumberBerat(entri.sumber_berat);
   return jenis ? <PenandaSumber jenis={jenis} /> : null;
-}
-
-/** Kalimat penjelas sinyal arah; nadanya netral, tanpa menghakimi. */
-function kalimatSinyal(
-  arah: string,
-  perubahan: number | null,
-  ambang: number,
-): string {
-  if (perubahan === null) {
-    return `Belum cukup timbangan untuk membandingkan dua pekan. Terus timbang pagi, ` +
-      `angka ini muncul sendiri.`;
-  }
-  const besar = formatDesimal(Math.abs(perubahan));
-  if (arah === 'datar') {
-    return `Rata-rata bergerak ${besar} kg dalam sepekan — masih di bawah ambang ` +
-      `${formatDesimal(ambang)} kg, jadi ini terbaca datar, bukan naik atau turun.`;
-  }
-  if (arah === 'naik') {
-    return `Rata-rata naik ${besar} kg dibanding pekan lalu.`;
-  }
-  return `Rata-rata turun ${besar} kg dibanding pekan lalu.`;
 }
 
 function StatKecil({

@@ -11,6 +11,7 @@ export type {
   Fase,
   HitunganMakro,
   JenisOlahraga,
+  KecocokanFase,
   KoridorTarget,
   MacroProgress,
   ModeMakro,
@@ -37,6 +38,7 @@ export { hitungMakro, keteranganMakro } from './makro';
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 
 export {
+  arahSesuaiFase,
   deretTren,
   JENDELA_HARI,
   majuHari,
