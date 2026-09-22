@@ -10,29 +10,32 @@ insert into auth.users (id, email) values
   ('22222222-2222-2222-2222-222222222222', 'budi@contoh.test')
 on conflict do nothing;
 
--- Data awal ditulis sebagai superuser (RLS dilewati), meniru seed dari server.
-insert into public.profiles (user_id, nama, fase_aktif, tinggi_cm, jenis_kelamin)
-values
-  ('11111111-1111-1111-1111-111111111111', 'Ani', 'Lean Gain', 165, 'wanita'),
-  ('22222222-2222-2222-2222-222222222222', 'Budi', 'Cut', 176, 'pria');
+-- Profil, tipe hari, dan target sudah dibuat otomatis oleh pemicu
+-- `pengguna_baru_disiapkan`, jadi di sini tinggal melengkapi datanya.
+update public.profiles
+   set nama = 'Ani', fase_aktif = 'Lean Gain', tinggi_cm = 165, jenis_kelamin = 'wanita'
+ where user_id = '11111111-1111-1111-1111-111111111111';
 
-insert into public.day_types (id, user_id, nama, urutan) values
-  ('aaaaaaaa-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Angkat Beban', 1),
-  ('bbbbbbbb-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 'Angkat Beban', 1);
+update public.profiles
+   set nama = 'Budi', fase_aktif = 'Cut', tinggi_cm = 176, jenis_kelamin = 'pria'
+ where user_id = '22222222-2222-2222-2222-222222222222';
 
-insert into public.day_type_targets
-  (user_id, day_type_id, fase, target_kalori, target_protein_g, target_lemak_g, batas_sat_fat_g)
-values
-  ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000001', 'Lean Gain', 2400, 150, 70, 20),
-  ('22222222-2222-2222-2222-222222222222', 'bbbbbbbb-0000-0000-0000-000000000001', 'Cut', 2100, 180, 60, 18);
+-- Pakai tipe hari hasil seed, bukan membuat sendiri.
+insert into public.daily_logs
+  (id, user_id, tanggal, berat_pagi_kg, sumber_berat, day_type_id, kalori, target_kalori)
+select
+  'cccccccc-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+  date '2026-09-22', 58.4, 'manual', id, 1800, 2400
+  from public.day_types
+ where user_id = '11111111-1111-1111-1111-111111111111' and nama = 'Angkat Beban';
 
 insert into public.daily_logs
   (id, user_id, tanggal, berat_pagi_kg, sumber_berat, day_type_id, kalori, target_kalori)
-values
-  ('cccccccc-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
-   date '2026-09-22', 58.4, 'manual', 'aaaaaaaa-0000-0000-0000-000000000001', 1800, 2400),
-  ('dddddddd-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222',
-   date '2026-09-22', 74.6, 'healthkit', 'bbbbbbbb-0000-0000-0000-000000000001', 1600, 2100);
+select
+  'dddddddd-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222',
+  date '2026-09-22', 74.6, 'healthkit', id, 1600, 2100
+  from public.day_types
+ where user_id = '22222222-2222-2222-2222-222222222222' and nama = 'Angkat Beban';
 
 insert into public.food_logs (user_id, daily_log_id, nama_makanan, kalori, sumber) values
   ('11111111-1111-1111-1111-111111111111', 'cccccccc-0000-0000-0000-000000000001', 'Oat + whey', 520, 'manual'),
@@ -53,8 +56,12 @@ begin
   select count(*) into n from public.food_logs;
   assert n = 1, format('Ani seharusnya melihat 1 food_log, bukan %s', n);
 
+  -- Seed memberi 4 tipe hari x 3 fase = 12 target, dan HANYA miliknya.
   select count(*) into n from public.day_type_targets;
-  assert n = 1, format('Ani seharusnya melihat 1 target, bukan %s', n);
+  assert n = 12, format('Ani seharusnya melihat 12 target miliknya, bukan %s', n);
+
+  select count(*) into n from public.day_types;
+  assert n = 4, format('Ani seharusnya melihat 4 tipe hari, bukan %s', n);
 
   select count(*) into n from public.profiles;
   assert n = 1, format('Ani seharusnya melihat 1 profil, bukan %s', n);

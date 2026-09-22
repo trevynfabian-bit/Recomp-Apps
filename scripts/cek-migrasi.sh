@@ -46,8 +46,6 @@ for f in "$REPO"/supabase/migrations/*.sql; do
   $PSQL -f "$f" >/dev/null
 done
 
-$PSQL -f "$REPO/supabase/tests/izin.sql" >/dev/null
-
 echo "→ Menjalankan uji RLS"
 for f in "$REPO"/supabase/tests/rls_*.sql; do
   echo "   • $(basename "$f")"
