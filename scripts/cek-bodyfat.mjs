@@ -150,17 +150,41 @@ const leherLebihBesar = estimasiBodyFatNavy({
   jenisKelamin: 'pria', tinggiCm: 176, pinggangCm: 38, leherCm: 40,
 });
 cek(
-  'pinggang ≤ leher menghasilkan null + alasan',
-  leherLebihBesar.persen === null && /lebih besar dari lingkar leher/.test(leherLebihBesar.alasanKosong ?? ''),
+  'pinggang ≤ leher menghasilkan null + alasan + kurang "ukuran"',
+  leherLebihBesar.persen === null &&
+    /lebih besar dari lingkar leher/.test(leherLebihBesar.alasanKosong ?? '') &&
+    leherLebihBesar.kurang === 'ukuran',
   leherLebihBesar.alasanKosong ?? 'tanpa alasan',
+);
+
+// Kekurangan yang BISA dilengkapi dari profil harus bisa dibedakan kode dari
+// yang tidak — UI memakainya untuk memutuskan menawarkan tombol atau tidak.
+const tanpaJenisKelamin = estimasiBodyFatNavy({
+  jenisKelamin: null, tinggiCm: 176, pinggangCm: 85.4, leherCm: 38.7,
+});
+cek(
+  'jenis kelamin null → kurang "jenis-kelamin"',
+  tanpaJenisKelamin.persen === null && tanpaJenisKelamin.kurang === 'jenis-kelamin',
+  tanpaJenisKelamin.alasanKosong ?? 'tanpa alasan',
+);
+
+const tinggiNull = estimasiBodyFatNavy({
+  jenisKelamin: 'pria', tinggiCm: null, pinggangCm: 85.4, leherCm: 38.7,
+});
+cek(
+  'tinggi null → kurang "tinggi"',
+  tinggiNull.persen === null && tinggiNull.kurang === 'tinggi',
+  tinggiNull.alasanKosong ?? 'tanpa alasan',
 );
 
 const wanitaTanpaPinggul = estimasiBodyFatNavy({
   jenisKelamin: 'wanita', tinggiCm: 165, pinggangCm: 75, leherCm: 32,
 });
 cek(
-  'wanita tanpa lingkar pinggul menghasilkan null + alasan',
-  wanitaTanpaPinggul.persen === null && /pinggul/.test(wanitaTanpaPinggul.alasanKosong ?? ''),
+  'wanita tanpa lingkar pinggul menghasilkan null + kurang "pinggul"',
+  wanitaTanpaPinggul.persen === null &&
+    /pinggul/.test(wanitaTanpaPinggul.alasanKosong ?? '') &&
+    wanitaTanpaPinggul.kurang === 'pinggul',
   wanitaTanpaPinggul.alasanKosong ?? 'tanpa alasan',
 );
 
@@ -168,8 +192,10 @@ const takMasukAkal = estimasiBodyFatNavy({
   jenisKelamin: 'pria', tinggiCm: 176, pinggangCm: 250, leherCm: 38,
 });
 cek(
-  'hasil di luar rentang manusia ditolak dengan alasannya sendiri',
-  takMasukAkal.persen === null && /di luar rentang yang pernah terukur/.test(takMasukAkal.alasanKosong ?? ''),
+  'hasil di luar rentang manusia ditolak dengan alasannya sendiri + kurang "ukuran"',
+  takMasukAkal.persen === null &&
+    /di luar rentang yang pernah terukur/.test(takMasukAkal.alasanKosong ?? '') &&
+    takMasukAkal.kurang === 'ukuran',
   takMasukAkal.alasanKosong ?? 'tanpa alasan',
 );
 
@@ -177,8 +203,10 @@ const tanpaTinggi = estimasiBodyFatNavy({
   jenisKelamin: 'pria', tinggiCm: 0, pinggangCm: 85, leherCm: 38,
 });
 cek(
-  'tinggi kosong menghasilkan null + alasan',
-  tanpaTinggi.persen === null && /Tinggi badan/.test(tanpaTinggi.alasanKosong ?? ''),
+  'tinggi 0 menghasilkan null + alasan + kurang "tinggi"',
+  tanpaTinggi.persen === null &&
+    /Tinggi badan/.test(tanpaTinggi.alasanKosong ?? '') &&
+    tanpaTinggi.kurang === 'tinggi',
   tanpaTinggi.alasanKosong ?? 'tanpa alasan',
 );
 
@@ -191,6 +219,7 @@ cek(
   `estimasi profil contoh = ${nyata.persen}%`,
   nyata.persen !== null && nyata.persen > 10 && nyata.persen < 25,
 );
+cek('hasil yang berhasil tidak menyisakan kurang', nyata.kurang === null);
 cek(
   `rentang ±${KETIDAKPASTIAN_BF} poin (${nyata.rentang?.bawah}–${nyata.rentang?.atas})`,
   Math.abs((nyata.rentang?.bawah ?? 0) - (nyata.persen - KETIDAKPASTIAN_BF)) < 0.05 &&

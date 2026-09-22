@@ -277,15 +277,28 @@ export type HasilTdee = {
   alasanKeyakinan: string;
 };
 
-/** Masukan rumus Navy; semua lingkar dalam cm. */
+/**
+ * Masukan rumus Navy; semua lingkar dalam cm.
+ *
+ * `tinggiCm` dan `jenisKelamin` boleh null karena kolomnya memang nullable di
+ * `profiles`: pengguna baru belum tentu mengisinya. Rumus ini yang memutuskan
+ * apa yang kurang, bukan pemanggilnya.
+ */
 export type InputBodyFat = {
-  jenisKelamin: 'pria' | 'wanita';
-  tinggiCm: number;
+  jenisKelamin: 'pria' | 'wanita' | null;
+  tinggiCm: number | null;
   pinggangCm: number;
   leherCm: number;
   /** Lingkar pinggul — hanya dipakai rumus versi wanita. */
   pinggulCm?: number | null;
 };
+
+/**
+ * Apa yang membuat estimasi tidak bisa dihitung, dalam bentuk yang bisa
+ * diperiksa kode. Tiga yang pertama bisa diperbaiki pengguna dari profil;
+ * `ukuran` hanya bisa diperbaiki dengan mengukur ulang.
+ */
+export type KekuranganBodyFat = 'tinggi' | 'jenis-kelamin' | 'pinggul' | 'ukuran';
 
 /** Hasil estimasi persen lemak tubuh. */
 export type HasilBodyFat = {
@@ -300,6 +313,11 @@ export type HasilBodyFat = {
   sensitivitasPinggang: number | null;
   /** Kenapa tidak bisa dihitung; null bila berhasil. */
   alasanKosong: string | null;
+  /**
+   * Bentuk kekurangannya yang bisa diperiksa kode, supaya UI tahu kapan
+   * pantas menawarkan "lengkapi profil" dan kapan justru menyesatkan.
+   */
+  kurang: KekuranganBodyFat | null;
 };
 
 /** Pecahan berat badan menjadi massa lemak dan massa bebas lemak. */

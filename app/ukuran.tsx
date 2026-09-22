@@ -13,6 +13,7 @@ import {
   KartuBodyFat,
   SectionHeader,
   SheetCatatUkuran,
+  SheetLengkapiProfil,
   type UkuranBaru,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
@@ -47,11 +48,12 @@ const BAGIAN: { kunci: BarisUkuran['kunci']; label: string; pasangan?: 'kiri' | 
 export default function UkuranScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { profil } = useProfil();
+  const { profil, perbaruiProfil } = useProfil();
 
   // Sumber tampilan layar ini; task backend menukarnya dengan query Supabase.
   const [catatan, setCatatan] = useState<UkuranTubuh[]>(mockUkuran);
   const [sheetTerbuka, setSheetTerbuka] = useState(false);
+  const [sheetProfilTerbuka, setSheetProfilTerbuka] = useState(false);
 
   const terbaru = catatan[catatan.length - 1];
   // Label CTA menyebut apa yang akan terjadi: hari yang sudah terisi diperbarui,
@@ -183,6 +185,7 @@ export default function UkuranScreen() {
         terbaru={terbaru}
         pertama={pertama}
         beratRataRataKg={rataRata7Hari(mockRiwayatBerat, terbaru.tanggal).rataRataKg}
+        onLengkapiProfil={() => setSheetProfilTerbuka(true)}
       />
 
       {/* Semua ukuran, dengan perubahan sejak pencatatan sebelumnya */}
@@ -260,6 +263,13 @@ export default function UkuranScreen() {
         onTutup={() => setSheetTerbuka(false)}
         catatan={catatan}
         onSimpan={simpanUkuran}
+      />
+
+      <SheetLengkapiProfil
+        terbuka={sheetProfilTerbuka}
+        onTutup={() => setSheetProfilTerbuka(false)}
+        profil={profil}
+        onSimpan={perbaruiProfil}
       />
     </ScrollView>
   );

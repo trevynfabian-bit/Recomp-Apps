@@ -24,55 +24,58 @@ export const KETIDAKPASTIAN_BF = 4;
 
 /** Estimasi persen lemak tubuh; `persen` null bila datanya tidak cukup. */
 export function estimasiBodyFatNavy(input: InputBodyFat): HasilBodyFat {
-  const dasar: Omit<HasilBodyFat, 'persen' | 'rentang' | 'alasanKosong'> = {
+  const dasar: Omit<HasilBodyFat, 'persen' | 'rentang' | 'alasanKosong' | 'kurang'> = {
     metode: 'Navy',
     ketidakpastian: KETIDAKPASTIAN_BF,
     sensitivitasPinggang: null,
   };
+  const kosong = (kurang: HasilBodyFat['kurang'], alasanKosong: string): HasilBodyFat => ({
+    ...dasar,
+    persen: null,
+    rentang: null,
+    alasanKosong,
+    kurang,
+  });
 
-  if (input.tinggiCm <= 0) {
-    return {
-      ...dasar,
-      persen: null,
-      rentang: null,
-      alasanKosong: 'Tinggi badan belum diisi di profil.',
-    };
+  // Dua kolom profil ini memang nullable di `profiles`, jadi ketidaklengkapan
+  // itu keadaan normal pengguna baru — bukan kesalahan yang perlu disamarkan.
+  if (input.jenisKelamin === null) {
+    return kosong(
+      'jenis-kelamin',
+      'Rumus Navy memakai konstanta yang berbeda untuk pria dan wanita, dan jenis kelamin belum diisi di profil.',
+    );
+  }
+
+  if (input.tinggiCm === null || input.tinggiCm <= 0) {
+    return kosong('tinggi', 'Tinggi badan belum diisi di profil.');
   }
 
   // Rumus versi wanita memakai lingkar pinggul, yang belum dicatat app ini.
   // Menyodorkan rumus pria untuk semua orang akan menghasilkan angka yang
   // kelihatan sah padahal salah sistematis, jadi lebih baik berhenti di sini.
   if (input.jenisKelamin === 'wanita' && (input.pinggulCm ?? 0) <= 0) {
-    return {
-      ...dasar,
-      persen: null,
-      rentang: null,
-      alasanKosong:
-        'Rumus Navy untuk wanita butuh lingkar pinggul, dan app ini belum mencatatnya.',
-    };
+    return kosong(
+      'pinggul',
+      'Rumus Navy untuk wanita butuh lingkar pinggul, dan app ini belum mencatatnya.',
+    );
   }
 
   const mentah = hitung(input);
   if (mentah === null) {
-    return {
-      ...dasar,
-      persen: null,
-      rentang: null,
-      alasanKosong:
-        'Lingkar pinggang harus lebih besar dari lingkar leher agar rumus ini bisa dihitung.',
-    };
+    return kosong(
+      'ukuran',
+      'Lingkar pinggang harus lebih besar dari lingkar leher agar rumus ini bisa dihitung.',
+    );
   }
 
   // Di bawah ~3% tubuh manusia tidak bisa hidup dan di atas ~70% tidak pernah
   // terukur. Hasil di luar itu berarti salah ukur, bukan temuan — dan alasannya
   // harus disebut apa adanya, bukan disamarkan jadi keluhan soal leher.
   if (mentah < BATAS_MASUK_AKAL.bawah || mentah > BATAS_MASUK_AKAL.atas) {
-    return {
-      ...dasar,
-      persen: null,
-      rentang: null,
-      alasanKosong: `Hasilnya ${bulat(mentah, 1)}%, di luar rentang yang pernah terukur pada manusia. Periksa lagi lingkar pinggang dan leher.`,
-    };
+    return kosong(
+      'ukuran',
+      `Hasilnya ${bulat(mentah, 1)}%, di luar rentang yang pernah terukur pada manusia. Periksa lagi lingkar pinggang dan leher.`,
+    );
   }
   const persen = mentah;
 
@@ -90,6 +93,7 @@ export function estimasiBodyFatNavy(input: InputBodyFat): HasilBodyFat {
     },
     sensitivitasPinggang: naikSatuCm === null ? null : bulat(naikSatuCm - persen, 1),
     alasanKosong: null,
+    kurang: null,
   };
 }
 
@@ -120,6 +124,8 @@ const BATAS_MASUK_AKAL = { bawah: 3, atas: 70 } as const;
  */
 function hitung(input: InputBodyFat): number | null {
   const { jenisKelamin, tinggiCm, pinggangCm, leherCm } = input;
+  // Dipanggil hanya setelah kedua field itu lolos pemeriksaan di atas.
+  if (jenisKelamin === null || tinggiCm === null) return null;
 
   const persen =
     jenisKelamin === 'pria'

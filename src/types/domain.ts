@@ -13,6 +13,7 @@ export type {
   DayType,
   Fase,
   HasilBodyFat,
+  KekuranganBodyFat,
   KomposisiTubuh,
   HitunganMakro,
   JenisOlahraga,
@@ -32,8 +33,13 @@ export type Profile = {
   nama: string;
   satuan: 'metrik' | 'imperial';
   fase_aktif: Fase;
-  tinggi_cm: number;
-  jenis_kelamin: 'pria' | 'wanita';
+  /**
+   * Nullable karena kolomnya memang nullable di `profiles`: pengguna baru
+   * belum tentu sudah mengisinya, dan estimasi body fat harus bisa berkata
+   * "belum bisa dihitung" alih-alih memakai angka karangan.
+   */
+  tinggi_cm: number | null;
+  jenis_kelamin: 'pria' | 'wanita' | null;
   batas_pinggang_cm: number;
   /** Dibutuhkan rumus Mifflin-St Jeor pada estimasi TDEE; boleh null. */
   tanggal_lahir: string | null;

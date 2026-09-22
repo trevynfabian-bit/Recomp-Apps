@@ -23,6 +23,7 @@ export type {
   JenisOlahraga,
   KecocokanFase,
   KecukupanTren,
+  KekuranganBodyFat,
   KomposisiTubuh,
   KoridorTarget,
   MacroProgress,

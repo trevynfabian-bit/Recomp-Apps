@@ -18,6 +18,13 @@ import type { Profile } from '@/types/domain';
 type KonteksProfil = {
   profil: Profile;
   gantiFase: (fase: Fase) => void;
+  /**
+   * Perbarui sebagian field profil (tinggi badan, jenis kelamin, batas
+   * pinggang). Dipakai layar yang perlu melengkapi data sebelum sebuah
+   * perhitungan bisa jalan, tanpa harus memindahkan pengguna ke Setelan dan
+   * kehilangan konteks apa yang sedang ia kerjakan.
+   */
+  perbaruiProfil: (perubahan: Partial<Profile>) => void | Promise<void>;
 };
 
 const Konteks = createContext<KonteksProfil | null>(null);
@@ -29,6 +36,7 @@ export function PenyediaProfil({ children }: { children: React.ReactNode }) {
     () => ({
       profil,
       gantiFase: (fase) => setProfil((p) => ({ ...p, fase_aktif: fase })),
+      perbaruiProfil: (perubahan) => setProfil((p) => ({ ...p, ...perubahan })),
     }),
     [profil],
   );

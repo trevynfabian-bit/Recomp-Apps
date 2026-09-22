@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import {
   estimasiBodyFatNavy,
   formatDesimal,
@@ -8,8 +8,9 @@ import {
 } from '@recomp/logika';
 import { Card } from './Card';
 import { Pill } from './Pill';
+import { ketukRingan } from '@/lib/haptics';
 import type { Profile, UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Props = {
   profil: Profile;
@@ -24,6 +25,13 @@ type Props = {
    * ada timbangan sama sekali.
    */
   beratRataRataKg: number | null;
+  /**
+   * Membuka sheet melengkapi profil. Dipakai saat estimasi terhalang data
+   * profil yang kosong — dan tetap tersedia saat estimasi berhasil, karena
+   * tinggi badan yang salah ketik akan memiringkan SETIAP estimasi tanpa
+   * pernah terlihat salah.
+   */
+  onLengkapiProfil: () => void;
 };
 
 /**
@@ -38,7 +46,13 @@ type Props = {
  * beserta rentang wajarnya, arah perubahannya, dan seberapa jauh satu
  * sentimeter salah ukur menggesernya.
  */
-export function KartuBodyFat({ profil, terbaru, pertama, beratRataRataKg }: Props) {
+export function KartuBodyFat({
+  profil,
+  terbaru,
+  pertama,
+  beratRataRataKg,
+  onLengkapiProfil,
+}: Props) {
   const hasil = estimasiBodyFatNavy({
     jenisKelamin: profil.jenis_kelamin,
     tinggiCm: profil.tinggi_cm,
@@ -47,7 +61,13 @@ export function KartuBodyFat({ profil, terbaru, pertama, beratRataRataKg }: Prop
   });
 
   if (hasil.persen === null) {
-    return <KartuKosong alasan={hasil.alasanKosong} />;
+    return (
+      <KartuKosong
+        alasan={hasil.alasanKosong}
+        kurang={hasil.kurang}
+        onLengkapiProfil={onLengkapiProfil}
+      />
+    );
   }
 
   const awal =
@@ -148,6 +168,36 @@ export function KartuBodyFat({ profil, terbaru, pertama, beratRataRataKg }: Prop
           </Text>
         ) : null}
       </View>
+
+      {/* Masukan profil ditampilkan terbuka, bukan disembunyikan: tinggi badan
+          yang salah ketik memiringkan setiap estimasi tanpa pernah kelihatan
+          salah di angkanya. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Ubah tinggi badan dan jenis kelamin"
+        onPress={() => {
+          ketukRingan();
+          onLengkapiProfil();
+        }}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: TAP_MIN,
+          paddingHorizontal: spacing.md,
+          borderRadius: radius.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surfaceSunken,
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          Dihitung untuk tinggi {formatDesimal(profil.tinggi_cm!, 0)} cm ·{' '}
+          {profil.jenis_kelamin === 'pria' ? 'pria' : 'wanita'}
+        </Text>
+        <Text style={{ ...typography.label, color: colors.amber }}>Ubah</Text>
+      </Pressable>
     </Card>
   );
 }
@@ -175,8 +225,33 @@ function BagianKomposisi({
   );
 }
 
-/** Tampilan saat estimasi tidak bisa dihitung — alasannya disebut, bukan kartu kosong. */
-function KartuKosong({ alasan }: { alasan: HasilBodyFat['alasanKosong'] }) {
+/**
+ * Tampilan saat estimasi tidak bisa dihitung.
+ *
+ * Alasannya disebut, lalu — bila memang bisa diperbaiki dari profil — jalan
+ * keluarnya disediakan di tempat. Kartu yang cuma bilang "belum bisa dihitung"
+ * memindahkan pekerjaan mencari tahu ke pengguna, dan itu alasan paling umum
+ * data profil tidak pernah terisi.
+ *
+ * Tombol UTAMA hanya muncul untuk kekurangan yang benar-benar bisa ditutup dari
+ * profil. Untuk `pinggul` ia diganti tautan sekunder: mengisi profil tidak akan
+ * memunculkan estimasi (lingkar pinggulnya belum dicatat app ini), tapi jalan
+ * masuk ke profil tetap harus ada — tanpa itu, salah ketuk "Wanita" akan
+ * mengunci pengguna di kartu yang tidak punya jalan keluar. Untuk `ukuran`
+ * tidak ada keduanya: yang itu cuma bisa diperbaiki dengan mengukur ulang.
+ */
+function KartuKosong({
+  alasan,
+  kurang,
+  onLengkapiProfil,
+}: {
+  alasan: HasilBodyFat['alasanKosong'];
+  kurang: HasilBodyFat['kurang'];
+  onLengkapiProfil: () => void;
+}) {
+  const bisaDilengkapi = kurang === 'tinggi' || kurang === 'jenis-kelamin';
+  const adaJalanKeProfil = bisaDilengkapi || kurang === 'pinggul';
+
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -189,6 +264,57 @@ function KartuKosong({ alasan }: { alasan: HasilBodyFat['alasanKosong'] }) {
       <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
         {alasan ?? 'Data yang dibutuhkan rumus Navy belum lengkap.'}
       </Text>
+
+      {bisaDilengkapi ? (
+        <>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Lengkapi profil"
+            onPress={() => {
+              ketukRingan();
+              onLengkapiProfil();
+            }}
+            style={({ pressed }) => ({
+              minHeight: TAP_MIN,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: spacing.md,
+              borderRadius: radius.lg,
+              backgroundColor: colors.amber,
+              opacity: pressed ? 0.8 : 1,
+            })}
+          >
+            <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>
+              Lengkapi profil
+            </Text>
+          </Pressable>
+          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            Cukup sekali isi. Ukuran yang sudah Anda catat tetap tersimpan dan tidak perlu
+            diulang — estimasinya langsung muncul begitu datanya lengkap.
+          </Text>
+        </>
+      ) : adaJalanKeProfil ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Ubah data profil"
+          onPress={() => {
+            ketukRingan();
+            onLengkapiProfil();
+          }}
+          style={({ pressed }) => ({
+            minHeight: TAP_MIN,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: radius.md,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.surfaceSunken,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Text style={{ ...typography.label, color: colors.amber }}>Ubah data profil</Text>
+        </Pressable>
+      ) : null}
     </Card>
   );
 }

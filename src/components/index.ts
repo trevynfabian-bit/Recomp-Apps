@@ -20,5 +20,6 @@ export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
+export { SheetLengkapiProfil } from './SheetLengkapiProfil';
 export { StatusRedistribusi } from './StatusRedistribusi';
 export { SectionHeader } from './SectionHeader';
