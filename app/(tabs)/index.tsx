@@ -15,9 +15,9 @@ import {
   SheetCatatFoto,
   type EntriMakananBaru,
 } from '@/components';
-import { formatAngka, formatMakro, formatTanggalPanjang } from '@/lib/format';
+import { formatAngka, formatMakro, formatTanggalPanjang } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
-import { deteksiTipeHari } from '@/lib/deteksiTipeHari';
+import { deteksiTipeHari } from '@recomp/logika';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
 import { mockWorkoutsHariIni } from '@/mocks/workout';
 import {

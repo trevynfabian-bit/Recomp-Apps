@@ -1,8 +1,8 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { formatAngka, formatMakro } from '@/lib/format';
-import { alasanDeteksi, type HasilDeteksi } from '@/lib/deteksiTipeHari';
+import { formatAngka, formatMakro } from '@recomp/logika';
+import { alasanDeteksi, type HasilDeteksi } from '@recomp/logika';
 import { NAMA_SUMBER } from '@/mocks/workout';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';

@@ -6,17 +6,11 @@
  * sekarang supaya auto-deteksi tipe hari bisa dibangun dan diuji lebih dulu.
  */
 
-/** Kategori olahraga yang dipakai aturan auto-deteksi tipe hari. */
-export type JenisOlahraga = 'angkat_beban' | 'lari' | 'padel' | 'lainnya';
+// Bentuk workout kini tinggal di paket logika bersama, karena aturan
+// auto-deteksi yang memakainya juga dipakai web dashboard.
+export type { JenisOlahraga, WorkoutRingkas } from '@recomp/logika';
 
-export type WorkoutRingkas = {
-  id: string;
-  nama: string;
-  jenis: JenisOlahraga;
-  /** Layanan asal; dipakai untuk menyebut sumber di UI dan dedup di Fase 2. */
-  sumber: 'hevy' | 'strava' | 'whoop' | 'healthkit';
-  durasi_menit: number;
-};
+import type { WorkoutRingkas } from '@recomp/logika';
 
 /** Nama layanan yang enak dibaca, untuk ditampilkan apa adanya di UI. */
 export const NAMA_SUMBER: Record<WorkoutRingkas['sumber'], string> = {
@@ -24,6 +18,7 @@ export const NAMA_SUMBER: Record<WorkoutRingkas['sumber'], string> = {
   strava: 'Strava',
   whoop: 'WHOOP',
   healthkit: 'Apple Health',
+  manual: 'Dicatat sendiri',
 };
 
 /** Workout hari ini: angkat beban + lari, sehingga terdeteksi "Beban+Lari". */

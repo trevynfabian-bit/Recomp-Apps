@@ -1,5 +1,5 @@
 import { formatMakro, rasio } from './format';
-import type { HitunganMakro, MacroProgress, ModeMakro } from '@/types/domain';
+import type { HitunganMakro, MacroProgress, ModeMakro } from './tipe';
 
 /**
  * Hitung angka tampil satu makro. Dipisah dari komponen supaya aturannya

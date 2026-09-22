@@ -4,7 +4,7 @@ import { Card } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { formatDesimal, formatTanggalPanjang } from '@/lib/format';
+import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { SumberBerat } from '@/types/domain';

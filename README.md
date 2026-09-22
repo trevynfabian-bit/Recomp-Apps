@@ -8,7 +8,7 @@ Menggantikan alur export CSV → Excel → upload manual.
 
 - **Mobile:** React Native + Expo (SDK 57), TypeScript, expo-router
 - **Backend:** Supabase yang **sudah ada** (Postgres + Auth + RLS) — tidak membangun backend baru
-- **Logika hitungan:** paket TypeScript bersama dengan web dashboard Next.js
+- **Logika hitungan:** paket TypeScript bersama `@recomp/logika` (lihat `packages/logika/`)
 - **Rilis:** iOS via TestFlight. Android & fitur sosial di luar cakupan V1.
 
 ## Menjalankan
@@ -24,6 +24,7 @@ npm run typecheck  # tsc --noEmit
 ## Struktur
 
 ```
+packages/logika/     LOGIKA BERSAMA dengan web Next.js (makro, deteksi tipe hari, format)
 app/                 rute expo-router
   _layout.tsx        root stack + status bar
   (tabs)/            tab bar: Hari Ini, Tren, Coach, Pengaturan
@@ -33,8 +34,19 @@ src/
   lib/format.ts      format angka/tanggal Indonesia + helper Asia/Jakarta
   mocks/             DATA TIRUAN untuk Fase 1 frontend
   theme/             palet warna, spasi, radius, tipografi
-  types/domain.ts    tipe domain mengikuti skema Supabase di PRD
+  data/              akses Supabase (RPC + query) per topik
+  types/database.ts  tipe tabel & RPC, cocok dengan supabase/migrations/
+  types/domain.ts    tipe khusus app; tipe bersama di-re-export dari @recomp/logika
+supabase/
+  migrations/        skema + RLS + RPC
+  functions/         Edge Function (estimasi makanan dari foto)
+  tests/             uji RLS & RPC yang dijalankan `npm run db:cek`
 ```
+
+Paket bersama mengekspor **TypeScript sumber** — tidak ada langkah build dan
+tidak ada artefak yang bisa basi, karena kedua konsumennya (Metro dan Next.js)
+memang mem-bundle TypeScript. Repo web perlu satu baris:
+`transpilePackages: ['@recomp/logika']` di `next.config.js`.
 
 ## Database (Supabase)
 

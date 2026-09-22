@@ -1,5 +1,4 @@
-import type { WorkoutRingkas } from '@/mocks/workout';
-import type { DayType } from '@/types/domain';
+import type { DayType, WorkoutRingkas } from './tipe';
 
 export type HasilDeteksi = {
   /** Tipe hari yang ditebak; `null` bila tidak ada tipe hari yang cocok. */

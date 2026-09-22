@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "android": "expo start --android",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && npm --workspace @recomp/logika run typecheck",
     "lint": "expo lint",
     "db:cek": "bash scripts/cek-migrasi.sh",
     "cek:paritas": "node scripts/cek-paritas-makro.mjs",
@@ -33,7 +33,8 @@
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
-    "react-native-url-polyfill": "^4.0.0"
+    "react-native-url-polyfill": "^4.0.0",
+    "@recomp/logika": "*"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.127.0",
@@ -42,5 +43,8 @@
     "react-dom": "^19.2.3",
     "react-native-web": "^0.21.2",
     "typescript": "~6.0.3"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

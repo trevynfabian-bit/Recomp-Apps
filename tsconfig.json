@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@recomp/logika": [
+        "./packages/logika/src/index.ts"
       ]
     }
   },

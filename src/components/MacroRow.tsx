@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme';
-import { formatMakro } from '@/lib/format';
-import { hitungMakro, keteranganMakro } from '@/lib/makro';
+import { formatMakro } from '@recomp/logika';
+import { hitungMakro, keteranganMakro } from '@recomp/logika';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
 
 type Props = {

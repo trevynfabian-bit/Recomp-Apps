@@ -4,8 +4,22 @@
  * Semua tanggal berupa string `YYYY-MM-DD` yang sudah dinormalisasi ke Asia/Jakarta.
  */
 
-/** Fase program yang menentukan target harian & budget mingguan. */
-export type Fase = 'Maintenance' | 'Lean Gain' | 'Cut';
+/**
+ * Tipe yang dipakai BERSAMA dengan web dashboard tinggal di `@recomp/logika`
+ * dan di-re-export dari sini supaya pemanggil di dalam app tidak perlu tahu
+ * batas paketnya.
+ */
+export type {
+  DayType,
+  Fase,
+  HitunganMakro,
+  JenisOlahraga,
+  MacroProgress,
+  ModeMakro,
+  WorkoutRingkas,
+} from '@recomp/logika';
+
+import type { DayType, Fase, MacroProgress } from '@recomp/logika';
 
 /** Sumber angka berat — dipakai untuk membedakan data mentah vs hasil sync. */
 export type SumberBerat = 'manual' | 'healthkit';
@@ -19,14 +33,6 @@ export type Profile = {
   tinggi_cm: number;
   jenis_kelamin: 'pria' | 'wanita';
   batas_pinggang_cm: number;
-};
-
-/** day_types — konfigurasi tipe hari. Tidak ada faktor pengali di sini. */
-export type DayType = {
-  id: string;
-  nama: string;
-  auto_detect: boolean;
-  is_default: boolean;
 };
 
 /** day_type_targets — target ABSOLUT per (tipe hari x fase). */
@@ -74,22 +80,6 @@ export type FoodLog = {
   sumber: 'manual' | 'foto_ai';
 };
 
-/**
- * Bentuk turunan yang dipakai UI: pasangan konsumsi vs target untuk satu makro.
- * Dihitung dari daily_logs + day_type_targets, bukan disimpan di database.
- */
-export type MacroProgress = {
-  key: 'kalori' | 'protein' | 'lemak' | 'karbo' | 'satFat';
-  label: string;
-  /** Sudah dikonsumsi hari ini. */
-  terpakai: number;
-  /** Target absolut hari ini; `null` bila makro tersebut tidak ditargetkan. */
-  target: number | null;
-  unit: 'kcal' | 'g';
-  /** true untuk sat fat: target berperan sebagai BATAS, bukan sasaran. */
-  isBatas?: boolean;
-};
-
 /** Ringkasan satu hari siap-tampil untuk layar Log Harian. */
 export type DailySnapshot = {
   log: DailyLog;
@@ -97,19 +87,6 @@ export type DailySnapshot = {
   target: DayTypeTarget;
   fase: Fase;
   macros: MacroProgress[];
-};
-
-/** Cara panel ringkasan menampilkan angka utama tiap makro. */
-export type ModeMakro = 'sisa' | 'terpakai';
-
-/** Hasil hitung satu makro, siap ditampilkan tanpa logika tambahan di komponen. */
-export type HitunganMakro = {
-  /** Angka yang ditonjolkan sesuai `ModeMakro`. */
-  nilaiUtama: number;
-  /** true bila target/batas sudah terlampaui (sisa negatif). */
-  terlampaui: boolean;
-  /** Rasio 0..1 untuk bar progress. */
-  progres: number;
 };
 
 /**

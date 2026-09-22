@@ -1,5 +1,5 @@
 /**
- * Membuktikan aturan "sisa" di SQL dan di TypeScript menghasilkan angka SAMA.
+ * Membuktikan aturan di SQL dan di paket `@recomp/logika` menghasilkan hasil SAMA.
  *
  * Perhitungan makro hidup di dua tempat karena PRD memang menuntutnya: UI
  * memakai paket TypeScript bersama (agar konsisten dengan web), sementara
@@ -71,25 +71,18 @@ function hentikanPostgres() {
  */
 function muatLogikaTs() {
   const kerja = mkdtempSync(join(tmpdir(), 'paritas-'));
-  copyFileSync('src/lib/format.ts', join(kerja, 'format.ts'));
-  copyFileSync('src/types/domain.ts', join(kerja, 'domain.ts'));
-  copyFileSync('src/mocks/workout.ts', join(kerja, 'workout.ts'));
+  copyFileSync('packages/logika/src/format.ts', join(kerja, 'format.ts'));
+  copyFileSync('packages/logika/src/tipe.ts', join(kerja, 'tipe.ts'));
+  
 
   // Alias `@/…` tidak ada di luar proyek, jadi diarahkan ke berkas tetangga.
-  writeFileSync(
-    join(kerja, 'makro.ts'),
-    readFileSync('src/lib/makro.ts', 'utf8').replace('@/types/domain', './domain'),
-  );
-  writeFileSync(
-    join(kerja, 'deteksiTipeHari.ts'),
-    readFileSync('src/lib/deteksiTipeHari.ts', 'utf8')
-      .replace('@/types/domain', './domain')
-      .replace('@/mocks/workout', './workout'),
-  );
+  // Paket bersama sudah memakai impor relatif, jadi disalin apa adanya.
+  copyFileSync('packages/logika/src/makro.ts', join(kerja, 'makro.ts'));
+  copyFileSync('packages/logika/src/deteksiTipeHari.ts', join(kerja, 'deteksiTipeHari.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-    ['makro.ts', 'format.ts', 'domain.ts', 'workout.ts', 'deteksiTipeHari.ts',
+    ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
