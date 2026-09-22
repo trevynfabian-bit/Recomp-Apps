@@ -6,15 +6,19 @@ import {
   HeroNumber,
   KartuTimbangPagi,
   MacroRow,
+  PemilihTipeHari,
   Pill,
   SectionHeader,
 } from '@/components';
 import { formatAngka, formatTanggalPanjang } from '@/lib/format';
 import {
   beratTerakhirSebelum,
+  cariTarget,
+  mockDailyLogHariIni,
+  mockDayTypes,
   mockFoodLogsHariIni,
   mockProfile,
-  mockSnapshotHariIni,
+  susunMacros,
 } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
 import type { DailyLog } from '@/types/domain';
@@ -27,11 +31,15 @@ import type { DailyLog } from '@/types/domain';
  */
 export default function LogHarianScreen() {
   const insets = useSafeAreaInsets();
-  const snapshot = mockSnapshotHariIni();
-  const { dayType, target, fase, macros } = snapshot;
 
-  // Log hari ini disimpan di state supaya kartu Timbang Pagi bisa menulis balik.
-  const [log, setLog] = useState<DailyLog>(snapshot.log);
+  // Log hari ini disimpan di state supaya kartu Timbang Pagi & pemilih tipe hari
+  // bisa menulis balik. Semua angka target diturunkan dari state ini.
+  const [log, setLog] = useState<DailyLog>(mockDailyLogHariIni);
+
+  const fase = mockProfile.fase_aktif;
+  const dayType = mockDayTypes.find((d) => d.id === log.day_type_id) ?? mockDayTypes[0];
+  const target = cariTarget(log.day_type_id, fase);
+  const macros = susunMacros(log, target);
 
   const sisaKalori = target.target_kalori - log.kalori;
   const sisaProtein = target.target_protein_g - log.protein_g;
@@ -40,6 +48,20 @@ export default function LogHarianScreen() {
 
   function simpanBeratPagi(beratKg: number) {
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
+  }
+
+  /**
+   * Ganti tipe hari secara manual. `target_kalori` ikut diperbarui karena
+   * kolom itu adalah SNAPSHOT target hari tersebut di `daily_logs`.
+   */
+  function pilihTipeHari(dayTypeId: string) {
+    const targetBaru = cariTarget(dayTypeId, fase);
+    setLog((prev) => ({
+      ...prev,
+      day_type_id: dayTypeId,
+      day_type_override: true,
+      target_kalori: targetBaru.target_kalori,
+    }));
   }
 
   return (
@@ -97,6 +119,19 @@ export default function LogHarianScreen() {
         beratSebelumnyaKg={beratSebelumnya}
         onSimpan={simpanBeratPagi}
       />
+
+      {/* Tipe hari — mengganti pilihan langsung menukar target harian */}
+      <View>
+        <SectionHeader judul="Tipe hari" aksi={log.day_type_override ? 'diubah manual' : 'auto'} />
+        <PemilihTipeHari
+          daftar={mockDayTypes}
+          terpilihId={log.day_type_id}
+          target={target}
+          fase={fase}
+          override={log.day_type_override}
+          onPilih={pilihTipeHari}
+        />
+      </View>
 
       {/* Rincian makro vs target absolut hari ini */}
       <View>
