@@ -1,4 +1,5 @@
-import { evaluasi4Mingguan, judulPercakapan } from '@recomp/logika';
+import { evaluasi4Mingguan, judulPercakapan, periksaBatasMedis } from '@recomp/logika';
+import type { PenolakanMedis } from '@recomp/logika';
 import type {
   Percakapan,
   PesanCoach,
@@ -208,6 +209,12 @@ export type BalasanCoach = {
   rujukan: RujukanData[];
   /** Kartu angka yang diminta coach lewat function calling. */
   widget: WidgetCoach[];
+  /**
+   * Terisi bila pertanyaannya melewati batas medis. Pemeriksaannya terjadi di
+   * KLIEN sebelum apa pun dikirim, jadi penolakannya pasti dan pertanyaan
+   * kesehatan yang sensitif tidak perlu meninggalkan perangkat.
+   */
+  penolakan?: PenolakanMedis;
 };
 
 /**
@@ -215,6 +222,15 @@ export type BalasanCoach = {
  * benar-benar terlihat dan bisa diuji — bukan berkedip lalu hilang.
  */
 export function balasCoachStub(pertanyaan: string): Promise<BalasanCoach> {
+  // Batas medis diperiksa lebih dulu, sebelum pertanyaannya sampai ke penyusun
+  // balasan mana pun — termasuk sebelum ia akan dikirim ke server nanti.
+  const penolakan = periksaBatasMedis(pertanyaan);
+  if (penolakan) {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve({ teks: '', rujukan: [], widget: [], penolakan }), 400);
+    });
+  }
+
   return new Promise((resolve) => {
     setTimeout(() => resolve(susunBalasan(pertanyaan)), 900);
   });

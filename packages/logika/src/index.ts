@@ -25,6 +25,7 @@ export type {
   HitunganMakro,
   JenisOlahraga,
   KecocokanFase,
+  KategoriMedis,
   KecukupanTren,
   KelompokPesan,
   KekuranganBodyFat,
@@ -34,6 +35,7 @@ export type {
   MetodeTdee,
   ModeMakro,
   OpsiRedistribusi,
+  PenolakanMedis,
   PerubahanUkuran,
   PesanRingkas,
   ProteksiProtein,
@@ -74,6 +76,8 @@ export {
 export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFat';
 
 export { evaluasi4Mingguan, PEKAN_EVALUASI } from './evaluasi';
+
+export { DISCLAIMER_COACH, periksaBatasMedis } from './batasMedis';
 
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  DISCLAIMER_COACH,
   formatJam,
   formatTanggalPanjang,
   judulPercakapan,
@@ -116,6 +117,8 @@ export default function CoachScreen() {
             // Kartu angka hasil function calling; dihitung app, bukan diketik
             // ulang model ke dalam teks.
             widget: jawaban.widget,
+            // Terisi bila pertanyaannya melewati batas medis.
+            penolakan: jawaban.penolakan,
           },
         ]);
       } catch {
@@ -202,6 +205,13 @@ export default function CoachScreen() {
           {aktif && !kosong
             ? aktif.judul
             : `Membaca data Anda sampai ${formatTanggalPanjang(tanggalHariIni())}`}
+        </Text>
+
+        {/* Disclaimer berdiri TETAP di kepala layar, bukan hanya muncul saat
+            menolak: batas itu perlu diketahui sebelum pertanyaannya diketik,
+            bukan sesudah pengguna telanjur mengetiknya. */}
+        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          {DISCLAIMER_COACH}
         </Text>
       </View>
 

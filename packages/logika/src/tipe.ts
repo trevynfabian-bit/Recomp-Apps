@@ -414,3 +414,16 @@ export type HasilEvaluasi = {
   penentu: string;
   keyakinan: 'rendah' | 'sedang' | 'tinggi';
 };
+
+/** Jenis pelanggaran batas medis. */
+export type KategoriMedis = 'dosis-obat' | 'diagnosis' | 'resep';
+
+/** Penolakan coach beserta alasannya dan apa yang masih bisa ia bantu. */
+export type PenolakanMedis = {
+  kategori: KategoriMedis;
+  /** Kata yang memicu penolakan; ditampilkan supaya bisa diperiksa pengguna. */
+  pemicu: string;
+  judul: string;
+  alasan: string;
+  bisaDibantu: string[];
+};

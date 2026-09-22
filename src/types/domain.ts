@@ -14,6 +14,7 @@ export type {
   DayType,
   Fase,
   HasilEvaluasi,
+  PenolakanMedis,
   HasilBodyFat,
   KekuranganBodyFat,
   KomposisiTubuh,
@@ -30,6 +31,7 @@ import type {
   Fase,
   HasilEvaluasi,
   MacroProgress,
+  PenolakanMedis,
 } from '@recomp/logika';
 
 /** Sumber angka berat — dipakai untuk membedakan data mentah vs hasil sync. */
@@ -283,6 +285,11 @@ export type PesanCoach = {
   ringkasan?: RingkasanMingguan;
   /** Verdict evaluasi 4 mingguan; juga dirender sebagai kartu, bukan gelembung. */
   evaluasi?: EvaluasiEmpatPekan;
+  /**
+   * Penolakan batas medis. Pesan yang membawanya dirender sebagai kartu, bukan
+   * gelembung — ia bukan pendapat coach atas pertanyaannya, melainkan batas.
+   */
+  penolakan?: PenolakanMedis;
 };
 
 /**
