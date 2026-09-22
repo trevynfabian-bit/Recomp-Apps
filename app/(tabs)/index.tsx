@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
@@ -9,8 +9,11 @@ import {
   PemilihTipeHari,
   Pill,
   SectionHeader,
+  SheetCatatFoto,
+  type EntriMakananBaru,
 } from '@/components';
 import { formatAngka, formatTanggalPanjang } from '@/lib/format';
+import { ketukRingan } from '@/lib/haptics';
 import {
   beratTerakhirSebelum,
   cariTarget,
@@ -21,7 +24,7 @@ import {
   susunMacros,
 } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
-import type { DailyLog } from '@/types/domain';
+import type { DailyLog, FoodLog } from '@/types/domain';
 
 /**
  * Layar utama Log Harian.
@@ -35,6 +38,8 @@ export default function LogHarianScreen() {
   // Log hari ini disimpan di state supaya kartu Timbang Pagi & pemilih tipe hari
   // bisa menulis balik. Semua angka target diturunkan dari state ini.
   const [log, setLog] = useState<DailyLog>(mockDailyLogHariIni);
+  const [foodLogs, setFoodLogs] = useState<FoodLog[]>(mockFoodLogsHariIni);
+  const [sheetFotoTerbuka, setSheetFotoTerbuka] = useState(false);
 
   const fase = mockProfile.fase_aktif;
   const dayType = mockDayTypes.find((d) => d.id === log.day_type_id) ?? mockDayTypes[0];
@@ -48,6 +53,27 @@ export default function LogHarianScreen() {
 
   function simpanBeratPagi(beratKg: number) {
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
+  }
+
+  /**
+   * Tambah entri makanan. Totalnya langsung diakumulasikan ke `daily_logs`
+   * supaya angka utama, sisa makro, dan bar progress ikut bergerak.
+   */
+  function tambahMakanan(entri: EntriMakananBaru) {
+    const baru: FoodLog = {
+      ...entri,
+      id: `food-${Date.now()}`,
+      daily_log_id: log.id,
+    };
+    setFoodLogs((prev) => [...prev, baru]);
+    setLog((prev) => ({
+      ...prev,
+      kalori: prev.kalori + baru.kalori,
+      protein_g: prev.protein_g + baru.protein_g,
+      lemak_g: prev.lemak_g + baru.lemak_g,
+      karbo_g: prev.karbo_g + baru.karbo_g,
+      sat_fat_g: prev.sat_fat_g + baru.sat_fat_g,
+    }));
   }
 
   /**
@@ -139,11 +165,11 @@ export default function LogHarianScreen() {
         <PanelRingkasanMakro macros={macros} />
       </View>
 
-      {/* Daftar makanan hari ini */}
+      {/* Daftar makanan hari ini + jalan masuk catat via foto */}
       <View>
-        <SectionHeader judul="Makanan" aksi={`${mockFoodLogsHariIni.length} entri`} />
+        <SectionHeader judul="Makanan" aksi={`${foodLogs.length} entri`} />
         <Card flat>
-          {mockFoodLogsHariIni.map((food, i) => (
+          {foodLogs.map((food, i) => (
             <View
               key={food.id}
               style={{
@@ -155,10 +181,19 @@ export default function LogHarianScreen() {
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ flex: 1, gap: 2, paddingRight: spacing.md }}>
-                <Text style={{ ...typography.body, color: colors.text }} numberOfLines={1}>
-                  {food.nama_makanan}
-                </Text>
+              <View style={{ flex: 1, gap: 3, paddingRight: spacing.md }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text
+                    style={{ ...typography.body, color: colors.text, flexShrink: 1 }}
+                    numberOfLines={1}
+                  >
+                    {food.nama_makanan}
+                  </Text>
+                  {/* Entri dari foto SELALU ditandai estimasi, bukan data mentah. */}
+                  {food.sumber === 'foto_ai' ? (
+                    <Text style={{ ...typography.caption, color: colors.amber }}>ESTIMASI</Text>
+                  ) : null}
+                </View>
                 <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   P {formatAngka(food.protein_g)}g · L {formatAngka(food.lemak_g)}g · K{' '}
                   {formatAngka(food.karbo_g)}g
@@ -169,6 +204,28 @@ export default function LogHarianScreen() {
               </Text>
             </View>
           ))}
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Catat makan via foto"
+            onPress={() => {
+              ketukRingan();
+              setSheetFotoTerbuka(true);
+            }}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: spacing.sm,
+              padding: spacing.lg,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
+            <Text style={{ ...typography.body }}>📷</Text>
+            <Text style={{ ...typography.label, color: colors.amber }}>Catat makan via foto</Text>
+          </Pressable>
         </Card>
       </View>
 
@@ -187,6 +244,12 @@ export default function LogHarianScreen() {
           </Text>
         </Card>
       </View>
+
+      <SheetCatatFoto
+        terbuka={sheetFotoTerbuka}
+        onTutup={() => setSheetFotoTerbuka(false)}
+        onSimpan={tambahMakanan}
+      />
 
       {/* Penanda eksplisit bahwa Fase 1 masih memakai data tiruan */}
       <View style={{ alignItems: 'center' }}>

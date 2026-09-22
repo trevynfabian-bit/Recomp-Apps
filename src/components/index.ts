@@ -1,9 +1,11 @@
 export { Card } from './Card';
 export { HeroNumber } from './HeroNumber';
+export { InputAngka } from './InputAngka';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { MacroRow } from './MacroRow';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
 export { PemilihTipeHari } from './PemilihTipeHari';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
+export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SectionHeader } from './SectionHeader';
