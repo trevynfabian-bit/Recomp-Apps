@@ -1,4 +1,5 @@
-import type { PesanCoach } from '@/types/domain';
+import { judulPercakapan } from '@recomp/logika';
+import type { Percakapan, PesanCoach } from '@/types/domain';
 
 /**
  * Percakapan tiruan AI Coach.
@@ -117,3 +118,61 @@ function susunBalasan(pertanyaan: string): string {
     'misalnya soal laju mingguan, ukuran tubuh, atau sisa kalori hari ini.'
   );
 }
+
+/** Percakapan lama, untuk menguji daftar riwayat dan pemisah tanggal. */
+const percakapanLama: PesanCoach[][] = [
+  [
+    {
+      id: 'l1',
+      peran: 'pengguna',
+      teks: 'Kenapa berat saya naik padahal kalori sudah defisit dua minggu?',
+      waktu: '2026-09-15T09:02:00+07:00',
+      status: 'terkirim',
+    },
+    {
+      id: 'l2',
+      peran: 'coach',
+      teks:
+        'Dua pekan itu belum tentu cukup untuk terbaca. Rata-rata 7 hari Anda saat itu 74,0 kg, ' +
+        'naik 0,1 kg — masih di dalam rentang goyangan air, bukan sinyal.\n\nYang lebih sering ' +
+        'jadi penyebabnya: asupan tercatat lebih rendah dari asupan sebenarnya. Minyak masak dan ' +
+        'kudapan yang tidak dicatat gampang menambah 200–300 kkal sehari tanpa terasa.',
+      waktu: '2026-09-15T09:02:11+07:00',
+    },
+  ],
+  [
+    {
+      id: 'k1',
+      peran: 'pengguna',
+      teks: 'Protein saya cukup belum?',
+      waktu: '2026-09-21T20:41:00+07:00',
+      status: 'terkirim',
+    },
+    {
+      id: 'k2',
+      peran: 'coach',
+      teks:
+        'Rata-rata tujuh hari terakhir 168 g per hari terhadap target 180 g — jadi kurang sekitar ' +
+        '12 g sehari.\n\nSaat Lean Gain kekurangan sebesar itu tidak menggagalkan apa pun, tapi ' +
+        'protein adalah satu-satunya makro yang TIDAK pernah dipotong saat redistribusi budget. ' +
+        'Kalau ingin ditutup, satu porsi yoghurt atau dua butir telur sudah cukup.',
+      waktu: '2026-09-21T20:41:08+07:00',
+    },
+  ],
+];
+
+/** Riwayat percakapan tiruan, urut lama → baru. */
+export const mockRiwayatPercakapan: Percakapan[] = [
+  ...percakapanLama.map((pesan, i) => ({
+    id: `p-lama-${i + 1}`,
+    judul: judulPercakapan(pesan),
+    diperbaruiPada: pesan[pesan.length - 1].waktu,
+    pesan,
+  })),
+  {
+    id: 'p-aktif',
+    judul: judulPercakapan(mockPercakapan),
+    diperbaruiPada: mockPercakapan[mockPercakapan.length - 1].waktu,
+    pesan: mockPercakapan,
+  },
+];

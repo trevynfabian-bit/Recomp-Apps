@@ -154,3 +154,20 @@ export type PesanCoach = {
    */
   status?: 'terkirim' | 'mengirim' | 'gagal';
 };
+
+/**
+ * Satu utas percakapan dengan AI Coach.
+ *
+ * Dipisah per utas, bukan satu gulungan tanpa ujung, karena jawaban coach
+ * berisi angka yang BERLAKU PADA SAAT ITU: "rata-rata 7 hari Anda 74,5 kg"
+ * dari dua pekan lalu bukan informasi yang sama dengan kalimat serupa hari ini.
+ * Batas utas membuat konteks itu ikut terbaca.
+ */
+export type Percakapan = {
+  id: string;
+  /** Diturunkan dari pertanyaan pertama; lihat `judulPercakapan`. */
+  judul: string;
+  /** ISO 8601 pesan terakhir, dipakai mengurutkan daftar riwayat. */
+  diperbaruiPada: string;
+  pesan: PesanCoach[];
+};

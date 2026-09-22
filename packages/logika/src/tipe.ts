@@ -368,3 +368,24 @@ export type StatusBatasPinggang = {
   /** Perkiraan pekan sampai batas tercapai; 0 bila sudah lewat. */
   pekanLagi: number | null;
 };
+
+/**
+ * Bentuk MINIMAL sebuah pesan yang dibutuhkan penataan riwayat.
+ * Sengaja tidak memakai tipe pesan milik app: paket ini dipakai web dashboard
+ * juga, dan keduanya tidak perlu sepakat soal field di luar tiga ini.
+ */
+export type PesanRingkas = {
+  id: string;
+  peran: 'pengguna' | 'coach';
+  teks: string;
+  /** ISO 8601. */
+  waktu: string;
+};
+
+/** Sekelompok pesan yang terjadi pada tanggal yang sama. */
+export type KelompokPesan = {
+  tanggal: string;
+  /** "Hari ini", "Kemarin", atau tanggal panjang. */
+  label: string;
+  idPesan: string[];
+};

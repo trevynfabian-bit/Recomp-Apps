@@ -1,7 +1,7 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
-export { GelembungMengetik, GelembungPesan } from './GelembungPesan';
+export { GelembungMengetik, GelembungPesan, PemisahTanggal } from './GelembungPesan';
 export { GrafikTren } from './GrafikTren';
 export { GrafikUkuran } from './GrafikUkuran';
 export { HeroNumber } from './HeroNumber';
@@ -27,5 +27,6 @@ export { SheetBatasPinggang } from './SheetBatasPinggang';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
+export { SheetRiwayatPercakapan } from './SheetRiwayatPercakapan';
 export { StatusRedistribusi } from './StatusRedistribusi';
 export { SectionHeader } from './SectionHeader';

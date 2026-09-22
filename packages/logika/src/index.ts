@@ -23,6 +23,7 @@ export type {
   JenisOlahraga,
   KecocokanFase,
   KecukupanTren,
+  KelompokPesan,
   KekuranganBodyFat,
   KomposisiTubuh,
   KoridorTarget,
@@ -31,6 +32,7 @@ export type {
   ModeMakro,
   OpsiRedistribusi,
   PerubahanUkuran,
+  PesanRingkas,
   ProteksiProtein,
   RataRata7Hari,
   RingkasanHariBudget,
@@ -55,6 +57,15 @@ export {
 } from './format';
 
 export { hitungMakro, keteranganMakro } from './makro';
+
+export {
+  formatJam,
+  judulPercakapan,
+  kelompokkanPerTanggal,
+  labelTanggalRelatif,
+  MAKS_JUDUL,
+  tanggalDariWaktu,
+} from './percakapan';
 
 export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFat';
 

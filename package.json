@@ -15,9 +15,10 @@
     "cek:bf": "node scripts/cek-bodyfat.mjs",
     "cek:ukuran": "node scripts/cek-ukuran.mjs",
     "cek:kontras": "node scripts/cek-kontras.mjs",
+    "cek:percakapan": "node scripts/cek-percakapan.mjs",
     "cek:db": "npm run db:cek && npm run cek:paritas",
     "cek:edge": "bash scripts/cek-edge.sh",
-    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:edge && npm run cek:db"
+    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:percakapan && npm run cek:edge && npm run cek:db"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

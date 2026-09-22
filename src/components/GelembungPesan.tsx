@@ -1,10 +1,17 @@
 import { Pressable, Text, View } from 'react-native';
+import { formatJam } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Props = {
   pesan: PesanCoach;
+  /**
+   * Tampilkan jam di bawah gelembung. Hanya pesan TERAKHIR dalam satu rentetan
+   * yang diberi jam — memberi jam ke setiap gelembung mengubah percakapan jadi
+   * log server, dan yang dicari orang hanyalah "kapan bagian ini terjadi".
+   */
+  tampilkanJam?: boolean;
   /** Mengirim ulang pesan yang gagal, tanpa mengetik ulang. */
   onCobaLagi?: (pesan: PesanCoach) => void;
 };
@@ -18,7 +25,7 @@ type Props = {
  * perbedaan latar itu yang membuat kedua peran terbaca sekilas tanpa harus
  * melacak sisi mana gelembungnya menempel.
  */
-export function GelembungPesan({ pesan, onCobaLagi }: Props) {
+export function GelembungPesan({ pesan, tampilkanJam = false, onCobaLagi }: Props) {
   const dariPengguna = pesan.peran === 'pengguna';
   const gagal = pesan.status === 'gagal';
 
@@ -63,6 +70,12 @@ export function GelembungPesan({ pesan, onCobaLagi }: Props) {
           {pesan.teks}
         </Text>
       </View>
+
+      {tampilkanJam && !gagal ? (
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          {formatJam(pesan.waktu)}
+        </Text>
+      ) : null}
 
       {gagal ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -121,6 +134,23 @@ export function GelembungMengetik() {
           Coach sedang membaca data Anda…
         </Text>
       </View>
+    </View>
+  );
+}
+
+/**
+ * Pemisah tanggal di antara kelompok pesan.
+ *
+ * Garis tipis di kiri-kanan label, bukan pill melayang: pemisah ini kerangka,
+ * bukan data, jadi ia memakai warna garis dekoratif dan tidak pernah menarik
+ * perhatian lebih dari gelembung di sekitarnya.
+ */
+export function PemisahTanggal({ label }: { label: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>{label}</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
     </View>
   );
 }
