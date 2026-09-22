@@ -65,6 +65,8 @@ export type DailyLogRow = {
   karbo_g: number;
   sat_fat_g: number;
   target_kalori: number | null;
+  /** Target SEBELUM redistribusi; null bila hari itu belum pernah disesuaikan. */
+  target_asli_kalori: number | null;
   target_protein_g: number | null;
   target_lemak_g: number | null;
   batas_sat_fat_g: number | null;
@@ -206,6 +208,37 @@ export type TrenSnapshotRow = {
   };
 };
 
+/** Opsi redistribusi; sama persis dengan OpsiRedistribusi di @recomp/logika. */
+export type OpsiRedistribusiDb = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
+
+/** redistribusi_mingguan — satu penerapan redistribusi budget. */
+export type RedistribusiMingguanRow = {
+  id: string;
+  user_id: string;
+  /** Senin pekan yang disesuaikan. */
+  minggu_mulai: string;
+  opsi: OpsiRedistribusiDb;
+  /** Negatif berarti kelebihan yang harus ditutup. */
+  perlu_dipindah: number;
+  terserap: number;
+  /** Yang TIDAK terserap; database menjamin terserap + tersisa = perlu_dipindah. */
+  tersisa: number;
+  dibatasi_lantai: boolean;
+  alasan: string | null;
+  created_at: string;
+};
+
+/** redistribusi_hari — perubahan target kalori per hari. */
+export type RedistribusiHariRow = {
+  id: string;
+  redistribusi_id: string;
+  user_id: string;
+  tanggal: string;
+  target_lama: number;
+  target_baru: number;
+  kena_lantai: boolean;
+};
+
 /** fase_periode — riwayat fase program. */
 export type FasePeriodeRow = {
   id: string;
@@ -293,6 +326,18 @@ export type Database = {
         Update: Partial<FasePeriodeRow>;
         Relationships: [];
       };
+      redistribusi_mingguan: {
+        Row: RedistribusiMingguanRow;
+        Insert: Omit<RedistribusiMingguanRow, 'id' | 'created_at'>;
+        Update: Partial<RedistribusiMingguanRow>;
+        Relationships: [];
+      };
+      redistribusi_hari: {
+        Row: RedistribusiHariRow;
+        Insert: Omit<RedistribusiHariRow, 'id'>;
+        Update: Partial<RedistribusiHariRow>;
+        Relationships: [];
+      };
       food_logs: {
         Row: FoodLogRow;
         Insert: Omit<FoodLogRow, 'id' | 'created_at'>;
@@ -374,6 +419,10 @@ export type Database = {
       tren_berat_7_hari: {
         Args: { p_sampai: string; p_hari: number };
         Returns: TrenSnapshotRow;
+      };
+      awal_minggu: {
+        Args: { p_tanggal: string };
+        Returns: string;
       };
       fase_pada_tanggal: {
         Args: { p_tanggal: string };
