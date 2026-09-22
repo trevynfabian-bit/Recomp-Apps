@@ -1,57 +1,71 @@
 import { Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme';
-import { formatAngka, rasio } from '@/lib/format';
-import type { MacroProgress } from '@/types/domain';
+import { formatAngka } from '@/lib/format';
+import { hitungMakro, keteranganMakro } from '@/lib/makro';
+import type { MacroProgress, ModeMakro } from '@/types/domain';
 
-type Props = { macro: MacroProgress };
+type Props = {
+  macro: MacroProgress;
+  mode: ModeMakro;
+};
 
 /**
- * Satu baris makro: label, "terpakai / target", dan bar progress.
- * Untuk `isBatas` (sat fat) bar berubah coral begitu batas terlampaui —
- * tetap netral, hanya menandai fakta, tanpa kalimat menghakimi.
+ * Satu baris makro di panel ringkasan: label + angka utama (sisa atau terpakai),
+ * bar progress, lalu keterangan target/batas.
+ *
+ * Bar berubah coral bila target/batas terlampaui — penanda fakta, bukan
+ * peringatan; nada teks tetap netral sesuai PRD.
  */
-export function MacroRow({ macro }: Props) {
-  const warnaDasar = colors.macro[macro.key];
-  const lewatBatas = macro.isBatas && macro.target !== null && macro.terpakai > macro.target;
-  const warna = lewatBatas ? colors.coral : warnaDasar;
-  const persen = rasio(macro.terpakai, macro.target);
+export function MacroRow({ macro, mode }: Props) {
+  const { nilaiUtama, terlampaui, progres } = hitungMakro(macro, mode);
+  const tanpaTarget = macro.target === null;
+  const warna = terlampaui ? colors.coral : colors.macro[macro.key];
 
   return (
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <Text style={{ ...typography.label, color: colors.textMuted }}>{macro.label}</Text>
-        <Text style={{ ...typography.label, color: colors.text }}>
-          {formatAngka(macro.terpakai)}
-          <Text style={{ color: colors.textFaint }}>
-            {macro.target !== null
-              ? ` / ${formatAngka(macro.target)} ${macro.unit}`
-              : ` ${macro.unit}`}
+
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
+          {/* Sisa negatif diberi awalan "+" karena angkanya sudah dimutlakkan. */}
+          <Text style={{ ...typography.title, color: terlampaui ? colors.coral : colors.text }}>
+            {mode === 'sisa' && terlampaui ? '+' : ''}
+            {formatAngka(nilaiUtama)}
           </Text>
-        </Text>
+          <Text style={{ ...typography.label, color: colors.textFaint }}>{macro.unit}</Text>
+        </View>
       </View>
 
-      {macro.target !== null ? (
-        <View
-          style={{
-            height: 6,
-            borderRadius: radius.pill,
-            backgroundColor: colors.surfaceSunken,
-            overflow: 'hidden',
-          }}
-        >
+      <View
+        style={{
+          height: 6,
+          borderRadius: radius.pill,
+          backgroundColor: colors.surfaceSunken,
+          overflow: 'hidden',
+        }}
+      >
+        {!tanpaTarget ? (
           <View
             style={{
-              width: `${persen * 100}%`,
+              width: `${progres * 100}%`,
               height: '100%',
               borderRadius: radius.pill,
               backgroundColor: warna,
             }}
           />
-        </View>
-      ) : (
-        // Karbo tidak ditargetkan: tampilkan track kosong agar ritme baris tetap rapi.
-        <View style={{ height: 6, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken }} />
-      )}
+        ) : null}
+      </View>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          {keteranganMakro(macro, mode)}
+        </Text>
+        {!tanpaTarget ? (
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            {formatAngka(macro.terpakai)} / {formatAngka(macro.target as number)} {macro.unit}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }

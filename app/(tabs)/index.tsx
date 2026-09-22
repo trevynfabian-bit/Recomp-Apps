@@ -5,7 +5,7 @@ import {
   Card,
   HeroNumber,
   KartuTimbangPagi,
-  MacroRow,
+  PanelRingkasanMakro,
   PemilihTipeHari,
   Pill,
   SectionHeader,
@@ -136,16 +136,7 @@ export default function LogHarianScreen() {
       {/* Rincian makro vs target absolut hari ini */}
       <View>
         <SectionHeader judul="Makro hari ini" aksi={`target ${dayType.nama} · ${fase}`} />
-        <Card>
-          <View style={{ gap: spacing.lg }}>
-            {macros.map((macro) => (
-              <MacroRow key={macro.key} macro={macro} />
-            ))}
-          </View>
-          <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.lg }}>
-            Sat fat dihitung sebagai BATAS, bukan sasaran. Karbo tidak ditargetkan.
-          </Text>
-        </Card>
+        <PanelRingkasanMakro macros={macros} />
       </View>
 
       {/* Daftar makanan hari ini */}

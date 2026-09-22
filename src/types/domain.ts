@@ -98,3 +98,16 @@ export type DailySnapshot = {
   fase: Fase;
   macros: MacroProgress[];
 };
+
+/** Cara panel ringkasan menampilkan angka utama tiap makro. */
+export type ModeMakro = 'sisa' | 'terpakai';
+
+/** Hasil hitung satu makro, siap ditampilkan tanpa logika tambahan di komponen. */
+export type HitunganMakro = {
+  /** Angka yang ditonjolkan sesuai `ModeMakro`. */
+  nilaiUtama: number;
+  /** true bila target/batas sudah terlampaui (sisa negatif). */
+  terlampaui: boolean;
+  /** Rasio 0..1 untuk bar progress. */
+  progres: number;
+};
