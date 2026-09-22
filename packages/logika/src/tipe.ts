@@ -276,3 +276,34 @@ export type HasilTdee = {
   keyakinan: 'rendah' | 'sedang' | 'tinggi';
   alasanKeyakinan: string;
 };
+
+/** Masukan rumus Navy; semua lingkar dalam cm. */
+export type InputBodyFat = {
+  jenisKelamin: 'pria' | 'wanita';
+  tinggiCm: number;
+  pinggangCm: number;
+  leherCm: number;
+  /** Lingkar pinggul — hanya dipakai rumus versi wanita. */
+  pinggulCm?: number | null;
+};
+
+/** Hasil estimasi persen lemak tubuh. */
+export type HasilBodyFat = {
+  metode: 'Navy';
+  /** Persen lemak; null bila datanya tidak cukup untuk dihitung. */
+  persen: number | null;
+  /** Rentang wajar mengingat galat metode; null bila `persen` null. */
+  rentang: { bawah: number; atas: number } | null;
+  /** Galat baku metode, dalam poin persentase. */
+  ketidakpastian: number;
+  /** Pergeseran estimasi bila meteran pinggang meleset 1 cm, dalam poin. */
+  sensitivitasPinggang: number | null;
+  /** Kenapa tidak bisa dihitung; null bila berhasil. */
+  alasanKosong: string | null;
+};
+
+/** Pecahan berat badan menjadi massa lemak dan massa bebas lemak. */
+export type KomposisiTubuh = {
+  lemakKg: number;
+  bebasLemakKg: number;
+};

@@ -12,7 +12,9 @@ export type {
   HariBudget,
   HariRedistribusi,
   HasilRedistribusi,
+  HasilBodyFat,
   HasilTdee,
+  InputBodyFat,
   InputTdee,
   LajuBudget,
   EntriBeratRingkas,
@@ -21,6 +23,7 @@ export type {
   JenisOlahraga,
   KecocokanFase,
   KecukupanTren,
+  KomposisiTubuh,
   KoridorTarget,
   MacroProgress,
   MetodeTdee,
@@ -47,6 +50,8 @@ export {
 } from './format';
 
 export { hitungMakro, keteranganMakro } from './makro';
+
+export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFat';
 
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 

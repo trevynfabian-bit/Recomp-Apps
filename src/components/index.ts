@@ -4,6 +4,7 @@ export { GrafikTren } from './GrafikTren';
 export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { InputAngka } from './InputAngka';
+export { KartuBodyFat } from './KartuBodyFat';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuTdee } from './KartuTdee';
 export { KartuTimbangPagi } from './KartuTimbangPagi';

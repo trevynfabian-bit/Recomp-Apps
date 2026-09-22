@@ -2,9 +2,21 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatDesimal, formatTanggalPanjang, tanggalHariIni } from '@recomp/logika';
-import { Card, SectionHeader, SheetCatatUkuran, type UkuranBaru } from '@/components';
+import {
+  formatDesimal,
+  formatTanggalPanjang,
+  rataRata7Hari,
+  tanggalHariIni,
+} from '@recomp/logika';
+import {
+  Card,
+  KartuBodyFat,
+  SectionHeader,
+  SheetCatatUkuran,
+  type UkuranBaru,
+} from '@/components';
 import { ketukRingan } from '@/lib/haptics';
+import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
@@ -29,8 +41,8 @@ const BAGIAN: { kunci: BarisUkuran['kunci']; label: string; pasangan?: 'kiri' | 
  * dan tidak akan terlihat sama sekali dari timbangan.
  *
  * Fase 1 memakai data tiruan yang disimpan di state layar ini, jadi pencatatan
- * baru langsung terlihat tanpa backend. Estimasi body fat Navy dan alert batas
- * pinggang dipasang di task berikutnya pada halaman ini.
+ * baru langsung terlihat tanpa backend. Alert batas pinggang dipasang di task
+ * berikutnya pada halaman ini.
  */
 export default function UkuranScreen() {
   const insets = useSafeAreaInsets();
@@ -164,6 +176,15 @@ export default function UkuranScreen() {
         </Text>
       </Pressable>
 
+      {/* Estimasi body fat: angka turunan, jadi ditempatkan SETELAH pengukuran
+          dan dengan bobot visual yang lebih kecil daripada hero pinggang */}
+      <KartuBodyFat
+        profil={profil}
+        terbaru={terbaru}
+        pertama={pertama}
+        beratRataRataKg={rataRata7Hari(mockRiwayatBerat, terbaru.tanggal).rataRataKg}
+      />
+
       {/* Semua ukuran, dengan perubahan sejak pencatatan sebelumnya */}
       <View>
         <SectionHeader
@@ -229,7 +250,7 @@ export default function UkuranScreen() {
           }}
         >
           <Text style={{ ...typography.caption, color: colors.textFaint }}>
-            Data tiruan · estimasi body fat menyusul
+            Data tiruan · estimasi body fat memakai metode Navy
           </Text>
         </View>
       </View>

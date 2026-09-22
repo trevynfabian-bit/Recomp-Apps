@@ -12,6 +12,8 @@
 export type {
   DayType,
   Fase,
+  HasilBodyFat,
+  KomposisiTubuh,
   HitunganMakro,
   JenisOlahraga,
   MacroProgress,
