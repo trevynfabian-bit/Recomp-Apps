@@ -11,6 +11,7 @@ import {
 import {
   Card,
   KartuBodyFat,
+  RiwayatPerubahan,
   SectionHeader,
   SheetCatatUkuran,
   SheetLengkapiProfil,
@@ -224,15 +225,8 @@ export default function UkuranScreen() {
         </Card>
       </View>
 
-      {/* Riwayat pencatatan */}
-      <View>
-        <SectionHeader judul="Riwayat" aksi={`${catatan.length} pencatatan`} />
-        <Card flat>
-          {[...catatan].reverse().map((u, i) => (
-            <BarisRiwayat key={u.id} ukuran={u} pertama={i === 0} />
-          ))}
-        </Card>
-      </View>
+      {/* Riwayat perubahan per bagian tubuh */}
+      <RiwayatPerubahan catatan={catatan} bagian={BAGIAN} />
 
       <Card>
         <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
@@ -272,30 +266,6 @@ export default function UkuranScreen() {
         onSimpan={perbaruiProfil}
       />
     </ScrollView>
-  );
-}
-
-/** Satu baris riwayat: tanggal + ukuran yang paling sering dilihat. */
-function BarisRiwayat({ ukuran, pertama }: { ukuran: UkuranTubuh; pertama: boolean }) {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.lg,
-        borderTopWidth: pertama ? 0 : 1,
-        borderTopColor: colors.border,
-      }}
-    >
-      <Text style={{ ...typography.label, color: colors.text }}>
-        {formatTanggalPanjang(ukuran.tanggal)}
-      </Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
-        pinggang {formatDesimal(ukuran.pinggang_cm)} · dada {formatDesimal(ukuran.dada_cm)} · leher{' '}
-        {formatDesimal(ukuran.leher_cm)}
-      </Text>
-    </View>
   );
 }
 

@@ -325,3 +325,36 @@ export type KomposisiTubuh = {
   lemakKg: number;
   bebasLemakKg: number;
 };
+
+/** Satu titik riwayat untuk SATU bagian tubuh. */
+export type TitikUkuran = {
+  tanggal: string;
+  /** Nilai dalam cm. */
+  nilai: number;
+};
+
+/** Perubahan antara dua pencatatan berurutan. */
+export type PerubahanUkuran = {
+  dari: string;
+  ke: string;
+  nilaiDari: number;
+  nilaiKe: number;
+  /** `nilaiKe − nilaiDari`, dibulatkan ke 0,1 cm. */
+  selisih: number;
+  jarakHari: number;
+  /**
+   * Selisih dinormalkan ke tujuh hari. Tanpa ini, selang yang tidak seragam
+   * terbaca seolah sebanding — padahal pencatatan mingguan sering tertunda.
+   */
+  lajuPerPekan: number;
+};
+
+/** Riwayat perubahan satu bagian tubuh beserta totalnya. */
+export type RingkasanPerubahan = {
+  perubahan: PerubahanUkuran[];
+  /** Selisih pencatatan terakhir terhadap yang pertama; null bila baru satu. */
+  totalSelisih: number | null;
+  rentangHari: number | null;
+  awal: TitikUkuran | null;
+  akhir: TitikUkuran | null;
+};

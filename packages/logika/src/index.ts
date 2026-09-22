@@ -30,13 +30,16 @@ export type {
   MetodeTdee,
   ModeMakro,
   OpsiRedistribusi,
+  PerubahanUkuran,
   ProteksiProtein,
   RataRata7Hari,
   RingkasanHariBudget,
+  RingkasanPerubahan,
   SinyalArah,
   StatusKoridor,
   TitikKoridor,
   TitikTren,
+  TitikUkuran,
   WorkoutRingkas,
 } from './tipe';
 
@@ -69,6 +72,8 @@ export {
 } from './tren';
 
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
+
+export { HARI_PER_PEKAN, ringkasPerubahan } from './ukuran';
 
 export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';
 

@@ -1,6 +1,7 @@
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { GrafikTren } from './GrafikTren';
+export { GrafikUkuran } from './GrafikUkuran';
 export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { InputAngka } from './InputAngka';
@@ -18,6 +19,7 @@ export { PemilihTipeHari } from './PemilihTipeHari';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
+export { RiwayatPerubahan } from './RiwayatPerubahan';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
