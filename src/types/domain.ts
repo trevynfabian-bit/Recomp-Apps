@@ -40,7 +40,8 @@ export type Profile = {
    */
   tinggi_cm: number | null;
   jenis_kelamin: 'pria' | 'wanita' | null;
-  batas_pinggang_cm: number;
+  /** Nullable seperti kolomnya: batas ini keputusan pengguna, bukan bawaan. */
+  batas_pinggang_cm: number | null;
   /** Dibutuhkan rumus Mifflin-St Jeor pada estimasi TDEE; boleh null. */
   tanggal_lahir: string | null;
 };

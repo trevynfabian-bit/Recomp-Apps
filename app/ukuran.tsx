@@ -12,6 +12,7 @@ import {
   Card,
   KartuBodyFat,
   RiwayatPerubahan,
+  SheetBatasPinggang,
   SectionHeader,
   SheetCatatUkuran,
   SheetLengkapiProfil,
@@ -55,6 +56,7 @@ export default function UkuranScreen() {
   const [catatan, setCatatan] = useState<UkuranTubuh[]>(mockUkuran);
   const [sheetTerbuka, setSheetTerbuka] = useState(false);
   const [sheetProfilTerbuka, setSheetProfilTerbuka] = useState(false);
+  const [sheetBatasTerbuka, setSheetBatasTerbuka] = useState(false);
 
   const terbaru = catatan[catatan.length - 1];
   // Label CTA menyebut apa yang akan terjadi: hari yang sudah terisi diperbarui,
@@ -148,9 +150,42 @@ export default function UkuranScreen() {
               {formatTanggalPanjang(pertama.tanggal)}
             </Text>
           ) : null}
-          <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.xs }}>
-            batas yang Anda tetapkan {formatDesimal(profil.batas_pinggang_cm)} cm
-          </Text>
+          {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
+              punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              profil.batas_pinggang_cm !== null
+                ? `Batas pinggang ${formatDesimal(profil.batas_pinggang_cm)} sentimeter. Ketuk untuk mengubah.`
+                : 'Batas pinggang belum ditetapkan. Ketuk untuk menetapkan.'
+            }
+            onPress={() => {
+              ketukRingan();
+              setSheetBatasTerbuka(true);
+            }}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.sm,
+              minHeight: TAP_MIN,
+              paddingHorizontal: spacing.lg,
+              marginTop: spacing.xs,
+              borderRadius: radius.pill,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.surfaceSunken,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              {profil.batas_pinggang_cm !== null
+                ? `batas yang Anda tetapkan ${formatDesimal(profil.batas_pinggang_cm)} cm`
+                : 'batas pinggang belum ditetapkan'}
+            </Text>
+            <Text style={{ ...typography.label, color: colors.amber }}>
+              {profil.batas_pinggang_cm !== null ? 'Ubah' : 'Tetapkan'}
+            </Text>
+          </Pressable>
         </View>
       </Card>
 
@@ -257,6 +292,15 @@ export default function UkuranScreen() {
         onTutup={() => setSheetTerbuka(false)}
         catatan={catatan}
         onSimpan={simpanUkuran}
+      />
+
+      <SheetBatasPinggang
+        terbuka={sheetBatasTerbuka}
+        onTutup={() => setSheetBatasTerbuka(false)}
+        batasCm={profil.batas_pinggang_cm}
+        pinggangSekarangCm={terbaru.pinggang_cm}
+        pinggangAwalCm={pertama?.pinggang_cm ?? null}
+        onSimpan={(batas) => perbaruiProfil({ batas_pinggang_cm: batas })}
       />
 
       <SheetLengkapiProfil

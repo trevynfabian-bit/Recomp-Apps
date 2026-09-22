@@ -20,6 +20,7 @@ export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
 export { RiwayatPerubahan } from './RiwayatPerubahan';
+export { SheetBatasPinggang } from './SheetBatasPinggang';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
