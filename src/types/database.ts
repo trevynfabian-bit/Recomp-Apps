@@ -114,6 +114,41 @@ export type RingkasanHarianRow = {
   jumlah_estimasi: number;
 };
 
+/** Hasil `ringkasan_sisa_harian`: ringkasan hari beserta sisa tiap makro. */
+export type RingkasanSisaRow = {
+  tanggal: string;
+  nama_tipe_hari: string | null;
+  fase: FaseProgram | null;
+  berat_pagi_kg: number | null;
+  sumber_berat: SumberBeratDb | null;
+  terpakai_kalori: number;
+  terpakai_protein_g: number;
+  terpakai_lemak_g: number;
+  terpakai_karbo_g: number;
+  terpakai_sat_fat_g: number;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+  /** Boleh negatif: negatif berarti sudah melewati target/batas. */
+  sisa_kalori: number | null;
+  sisa_protein_g: number | null;
+  sisa_lemak_g: number | null;
+  sisa_sat_fat_g: number | null;
+  sat_fat_terlampaui: boolean;
+  kalori_terlampaui: boolean;
+  catatan: string | null;
+  jumlah_entri: number;
+  jumlah_estimasi: number;
+};
+
+/** Hasil `rata_rata_berat_7_hari`. */
+export type RataRataBeratRow = {
+  tanggal: string;
+  rata_rata_kg: number | null;
+  jumlah_timbangan: number;
+};
+
 export type FoodLogRow = {
   id: string;
   user_id: string;
@@ -212,6 +247,14 @@ export type Database = {
       ringkasan_harian: {
         Args: { p_tanggal: string };
         Returns: RingkasanHarianRow[];
+      };
+      ringkasan_sisa_harian: {
+        Args: { p_tanggal: string };
+        Returns: RingkasanSisaRow[];
+      };
+      rata_rata_berat_7_hari: {
+        Args: { p_tanggal: string };
+        Returns: RataRataBeratRow[];
       };
     };
     Enums: {

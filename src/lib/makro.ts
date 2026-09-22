@@ -14,7 +14,10 @@ export function hitungMakro(macro: MacroProgress, mode: ModeMakro): HitunganMakr
     return { nilaiUtama: macro.terpakai, terlampaui: false, progres: 0 };
   }
 
-  const sisa = macro.target - macro.terpakai;
+  // Dibulatkan ke 2 desimal: aritmetika float JavaScript meninggalkan sisa
+  // seperti -0,10000000000000142 untuk 25 − 25,1, sementara sisi server
+  // memakai `numeric` yang eksak. Tanpa pembulatan ini kedua sisi berbeda.
+  const sisa = bulatkan(macro.target - macro.terpakai);
   const terlampaui = sisa < 0;
 
   return {
@@ -50,4 +53,9 @@ export function keteranganMakro(macro: MacroProgress, mode: ModeMakro): string {
   return macro.isBatas
     ? `Tersisa dari batas ${batas} ${satuan}`
     : `Dari target ${batas} ${satuan}`;
+}
+
+/** Bulatkan ke 2 desimal untuk menyingkirkan galat pembulatan biner. */
+function bulatkan(nilai: number): number {
+  return Math.round(nilai * 100) / 100;
 }

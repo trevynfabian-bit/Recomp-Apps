@@ -10,7 +10,9 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "db:cek": "bash scripts/cek-migrasi.sh"
+    "db:cek": "bash scripts/cek-migrasi.sh",
+    "cek:paritas": "node scripts/cek-paritas-makro.mjs",
+    "cek:db": "npm run db:cek && npm run cek:paritas"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

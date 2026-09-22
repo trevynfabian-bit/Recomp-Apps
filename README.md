@@ -44,10 +44,19 @@ dibuat dengan `IF NOT EXISTS` sehingga aman dijalankan ulang di database yang
 sudah berisi tabel milik web.
 
 ```bash
-npm run db:cek   # jalankan migrasi di Postgres lokal bersih + uji RLS
+npm run db:cek       # migrasi di Postgres lokal bersih + uji RLS/RPC
+npm run cek:paritas  # buktikan aturan "sisa" di SQL dan TypeScript sama
+npm run cek:db       # keduanya
 ```
 
-Skrip itu menyiapkan Postgres kosong, memasang tiruan `auth.users`/`auth.uid()`
+**Kenapa ada pemeriksaan paritas:** perhitungan makro hidup di dua tempat
+karena PRD menuntutnya — UI memakai paket TypeScript bersama (agar konsisten
+dengan web), sementara widget lock screen membaca angka yang dihitung server
+karena WidgetKit tidak bisa menjalankan paket TS. Dua tempat berarti dua aturan
+yang bisa menyimpang diam-diam, jadi `cek:paritas` menjalankan daftar kasus yang
+sama lewat SQL dan lewat `src/lib/makro.ts` lalu membandingkan hasilnya.
+
+Skrip migrasi menyiapkan Postgres kosong, memasang tiruan `auth.users`/`auth.uid()`
 (hanya untuk uji lokal, tidak pernah dipakai di Supabase asli), menjalankan
 migrasi **dua kali** untuk membuktikan idempoten, lalu menjalankan uji RLS yang
 memeriksa dua pengguna tidak bisa saling melihat atau mengubah data. Keluar
