@@ -10,6 +10,8 @@ export type {
   BudgetMingguan,
   DayType,
   HariBudget,
+  HariRedistribusi,
+  HasilRedistribusi,
   LajuBudget,
   EntriBeratRingkas,
   Fase,
@@ -20,6 +22,7 @@ export type {
   KoridorTarget,
   MacroProgress,
   ModeMakro,
+  OpsiRedistribusi,
   RataRata7Hari,
   RingkasanHariBudget,
   SinyalArah,
@@ -57,3 +60,5 @@ export {
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
 
 export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';
+
+export { hitungRedistribusi, KELIPATAN_KCAL, selisihPerluDipindah } from './redistribusi';

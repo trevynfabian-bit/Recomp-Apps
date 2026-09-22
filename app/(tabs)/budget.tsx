@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -8,11 +9,25 @@ import {
   rincianKumulatif,
 } from '@recomp/logika';
 import type { BarisKumulatif } from '@recomp/logika';
-import { Card, HeroNumber, MeterBudget, PemilihFase, Pill, SectionHeader } from '@/components';
+import {
+  Card,
+  HeroNumber,
+  MeterBudget,
+  PanelRedistribusi,
+  PemilihFase,
+  Pill,
+  SectionHeader,
+} from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { colors, radius, spacing, typography } from '@/theme';
+
+/**
+ * Batas bawah kalori harian. Redistribusi tidak pernah menurunkan target di
+ * bawah angka ini. Fase 2 membacanya dari `weekly_budgets.batas_bawah_kalori_harian`.
+ */
+const BATAS_BAWAH_KALORI = 1800;
 
 /**
  * Layar Budget Kalori Mingguan.
@@ -31,6 +46,10 @@ export default function BudgetScreen() {
 
   const laju = lajuBudget(budget);
   const rincian = rincianKumulatif(budget);
+
+  // Fase 1 menyimpan jejak redistribusi di memori; kolom aslinya
+  // (`weekly_budgets.redistribusi_terpakai`) dipasang di task backend.
+  const [redistribusiDipakai, setRedistribusiDipakai] = useState(false);
   const lewat = budget.sisa < 0;
 
   return (
@@ -138,6 +157,17 @@ export default function BudgetScreen() {
             </View>
           </View>
         </Card>
+      </View>
+
+      {/* Redistribusi: menawarkan, tidak pernah menerapkan sendiri */}
+      <View>
+        <SectionHeader judul="Redistribusi kalori" aksi="maksimal 1x per minggu" />
+        <PanelRedistribusi
+          budget={budget}
+          batasBawahKalori={BATAS_BAWAH_KALORI}
+          sudahDipakai={redistribusiDipakai}
+          onTerapkan={() => setRedistribusiDipakai(true)}
+        />
       </View>
 
       {/* Kenapa angkanya begitu — perhitungannya bisa ditelusuri */}

@@ -8,6 +8,7 @@ export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';
 export { MeterBudget } from './MeterBudget';
+export { PanelRedistribusi } from './PanelRedistribusi';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
 export { PemilihFase } from './PemilihFase';
 export { PemilihTipeHari } from './PemilihTipeHari';

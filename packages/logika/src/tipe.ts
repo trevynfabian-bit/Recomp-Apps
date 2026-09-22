@@ -184,3 +184,31 @@ export type BarisKumulatif = RingkasanHariBudget & {
   /** Akumulasi konsumsi TERCATAT saja, tanpa proyeksi. */
   terpakaiSampaiSini: number;
 };
+
+/** Pilihan penanganan kelebihan/kekurangan kalori mingguan. */
+export type OpsiRedistribusi = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
+
+/** Usulan target baru untuk satu hari. */
+export type HariRedistribusi = {
+  tanggal: string;
+  namaTipeHari: string;
+  targetLama: number;
+  targetBaru: number;
+  selisih: number;
+  /** true bila target tertahan batas bawah kalori harian. */
+  kenaLantai: boolean;
+};
+
+/** Hasil perhitungan satu opsi redistribusi. Belum diterapkan. */
+export type HasilRedistribusi = {
+  opsi: OpsiRedistribusi;
+  /** Negatif berarti kelebihan yang harus ditutup. */
+  perluDipindah: number;
+  /** Yang benar-benar terserap setelah pembulatan & lantai. */
+  terserap: number;
+  /** Yang TIDAK terserap; dinyatakan terang-terangan. */
+  tersisa: number;
+  dibatasiLantai: boolean;
+  alasan: string;
+  hari: HariRedistribusi[];
+};
