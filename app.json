@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Recomp Coach",
+    "slug": "recomp-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "recompcoach",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#14151A",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#14151A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.recompcoach.app",
+      "userInterfaceStyle": "dark"
+    },
+    "android": {
+      "package": "com.recompcoach.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#14151A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
