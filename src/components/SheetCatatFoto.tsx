@@ -14,7 +14,7 @@ import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { analisisFotoStub, type HasilAnalisisFoto } from '@/mocks/fotoAi';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { FoodLog } from '@/types/domain';
 
 /** Entri makanan baru yang siap disimpan (tanpa id & relasi, diisi pemanggil). */
@@ -135,10 +135,10 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                     label={`Estimasi AI · keyakinan ${keyakinan}`}
                     warna={
                       keyakinan === 'tinggi'
-                        ? colors.jade
+                        ? colors.aksenTeks.jade
                         : keyakinan === 'sedang'
                           ? colors.amber
-                          : colors.coral
+                          : colors.aksenTeks.coral
                     }
                   />
                 </View>
@@ -163,15 +163,15 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                 </View>
 
                 <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Kalori" unit="kcal" nilai={kalori} onUbah={setKalori} warna={colors.macro.kalori} />
-                  <InputAngka label="Protein" unit="g" nilai={protein} onUbah={setProtein} warna={colors.macro.protein} />
+                  <InputAngka label="Kalori" unit="kcal" nilai={kalori} onUbah={setKalori} warna={colors.macroTeks.kalori} />
+                  <InputAngka label="Protein" unit="g" nilai={protein} onUbah={setProtein} warna={colors.macroTeks.protein} />
                 </View>
                 <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Lemak" unit="g" nilai={lemak} onUbah={setLemak} warna={colors.macro.lemak} />
-                  <InputAngka label="Karbo" unit="g" nilai={karbo} onUbah={setKarbo} warna={colors.macro.karbo} />
+                  <InputAngka label="Lemak" unit="g" nilai={lemak} onUbah={setLemak} warna={colors.macroTeks.lemak} />
+                  <InputAngka label="Karbo" unit="g" nilai={karbo} onUbah={setKarbo} warna={colors.macroTeks.karbo} />
                 </View>
                 <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Sat fat" unit="g" nilai={satFat} onUbah={setSatFat} warna={colors.macro.satFat} />
+                  <InputAngka label="Sat fat" unit="g" nilai={satFat} onUbah={setSatFat} warna={colors.macroTeks.satFat} />
                   <View style={{ flex: 1 }} />
                 </View>
 
@@ -258,6 +258,8 @@ function TombolUtama({
       style={({ pressed }) => ({
         backgroundColor: aktif ? colors.amber : colors.surfaceSunken,
         borderRadius: radius.lg,
+        minHeight: TAP_MIN,
+        justifyContent: 'center',
         paddingVertical: spacing.lg,
         alignItems: 'center',
         opacity: pressed ? 0.8 : 1,
@@ -282,6 +284,8 @@ function TombolSekunder({ label, onPress }: { label: string; onPress: () => void
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.surfaceSunken,
+        minHeight: TAP_MIN,
+        justifyContent: 'center',
         paddingVertical: spacing.lg,
         alignItems: 'center',
         opacity: pressed ? 0.7 : 1,
@@ -297,7 +301,7 @@ function TombolTeks({ label, onPress }: { label: string; onPress: () => void }) 
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={{ paddingVertical: spacing.sm, alignItems: 'center' }}
+      style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
     >
       <Text style={{ ...typography.label, color: colors.textFaint }}>{label}</Text>
     </Pressable>

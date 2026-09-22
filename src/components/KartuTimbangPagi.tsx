@@ -6,7 +6,7 @@ import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal, formatTanggalPanjang } from '@/lib/format';
 import type { EntriBerat } from '@/mocks/dailyLog';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
@@ -104,7 +104,7 @@ export function KartuTimbangPagi({
                     <Text
                       style={{
                         ...typography.label,
-                        color: selisih > 0 ? colors.amber : colors.jade,
+                        color: selisih > 0 ? colors.amber : colors.aksenTeks.jade,
                       }}
                     >
                       {selisih > 0 ? '+' : '−'}
@@ -218,7 +218,7 @@ export function KartuTimbangPagi({
                     // Lebar eksplisit: tanpa ini input memakai lebar bawaan
                     // (~20 karakter) dan mendorong tombol + keluar layar.
                     width: 140,
-                    color: valid ? colors.text : colors.coral,
+                    color: valid ? colors.text : colors.aksenTeks.coral,
                     textAlign: 'center',
                     padding: 0,
                   }}
@@ -230,7 +230,7 @@ export function KartuTimbangPagi({
             </View>
 
             {!valid ? (
-              <Text style={{ ...typography.caption, color: colors.coral, textAlign: 'center' }}>
+              <Text style={{ ...typography.caption, color: colors.aksenTeks.coral, textAlign: 'center' }}>
                 Masukkan berat antara {BERAT_MIN} dan {BERAT_MAKS} kg
               </Text>
             ) : null}
@@ -301,6 +301,8 @@ export function KartuTimbangPagi({
                 style={({ pressed }) => ({
                   backgroundColor: valid ? colors.amber : colors.surfaceSunken,
                   borderRadius: radius.lg,
+                  minHeight: TAP_MIN,
+                  justifyContent: 'center',
                   paddingVertical: spacing.lg,
                   alignItems: 'center',
                   opacity: pressed ? 0.8 : 1,
@@ -320,7 +322,7 @@ export function KartuTimbangPagi({
               <Pressable
                 accessibilityRole="button"
                 onPress={() => setSheetTerbuka(false)}
-                style={{ paddingVertical: spacing.sm, alignItems: 'center' }}
+                style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
               >
                 <Text style={{ ...typography.label, color: colors.textFaint }}>Batal</Text>
               </Pressable>

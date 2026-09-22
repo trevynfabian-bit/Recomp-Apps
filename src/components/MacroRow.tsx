@@ -19,7 +19,8 @@ type Props = {
 export function MacroRow({ macro, mode }: Props) {
   const { nilaiUtama, terlampaui, progres } = hitungMakro(macro, mode);
   const tanpaTarget = macro.target === null;
-  const warna = terlampaui ? colors.coral : colors.macro[macro.key];
+  const warnaIsian = terlampaui ? colors.coral : colors.macro[macro.key];
+  const warnaTeks = terlampaui ? colors.aksenTeks.coral : colors.macroTeks[macro.key];
 
   return (
     <View style={{ gap: spacing.sm }}>
@@ -28,7 +29,7 @@ export function MacroRow({ macro, mode }: Props) {
 
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
           {/* Sisa negatif diberi awalan "+" karena angkanya sudah dimutlakkan. */}
-          <Text style={{ ...typography.title, color: terlampaui ? colors.coral : colors.text }}>
+          <Text style={{ ...typography.title, color: terlampaui ? colors.aksenTeks.coral : colors.text }}>
             {mode === 'sisa' && terlampaui ? '+' : ''}
             {formatMakro(nilaiUtama)}
           </Text>
@@ -50,7 +51,7 @@ export function MacroRow({ macro, mode }: Props) {
               width: `${progres * 100}%`,
               height: '100%',
               borderRadius: radius.pill,
-              backgroundColor: warna,
+              backgroundColor: warnaIsian,
             }}
           />
         ) : null}

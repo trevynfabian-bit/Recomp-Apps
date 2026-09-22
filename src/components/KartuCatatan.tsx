@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Batas panjang catatan; cukup untuk konteks sehari, tidak untuk jurnal. */
 const MAKS_KARAKTER = 500;
@@ -103,8 +103,9 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
               accessibilityRole="button"
               onPress={() => setMenyunting(false)}
               style={({ pressed }) => ({
+                minHeight: TAP_MIN,
+                justifyContent: 'center',
                 paddingHorizontal: spacing.lg,
-                paddingVertical: spacing.sm + 2,
                 borderRadius: radius.pill,
                 opacity: pressed ? 0.6 : 1,
               })}
@@ -116,8 +117,9 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
               accessibilityRole="button"
               onPress={simpan}
               style={({ pressed }) => ({
+                minHeight: TAP_MIN,
+                justifyContent: 'center',
                 paddingHorizontal: spacing.lg,
-                paddingVertical: spacing.sm + 2,
                 borderRadius: radius.pill,
                 backgroundColor: colors.amber,
                 opacity: pressed ? 0.8 : 1,

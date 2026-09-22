@@ -118,7 +118,7 @@ export default function LogHarianScreen() {
             {formatTanggalPanjang(log.tanggal)}
           </Text>
         </View>
-        <Pill label={fase} warna={colors.jade} />
+        <Pill label={fase} warna={colors.aksenTeks.jade} />
       </View>
 
       {/* Angka utama: sisa kalori hari ini */}
@@ -140,7 +140,7 @@ export default function LogHarianScreen() {
             borderTopColor: colors.border,
           }}
         >
-          <StatKecil label="Sisa protein" nilai={formatMakro(sisaProtein)} unit="g" warna={colors.jade} />
+          <StatKecil label="Sisa protein" nilai={formatMakro(sisaProtein)} unit="g" warna={colors.aksenTeks.jade} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
           <StatKecil label="Sisa lemak" nilai={formatMakro(sisaLemak)} unit="g" warna={colors.text} />
           <View style={{ width: 1, backgroundColor: colors.border }} />

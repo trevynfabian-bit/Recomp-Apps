@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { colors, spacing, typography } from '@/theme';
+import { colors, MAKS_SKALA_HERO, spacing, typography } from '@/theme';
 
 type Props = {
   /** Angka utama, sudah diformat sebagai string. */
@@ -23,7 +23,12 @@ export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.ambe
         {label}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
-        <Text style={{ ...typography.hero, color: warna }}>{nilai}</Text>
+        <Text
+          maxFontSizeMultiplier={MAKS_SKALA_HERO}
+          style={{ ...typography.hero, color: warna }}
+        >
+          {nilai}
+        </Text>
         <Text style={{ ...typography.title, color: colors.textFaint, paddingBottom: spacing.md }}>
           {unit}
         </Text>

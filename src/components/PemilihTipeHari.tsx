@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
 import { formatAngka, formatMakro } from '@/lib/format';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
 
 type Props = {
@@ -28,7 +28,8 @@ export function PemilihTipeHari({ daftar, terpilihId, target, fase, override, on
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: spacing.sm }}
+          accessibilityRole="radiogroup"
+          contentContainerStyle={{ gap: spacing.sm, alignItems: 'center' }}
         >
           {daftar.map((dt) => {
             const aktif = dt.id === terpilihId;
@@ -44,6 +45,8 @@ export function PemilihTipeHari({ daftar, terpilihId, target, fase, override, on
                   onPilih(dt.id);
                 }}
                 style={({ pressed }) => ({
+                  minHeight: TAP_MIN,
+                  justifyContent: 'center',
                   paddingHorizontal: spacing.lg,
                   paddingVertical: spacing.md,
                   borderRadius: radius.pill,
@@ -75,10 +78,10 @@ export function PemilihTipeHari({ daftar, terpilihId, target, fase, override, on
             borderTopColor: colors.border,
           }}
         >
-          <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macro.kalori} />
-          <TargetRingkas label="Protein" nilai={formatMakro(target.target_protein_g)} unit="g" warna={colors.macro.protein} />
-          <TargetRingkas label="Lemak" nilai={formatMakro(target.target_lemak_g)} unit="g" warna={colors.macro.lemak} />
-          <TargetRingkas label="Sat fat" nilai={`≤${formatMakro(target.batas_sat_fat_g)}`} unit="g" warna={colors.macro.satFat} />
+          <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macroTeks.kalori} />
+          <TargetRingkas label="Protein" nilai={formatMakro(target.target_protein_g)} unit="g" warna={colors.macroTeks.protein} />
+          <TargetRingkas label="Lemak" nilai={formatMakro(target.target_lemak_g)} unit="g" warna={colors.macroTeks.lemak} />
+          <TargetRingkas label="Sat fat" nilai={`≤${formatMakro(target.batas_sat_fat_g)}`} unit="g" warna={colors.macroTeks.satFat} />
         </View>
 
         <Text style={{ ...typography.caption, color: colors.textFaint }}>

@@ -46,4 +46,15 @@ karena bentuk data tiruan sudah meniru baris tabel sebenarnya.
 
 Dark mode, nuansa athlete dashboard ala WHOOP. Palet: `#14151A` latar, `#2A2D36`
 kartu, aksen amber `#F0A202`, coral `#E24E1B`, jade `#1B998B` — biru standar
-dihindari. Satu angka utama per layar, log berat maksimal 2 tap, mengikuti Apple HIG.
+dihindari. Satu angka utama per layar, log berat maksimal 2 tap.
+
+**Aturan warna (kontras):** nilai aksen di PRD dipakai apa adanya untuk ISIAN
+besar (bar, tombol, pill). Sebagian di antaranya tidak lolos WCAG AA 4.5:1 untuk
+TEKS KECIL di atas `surface`, jadi `src/theme/colors.ts` menyediakan
+`aksenTeks` dan `macroTeks` — varian hue yang sama, sedikit lebih terang. Isian
+pakai warna dasar, teks kecil pakai varian teks.
+
+**Apple HIG:** konstanta di `src/theme/hig.ts`. Setiap kontrol memenuhi area
+sentuh minimum 44×44 pt; angka hero dibatasi `MAKS_SKALA_HERO` agar tata letak
+satu-angka-per-layar tidak pecah pada Dynamic Type ekstrem, sementara teks isi
+tetap menskala penuh.

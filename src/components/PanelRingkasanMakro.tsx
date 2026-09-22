@@ -4,7 +4,7 @@ import { Card } from './Card';
 import { MacroRow } from './MacroRow';
 import { PenandaSumber } from './PenandaSumber';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
 
 type Props = {
@@ -68,6 +68,7 @@ function SakelarMode({
 
   return (
     <View
+      accessibilityRole="radiogroup"
       style={{
         flexDirection: 'row',
         backgroundColor: colors.surfaceSunken,
@@ -91,9 +92,11 @@ function SakelarMode({
             }}
             style={({ pressed }) => ({
               flex: 1,
-              paddingVertical: spacing.sm,
+              // Area sentuh anak harus 44pt sendiri; padding wadah tidak dihitung.
+              minHeight: TAP_MIN,
               borderRadius: radius.pill,
               alignItems: 'center',
+              justifyContent: 'center',
               backgroundColor: aktif ? colors.surface : 'transparent',
               borderWidth: 1,
               borderColor: aktif ? colors.border : 'transparent',

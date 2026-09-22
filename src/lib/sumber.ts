@@ -8,7 +8,7 @@ export const METADATA_SUMBER: Record<
 > = {
   manual: {
     label: 'Manual',
-    warna: colors.jade,
+    warna: colors.aksenTeks.jade,
     penjelasan: 'Anda catat sendiri — data mentah.',
   },
   sinkron: {
