@@ -91,11 +91,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/tren.ts', join(kerja, 'tren.ts'));
   copyFileSync('packages/logika/src/koridor.ts', join(kerja, 'koridor.ts'));
   copyFileSync('packages/logika/src/budget.ts', join(kerja, 'budget.ts'));
+  copyFileSync('packages/logika/src/redistribusi.ts', join(kerja, 'redistribusi.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts',
+     'budget.ts', 'redistribusi.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -106,6 +107,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'tren.js')),
     ...require(join(kerja, 'keluar', 'koridor.js')),
     ...require(join(kerja, 'keluar', 'budget.js')),
+    ...require(join(kerja, 'keluar', 'redistribusi.js')),
   };
 }
 
@@ -754,6 +756,122 @@ try {
   }
   console.log(
     `✓ ${KASUS_BUDGET.length + 1} kasus cocok — budget mingguan & laju di SQL dan TypeScript sejalan.`,
+  );
+
+  // === Bagian 8: redistribusi kalori mingguan ==============================
+  //
+  // Redistribusi punya tiga sumber penyimpangan yang tidak saling menutupi:
+  // pembulatan 50 kkal, lantai kalori harian, dan urutan keduanya (bulatkan
+  // dulu, baru tegakkan lantai — kebalikannya melanggar lantai). Ditambah
+  // pembagi yang sering menghasilkan pecahan berulang, ini bagian yang paling
+  // mudah menyimpang diam-diam. Rincian budget-nya diambil dari SQL lalu
+  // disuapkan ke `hitungRedistribusi`, jadi yang dibandingkan aturannya.
+  console.log();
+  const { hitungRedistribusi, KELIPATAN_KCAL } = muatLogikaTs();
+
+  const kelipatanSql = Number(sql('select public.kelipatan_redistribusi_kcal();'));
+  if (kelipatanSql !== KELIPATAN_KCAL) {
+    console.error(
+      `✗ Kelipatan pembulatan BERBEDA: SQL ${kelipatanSql} vs TS ${KELIPATAN_KCAL}.`,
+    );
+    process.exit(1);
+  }
+  console.log(`✓ kelipatan pembulatan sama: ${kelipatanSql} kcal`);
+
+  const KASUS_REDIS = [
+    // Jatah menganggur, habis dibagi rata tanpa sisa.
+    { label: 'sebar rata pas', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-23', opsi: 'sebar_rata' },
+    // Pembagi 3 → pecahan berulang, pembulatan menyisakan selisih.
+    { label: 'sebar sisa bulat', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-24', opsi: 'sebar_rata' },
+    { label: 'tumpuk bawaan', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-23', opsi: 'tumpuk_satu_hari' },
+    { label: 'tumpuk ditunjuk', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-23', opsi: 'tumpuk_satu_hari', tumpuk: '2026-09-25' },
+    { label: 'abaikan', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-23', opsi: 'abaikan' },
+    { label: 'tanpa hari sisa', uid: UID_BUDGET, pekan: '2026-09-23', hariIni: '2026-09-27', opsi: 'sebar_rata' },
+    // Pekan yang jatahnya sudah terlampaui: potongannya menabrak lantai.
+    { label: 'kena lantai', uid: UID_LAMPAU, pekan: '2026-09-25', hariIni: '2026-09-25', opsi: 'sebar_rata' },
+    { label: 'lantai + tumpuk', uid: UID_LAMPAU, pekan: '2026-09-25', hariIni: '2026-09-25', opsi: 'tumpuk_satu_hari' },
+  ];
+
+  let gagalRedis = 0;
+  console.log('kasus              SQL perlu  SQL serap  TS serap  SQL sisa  TS sisa  lantai');
+  console.log('─'.repeat(88));
+  for (const k of KASUS_REDIS) {
+    const tumpuk = k.tumpuk ? `date '${k.tumpuk}'` : 'null';
+    const mentahH = sql(
+      `set request.jwt.claim.sub = '${k.uid}';
+       select public.hitung_redistribusi(date '${k.pekan}', '${k.opsi}'::public.opsi_redistribusi,
+              ${tumpuk}, date '${k.hariIni}')::text;`,
+    );
+    const h = JSON.parse(mentahH);
+
+    const mentahB = sql(
+      `set request.jwt.claim.sub = '${k.uid}';
+       select public.budget_mingguan(date '${k.pekan}', date '${k.hariIni}')::text;`,
+    );
+    const b = JSON.parse(mentahB);
+    const budget = budgetMingguan(
+      b.rincian.map((r) => ({
+        tanggal: r.tanggal,
+        namaTipeHari: r.nama_tipe_hari,
+        targetKalori: r.target_kalori,
+        targetAsliKalori: r.target_asli_kalori ?? undefined,
+        terpakaiKalori: r.terpakai_kalori,
+        targetProteinG: r.target_protein_g,
+      })),
+      k.hariIni,
+    );
+    // Lantai diambil dari jawaban SQL: batasnya milik SERVER, dan memberi TS
+    // angka lain berarti menguji dua aturan yang berbeda.
+    const ts = hitungRedistribusi(budget, k.opsi, h.batas_bawah_kalori, k.tumpuk);
+
+    const beda = [];
+    const bandingkan = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    bandingkan('opsi', h.opsi, ts.opsi);
+    bandingkan('perlu_dipindah', h.perlu_dipindah, ts.perluDipindah);
+    bandingkan('terserap', h.terserap, ts.terserap);
+    bandingkan('tersisa', h.tersisa, ts.tersisa);
+    bandingkan('dibatasi_lantai', h.dibatasi_lantai, ts.dibatasiLantai);
+    bandingkan('jumlah hari', h.hari.length, ts.hari.length);
+    h.hari.forEach((r, i) => {
+      const t = ts.hari[i];
+      if (!t) return;
+      bandingkan(`hari[${i}].tanggal`, r.tanggal, t.tanggal);
+      bandingkan(`hari[${i}].target_lama`, r.target_lama, t.targetLama);
+      bandingkan(`hari[${i}].target_baru`, r.target_baru, t.targetBaru);
+      bandingkan(`hari[${i}].selisih`, r.selisih, t.selisih);
+      bandingkan(`hari[${i}].kena_lantai`, r.kena_lantai, t.kenaLantai);
+      // Lantai bukan sekadar penanda: tidak satu pun target baru boleh
+      // menembusnya ke bawah.
+      if (r.target_baru < h.batas_bawah_kalori) {
+        beda.push(`hari[${i}] target ${r.target_baru} menembus lantai ${h.batas_bawah_kalori}`);
+      }
+      if (r.target_baru % kelipatanSql !== 0) {
+        beda.push(`hari[${i}] target ${r.target_baru} bukan kelipatan ${kelipatanSql}`);
+      }
+    });
+    // Tidak boleh ada kalori yang hilang tanpa keterangan.
+    if (h.terserap + h.tersisa !== h.perlu_dipindah) {
+      beda.push(`terserap + tersisa (${h.terserap + h.tersisa}) ≠ perlu (${h.perlu_dipindah})`);
+    }
+
+    if (beda.length > 0) gagalRedis += 1;
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${k.label.padEnd(17)} ${String(h.perlu_dipindah).padStart(9)}  ` +
+        `${String(h.terserap).padStart(9)}  ${String(ts.terserap).padStart(8)}  ` +
+        `${String(h.tersisa).padStart(8)}  ${String(ts.tersisa).padStart(7)}  ${h.dibatasi_lantai}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  console.log();
+  if (gagalRedis > 0) {
+    console.error(`✗ ${gagalRedis} kasus BERBEDA (redistribusi kalori mingguan).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${KASUS_REDIS.length} kasus cocok — redistribusi di SQL dan TypeScript sejalan.`,
   );
 } finally {
   hentikanPostgres();

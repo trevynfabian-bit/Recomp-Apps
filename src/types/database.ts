@@ -24,6 +24,8 @@ export type ProfileRow = {
   jenis_kelamin: 'pria' | 'wanita' | null;
   batas_pinggang_cm: number | null;
   tanggal_lahir: string | null;
+  /** Kalori harian yang tidak boleh dilewati ke bawah oleh redistribusi. */
+  batas_bawah_kalori: number;
   created_at: string;
   updated_at: string;
 };
@@ -251,6 +253,43 @@ export type BudgetMingguanRow = {
   rincian: HariBudgetRow[];
 };
 
+/** Satu hari dalam usulan `hitung_redistribusi`. */
+export type HariRedistribusiRow = {
+  tanggal: string;
+  nama_tipe_hari: string | null;
+  target_lama: number;
+  target_baru: number;
+  selisih: number;
+  /** true bila target tertahan batas bawah kalori harian. */
+  kena_lantai: boolean;
+};
+
+/**
+ * Hasil `hitung_redistribusi` / `terapkan_redistribusi`.
+ *
+ * `sebab` adalah KODE, bukan kalimat: kalimatnya disusun @recomp/logika supaya
+ * angka di dalamnya diformat sama dengan angka di seluruh app.
+ */
+export type HasilRedistribusiRow = {
+  minggu_mulai: string;
+  hari_ini: string;
+  opsi: OpsiRedistribusiDb;
+  /** Negatif berarti kelebihan yang harus ditutup. */
+  perlu_dipindah: number;
+  terserap: number;
+  /** Yang TIDAK terserap karena pembulatan atau lantai. */
+  tersisa: number;
+  dibatasi_lantai: boolean;
+  /** Batas bawah kalori harian menurut PROFIL, bukan menurut pemanggil. */
+  batas_bawah_kalori: number;
+  kelipatan_kcal: number;
+  sebab: 'abaikan' | 'tanpa hari tersisa' | 'sudah pas' | 'tidak ada perubahan' | null;
+  hari: HariRedistribusiRow[];
+  /** Hanya ada pada jawaban `terapkan_redistribusi`. */
+  diterapkan?: boolean;
+  redistribusi_id?: string | null;
+};
+
 /** Opsi redistribusi; sama persis dengan OpsiRedistribusi di @recomp/logika. */
 export type OpsiRedistribusiDb = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
 
@@ -470,6 +509,29 @@ export type Database = {
       budget_mingguan: {
         Args: { p_tanggal: string | null; p_hari_ini: string | null; p_ambang_kcal: number };
         Returns: BudgetMingguanRow;
+      };
+      kelipatan_redistribusi_kcal: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      hitung_redistribusi: {
+        Args: {
+          p_tanggal: string | null;
+          p_opsi: OpsiRedistribusiDb;
+          p_tanggal_tumpuk: string | null;
+          p_hari_ini: string | null;
+        };
+        Returns: HasilRedistribusiRow;
+      };
+      terapkan_redistribusi: {
+        Args: {
+          p_tanggal: string | null;
+          p_opsi: OpsiRedistribusiDb;
+          p_tanggal_tumpuk: string | null;
+          p_hari_ini: string | null;
+          p_alasan: string | null;
+        };
+        Returns: HasilRedistribusiRow;
       };
       fase_pada_tanggal: {
         Args: { p_tanggal: string };
