@@ -93,6 +93,27 @@ export type TargetHarianRow = {
   batas_sat_fat_g: number | null;
 };
 
+/** Hasil `ringkasan_harian`: satu baris ringkasan siap tampil. */
+export type RingkasanHarianRow = {
+  tanggal: string;
+  berat_pagi_kg: number | null;
+  sumber_berat: SumberBeratDb | null;
+  nama_tipe_hari: string | null;
+  fase: FaseProgram | null;
+  kalori: number;
+  protein_g: number;
+  lemak_g: number;
+  karbo_g: number;
+  sat_fat_g: number;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+  catatan: string | null;
+  jumlah_entri: number;
+  jumlah_estimasi: number;
+};
+
 export type FoodLogRow = {
   id: string;
   user_id: string;
@@ -169,6 +190,28 @@ export type Database = {
       ambil_target_harian: {
         Args: { p_tanggal: string };
         Returns: TargetHarianRow[];
+      };
+      catat_makanan: {
+        Args: {
+          p_tanggal: string;
+          p_nama_makanan: string;
+          p_kalori: number;
+          p_protein_g: number;
+          p_lemak_g: number;
+          p_karbo_g: number;
+          p_sat_fat_g: number;
+          p_sumber: SumberMakananDb;
+          p_foto_url: string | null;
+        };
+        Returns: FoodLogRow;
+      };
+      simpan_catatan_harian: {
+        Args: { p_tanggal: string; p_catatan: string | null };
+        Returns: DailyLogRow;
+      };
+      ringkasan_harian: {
+        Args: { p_tanggal: string };
+        Returns: RingkasanHarianRow[];
       };
     };
     Enums: {

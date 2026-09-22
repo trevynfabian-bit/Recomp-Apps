@@ -109,9 +109,12 @@ set role authenticated;
 do $$
 declare k integer;
 begin
+  -- Sejak migrasi total makro, kolom `kalori` dijaga trigger sebagai jumlah
+  -- food_logs hari itu. Entri Budi bernilai 760, jadi itulah angka yang benar —
+  -- yang diuji di sini adalah percobaan Ani mengubahnya TIDAK berpengaruh.
   select kalori into k from public.daily_logs
    where id = 'dddddddd-0000-0000-0000-000000000001';
-  assert k = 1600, format('daily_log Budi berubah jadi %s — seharusnya tetap 1600', k);
+  assert k = 760, format('daily_log Budi berubah jadi %s — seharusnya tetap 760', k);
 end $$;
 
 reset role;
