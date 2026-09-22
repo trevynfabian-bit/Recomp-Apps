@@ -1,5 +1,10 @@
 import { judulPercakapan } from '@recomp/logika';
-import type { Percakapan, PesanCoach, RujukanData, WidgetCoach } from '@/types/domain';
+import type {
+  Percakapan,
+  PesanCoach,
+  RujukanData,
+  WidgetCoach,
+} from '@/types/domain';
 
 /**
  * Percakapan tiruan AI Coach.
@@ -11,6 +16,55 @@ import type { Percakapan, PesanCoach, RujukanData, WidgetCoach } from '@/types/d
  * saja sampai jawaban aslinya datang dengan lima kalimat dan tiga angka.
  */
 export const mockPercakapan: PesanCoach[] = [
+  {
+    // Dibuat coach sendiri Senin pagi, sebelum pengguna bertanya apa pun.
+    id: 'm0',
+    peran: 'coach',
+    teks: '',
+    waktu: '2026-09-22T06:00:00+07:00',
+    ringkasan: {
+      periode: { dari: '2026-09-15', sampai: '2026-09-21' },
+      poin: [
+        {
+          label: 'Rata-rata berat',
+          nilai: '74,4 kg',
+          delta: '+0,3 kg dari pekan lalu',
+          arah: 'sesuai',
+          sumber: 'manual',
+        },
+        {
+          label: 'Rata-rata asupan',
+          nilai: '2.910 kkal',
+          delta: '+60 kkal dari target',
+          arah: 'netral',
+          sumber: 'estimasi',
+        },
+        {
+          label: 'Protein harian',
+          nilai: '168 g',
+          delta: '−12 g dari target',
+          arah: 'berlawanan',
+          sumber: 'estimasi',
+        },
+        {
+          label: 'Pinggang',
+          nilai: '85,2 cm',
+          delta: '+0,4 cm',
+          arah: 'berlawanan',
+          sumber: 'manual',
+        },
+      ],
+      bacaan:
+        'Laju berat Anda pas di tengah koridor Lean Gain, dan asupan hanya 60 kkal di atas ' +
+        'target — pekan yang berjalan sesuai rencana.\n\nDua hal yang pantas diawasi: protein ' +
+        'kurang 12 g sehari, dan pinggang naik 0,4 cm — lebih cepat dari tiga pekan sebelumnya. ' +
+        'Kalau laju pinggang bertahan, batas 86,0 cm tercapai sekitar dua pekan lagi.',
+      lanjutan: [
+        'Kenapa pinggang naik lebih cepat pekan ini?',
+        'Bagaimana cara menutup kekurangan protein?',
+      ],
+    },
+  },
   {
     id: 'm1',
     peran: 'pengguna',

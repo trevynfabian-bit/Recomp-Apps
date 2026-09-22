@@ -30,11 +30,15 @@ function muatLogika() {
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
-  return require(join(kerja, 'keluar', 'percakapan.js'));
+  return {
+    ...require(join(kerja, 'keluar', 'format.js')),
+    ...require(join(kerja, 'keluar', 'percakapan.js')),
+  };
 }
 
 const {
   formatJam,
+  formatRentangTanggal,
   judulPercakapan,
   kelompokkanPerTanggal,
   labelTanggalRelatif,
@@ -138,6 +142,24 @@ cek(
   'spasi berlebih dirapikan',
   judulPercakapan([{ id: '1', peran: 'pengguna', teks: '  Laju   saya\n wajar? ', waktu: '' }]) ===
     'Laju saya wajar?',
+);
+
+console.log('\nRentang tanggal periode');
+cek(
+  `satu bulan → "${formatRentangTanggal('2026-09-15', '2026-09-21')}"`,
+  formatRentangTanggal('2026-09-15', '2026-09-21') === '15–21 September',
+);
+cek(
+  `lintas bulan → "${formatRentangTanggal('2026-09-29', '2026-10-05')}"`,
+  formatRentangTanggal('2026-09-29', '2026-10-05') === '29 September – 5 Oktober',
+);
+cek(
+  `lintas tahun → "${formatRentangTanggal('2026-12-28', '2027-01-03')}"`,
+  formatRentangTanggal('2026-12-28', '2027-01-03') === '28 Desember 2026 – 3 Januari 2027',
+);
+cek(
+  'bulan tidak diulang saat sama',
+  (formatRentangTanggal('2026-09-15', '2026-09-21').match(/September/g) || []).length === 1,
 );
 
 console.log(gagal === 0 ? '\n✓ Semua pemeriksaan percakapan lulus' : `\n✗ ${gagal} pemeriksaan gagal`);

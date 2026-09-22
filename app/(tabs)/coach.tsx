@@ -249,6 +249,7 @@ export default function CoachScreen() {
                   i === pesan.length - 1 || formatJam(pesan[i + 1].waktu) !== formatJam(m.waktu)
                 }
                 onCobaLagi={cobaLagi}
+                onTanya={(t) => void tanya(t)}
               />
             </View>
           ))

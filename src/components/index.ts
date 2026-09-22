@@ -11,6 +11,7 @@ export { InputAngka } from './InputAngka';
 export { InputChat } from './InputChat';
 export { KartuBodyFat } from './KartuBodyFat';
 export { KartuCatatan } from './KartuCatatan';
+export { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
 export { KartuTdee } from './KartuTdee';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { KartuWidgetCoach } from './KartuWidgetCoach';

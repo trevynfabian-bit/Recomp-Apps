@@ -50,6 +50,7 @@ export {
   formatAngka,
   formatDesimal,
   formatMakro,
+  formatRentangTanggal,
   formatTanggalPanjang,
   rasio,
   tanggalHariIni,

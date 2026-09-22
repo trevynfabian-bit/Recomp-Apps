@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { formatJam } from '@recomp/logika';
 import { DaftarRujukan } from './DaftarRujukan';
+import { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
 import { KartuWidgetCoach } from './KartuWidgetCoach';
 import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
@@ -8,6 +9,8 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Props = {
   pesan: PesanCoach;
+  /** Mengirim pertanyaan lanjutan dari kartu ringkasan mingguan. */
+  onTanya?: (pertanyaan: string) => void;
   /**
    * Tampilkan jam di bawah gelembung. Hanya pesan TERAKHIR dalam satu rentetan
    * yang diberi jam — memberi jam ke setiap gelembung mengubah percakapan jadi
@@ -27,9 +30,28 @@ type Props = {
  * perbedaan latar itu yang membuat kedua peran terbaca sekilas tanpa harus
  * melacak sisi mana gelembungnya menempel.
  */
-export function GelembungPesan({ pesan, tampilkanJam = false, onCobaLagi }: Props) {
+export function GelembungPesan({
+  pesan,
+  tampilkanJam = false,
+  onCobaLagi,
+  onTanya,
+}: Props) {
   const dariPengguna = pesan.peran === 'pengguna';
   const gagal = pesan.status === 'gagal';
+
+  // Ringkasan mingguan bukan balasan, jadi ia tidak pernah jadi gelembung.
+  if (pesan.ringkasan) {
+    return (
+      <View style={{ gap: spacing.xs }}>
+        <KartuRingkasanMingguan ringkasan={pesan.ringkasan} onTanya={onTanya ?? (() => {})} />
+        {tampilkanJam ? (
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            {formatJam(pesan.waktu)}
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
 
   return (
     <View

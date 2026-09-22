@@ -55,3 +55,22 @@ export function rasio(terpakai: number, target: number | null): number {
   if (!target || target <= 0) return 0;
   return Math.min(Math.max(terpakai / target, 0), 1);
 }
+
+/**
+ * Rentang tanggal ringkas untuk judul periode: "15–21 September" bila sebulan,
+ * "29 September – 5 Oktober" bila melintasi bulan.
+ *
+ * Bulan yang sama sengaja tidak diulang dua kali. Judul periode dibaca sekilas,
+ * dan "15 September – 21 September" memaksa mata memverifikasi bahwa kedua
+ * bulannya memang sama sebelum bisa membaca angkanya.
+ */
+export function formatRentangTanggal(dari: string, sampai: string): string {
+  const [ty, tm, td] = dari.split('-').map(Number);
+  const [sy, sm, sd] = sampai.split('-').map(Number);
+  const bulanDari = NAMA_BULAN[tm - 1];
+  const bulanSampai = NAMA_BULAN[sm - 1];
+
+  if (ty === sy && tm === sm) return `${td}–${sd} ${bulanSampai}`;
+  if (ty === sy) return `${td} ${bulanDari} – ${sd} ${bulanSampai}`;
+  return `${td} ${bulanDari} ${ty} – ${sd} ${bulanSampai} ${sy}`;
+}

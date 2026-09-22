@@ -200,6 +200,32 @@ export type WidgetCoach =
 /** Kunci warna makro yang boleh dipakai widget coach. */
 export type MacroKeyWidget = 'kalori' | 'protein' | 'lemak' | 'karbo' | 'satFat';
 
+/**
+ * Ringkasan mingguan yang dibuat coach SENDIRI, tanpa diminta.
+ *
+ * Bentuknya berbeda dari jawaban biasa karena perannya berbeda: ini bukan
+ * balasan atas pertanyaan, melainkan laporan berkala. Yang membacanya belum
+ * punya pertanyaan di kepala, jadi angkanya harus terbaca lebih dulu dan
+ * narasinya menyusul — kebalikan dari jawaban, yang selalu dimulai dari
+ * kalimat.
+ */
+export type RingkasanMingguan = {
+  periode: { dari: string; sampai: string };
+  poin: {
+    label: string;
+    nilai: string;
+    /** Perubahan bertanda yang sudah diformat. */
+    delta?: string;
+    /** Arah menurut TUJUAN fase, bukan menurut tanda angkanya. */
+    arah?: 'sesuai' | 'berlawanan' | 'netral';
+    sumber: JenisSumber;
+  }[];
+  /** Bacaan naratif: apa yang angka-angka itu berarti bersama-sama. */
+  bacaan: string;
+  /** Pertanyaan lanjutan siap pakai; menghemat mengetik. */
+  lanjutan?: string[];
+};
+
 /** Satu pesan dalam percakapan AI Coach. */
 export type PesanCoach = {
   id: string;
@@ -222,6 +248,11 @@ export type PesanCoach = {
    * diketik ulang oleh model ke dalam teks.
    */
   widget?: WidgetCoach[];
+  /**
+   * Laporan berkala yang dibuat coach sendiri. Pesan yang membawanya dirender
+   * sebagai KARTU, bukan gelembung — ia tidak menjawab apa pun.
+   */
+  ringkasan?: RingkasanMingguan;
 };
 
 /**
