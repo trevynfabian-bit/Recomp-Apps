@@ -151,3 +151,14 @@ export function riwayatBeratTerakhir(tanggal: string, jumlah = 3): EntriBerat[] 
     .slice(-jumlah)
     .reverse();
 }
+
+/**
+ * Tiruan penulisan berat pagi ke server.
+ *
+ * Fase 1 hanya menunda sebentar supaya status "Menyimpan…" benar-benar terlihat
+ * dan bisa diuji. Fase backend menukar isinya dengan penulisan ke Supabase;
+ * kontraknya sama — resolve bila berhasil, reject bila gagal.
+ */
+export function simpanBeratStub(_beratKg: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 700));
+}

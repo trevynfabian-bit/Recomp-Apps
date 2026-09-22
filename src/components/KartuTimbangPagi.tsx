@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
@@ -14,6 +14,19 @@ const LANGKAH_KG = 0.1;
 const BERAT_MIN = 30;
 const BERAT_MAKS = 250;
 
+/**
+ * Selisih terhadap timbangan terakhir yang dianggap tidak wajar untuk semalam.
+ * Di atas ini pengguna diminta mengonfirmasi — penjaga salah ketik, bukan
+ * penghakiman atas angkanya.
+ */
+const AMBANG_KONFIRMASI_KG = 3;
+
+/** Berapa lama tanda "Tersimpan" bertahan di kartu setelah sheet tertutup. */
+const DURASI_TANDA_MS = 2200;
+
+/** Tahap penyimpanan; dipakai untuk mengunci tombol dan memberi umpan balik. */
+type StatusSimpan = 'idle' | 'konfirmasi' | 'menyimpan' | 'tersimpan' | 'gagal';
+
 type Props = {
   /** Berat pagi hari ini; `null` bila belum ditimbang. */
   beratKg: number | null;
@@ -22,7 +35,12 @@ type Props = {
   beratSebelumnyaKg: number | null;
   /** Beberapa timbangan terakhir beserta asalnya, urut baru → lama. */
   riwayat: EntriBerat[];
-  onSimpan: (beratKg: number) => void;
+  /**
+   * Menyimpan berat. Boleh async dan boleh menolak — sheet menampilkan
+   * status "Menyimpan…", "Tersimpan", atau "Gagal" sesuai hasilnya, jadi
+   * penggantian ke penulisan Supabase nanti tidak mengubah komponen ini.
+   */
+  onSimpan: (beratKg: number) => void | Promise<void>;
 };
 
 /**
@@ -43,13 +61,25 @@ export function KartuTimbangPagi({
   onSimpan,
 }: Props) {
   const [sheetTerbuka, setSheetTerbuka] = useState(false);
+  const [status, setStatus] = useState<StatusSimpan>('idle');
+  const [baruTersimpan, setBaruTersimpan] = useState(false);
   const nilaiAwal = beratKg ?? beratSebelumnyaKg ?? 70;
   const [draf, setDraf] = useState(() => formatDesimal(nilaiAwal));
 
-  // Samakan draf dengan data terbaru setiap kali sheet dibuka.
+  // Samakan draf dengan data terbaru dan reset status setiap sheet dibuka.
   useEffect(() => {
-    if (sheetTerbuka) setDraf(formatDesimal(nilaiAwal));
+    if (sheetTerbuka) {
+      setDraf(formatDesimal(nilaiAwal));
+      setStatus('idle');
+    }
   }, [sheetTerbuka, nilaiAwal]);
+
+  // Tanda "Tersimpan" di kartu hilang sendiri setelah beberapa detik.
+  useEffect(() => {
+    if (!baruTersimpan) return;
+    const t = setTimeout(() => setBaruTersimpan(false), DURASI_TANDA_MS);
+    return () => clearTimeout(t);
+  }, [baruTersimpan]);
 
   const drafAngka = urai(draf);
   const valid = drafAngka !== null && drafAngka >= BERAT_MIN && drafAngka <= BERAT_MAKS;
@@ -65,11 +95,37 @@ export function KartuTimbangPagi({
     setDraf(formatDesimal(Math.round(berikut * 10) / 10));
   }
 
-  function simpan() {
+  /** Selisih draf terhadap timbangan terakhir — dasar konfirmasi salah ketik. */
+  const lompatan =
+    drafAngka !== null && beratSebelumnyaKg !== null
+      ? Math.abs(drafAngka - beratSebelumnyaKg)
+      : 0;
+  const perluKonfirmasi = lompatan > AMBANG_KONFIRMASI_KG;
+
+  /** Tap Simpan: minta konfirmasi dulu bila lompatannya tidak wajar. */
+  function tekanSimpan() {
     if (!valid || drafAngka === null) return;
-    ketukBerhasil();
-    onSimpan(Math.round(drafAngka * 10) / 10);
-    setSheetTerbuka(false);
+    if (perluKonfirmasi && status !== 'konfirmasi') {
+      ketukRingan();
+      setStatus('konfirmasi');
+      return;
+    }
+    void jalankanSimpan();
+  }
+
+  async function jalankanSimpan() {
+    if (!valid || drafAngka === null) return;
+    setStatus('menyimpan');
+    try {
+      await onSimpan(Math.round(drafAngka * 10) / 10);
+      ketukBerhasil();
+      setStatus('tersimpan');
+      setBaruTersimpan(true);
+      // Beri sekejap agar konfirmasi terbaca sebelum sheet menutup sendiri.
+      setTimeout(() => setSheetTerbuka(false), 650);
+    } catch {
+      setStatus('gagal');
+    }
   }
 
   return (
@@ -123,8 +179,13 @@ export function KartuTimbangPagi({
                     detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
                   />
                   <Text style={{ ...typography.caption, color: colors.textFaint }}>
-                    ketuk untuk ubah
+                    {baruTersimpan ? '' : 'ketuk untuk ubah'}
                   </Text>
+                  {baruTersimpan ? (
+                    <Text style={{ ...typography.caption, color: colors.aksenTeks.jade }}>
+                      ✓ Tersimpan
+                    </Text>
+                  ) : null}
                 </View>
               ) : (
                 <Text style={{ ...typography.caption, color: colors.textFaint }}>
@@ -293,13 +354,63 @@ export function KartuTimbangPagi({
               </Text>
             )}
 
+            {/* Penjaga salah ketik: lompatan tak wajar diminta dikonfirmasi. */}
+            {status === 'konfirmasi' ? (
+              <View
+                style={{
+                  gap: spacing.sm,
+                  padding: spacing.md,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  borderColor: colors.amber + '55',
+                  backgroundColor: colors.amber + '14',
+                }}
+              >
+                <Text style={{ ...typography.label, color: colors.amber }}>
+                  Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
+                </Text>
+                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                  Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
+                  lanjutkan bila memang benar.
+                </Text>
+              </View>
+            ) : null}
+
+            {status === 'gagal' ? (
+              <View
+                style={{
+                  gap: spacing.xs,
+                  padding: spacing.md,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  borderColor: colors.coral + '55',
+                  backgroundColor: colors.coral + '14',
+                }}
+              >
+                <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                  Gagal menyimpan
+                </Text>
+                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                  Angka Anda masih tersimpan di layar ini. Coba lagi.
+                </Text>
+              </View>
+            ) : null}
+
             <View style={{ gap: spacing.md }}>
               <Pressable
                 accessibilityRole="button"
-                disabled={!valid}
-                onPress={simpan}
+                accessibilityLabel={labelTombolSimpan(status, perluKonfirmasi)}
+                disabled={!valid || status === 'menyimpan' || status === 'tersimpan'}
+                onPress={tekanSimpan}
                 style={({ pressed }) => ({
-                  backgroundColor: valid ? colors.amber : colors.surfaceSunken,
+                  flexDirection: 'row',
+                  gap: spacing.sm,
+                  backgroundColor:
+                    status === 'tersimpan'
+                      ? colors.jade
+                      : valid
+                        ? colors.amber
+                        : colors.surfaceSunken,
                   borderRadius: radius.lg,
                   minHeight: TAP_MIN,
                   justifyContent: 'center',
@@ -308,23 +419,33 @@ export function KartuTimbangPagi({
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
+                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
+                {status === 'tersimpan' ? (
+                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>✓</Text>
+                ) : null}
                 <Text
                   style={{
                     ...typography.body,
                     fontWeight: '700',
-                    color: valid ? colors.bg : colors.textFaint,
+                    color:
+                      status === 'tersimpan' || valid ? colors.bg : colors.textFaint,
                   }}
                 >
-                  Simpan
+                  {labelTombolSimpan(status, perluKonfirmasi)}
                 </Text>
               </Pressable>
 
               <Pressable
                 accessibilityRole="button"
-                onPress={() => setSheetTerbuka(false)}
+                disabled={status === 'menyimpan' || status === 'tersimpan'}
+                onPress={() =>
+                  status === 'konfirmasi' ? setStatus('idle') : setSheetTerbuka(false)
+                }
                 style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
               >
-                <Text style={{ ...typography.label, color: colors.textFaint }}>Batal</Text>
+                <Text style={{ ...typography.label, color: colors.textFaint }}>
+                  {status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
+                </Text>
               </Pressable>
             </View>
           </Pressable>
@@ -356,6 +477,22 @@ function TombolGeser({ label, onPress }: { label: string; onPress: () => void })
       <Text style={{ ...typography.display, color: colors.text, lineHeight: 36 }}>{label}</Text>
     </Pressable>
   );
+}
+
+/** Teks tombol simpan sesuai tahap penyimpanan. */
+function labelTombolSimpan(status: StatusSimpan, perluKonfirmasi: boolean): string {
+  switch (status) {
+    case 'menyimpan':
+      return 'Menyimpan…';
+    case 'tersimpan':
+      return 'Tersimpan';
+    case 'gagal':
+      return 'Coba lagi';
+    case 'konfirmasi':
+      return 'Ya, simpan';
+    default:
+      return perluKonfirmasi ? 'Simpan…' : 'Simpan';
+  }
 }
 
 /** Urai input pengguna; menerima koma maupun titik sebagai pemisah desimal. */

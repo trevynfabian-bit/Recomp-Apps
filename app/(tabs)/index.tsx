@@ -28,6 +28,7 @@ import {
   mockFoodLogsHariIni,
   mockProfile,
   riwayatBeratTerakhir,
+  simpanBeratStub,
   susunMacros,
 } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -66,7 +67,13 @@ export default function LogHarianScreen() {
   const beratSebelumnya = beratTerakhirSebelum(log.tanggal);
   const jumlahEstimasi = hitungEstimasi(foodLogs);
 
-  function simpanBeratPagi(beratKg: number) {
+  /**
+   * Simpan berat pagi. Sengaja async supaya kartu bisa menampilkan status
+   * "Menyimpan…"/"Tersimpan"/"Gagal"; error dibiarkan naik agar kartu yang
+   * menanganinya, bukan ditelan di sini.
+   */
+  async function simpanBeratPagi(beratKg: number) {
+    await simpanBeratStub(beratKg);
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
   }
 
