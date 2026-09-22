@@ -46,8 +46,9 @@ for f in "$REPO"/supabase/migrations/*.sql; do
   $PSQL -f "$f" >/dev/null
 done
 
-echo "→ Menjalankan uji RLS"
-for f in "$REPO"/supabase/tests/rls_*.sql; do
+echo "→ Menjalankan uji"
+# Semua berkas uji KECUALI harness (yang dipasang lebih dulu di atas).
+for f in $(ls "$REPO"/supabase/tests/*.sql | grep -v '/harness\.sql$'); do
   echo "   • $(basename "$f")"
   $PSQL -f "$f"
 done

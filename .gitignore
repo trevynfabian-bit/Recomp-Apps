@@ -43,3 +43,7 @@ yarn-error.*
 # NgodingPakeAI working files (config.json is intentionally committed)
 .ngodingpakeai/pending.json
 .ngodingpakeai/summaries.json
+
+# environment lokal (jangan di-commit)
+.env
+.env.local
