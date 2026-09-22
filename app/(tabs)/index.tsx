@@ -24,6 +24,7 @@ import {
   mockDayTypes,
   mockFoodLogsHariIni,
   mockProfile,
+  riwayatBeratTerakhir,
   susunMacros,
 } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -147,6 +148,7 @@ export default function LogHarianScreen() {
         beratKg={log.berat_pagi_kg}
         sumber={log.sumber_berat}
         beratSebelumnyaKg={beratSebelumnya}
+        riwayat={riwayatBeratTerakhir(log.tanggal, 3)}
         onSimpan={simpanBeratPagi}
       />
 

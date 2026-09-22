@@ -5,6 +5,7 @@ import type {
   DayTypeTarget,
   Fase,
   FoodLog,
+  SumberBerat,
   MacroProgress,
   Profile,
 } from '@/types/domain';
@@ -65,25 +66,33 @@ export const mockFoodLogsHariIni: FoodLog[] = [
   { id: 'food-4', daily_log_id: 'log-hari-ini', nama_makanan: 'Greek yogurt + almond', foto_url: null, kalori: 270, protein_g: 6, lemak_g: 8, karbo_g: 16, sat_fat_g: 1, sumber: 'manual' },
 ];
 
+/** Satu baris riwayat berat, lengkap dengan asal angkanya. */
+export type EntriBerat = {
+  tanggal: string;
+  berat_pagi_kg: number;
+  sumber_berat: SumberBerat;
+};
+
 /**
  * Riwayat berat 14 hari terakhir (kg, urut lama → baru).
- * Dipakai layar Tren; ditaruh di sini agar satu sumber tiruan untuk Fase 1.
+ * Sengaja bercampur manual dan healthkit supaya asal tiap angka bisa
+ * ditampilkan dan diuji, bukan hanya diasumsikan seragam.
  */
-export const mockRiwayatBerat: { tanggal: string; berat_pagi_kg: number }[] = [
-  { tanggal: '2026-09-09', berat_pagi_kg: 73.9 },
-  { tanggal: '2026-09-10', berat_pagi_kg: 74.2 },
-  { tanggal: '2026-09-11', berat_pagi_kg: 73.8 },
-  { tanggal: '2026-09-12', berat_pagi_kg: 74.1 },
-  { tanggal: '2026-09-13', berat_pagi_kg: 74.4 },
-  { tanggal: '2026-09-14', berat_pagi_kg: 74.0 },
-  { tanggal: '2026-09-15', berat_pagi_kg: 74.3 },
-  { tanggal: '2026-09-16', berat_pagi_kg: 74.1 },
-  { tanggal: '2026-09-17', berat_pagi_kg: 74.5 },
-  { tanggal: '2026-09-18', berat_pagi_kg: 74.2 },
-  { tanggal: '2026-09-19', berat_pagi_kg: 74.7 },
-  { tanggal: '2026-09-20', berat_pagi_kg: 74.4 },
-  { tanggal: '2026-09-21', berat_pagi_kg: 74.8 },
-  { tanggal: '2026-09-22', berat_pagi_kg: 74.6 },
+export const mockRiwayatBerat: EntriBerat[] = [
+  { tanggal: '2026-09-09', berat_pagi_kg: 73.9, sumber_berat: 'manual' },
+  { tanggal: '2026-09-10', berat_pagi_kg: 74.2, sumber_berat: 'manual' },
+  { tanggal: '2026-09-11', berat_pagi_kg: 73.8, sumber_berat: 'healthkit' },
+  { tanggal: '2026-09-12', berat_pagi_kg: 74.1, sumber_berat: 'manual' },
+  { tanggal: '2026-09-13', berat_pagi_kg: 74.4, sumber_berat: 'manual' },
+  { tanggal: '2026-09-14', berat_pagi_kg: 74.0, sumber_berat: 'healthkit' },
+  { tanggal: '2026-09-15', berat_pagi_kg: 74.3, sumber_berat: 'manual' },
+  { tanggal: '2026-09-16', berat_pagi_kg: 74.1, sumber_berat: 'manual' },
+  { tanggal: '2026-09-17', berat_pagi_kg: 74.5, sumber_berat: 'healthkit' },
+  { tanggal: '2026-09-18', berat_pagi_kg: 74.2, sumber_berat: 'manual' },
+  { tanggal: '2026-09-19', berat_pagi_kg: 74.7, sumber_berat: 'manual' },
+  { tanggal: '2026-09-20', berat_pagi_kg: 74.4, sumber_berat: 'healthkit' },
+  { tanggal: '2026-09-21', berat_pagi_kg: 74.8, sumber_berat: 'manual' },
+  { tanggal: '2026-09-22', berat_pagi_kg: 74.6, sumber_berat: 'manual' },
 ];
 
 /** Cari target absolut untuk kombinasi tipe hari + fase. */
@@ -118,11 +127,27 @@ export function mockSnapshotHariIni(): DailySnapshot {
 }
 
 /**
- * Berat terakhir yang tercatat SEBELUM tanggal tertentu.
+ * Entri berat terakhir SEBELUM tanggal tertentu, lengkap dengan asalnya.
  * Dipakai kartu Timbang Pagi sebagai nilai awal, supaya menyimpan berat
  * hari ini cukup dua tap (buka kartu → Simpan) tanpa mengetik.
  */
-export function beratTerakhirSebelum(tanggal: string): number | null {
+export function entriBeratTerakhirSebelum(tanggal: string): EntriBerat | null {
   const sebelum = mockRiwayatBerat.filter((r) => r.tanggal < tanggal);
-  return sebelum.length ? sebelum[sebelum.length - 1].berat_pagi_kg : null;
+  return sebelum.length ? sebelum[sebelum.length - 1] : null;
+}
+
+/** Hanya angkanya, untuk pemanggil yang tidak butuh asal data. */
+export function beratTerakhirSebelum(tanggal: string): number | null {
+  return entriBeratTerakhirSebelum(tanggal)?.berat_pagi_kg ?? null;
+}
+
+/**
+ * `jumlah` timbangan terakhir sebelum tanggal tertentu, urut baru → lama.
+ * Dipakai sheet Timbang Pagi untuk memperlihatkan asal angka dari hari ke hari.
+ */
+export function riwayatBeratTerakhir(tanggal: string, jumlah = 3): EntriBerat[] {
+  return mockRiwayatBerat
+    .filter((r) => r.tanggal < tanggal)
+    .slice(-jumlah)
+    .reverse();
 }

@@ -4,7 +4,8 @@ import { Card } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { formatDesimal } from '@/lib/format';
+import { formatDesimal, formatTanggalPanjang } from '@/lib/format';
+import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 
@@ -19,6 +20,8 @@ type Props = {
   sumber: SumberBerat | null;
   /** Berat tercatat terakhir sebelum hari ini — nilai awal saat belum menimbang. */
   beratSebelumnyaKg: number | null;
+  /** Beberapa timbangan terakhir beserta asalnya, urut baru → lama. */
+  riwayat: EntriBerat[];
   onSimpan: (beratKg: number) => void;
 };
 
@@ -32,7 +35,13 @@ type Props = {
  * Tombol −/+ dan input angka tersedia untuk koreksi, tapi tidak wajib dilewati:
  * jalur tercepat tetap dua tap dan papan ketik tidak muncul sendiri.
  */
-export function KartuTimbangPagi({ beratKg, sumber, beratSebelumnyaKg, onSimpan }: Props) {
+export function KartuTimbangPagi({
+  beratKg,
+  sumber,
+  beratSebelumnyaKg,
+  riwayat,
+  onSimpan,
+}: Props) {
   const [sheetTerbuka, setSheetTerbuka] = useState(false);
   const nilaiAwal = beratKg ?? beratSebelumnyaKg ?? 70;
   const [draf, setDraf] = useState(() => formatDesimal(nilaiAwal));
@@ -220,13 +229,69 @@ export function KartuTimbangPagi({ beratKg, sumber, beratSebelumnyaKg, onSimpan 
               <TombolGeser label="+" onPress={() => geser(LANGKAH_KG)} />
             </View>
 
-            <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
-              {!valid
-                ? `Masukkan berat antara ${BERAT_MIN} dan ${BERAT_MAKS} kg`
-                : beratSebelumnyaKg !== null
-                  ? `Terakhir tercatat ${formatDesimal(beratSebelumnyaKg)} kg`
-                  : 'Belum ada catatan berat sebelumnya'}
-            </Text>
+            {!valid ? (
+              <Text style={{ ...typography.caption, color: colors.coral, textAlign: 'center' }}>
+                Masukkan berat antara {BERAT_MIN} dan {BERAT_MAKS} kg
+              </Text>
+            ) : null}
+
+            {/* Asal angka yang sedang diubah, plus akibat menyimpannya. */}
+            {jenisSumber !== null ? (
+              <View
+                style={{
+                  gap: spacing.sm,
+                  padding: spacing.md,
+                  borderRadius: radius.md,
+                  backgroundColor: colors.surfaceSunken,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text style={{ ...typography.caption, color: colors.textFaint }}>Asal angka</Text>
+                  <PenandaSumber
+                    jenis={jenisSumber}
+                    detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
+                  />
+                </View>
+                {jenisSumber === 'sinkron' ? (
+                  <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                    Angka ini ditarik dari Apple Health. Menyimpan di sini akan
+                    menggantinya dengan catatan manual Anda.
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+
+            {/* Timbangan sebelumnya beserta asalnya masing-masing. */}
+            {riwayat.length > 0 ? (
+              <View style={{ gap: spacing.sm }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+                  Timbangan sebelumnya
+                </Text>
+                {riwayat.map((r) => (
+                  <View
+                    key={r.tanggal}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: spacing.sm,
+                    }}
+                  >
+                    <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }}>
+                      {formatTanggalPanjang(r.tanggal)}
+                    </Text>
+                    <PenandaSumber jenis={sumberBerat(r.sumber_berat) ?? 'manual'} />
+                    <Text style={{ ...typography.label, color: colors.text, width: 56, textAlign: 'right' }}>
+                      {formatDesimal(r.berat_pagi_kg)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
+                Belum ada catatan berat sebelumnya
+              </Text>
+            )}
 
             <View style={{ gap: spacing.md }}>
               <Pressable
