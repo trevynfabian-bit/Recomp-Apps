@@ -6,6 +6,7 @@
  * yang bisa basi.
  */
 export type {
+  BarisKumulatif,
   BudgetMingguan,
   DayType,
   HariBudget,
@@ -55,4 +56,4 @@ export {
 
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
 
-export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget } from './budget';
+export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';

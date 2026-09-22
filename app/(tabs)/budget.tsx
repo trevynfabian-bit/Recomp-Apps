@@ -5,8 +5,9 @@ import {
   formatAngka,
   formatTanggalPanjang,
   lajuBudget,
+  rincianKumulatif,
 } from '@recomp/logika';
-import type { RingkasanHariBudget } from '@recomp/logika';
+import type { BarisKumulatif } from '@recomp/logika';
 import { Card, HeroNumber, MeterBudget, PemilihFase, Pill, SectionHeader } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni } from '@/mocks/dailyLog';
@@ -29,6 +30,7 @@ export default function BudgetScreen() {
   const budget = budgetMingguan(mockHariBudget(hariIni, profil.fase_aktif), hariIni);
 
   const laju = lajuBudget(budget);
+  const rincian = rincianKumulatif(budget);
   const lewat = budget.sisa < 0;
 
   return (
@@ -104,11 +106,37 @@ export default function BudgetScreen() {
 
       {/* Rincian tujuh hari */}
       <View>
-        <SectionHeader judul="Minggu ini" aksi="Senin – Minggu" />
+        <SectionHeader judul="Minggu ini" aksi="sisa berjalan" />
         <Card flat>
-          {budget.rincian.map((h, i) => (
+          {rincian.map((h, i) => (
             <BarisHari key={h.tanggal} hari={h} pertama={i === 0} />
           ))}
+
+          {/* Baris total: menutup daftar dengan angka yang sama di kartu utama. */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: spacing.lg,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+              backgroundColor: colors.surfaceSunken,
+            }}
+          >
+            <View style={{ gap: 3 }}>
+              <Text style={{ ...typography.label, color: colors.text }}>Total minggu</Text>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                tercatat {formatAngka(budget.terpakai)} · proyeksi {formatAngka(budget.targetMendatang)}
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end', gap: 3 }}>
+              <Text style={{ ...typography.label, color: colors.text }}>
+                {formatAngka(budget.budgetTotal)} kcal
+              </Text>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>jatah</Text>
+            </View>
+          </View>
         </Card>
       </View>
 
@@ -139,9 +167,12 @@ export default function BudgetScreen() {
   );
 }
 
-/** Satu baris hari: tipe hari, target, konsumsi, dan selisihnya. */
-function BarisHari({ hari, pertama }: { hari: RingkasanHariBudget; pertama: boolean }) {
-  const mendatang = hari.status === 'mendatang';
+/**
+ * Satu baris hari. Kolom kanan menampilkan SISA BERJALAN, bukan hanya konsumsi
+ * hari itu: yang ingin dijawab pengguna adalah "setelah hari ini tinggal
+ * berapa", dan itu butuh akumulasi, bukan angka satuan.
+ */
+function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }) {
   const iniHariIni = hari.status === 'hari ini';
 
   const warnaSelisih =
@@ -160,8 +191,8 @@ function BarisHari({ hari, pertama }: { hari: RingkasanHariBudget; pertama: bool
         padding: spacing.lg,
         borderTopWidth: pertama ? 0 : 1,
         borderTopColor: colors.border,
-        // Hari yang belum terjadi sengaja diredupkan supaya beda dari yang sudah.
-        opacity: mendatang ? 0.55 : 1,
+        // Hari yang belum berjalan diredupkan: angkanya proyeksi, bukan catatan.
+        opacity: hari.proyeksi ? 0.55 : 1,
         backgroundColor: iniHariIni ? colors.amber + '0F' : 'transparent',
       }}
     >
@@ -174,21 +205,32 @@ function BarisHari({ hari, pertama }: { hari: RingkasanHariBudget; pertama: bool
             <Text style={{ ...typography.caption, color: colors.amber }}>HARI INI</Text>
           ) : null}
         </View>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
-          {hari.namaTipeHari} · target {formatAngka(hari.targetKalori)} kcal
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            {hari.namaTipeHari} · {formatAngka(hari.nilaiKalori)} kcal
+          </Text>
+          {hari.proyeksi ? (
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>proyeksi</Text>
+          ) : hari.selisih !== null && hari.selisih !== 0 ? (
+            <Text style={{ ...typography.caption, color: warnaSelisih }}>
+              {hari.selisih > 0 ? '+' : '−'}
+              {formatAngka(Math.abs(hari.selisih))}
+            </Text>
+          ) : null}
+        </View>
       </View>
 
       <View style={{ alignItems: 'flex-end', gap: 3 }}>
-        <Text style={{ ...typography.label, color: colors.text }}>
-          {mendatang ? '—' : `${formatAngka(hari.terpakaiKalori)} kcal`}
+        <Text
+          style={{
+            ...typography.label,
+            color: hari.sisaBerjalan < 0 ? colors.aksenTeks.coral : colors.text,
+          }}
+        >
+          {hari.sisaBerjalan < 0 ? '−' : ''}
+          {formatAngka(Math.abs(hari.sisaBerjalan))}
         </Text>
-        {hari.selisih !== null ? (
-          <Text style={{ ...typography.caption, color: warnaSelisih }}>
-            {hari.selisih > 0 ? '+' : hari.selisih < 0 ? '−' : ''}
-            {formatAngka(Math.abs(hari.selisih))}
-          </Text>
-        ) : null}
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>sisa</Text>
       </View>
     </View>
   );

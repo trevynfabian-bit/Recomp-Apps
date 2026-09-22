@@ -171,3 +171,16 @@ export type LajuBudget = {
   /** Selisih di bawah ini masih dianggap sesuai laju. */
   ambangKcal: number;
 };
+
+/** Satu baris rincian kumulatif budget mingguan. */
+export type BarisKumulatif = RingkasanHariBudget & {
+  /** true bila angkanya proyeksi dari target, bukan konsumsi tercatat. */
+  proyeksi: boolean;
+  nilaiKalori: number;
+  /** Akumulasi termasuk proyeksi hari mendatang. */
+  kumulatif: number;
+  /** Sisa jatah setelah hari ini; boleh negatif. */
+  sisaBerjalan: number;
+  /** Akumulasi konsumsi TERCATAT saja, tanpa proyeksi. */
+  terpakaiSampaiSini: number;
+};

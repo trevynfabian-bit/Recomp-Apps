@@ -1,4 +1,10 @@
-import type { BudgetMingguan, HariBudget, LajuBudget, RingkasanHariBudget } from './tipe';
+import type {
+  BarisKumulatif,
+  BudgetMingguan,
+  HariBudget,
+  LajuBudget,
+  RingkasanHariBudget,
+} from './tipe';
 import { majuHari } from './tren';
 
 /**
@@ -114,4 +120,38 @@ export function lajuBudget(budget: BudgetMingguan, ambangKcal = 300): LajuBudget
     status: selisih > 0 ? 'lebih cepat' : 'lebih lambat',
     ambangKcal,
   };
+}
+
+/**
+ * Rincian kumulatif: bagaimana jatah minggu ini terkuras hari demi hari.
+ *
+ * Kolom sisa BERJALAN inilah yang membuat pola terlihat. Daftar per hari saja
+ * hanya menunjukkan angka satuan; yang ingin dijawab pengguna adalah "setelah
+ * Selasa, tinggal berapa?" — dan itu butuh akumulasi.
+ *
+ * Hari yang belum berjalan memakai TARGET-nya sebagai proyeksi, ditandai
+ * `proyeksi: true`, supaya jelas mana catatan dan mana perkiraan.
+ */
+export function rincianKumulatif(budget: BudgetMingguan): BarisKumulatif[] {
+  let terpakaiKumulatif = 0;
+  let proyeksiKumulatif = 0;
+
+  return budget.rincian.map((h) => {
+    const proyeksi = h.status === 'mendatang';
+    // Hari mendatang diproyeksikan memakai targetnya, bukan nol.
+    const nilai = proyeksi ? h.targetKalori : h.terpakaiKalori;
+
+    if (!proyeksi) terpakaiKumulatif += nilai;
+    proyeksiKumulatif += nilai;
+
+    return {
+      ...h,
+      proyeksi,
+      nilaiKalori: nilai,
+      kumulatif: proyeksiKumulatif,
+      // Sisa setelah hari ini; negatif berarti jatah minggu sudah terlampaui.
+      sisaBerjalan: budget.budgetTotal - proyeksiKumulatif,
+      terpakaiSampaiSini: terpakaiKumulatif,
+    };
+  });
 }
