@@ -1,3 +1,4 @@
+export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { GrafikTren } from './GrafikTren';

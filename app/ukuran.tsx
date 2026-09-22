@@ -5,10 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   formatDesimal,
   formatTanggalPanjang,
+  lajuTerkini,
   rataRata7Hari,
+  statusBatasPinggang,
   tanggalHariIni,
 } from '@recomp/logika';
 import {
+  BannerBatasPinggang,
   Card,
   KartuBodyFat,
   RiwayatPerubahan,
@@ -61,6 +64,17 @@ export default function UkuranScreen() {
   const terbaru = catatan[catatan.length - 1];
   // Label CTA menyebut apa yang akan terjadi: hari yang sudah terisi diperbarui,
   // bukan ditambah — supaya tidak terkesan membuat baris kedua di tanggal sama.
+  /**
+   * Laju pinggang dari beberapa pencatatan terakhir, bukan dari satu selang:
+   * satu pekan yang salah ukur tidak boleh memicu maupun menyembunyikan
+   * peringatan.
+   */
+  const statusBatas = statusBatasPinggang(
+    terbaru?.pinggang_cm ?? 0,
+    profil.batas_pinggang_cm,
+    lajuTerkini(catatan.map((u) => ({ tanggal: u.tanggal, nilai: u.pinggang_cm }))),
+  );
+
   const labelAksi =
     terbaru?.tanggal === tanggalHariIni() ? 'Perbarui ukuran hari ini' : 'Catat ukuran mingguan';
   const sebelumnya = catatan[catatan.length - 2] ?? null;
@@ -188,6 +202,16 @@ export default function UkuranScreen() {
           </Pressable>
         </View>
       </Card>
+
+      {/* Peringatan batas — hanya muncul saat ada yang perlu diputuskan */}
+      <BannerBatasPinggang
+        status={statusBatas}
+        batasCm={profil.batas_pinggang_cm}
+        pinggangCm={terbaru.pinggang_cm}
+        fase={profil.fase_aktif}
+        onUbahBatas={() => setSheetBatasTerbuka(true)}
+        onLihatFase={() => router.push('/(tabs)/budget')}
+      />
 
       {/* Aksi utama layar: catat ukuran pekan ini */}
       <Pressable

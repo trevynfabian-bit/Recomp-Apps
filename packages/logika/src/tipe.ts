@@ -358,3 +358,13 @@ export type RingkasanPerubahan = {
   awal: TitikUkuran | null;
   akhir: TitikUkuran | null;
 };
+
+/** Keadaan lingkar pinggang terhadap batas yang ditetapkan pengguna. */
+export type StatusBatasPinggang = {
+  keadaan: 'belum-ditetapkan' | 'lewat' | 'mendekat' | 'aman';
+  /** `pinggang − batas`; positif berarti sudah di atas batas. */
+  selisihCm: number | null;
+  lajuPerPekan: number | null;
+  /** Perkiraan pekan sampai batas tercapai; 0 bila sudah lewat. */
+  pekanLagi: number | null;
+};

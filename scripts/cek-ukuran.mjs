@@ -28,7 +28,7 @@ function muatLogika() {
   return require(join(kerja, 'keluar', 'ukuran.js'));
 }
 
-const { ringkasPerubahan, HARI_PER_PEKAN } = muatLogika();
+const { ringkasPerubahan, lajuTerkini, statusBatasPinggang, HARI_PER_PEKAN } = muatLogika();
 
 let gagal = 0;
 function cek(label, lulus, detail = '') {
@@ -128,6 +128,62 @@ const turun = ringkasPerubahan([
 cek(
   `arah turun memberi selisih negatif (${turun.perubahan[0].selisih})`,
   turun.perubahan[0].selisih === -0.5 && turun.totalSelisih === -0.5,
+);
+
+console.log('\nLaju terkini');
+cek(
+  `empat pencatatan mingguan naik 0,9 cm dalam 21 hari → ${lajuTerkini(MINGGUAN)} cm/pekan`,
+  lajuTerkini(MINGGUAN) === 0.3,
+);
+// Satu pekan yang aneh tidak boleh mengubah kesimpulan seluruhnya.
+const berisik = [
+  { tanggal: '2026-09-01', nilai: 84.5 },
+  { tanggal: '2026-09-08', nilai: 84.8 },
+  { tanggal: '2026-09-15', nilai: 86.2 }, // meteran bergeser
+  { tanggal: '2026-09-22', nilai: 85.4 },
+];
+const selangTerakhir = ringkasPerubahan(berisik).perubahan.at(-1).lajuPerPekan;
+cek(
+  `satu pekan aneh: selang terakhir ${selangTerakhir} vs laju terentang ${lajuTerkini(berisik)}`,
+  selangTerakhir === -0.8 && lajuTerkini(berisik) === 0.3,
+);
+cek('satu titik saja → laju null', lajuTerkini([MINGGUAN[0]]) === null);
+
+console.log('\nStatus batas pinggang');
+const belum = statusBatasPinggang(85.4, null, 0.3);
+cek('batas belum ditetapkan', belum.keadaan === 'belum-ditetapkan' && belum.selisihCm === null);
+
+const lewat = statusBatasPinggang(86.4, 86, 0.3);
+cek(
+  `sudah lewat: selisih +${lewat.selisihCm} cm`,
+  lewat.keadaan === 'lewat' && lewat.selisihCm === 0.4 && lewat.pekanLagi === 0,
+);
+cek('pas di batas dihitung sudah lewat', statusBatasPinggang(86, 86, 0.3).keadaan === 'lewat');
+
+// Jarak yang SAMA, urgensi berbeda — inti dari memakai waktu, bukan jarak.
+const dekatCepat = statusBatasPinggang(85.2, 86, 0.4);
+const dekatPelan = statusBatasPinggang(85.2, 86, 0.1);
+cek(
+  `sisa 0,8 cm dengan laju 0,4 → ${dekatCepat.pekanLagi} pekan (mendekat)`,
+  dekatCepat.keadaan === 'mendekat' && dekatCepat.pekanLagi === 2,
+);
+cek(
+  `sisa 0,8 cm dengan laju 0,1 → ${dekatPelan.pekanLagi} pekan (aman)`,
+  dekatPelan.keadaan === 'aman' && dekatPelan.pekanLagi === 8,
+);
+
+const lajuTurun = statusBatasPinggang(85.2, 86, -0.3);
+cek(
+  'laju turun tidak pernah "mendekat"',
+  lajuTurun.keadaan === 'aman' && lajuTurun.pekanLagi === null,
+);
+cek(
+  'laju datar juga tidak "mendekat"',
+  statusBatasPinggang(85.9, 86, 0).keadaan === 'aman',
+);
+cek(
+  'tanpa laju, jarak sedekat apa pun tetap "aman" — bukan tebakan',
+  statusBatasPinggang(85.9, 86, null).keadaan === 'aman',
 );
 
 console.log(gagal === 0 ? '\n✓ Semua pemeriksaan riwayat ukuran lulus' : `\n✗ ${gagal} pemeriksaan gagal`);

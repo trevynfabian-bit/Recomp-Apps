@@ -36,6 +36,7 @@ export type {
   RingkasanHariBudget,
   RingkasanPerubahan,
   SinyalArah,
+  StatusBatasPinggang,
   StatusKoridor,
   TitikKoridor,
   TitikTren,
@@ -73,7 +74,12 @@ export {
 
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
 
-export { HARI_PER_PEKAN, ringkasPerubahan } from './ukuran';
+export {
+  HARI_PER_PEKAN,
+  lajuTerkini,
+  ringkasPerubahan,
+  statusBatasPinggang,
+} from './ukuran';
 
 export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';
 

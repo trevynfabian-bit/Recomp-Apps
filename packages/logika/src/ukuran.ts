@@ -1,4 +1,9 @@
-import type { RingkasanPerubahan, PerubahanUkuran, TitikUkuran } from './tipe';
+import type {
+  RingkasanPerubahan,
+  PerubahanUkuran,
+  StatusBatasPinggang,
+  TitikUkuran,
+} from './tipe';
 
 /**
  * Riwayat perubahan satu ukuran tubuh.
@@ -69,4 +74,63 @@ function selisihHariUkuran(dari: string, ke: string): number {
 /** Bulatkan ke 0,1 cm — ketelitian meteran kain, bukan lebih. */
 function bulat(nilai: number): number {
   return Math.round(nilai * 10) / 10;
+}
+
+/**
+ * Laju perubahan terkini, dari beberapa pencatatan TERAKHIR sekaligus.
+ *
+ * Bukan dari satu selang terakhir saja: satu pekan yang aneh (dehidrasi,
+ * meteran bergeser sesentimeter) akan mengubah kesimpulan seluruhnya. Dengan
+ * merentangkan beberapa pencatatan, galat pengukuran sebagian saling
+ * meniadakan — prinsip yang sama dengan rata-rata 7 hari pada berat.
+ *
+ * `null` bila belum ada dua pencatatan, atau bila keduanya di tanggal sama.
+ */
+export function lajuTerkini(titik: TitikUkuran[], maksTitik = 4): number | null {
+  const urut = [...titik].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+  const dipakai = urut.slice(-Math.max(maksTitik, 2));
+  if (dipakai.length < 2) return null;
+
+  const awal = dipakai[0];
+  const akhir = dipakai[dipakai.length - 1];
+  const hari = selisihHariUkuran(awal.tanggal, akhir.tanggal);
+  if (hari <= 0) return null;
+  return bulat(((akhir.nilai - awal.nilai) / hari) * HARI_PER_PEKAN);
+}
+
+/**
+ * Keadaan lingkar pinggang terhadap batas yang ditetapkan pengguna.
+ *
+ * "Mendekat" sengaja TIDAK memakai jarak tetap (misalnya "kurang dari 1 cm").
+ * Sisa 0,8 cm dengan laju +0,1 cm/pekan masih delapan pekan lagi, sementara
+ * sisa 0,8 cm dengan laju +0,4 cm/pekan tinggal dua pekan — jarak yang sama,
+ * urgensi yang sama sekali berbeda. Yang dipakai karena itu perkiraan WAKTU,
+ * bukan jarak.
+ */
+export function statusBatasPinggang(
+  pinggangCm: number,
+  batasCm: number | null,
+  lajuPerPekan: number | null,
+  ambangPekan = 4,
+): StatusBatasPinggang {
+  if (batasCm === null) {
+    return { keadaan: 'belum-ditetapkan', selisihCm: null, lajuPerPekan, pekanLagi: null };
+  }
+
+  const selisihCm = bulat(pinggangCm - batasCm);
+  if (selisihCm >= 0) {
+    return { keadaan: 'lewat', selisihCm, lajuPerPekan, pekanLagi: 0 };
+  }
+
+  // Hanya laju NAIK yang bisa membawa pinggang ke batas; laju datar atau turun
+  // berarti batasnya tidak sedang didekati sama sekali.
+  const pekanLagi =
+    lajuPerPekan !== null && lajuPerPekan > 0
+      ? Math.ceil((-selisihCm / lajuPerPekan) * 10) / 10
+      : null;
+
+  if (pekanLagi !== null && pekanLagi <= ambangPekan) {
+    return { keadaan: 'mendekat', selisihCm, lajuPerPekan, pekanLagi };
+  }
+  return { keadaan: 'aman', selisihCm, lajuPerPekan, pekanLagi };
 }
