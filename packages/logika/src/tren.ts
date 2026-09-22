@@ -110,6 +110,18 @@ export function majuHari(tanggal: string, hari: number): string {
   return t.toISOString().slice(0, 10);
 }
 
+/**
+ * Jumlah hari dari `dari` ke `ke` (positif bila `ke` lebih baru).
+ * Dipakai untuk memeriksa jarak antar pencatatan mingguan.
+ */
+export function selisihHari(dari: string, ke: string): number {
+  const urai = (t: string) => {
+    const [y, m, d] = t.split('-').map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((urai(ke) - urai(dari)) / 86_400_000);
+}
+
 function bulatkan(nilai: number, desimal: number): number {
   const f = 10 ** desimal;
   return Math.round(nilai * f) / f;

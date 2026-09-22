@@ -18,5 +18,6 @@ export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
+export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { StatusRedistribusi } from './StatusRedistribusi';
 export { SectionHeader } from './SectionHeader';

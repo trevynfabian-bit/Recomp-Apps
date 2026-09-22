@@ -58,6 +58,7 @@ export {
   majuHari,
   mundurHari,
   rataRata7Hari,
+  selisihHari,
   sinyalArah,
 } from './tren';
 

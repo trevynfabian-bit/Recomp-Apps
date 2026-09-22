@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
-import { Card, SectionHeader } from '@/components';
+import { formatDesimal, formatTanggalPanjang, tanggalHariIni } from '@recomp/logika';
+import { Card, SectionHeader, SheetCatatUkuran, type UkuranBaru } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
@@ -27,17 +28,44 @@ const BAGIAN: { kunci: BarisUkuran['kunci']; label: string; pasangan?: 'kiri' | 
  * pinggang mengecil dan lengan membesar — itu justru rekomposisi yang berhasil,
  * dan tidak akan terlihat sama sekali dari timbangan.
  *
- * Fase 1 memakai data tiruan. Estimasi body fat Navy dan alert batas pinggang
- * dipasang di task berikutnya pada halaman ini.
+ * Fase 1 memakai data tiruan yang disimpan di state layar ini, jadi pencatatan
+ * baru langsung terlihat tanpa backend. Estimasi body fat Navy dan alert batas
+ * pinggang dipasang di task berikutnya pada halaman ini.
  */
 export default function UkuranScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { profil } = useProfil();
 
-  const terbaru = mockUkuran[mockUkuran.length - 1];
-  const sebelumnya = mockUkuran[mockUkuran.length - 2] ?? null;
-  const pertama = mockUkuran[0] ?? null;
+  // Sumber tampilan layar ini; task backend menukarnya dengan query Supabase.
+  const [catatan, setCatatan] = useState<UkuranTubuh[]>(mockUkuran);
+  const [sheetTerbuka, setSheetTerbuka] = useState(false);
+
+  const terbaru = catatan[catatan.length - 1];
+  // Label CTA menyebut apa yang akan terjadi: hari yang sudah terisi diperbarui,
+  // bukan ditambah — supaya tidak terkesan membuat baris kedua di tanggal sama.
+  const labelAksi =
+    terbaru?.tanggal === tanggalHariIni() ? 'Perbarui ukuran hari ini' : 'Catat ukuran mingguan';
+  const sebelumnya = catatan[catatan.length - 2] ?? null;
+  const pertama = catatan[0] ?? null;
+
+  /**
+   * Simpan pencatatan: GANTI bila tanggalnya sudah ada, sisipkan bila belum.
+   *
+   * Satu tanggal hanya boleh punya satu pencatatan — dua baris di hari yang
+   * sama membuat selisih mingguan terbaca dari pasangan yang salah. Hasilnya
+   * diurutkan ulang karena tanggal bisa digeser ke belakang di form.
+   */
+  function simpanUkuran(baru: UkuranBaru) {
+    setCatatan((lama) => {
+      const adaIndex = lama.findIndex((u) => u.tanggal === baru.tanggal);
+      const berikut =
+        adaIndex >= 0
+          ? lama.map((u, i) => (i === adaIndex ? { ...u, ...baru } : u))
+          : [...lama, { id: `uk-${Date.now()}`, ...baru }];
+      return [...berikut].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    });
+  }
 
   const baris: BarisUkuran[] = BAGIAN.map((b) => ({
     ...b,
@@ -111,6 +139,31 @@ export default function UkuranScreen() {
         </View>
       </Card>
 
+      {/* Aksi utama layar: catat ukuran pekan ini */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={labelAksi}
+        onPress={() => {
+          ketukRingan();
+          setSheetTerbuka(true);
+        }}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: spacing.sm,
+          minHeight: TAP_MIN,
+          paddingVertical: spacing.lg,
+          borderRadius: radius.lg,
+          backgroundColor: colors.amber,
+          opacity: pressed ? 0.8 : 1,
+        })}
+      >
+        <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>
+          {labelAksi}
+        </Text>
+      </Pressable>
+
       {/* Semua ukuran, dengan perubahan sejak pencatatan sebelumnya */}
       <View>
         <SectionHeader
@@ -149,9 +202,9 @@ export default function UkuranScreen() {
 
       {/* Riwayat pencatatan */}
       <View>
-        <SectionHeader judul="Riwayat" aksi={`${mockUkuran.length} pencatatan`} />
+        <SectionHeader judul="Riwayat" aksi={`${catatan.length} pencatatan`} />
         <Card flat>
-          {[...mockUkuran].reverse().map((u, i) => (
+          {[...catatan].reverse().map((u, i) => (
             <BarisRiwayat key={u.id} ukuran={u} pertama={i === 0} />
           ))}
         </Card>
@@ -180,6 +233,13 @@ export default function UkuranScreen() {
           </Text>
         </View>
       </View>
+
+      <SheetCatatUkuran
+        terbuka={sheetTerbuka}
+        onTutup={() => setSheetTerbuka(false)}
+        catatan={catatan}
+        onSimpan={simpanUkuran}
+      />
     </ScrollView>
   );
 }
