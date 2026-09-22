@@ -72,6 +72,8 @@ const BANNER_AMBER = campur(c.amber, '14', c.bg);
 const BANNER_CORAL = campur(c.coral, '14', c.bg);
 const PILL_AMBER = campur(c.amber, '1A', c.surface);
 const PILIHAN_AMBER = campur(c.amber, '14', c.surface);
+/** Gelembung pesan pengguna: amber 8% di atas latar layar. */
+const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
 
 /**
  * Pasangan yang benar-benar ada di layar. `besar` berarti teksnya ≥24px atau
@@ -121,6 +123,9 @@ const PASANGAN = [
   // memasang textFaint di sana lagi, pasangannya harus ditambahkan ke sini dan
   // akan langsung gagal.
   ['textMuted di pilihan terpilih', c.textMuted, PILIHAN_AMBER, false],
+
+  ['text di gelembung pengguna', c.text, GELEMBUNG_PENGGUNA, false],
+  ['textFaint di gelembung pengguna', c.textFaint, GELEMBUNG_PENGGUNA, false],
 
   // Label di atas tombol isian penuh
   ['bg di atas amber', c.bg, c.amber, false],

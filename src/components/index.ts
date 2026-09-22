@@ -1,11 +1,13 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
+export { GelembungMengetik, GelembungPesan } from './GelembungPesan';
 export { GrafikTren } from './GrafikTren';
 export { GrafikUkuran } from './GrafikUkuran';
 export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { InputAngka } from './InputAngka';
+export { InputChat } from './InputChat';
 export { KartuBodyFat } from './KartuBodyFat';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuTdee } from './KartuTdee';

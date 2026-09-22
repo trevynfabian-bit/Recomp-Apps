@@ -1,0 +1,126 @@
+import { Pressable, Text, View } from 'react-native';
+import { ketukRingan } from '@/lib/haptics';
+import type { PesanCoach } from '@/types/domain';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+
+type Props = {
+  pesan: PesanCoach;
+  /** Mengirim ulang pesan yang gagal, tanpa mengetik ulang. */
+  onCobaLagi?: (pesan: PesanCoach) => void;
+};
+
+/**
+ * Satu gelembung pesan.
+ *
+ * Pesan COACH tidak diberi latar beraksen. Jawabannya panjang dan penuh angka;
+ * latar berwarna akan menurunkan kontras teks panjang justru di tempat yang
+ * paling banyak dibaca. Pesan PENGGUNA boleh, karena selalu pendek — dan
+ * perbedaan latar itu yang membuat kedua peran terbaca sekilas tanpa harus
+ * melacak sisi mana gelembungnya menempel.
+ */
+export function GelembungPesan({ pesan, onCobaLagi }: Props) {
+  const dariPengguna = pesan.peran === 'pengguna';
+  const gagal = pesan.status === 'gagal';
+
+  return (
+    <View
+      style={{
+        alignItems: dariPengguna ? 'flex-end' : 'flex-start',
+        gap: spacing.xs,
+      }}
+    >
+      <View
+        accessibilityRole="text"
+        accessibilityLabel={`${dariPengguna ? 'Anda' : 'Coach'}: ${pesan.teks}`}
+        style={{
+          maxWidth: '88%',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderRadius: radius.lg,
+          // Sudut yang menempel ke sisinya dibuat kecil: penanda arah bicara
+          // yang tetap terbaca tanpa warna.
+          borderBottomRightRadius: dariPengguna ? radius.sm : radius.lg,
+          borderBottomLeftRadius: dariPengguna ? radius.lg : radius.sm,
+          backgroundColor: dariPengguna ? colors.amber + '14' : colors.surface,
+          borderWidth: 1,
+          borderColor: gagal
+            ? colors.coral + '55'
+            : dariPengguna
+              ? colors.amber + '33'
+              : colors.border,
+          opacity: pesan.status === 'mengirim' ? 0.6 : 1,
+        }}
+      >
+        <Text
+          style={{
+            ...typography.body,
+            color: colors.text,
+            // 24px pada teks 16px: jawaban coach sering lima kalimat, dan
+            // lineHeight rapat membuatnya terbaca seperti dinding.
+            lineHeight: 24,
+          }}
+        >
+          {pesan.teks}
+        </Text>
+      </View>
+
+      {gagal ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral }}>
+            Gagal terkirim
+          </Text>
+          {onCobaLagi ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Kirim ulang pesan"
+              onPress={() => {
+                ketukRingan();
+                onCobaLagi(pesan);
+              }}
+              style={({ pressed }) => ({
+                minHeight: TAP_MIN,
+                justifyContent: 'center',
+                paddingHorizontal: spacing.md,
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <Text style={{ ...typography.label, color: colors.amber }}>Coba lagi</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Penanda coach sedang menyusun jawaban.
+ *
+ * Bentuknya sengaja menyerupai gelembung coach yang kosong, bukan spinner di
+ * tengah layar: yang ditunggu adalah SATU pesan berikutnya, dan menaruh
+ * penandanya di tempat pesan itu akan muncul membuat perpindahannya tidak
+ * mengagetkan.
+ */
+export function GelembungMengetik() {
+  return (
+    <View style={{ alignItems: 'flex-start' }}>
+      <View
+        accessibilityRole="text"
+        accessibilityLabel="Coach sedang menyusun jawaban"
+        style={{
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.md,
+          borderRadius: radius.lg,
+          borderBottomLeftRadius: radius.sm,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+        }}
+      >
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          Coach sedang membaca data Anda…
+        </Text>
+      </View>
+    </View>
+  );
+}

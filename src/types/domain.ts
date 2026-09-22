@@ -140,3 +140,17 @@ export type BarisUkuran = {
   /** Pasangan kiri/kanan agar bisa ditampilkan berdampingan. */
   pasangan?: 'kiri' | 'kanan';
 };
+
+/** Satu pesan dalam percakapan AI Coach. */
+export type PesanCoach = {
+  id: string;
+  peran: 'pengguna' | 'coach';
+  teks: string;
+  /** ISO 8601; dipakai untuk pengelompokan waktu, bukan ditampilkan mentah. */
+  waktu: string;
+  /**
+   * Keadaan pengiriman. Pesan pengguna bisa gagal terkirim dan harus bisa
+   * dicoba lagi tanpa mengetik ulang — itu satu-satunya alasan field ini ada.
+   */
+  status?: 'terkirim' | 'mengirim' | 'gagal';
+};
