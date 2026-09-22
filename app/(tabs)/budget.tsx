@@ -6,6 +6,7 @@ import {
   formatAngka,
   formatTanggalPanjang,
   lajuBudget,
+  periksaProteksiProtein,
   rincianKumulatif,
   terapkanRedistribusi,
 } from '@recomp/logika';
@@ -13,6 +14,7 @@ import type { BarisKumulatif, HasilRedistribusi } from '@recomp/logika';
 import {
   Card,
   HeroNumber,
+  IndikatorProteinTerlindungi,
   MeterBudget,
   PanelRedistribusi,
   StatusRedistribusi,
@@ -55,7 +57,13 @@ export default function BudgetScreen() {
   // Target hari mendatang memakai hasil redistribusi bila sudah diterapkan —
   // tanpa ini panelnya terkunci tapi angka di bawahnya tidak berubah sama sekali.
   const hariDasar = mockHariBudget(hariIni, profil.fase_aktif);
-  const budget = budgetMingguan(terapkanRedistribusi(hariDasar, redistribusi), hariIni);
+  const hariSetelah = terapkanRedistribusi(hariDasar, redistribusi);
+  const budget = budgetMingguan(hariSetelah, hariIni);
+
+  // Hanya hari yang belum berjalan yang bisa terkena redistribusi.
+  const mendatangSebelum = hariDasar.filter((h) => h.tanggal > hariIni);
+  const mendatangSesudah = hariSetelah.filter((h) => h.tanggal > hariIni);
+  const proteksi = periksaProteksiProtein(mendatangSebelum, mendatangSesudah);
 
   const laju = lajuBudget(budget);
   const rincian = rincianKumulatif(budget);
@@ -186,6 +194,15 @@ export default function BudgetScreen() {
             onTerapkan={setRedistribusi}
           />
         )}
+      </View>
+
+      {/* Proteksi protein — dibuktikan dari data, bukan sekadar diklaim */}
+      <View>
+        <SectionHeader judul="Proteksi protein" aksi="tidak pernah dipotong" />
+        <IndikatorProteinTerlindungi
+          proteksi={proteksi}
+          sudahRedistribusi={redistribusi !== null}
+        />
       </View>
 
       {/* Kenapa angkanya begitu — perhitungannya bisa ditelusuri */}

@@ -23,6 +23,7 @@ export type {
   MacroProgress,
   ModeMakro,
   OpsiRedistribusi,
+  ProteksiProtein,
   RataRata7Hari,
   RingkasanHariBudget,
   SinyalArah,
@@ -64,6 +65,7 @@ export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulat
 export {
   hitungRedistribusi,
   KELIPATAN_KCAL,
+  periksaProteksiProtein,
   selisihPerluDipindah,
   terapkanRedistribusi,
 } from './redistribusi';

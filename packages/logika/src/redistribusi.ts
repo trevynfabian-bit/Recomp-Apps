@@ -2,6 +2,7 @@ import { formatAngka } from './format';
 import type {
   BudgetMingguan,
   HariBudget,
+  ProteksiProtein,
   HasilRedistribusi,
   HariRedistribusi,
   OpsiRedistribusi,
@@ -171,4 +172,39 @@ export function terapkanRedistribusi(
     // Rencana semula disimpan supaya budget mingguan tetap memakai angka itu.
     return { ...h, targetKalori: baru, targetAsliKalori: h.targetAsliKalori ?? h.targetKalori };
   });
+}
+
+/**
+ * Bukti bahwa protein tidak ikut dipotong.
+ *
+ * PRD menyebut "protein tidak pernah dipotong" sebagai aturan keras. Klaim itu
+ * mudah ditulis di kalimat dan mudah pula dilanggar diam-diam saat kode
+ * berubah, jadi di sini ia diperiksa dari data: target protein SEBELUM dan
+ * SESUDAH redistribusi dibandingkan per hari.
+ */
+export function periksaProteksiProtein(
+  sebelum: HariBudget[],
+  sesudah: HariBudget[],
+): ProteksiProtein {
+  const petaSesudah = new Map(sesudah.map((h) => [h.tanggal, h]));
+
+  const hari = sebelum
+    .filter((h) => h.targetProteinG !== undefined)
+    .map((h) => {
+      const lawan = petaSesudah.get(h.tanggal);
+      const proteinSesudah = lawan?.targetProteinG ?? h.targetProteinG ?? 0;
+      return {
+        tanggal: h.tanggal,
+        namaTipeHari: h.namaTipeHari,
+        proteinG: h.targetProteinG ?? 0,
+        proteinSesudahG: proteinSesudah,
+        kaloriSebelum: h.targetAsliKalori ?? h.targetKalori,
+        kaloriSesudah: lawan?.targetKalori ?? h.targetKalori,
+      };
+    });
+
+  return {
+    utuh: hari.every((h) => h.proteinG === h.proteinSesudahG),
+    hari,
+  };
 }

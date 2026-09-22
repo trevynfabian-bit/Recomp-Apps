@@ -35,6 +35,8 @@ export function mockHariBudget(hariIni: string, fase: Fase): HariBudget[] {
       tanggal,
       namaTipeHari: nama,
       targetKalori: target.target_kalori,
+      // Dibawa supaya proteksi protein bisa dibuktikan, bukan cuma diklaim.
+      targetProteinG: target.target_protein_g,
       terpakaiKalori: KONSUMSI_MINGGU_INI[i] ?? 0,
     };
   });

@@ -141,6 +141,11 @@ export type HariBudget = {
    */
   targetAsliKalori?: number;
   terpakaiKalori: number;
+  /**
+   * Target protein harian. Dibawa di sini bukan untuk dihitung, melainkan
+   * untuk DIBUKTIKAN tidak berubah: redistribusi hanya menyentuh kalori.
+   */
+  targetProteinG?: number;
 };
 
 /** Hari budget yang sudah diberi status & selisih. */
@@ -219,4 +224,18 @@ export type HasilRedistribusi = {
   dibatasiLantai: boolean;
   alasan: string;
   hari: HariRedistribusi[];
+};
+
+/** Hasil pemeriksaan bahwa protein tidak ikut dipotong redistribusi. */
+export type ProteksiProtein = {
+  /** true bila target protein tiap hari sama persis sebelum dan sesudah. */
+  utuh: boolean;
+  hari: {
+    tanggal: string;
+    namaTipeHari: string;
+    proteinG: number;
+    proteinSesudahG: number;
+    kaloriSebelum: number;
+    kaloriSesudah: number;
+  }[];
 };

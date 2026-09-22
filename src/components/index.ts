@@ -2,6 +2,7 @@ export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { GrafikTren } from './GrafikTren';
 export { HeroNumber } from './HeroNumber';
+export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { InputAngka } from './InputAngka';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
