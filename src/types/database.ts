@@ -208,6 +208,49 @@ export type TrenSnapshotRow = {
   };
 };
 
+/** Satu hari dalam rincian `budget_mingguan`. */
+export type HariBudgetRow = {
+  tanggal: string;
+  nama_tipe_hari: string | null;
+  /** Target yang BERLAKU — bisa sudah dipotong redistribusi. */
+  target_kalori: number;
+  /** Target menurut rencana semula; `null` bila hari itu belum disesuaikan. */
+  target_asli_kalori: number | null;
+  target_protein_g: number;
+  terpakai_kalori: number;
+  terpakai_protein_g: number;
+  status: 'lampau' | 'hari ini' | 'mendatang';
+  /** `null` untuk hari yang belum berjalan. */
+  selisih: number | null;
+};
+
+/**
+ * Hasil `budget_mingguan` — satu snapshot budget kalori sepekan.
+ * Nama kunci mengikuti SQL; service yang menerjemahkannya ke bentuk TS.
+ */
+export type BudgetMingguanRow = {
+  minggu_mulai: string;
+  hari_ini: string;
+  /** Jumlah target ASLI sepekan; redistribusi tidak mengecilkannya. */
+  budget_total: number;
+  terpakai: number;
+  /** Boleh negatif: jatah pekan sudah terlampaui. */
+  sisa: number;
+  /** Hari yang BELUM berjalan; hari ini tidak termasuk. */
+  hari_tersisa: number;
+  target_mendatang: number;
+  sisa_per_hari: number | null;
+  rencana_per_hari: number | null;
+  laju: {
+    /** Jumlah target BERLAKU hari-hari yang sudah berjalan. */
+    seharusnya: number;
+    selisih: number;
+    status: 'sesuai laju' | 'lebih cepat' | 'lebih lambat' | 'belum mulai';
+    ambang_kcal: number;
+  };
+  rincian: HariBudgetRow[];
+};
+
 /** Opsi redistribusi; sama persis dengan OpsiRedistribusi di @recomp/logika. */
 export type OpsiRedistribusiDb = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
 
@@ -423,6 +466,10 @@ export type Database = {
       awal_minggu: {
         Args: { p_tanggal: string };
         Returns: string;
+      };
+      budget_mingguan: {
+        Args: { p_tanggal: string | null; p_hari_ini: string | null; p_ambang_kcal: number };
+        Returns: BudgetMingguanRow;
       };
       fase_pada_tanggal: {
         Args: { p_tanggal: string };

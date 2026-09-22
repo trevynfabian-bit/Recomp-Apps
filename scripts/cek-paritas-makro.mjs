@@ -90,10 +90,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/deteksiTipeHari.ts', join(kerja, 'deteksiTipeHari.ts'));
   copyFileSync('packages/logika/src/tren.ts', join(kerja, 'tren.ts'));
   copyFileSync('packages/logika/src/koridor.ts', join(kerja, 'koridor.ts'));
+  copyFileSync('packages/logika/src/budget.ts', join(kerja, 'budget.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
+     'budget.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -103,6 +105,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'deteksiTipeHari.js')),
     ...require(join(kerja, 'keluar', 'tren.js')),
     ...require(join(kerja, 'keluar', 'koridor.js')),
+    ...require(join(kerja, 'keluar', 'budget.js')),
   };
 }
 
@@ -590,6 +593,167 @@ try {
   console.log(
     `✓ ${titikDiperiksa} titik koridor & ${KASUS_STATUS.length} posisi cocok — ` +
       'koridor target di SQL dan TypeScript sejalan.',
+  );
+
+  // === Bagian 7: budget kalori mingguan ====================================
+  //
+  // Tiga aturan budget mingguan hidup di dua tempat, dan ketiganya berupa
+  // PILIHAN, bukan rumus yang bisa ditebak ulang: total memakai target ASLI,
+  // laju memakai target BERLAKU, dan hari ini bukan hari tersisa. Yang
+  // dibandingkan di sini justru agregasinya — rincian tujuh hari diambil dari
+  // SQL lalu disuapkan ke `budgetMingguan`/`lajuBudget`, sehingga yang diuji
+  // adalah aturannya, bukan sekadar kemampuan keduanya membaca tabel.
+  console.log();
+  const { budgetMingguan, lajuBudget, awalMinggu } = muatLogikaTs();
+
+  const UID_BUDGET = '99999999-3333-3333-3333-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_BUDGET}', 'paritas-budget@contoh.test');`);
+  sql(`update public.profiles set fase_aktif = 'Lean Gain' where user_id = '${UID_BUDGET}';`);
+
+  // Pekan 21–27 Sep: Selasa sengaja dipotong redistribusi (berlaku 2900,
+  // asli 3100) supaya kedua aturan target bisa dibedakan; Jum–Min tanpa baris
+  // sama sekali supaya jalur "tipe hari bawaan" ikut terbandingkan.
+  sql(`
+    set request.jwt.claim.sub = '${UID_BUDGET}';
+    select public.setel_tipe_hari(date '2026-09-21',
+             (select id from public.day_types
+               where user_id = '${UID_BUDGET}' and nama = 'Angkat Beban'));
+    select public.setel_tipe_hari(date '2026-09-24',
+             (select id from public.day_types
+               where user_id = '${UID_BUDGET}' and nama = 'Angkat Beban'));
+    select public.setel_tipe_hari(date '2026-09-22',
+             (select id from public.day_types
+               where user_id = '${UID_BUDGET}' and nama = 'Beban+Lari'));
+    select public.setel_tipe_hari(date '2026-09-23',
+             (select id from public.day_types
+               where user_id = '${UID_BUDGET}' and nama = 'Rest'));
+    update public.daily_logs set kalori = 2900, protein_g = 180
+      where user_id = '${UID_BUDGET}' and tanggal = date '2026-09-21';
+    update public.daily_logs
+       set kalori = 3300, protein_g = 190,
+           target_asli_kalori = target_kalori, target_kalori = 2900
+     where user_id = '${UID_BUDGET}' and tanggal = date '2026-09-22';
+    update public.daily_logs set kalori = 1200, protein_g = 95
+      where user_id = '${UID_BUDGET}' and tanggal = date '2026-09-23';`);
+
+  const KASUS_BUDGET = [
+    { label: 'tengah pekan', pekan: '2026-09-23', hariIni: '2026-09-23', ambang: 300 },
+    { label: 'ambang longgar', pekan: '2026-09-23', hariIni: '2026-09-23', ambang: 900 },
+    { label: 'pekan di depan', pekan: '2026-09-28', hariIni: '2026-09-23', ambang: 300 },
+    { label: 'pekan lampau', pekan: '2026-09-14', hariIni: '2026-09-23', ambang: 300 },
+    { label: 'hari terakhir', pekan: '2026-09-23', hariIni: '2026-09-27', ambang: 300 },
+    { label: 'hari pertama', pekan: '2026-09-23', hariIni: '2026-09-21', ambang: 300 },
+  ];
+
+  let gagalBudget = 0;
+  console.log('kasus            SQL total  TS total   SQL sisa/hr  TS sisa/hr  SQL status      TS status');
+  console.log('─'.repeat(96));
+  for (const k of KASUS_BUDGET) {
+    const mentah = sql(
+      `set request.jwt.claim.sub = '${UID_BUDGET}';
+       select public.budget_mingguan(date '${k.pekan}', date '${k.hariIni}', ${k.ambang})::text;`,
+    );
+    const b = JSON.parse(mentah);
+
+    // Rincian SQL dipakai APA ADANYA sebagai masukan TS. Yang dibandingkan
+    // adalah aturan agregasinya, bukan cara masing-masing membaca tabel.
+    const hari = b.rincian.map((r) => ({
+      tanggal: r.tanggal,
+      namaTipeHari: r.nama_tipe_hari,
+      targetKalori: r.target_kalori,
+      targetAsliKalori: r.target_asli_kalori ?? undefined,
+      terpakaiKalori: r.terpakai_kalori,
+      targetProteinG: r.target_protein_g,
+    }));
+    const ts = budgetMingguan(hari, k.hariIni);
+    const tsLaju = lajuBudget(ts, k.ambang);
+
+    const beda = [];
+    const bandingkan = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    bandingkan('minggu_mulai', b.minggu_mulai, ts.mingguMulai);
+    bandingkan('minggu_mulai(awalMinggu)', b.minggu_mulai, awalMinggu(k.pekan));
+    bandingkan('budget_total', b.budget_total, ts.budgetTotal);
+    bandingkan('terpakai', b.terpakai, ts.terpakai);
+    bandingkan('sisa', b.sisa, ts.sisa);
+    bandingkan('hari_tersisa', b.hari_tersisa, ts.hariTersisa);
+    bandingkan('target_mendatang', b.target_mendatang, ts.targetMendatang);
+    bandingkan('sisa_per_hari', b.sisa_per_hari, ts.sisaPerHari);
+    bandingkan('rencana_per_hari', b.rencana_per_hari, ts.rencanaPerHari);
+    bandingkan('laju.seharusnya', b.laju.seharusnya, tsLaju.seharusnya);
+    bandingkan('laju.selisih', b.laju.selisih, tsLaju.selisih);
+    bandingkan('laju.status', b.laju.status, tsLaju.status);
+    bandingkan('laju.ambang', b.laju.ambang_kcal, tsLaju.ambangKcal);
+    // Status & selisih per hari ikut dibandingkan: salah menempatkan "hari ini"
+    // tidak selalu mengubah total, tapi selalu mengubah barisnya.
+    b.rincian.forEach((r, i) => {
+      bandingkan(`rincian[${i}].status`, r.status, ts.rincian[i].status);
+      bandingkan(`rincian[${i}].selisih`, r.selisih, ts.rincian[i].selisih);
+    });
+
+    if (beda.length > 0) gagalBudget += 1;
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${k.label.padEnd(15)} ${String(b.budget_total).padStart(8)}  ` +
+        `${String(ts.budgetTotal).padStart(8)}  ${String(b.sisa_per_hari).padStart(10)}  ` +
+        `${String(ts.sisaPerHari).padStart(10)}  ${String(b.laju.status).padEnd(14)}  ${tsLaju.status}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  // Pembulatan setengah NEGATIF: `Math.round(-1.5)` = −1, sedangkan `round()`
+  // di Postgres memberi −2. Bedanya cuma 1 kkal, tapi ia muncul justru saat
+  // jatah pekan sudah terlampaui — keadaan yang paling diperhatikan pengguna.
+  // Pekan berikut disusun supaya sisa ÷ hari tersisa jatuh PERSIS di −1,5.
+  const UID_LAMPAU = '99999999-4444-4444-4444-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_LAMPAU}', 'paritas-lampau@contoh.test');`);
+  sql(`update public.profiles set fase_aktif = 'Lean Gain' where user_id = '${UID_LAMPAU}';`);
+  // Tujuh hari Rest Lean Gain = 2450 × 7 = 17.150. Sen–Jum menghabiskan
+  // 17.153 → sisa −3 dengan 2 hari tersisa.
+  sql(`
+    set request.jwt.claim.sub = '${UID_LAMPAU}';
+    select public.setel_tipe_hari((date '2026-09-21' + i)::date,
+             (select id from public.day_types
+               where user_id = '${UID_LAMPAU}' and nama = 'Rest'))
+      from generate_series(0, 4) as i;
+    update public.daily_logs set kalori = 3430
+     where user_id = '${UID_LAMPAU}' and tanggal between date '2026-09-21' and date '2026-09-24';
+    update public.daily_logs set kalori = 3433
+     where user_id = '${UID_LAMPAU}' and tanggal = date '2026-09-25';`);
+
+  const mentahLampau = sql(
+    `set request.jwt.claim.sub = '${UID_LAMPAU}';
+     select public.budget_mingguan(date '2026-09-25', date '2026-09-25', 300)::text;`,
+  );
+  const bLampau = JSON.parse(mentahLampau);
+  const tsLampau = budgetMingguan(
+    bLampau.rincian.map((r) => ({
+      tanggal: r.tanggal,
+      namaTipeHari: r.nama_tipe_hari,
+      targetKalori: r.target_kalori,
+      targetAsliKalori: r.target_asli_kalori ?? undefined,
+      terpakaiKalori: r.terpakai_kalori,
+      targetProteinG: r.target_protein_g,
+    })),
+    '2026-09-25',
+  );
+  const setengahCocok =
+    bLampau.sisa === -3 &&
+    bLampau.hari_tersisa === 2 &&
+    bLampau.sisa_per_hari === tsLampau.sisaPerHari;
+  if (!setengahCocok) gagalBudget += 1;
+  console.log(
+    `${setengahCocok ? '✓' : '✗'} setengah negatif  sisa ${bLampau.sisa} ÷ ${bLampau.hari_tersisa} hari → ` +
+      `SQL ${bLampau.sisa_per_hari} / TS ${tsLampau.sisaPerHari}`,
+  );
+
+  console.log();
+  if (gagalBudget > 0) {
+    console.error(`✗ ${gagalBudget} kasus BERBEDA (budget kalori mingguan).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${KASUS_BUDGET.length + 1} kasus cocok — budget mingguan & laju di SQL dan TypeScript sejalan.`,
   );
 } finally {
   hentikanPostgres();
