@@ -36,11 +36,20 @@ const KASUS = [
 ];
 
 function sql(query) {
-  return execFileSync(
+  const keluaran = execFileSync(
     'psql',
     ['-v', 'ON_ERROR_STOP=1', '-h', PGROOT, '-p', PORT, '-U', 'postgres', '-d', 'postgres', '-tAc', query],
     { encoding: 'utf8' },
   ).trim();
+  // Saat query memuat beberapa pernyataan, psql mencetak TAG PERINTAH tiap
+  // pernyataan (SET, INSERT 0 1, …) sebelum hasilnya. Tag-nya dibuang, tapi
+  // barisnya tidak diringkas — sebagian query di sini memang berhasil banyak baris.
+  const TAG = /^(SET|BEGIN|COMMIT|ROLLBACK|DO|VACUUM|ANALYZE|(INSERT \d+ \d+)|((UPDATE|DELETE|SELECT|MOVE|FETCH|COPY) \d+))$/;
+  return keluaran
+    .split('\n')
+    .filter((b) => !TAG.test(b.trim()))
+    .join('\n')
+    .trim();
 }
 
 function mulaiPostgres() {
@@ -79,10 +88,11 @@ function muatLogikaTs() {
   // Paket bersama sudah memakai impor relatif, jadi disalin apa adanya.
   copyFileSync('packages/logika/src/makro.ts', join(kerja, 'makro.ts'));
   copyFileSync('packages/logika/src/deteksiTipeHari.ts', join(kerja, 'deteksiTipeHari.ts'));
+  copyFileSync('packages/logika/src/tren.ts', join(kerja, 'tren.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-    ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts',
+    ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -90,6 +100,7 @@ function muatLogikaTs() {
   return {
     ...require(join(kerja, 'keluar', 'makro.js')),
     ...require(join(kerja, 'keluar', 'deteksiTipeHari.js')),
+    ...require(join(kerja, 'keluar', 'tren.js')),
   };
 }
 
@@ -233,6 +244,52 @@ try {
   console.log(
     `✓ ${KASUS_DETEKSI.length} kasus cocok — aturan deteksi tipe hari di SQL dan TypeScript sejalan.`,
   );
+
+  // === Bagian 3: rata-rata berat 7 hari ====================================
+  console.log();
+  const { rataRata7Hari } = muatLogikaTs();
+
+  // Sengaja berlubang: 09-19 dan 09-21 tidak ditimbang, supaya terbukti hari
+  // kosong DILEWATI dan bukan dihitung nol.
+  const TIMBANGAN = [
+    ['2026-09-16', 74.1], ['2026-09-17', 74.5], ['2026-09-18', 74.2],
+    ['2026-09-20', 74.4], ['2026-09-22', 74.6],
+  ];
+  for (const [tgl, kg] of TIMBANGAN) {
+    sql(`set request.jwt.claim.sub = '${UID}'; select 1 from public.simpan_berat_pagi(date '${tgl}', ${kg});`);
+  }
+
+  const KASUS_RATA = ['2026-09-22', '2026-09-20', '2026-09-18', '2026-09-30'];
+  const riwayatTs = TIMBANGAN.map(([tanggal, kg]) => ({ tanggal, berat_pagi_kg: kg }));
+
+  let gagalRata = 0;
+  console.log('tanggal        SQL rata  TS rata   SQL n  TS n');
+  console.log('─'.repeat(52));
+  for (const tgl of KASUS_RATA) {
+    const baris = sql(
+      `set request.jwt.claim.sub = '${UID}';
+       select coalesce(rata_rata_kg::text, 'null') || '|' || jumlah_timbangan
+         from public.rata_rata_berat_7_hari(date '${tgl}');`,
+    );
+    const [rataSql, nSql] = baris.split('|');
+    const ts = rataRata7Hari(riwayatTs, tgl);
+    const tsRata = ts.rataRataKg === null ? 'null' : String(ts.rataRataKg);
+
+    const cocok =
+      (rataSql === 'null' ? tsRata === 'null' : Math.abs(Number(rataSql) - Number(tsRata)) < 1e-9) &&
+      Number(nSql) === ts.jumlahTimbangan;
+    if (!cocok) gagalRata += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${tgl}  ${rataSql.padStart(8)}  ${tsRata.padStart(7)}  ${nSql.padStart(5)}  ${String(ts.jumlahTimbangan).padStart(4)}`,
+    );
+  }
+
+  console.log();
+  if (gagalRata > 0) {
+    console.error(`✗ ${gagalRata} kasus BERBEDA (rata-rata 7 hari).`);
+    process.exit(1);
+  }
+  console.log(`✓ ${KASUS_RATA.length} kasus cocok — rata-rata 7 hari di SQL dan TypeScript sejalan.`);
 } finally {
   hentikanPostgres();
 }

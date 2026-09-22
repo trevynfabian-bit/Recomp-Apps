@@ -7,11 +7,15 @@
  */
 export type {
   DayType,
+  EntriBeratRingkas,
   Fase,
   HitunganMakro,
   JenisOlahraga,
   MacroProgress,
   ModeMakro,
+  RataRata7Hari,
+  SinyalArah,
+  TitikTren,
   WorkoutRingkas,
 } from './tipe';
 
@@ -28,3 +32,12 @@ export {
 export { hitungMakro, keteranganMakro } from './makro';
 
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
+
+export {
+  deretTren,
+  JENDELA_HARI,
+  majuHari,
+  mundurHari,
+  rataRata7Hari,
+  sinyalArah,
+} from './tren';

@@ -52,3 +52,34 @@ export type HitunganMakro = {
   /** Rasio 0..1 untuk bar progress. */
   progres: number;
 };
+
+/** Satu timbangan, secukupnya untuk perhitungan tren. */
+export type EntriBeratRingkas = {
+  tanggal: string;
+  berat_pagi_kg: number | null;
+};
+
+/** Hasil rata-rata bergerak 7 hari untuk satu tanggal. */
+export type RataRata7Hari = {
+  tanggal: string;
+  /** `null` bila tidak ada timbangan sama sekali dalam jendelanya. */
+  rataRataKg: number | null;
+  /** Berapa hari yang benar-benar ditimbang dalam jendela itu. */
+  jumlahTimbangan: number;
+};
+
+/** Satu titik pada grafik tren. */
+export type TitikTren = {
+  tanggal: string;
+  rataRataKg: number | null;
+  beratHarianKg: number | null;
+};
+
+/** Arah berat sepekan terakhir. */
+export type SinyalArah = {
+  arah: 'naik' | 'turun' | 'datar' | 'belum cukup data';
+  /** Selisih rata-rata sekarang terhadap sepekan lalu; `null` bila data kurang. */
+  perubahanKg: number | null;
+  /** Ambang yang dianggap masih "datar". */
+  ambangKg: number;
+};
