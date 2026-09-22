@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { formatAngka } from '@/lib/format';
+import { formatAngka, formatMakro } from '@/lib/format';
 import { colors, radius, spacing, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
 
@@ -76,9 +76,9 @@ export function PemilihTipeHari({ daftar, terpilihId, target, fase, override, on
           }}
         >
           <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macro.kalori} />
-          <TargetRingkas label="Protein" nilai={formatAngka(target.target_protein_g)} unit="g" warna={colors.macro.protein} />
-          <TargetRingkas label="Lemak" nilai={formatAngka(target.target_lemak_g)} unit="g" warna={colors.macro.lemak} />
-          <TargetRingkas label="Sat fat" nilai={`≤${formatAngka(target.batas_sat_fat_g)}`} unit="g" warna={colors.macro.satFat} />
+          <TargetRingkas label="Protein" nilai={formatMakro(target.target_protein_g)} unit="g" warna={colors.macro.protein} />
+          <TargetRingkas label="Lemak" nilai={formatMakro(target.target_lemak_g)} unit="g" warna={colors.macro.lemak} />
+          <TargetRingkas label="Sat fat" nilai={`≤${formatMakro(target.batas_sat_fat_g)}`} unit="g" warna={colors.macro.satFat} />
         </View>
 
         <Text style={{ ...typography.caption, color: colors.textFaint }}>

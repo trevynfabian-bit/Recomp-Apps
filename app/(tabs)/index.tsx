@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   HeroNumber,
+  KartuCatatan,
   KartuTimbangPagi,
   LegendaSumber,
   PanelRingkasanMakro,
@@ -14,7 +15,7 @@ import {
   SheetCatatFoto,
   type EntriMakananBaru,
 } from '@/components';
-import { formatAngka, formatTanggalPanjang } from '@/lib/format';
+import { formatAngka, formatMakro, formatTanggalPanjang } from '@/lib/format';
 import { ketukRingan } from '@/lib/haptics';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
 import {
@@ -58,6 +59,10 @@ export default function LogHarianScreen() {
 
   function simpanBeratPagi(beratKg: number) {
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
+  }
+
+  function simpanCatatan(catatan: string | null) {
+    setLog((prev) => ({ ...prev, catatan }));
   }
 
   /**
@@ -135,9 +140,9 @@ export default function LogHarianScreen() {
             borderTopColor: colors.border,
           }}
         >
-          <StatKecil label="Sisa protein" nilai={formatAngka(sisaProtein)} unit="g" warna={colors.jade} />
+          <StatKecil label="Sisa protein" nilai={formatMakro(sisaProtein)} unit="g" warna={colors.jade} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
-          <StatKecil label="Sisa lemak" nilai={formatAngka(sisaLemak)} unit="g" warna={colors.text} />
+          <StatKecil label="Sisa lemak" nilai={formatMakro(sisaLemak)} unit="g" warna={colors.text} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
           <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.text} kecil />
         </View>
@@ -202,8 +207,8 @@ export default function LogHarianScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <PenandaSumber jenis={sumberMakanan(food.sumber)} />
                   <Text style={{ ...typography.caption, color: colors.textFaint }}>
-                    P {formatAngka(food.protein_g)}g · L {formatAngka(food.lemak_g)}g · K{' '}
-                    {formatAngka(food.karbo_g)}g
+                    P {formatMakro(food.protein_g)}g · L {formatMakro(food.lemak_g)}g · K{' '}
+                    {formatMakro(food.karbo_g)}g
                   </Text>
                 </View>
               </View>
@@ -240,17 +245,7 @@ export default function LogHarianScreen() {
       {/* Catatan bebas per hari */}
       <View>
         <SectionHeader judul="Catatan hari ini" />
-        <Card>
-          <Text
-            style={{
-              ...typography.body,
-              color: log.catatan ? colors.textMuted : colors.textFaint,
-              lineHeight: 24,
-            }}
-          >
-            {log.catatan ?? 'Belum ada catatan untuk hari ini.'}
-          </Text>
-        </Card>
+        <KartuCatatan catatan={log.catatan} onSimpan={simpanCatatan} />
       </View>
 
       <SheetCatatFoto

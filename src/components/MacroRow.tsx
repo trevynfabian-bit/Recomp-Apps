@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme';
-import { formatAngka } from '@/lib/format';
+import { formatMakro } from '@/lib/format';
 import { hitungMakro, keteranganMakro } from '@/lib/makro';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
 
@@ -30,7 +30,7 @@ export function MacroRow({ macro, mode }: Props) {
           {/* Sisa negatif diberi awalan "+" karena angkanya sudah dimutlakkan. */}
           <Text style={{ ...typography.title, color: terlampaui ? colors.coral : colors.text }}>
             {mode === 'sisa' && terlampaui ? '+' : ''}
-            {formatAngka(nilaiUtama)}
+            {formatMakro(nilaiUtama)}
           </Text>
           <Text style={{ ...typography.label, color: colors.textFaint }}>{macro.unit}</Text>
         </View>
@@ -62,7 +62,7 @@ export function MacroRow({ macro, mode }: Props) {
         </Text>
         {!tanpaTarget ? (
           <Text style={{ ...typography.caption, color: colors.textFaint }}>
-            {formatAngka(macro.terpakai)} / {formatAngka(macro.target as number)} {macro.unit}
+            {formatMakro(macro.terpakai)} / {formatMakro(macro.target as number)} {macro.unit}
           </Text>
         ) : null}
       </View>

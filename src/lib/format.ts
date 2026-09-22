@@ -12,9 +12,26 @@ export function formatAngka(nilai: number): string {
   return Math.round(nilai).toLocaleString('id-ID');
 }
 
-/** Format angka desimal dengan jumlah digit tetap, koma sebagai desimal. */
+/**
+ * Format angka desimal dengan jumlah digit TETAP.
+ * Memakai Intl agar pemisah ribuan ikut benar (1.234,5), bukan hanya
+ * menukar titik jadi koma.
+ */
 export function formatDesimal(nilai: number, digit = 1): string {
-  return nilai.toFixed(digit).replace('.', ',');
+  return nilai.toLocaleString('id-ID', {
+    minimumFractionDigits: digit,
+    maximumFractionDigits: digit,
+  });
+}
+
+/**
+ * Format angka makro: satu desimal HANYA bila memang ada pecahannya.
+ * 128 tetap "128", 42,5 tampil "42,5" — supaya angka bulat tidak berisik
+ * dengan ",0" tapi pecahan tidak diam-diam dibulatkan.
+ */
+export function formatMakro(nilai: number): string {
+  const dibulatkan = Math.round(nilai * 10) / 10;
+  return Number.isInteger(dibulatkan) ? formatAngka(dibulatkan) : formatDesimal(dibulatkan, 1);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { formatAngka, rasio } from './format';
+import { formatMakro, rasio } from './format';
 import type { HitunganMakro, MacroProgress, ModeMakro } from '@/types/domain';
 
 /**
@@ -33,7 +33,7 @@ export function keteranganMakro(macro: MacroProgress, mode: ModeMakro): string {
 
   const sisa = macro.target - macro.terpakai;
   const satuan = macro.unit;
-  const batas = formatAngka(macro.target);
+  const batas = formatMakro(macro.target);
 
   if (mode === 'terpakai') {
     return macro.isBatas

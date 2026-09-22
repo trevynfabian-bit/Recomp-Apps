@@ -1,6 +1,7 @@
 export { Card } from './Card';
 export { HeroNumber } from './HeroNumber';
 export { InputAngka } from './InputAngka';
+export { KartuCatatan } from './KartuCatatan';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { MacroRow } from './MacroRow';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
