@@ -1,23 +1,46 @@
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, HeroNumber, MacroRow, Pill, SectionHeader } from '@/components';
-import { formatAngka, formatDesimal, formatTanggalPanjang } from '@/lib/format';
-import { mockFoodLogsHariIni, mockProfile, mockSnapshotHariIni } from '@/mocks/dailyLog';
+import {
+  Card,
+  HeroNumber,
+  KartuTimbangPagi,
+  MacroRow,
+  Pill,
+  SectionHeader,
+} from '@/components';
+import { formatAngka, formatTanggalPanjang } from '@/lib/format';
+import {
+  beratTerakhirSebelum,
+  mockFoodLogsHariIni,
+  mockProfile,
+  mockSnapshotHariIni,
+} from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
+import type { DailyLog } from '@/types/domain';
 
 /**
  * Layar utama Log Harian.
- * Fase 1 frontend: seluruh angka berasal dari data tiruan di `@/mocks/dailyLog`;
- * penggantian ke query Supabase dilakukan di task backend tanpa mengubah layout.
+ * Fase 1 frontend: seluruh angka berasal dari data tiruan di `@/mocks/dailyLog`
+ * dan perubahan hanya hidup di state layar ini. Penggantian ke Supabase
+ * dilakukan di task layer backend tanpa mengubah layout.
  */
 export default function LogHarianScreen() {
   const insets = useSafeAreaInsets();
-  const { log, dayType, target, fase, macros } = mockSnapshotHariIni();
+  const snapshot = mockSnapshotHariIni();
+  const { dayType, target, fase, macros } = snapshot;
 
-  const kalori = macros[0];
-  const protein = macros[1];
+  // Log hari ini disimpan di state supaya kartu Timbang Pagi bisa menulis balik.
+  const [log, setLog] = useState<DailyLog>(snapshot.log);
+
   const sisaKalori = target.target_kalori - log.kalori;
   const sisaProtein = target.target_protein_g - log.protein_g;
+  const sisaLemak = target.target_lemak_g - log.lemak_g;
+  const beratSebelumnya = beratTerakhirSebelum(log.tanggal);
+
+  function simpanBeratPagi(beratKg: number) {
+    setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
+  }
 
   return (
     <ScrollView
@@ -30,16 +53,14 @@ export default function LogHarianScreen() {
       }}
     >
       {/* Header: sapaan + tanggal + fase aktif */}
-      <View style={{ gap: spacing.md }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <View>
-            <Text style={{ ...typography.title, color: colors.text }}>Hai, {mockProfile.nama}</Text>
-            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
-              {formatTanggalPanjang(log.tanggal)}
-            </Text>
-          </View>
-          <Pill label={fase} warna={colors.jade} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <View>
+          <Text style={{ ...typography.title, color: colors.text }}>Hai, {mockProfile.nama}</Text>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+            {formatTanggalPanjang(log.tanggal)}
+          </Text>
         </View>
+        <Pill label={fase} warna={colors.jade} />
       </View>
 
       {/* Angka utama: sisa kalori hari ini */}
@@ -61,23 +82,21 @@ export default function LogHarianScreen() {
             borderTopColor: colors.border,
           }}
         >
-          <StatKecil
-            label="Berat pagi"
-            nilai={log.berat_pagi_kg !== null ? formatDesimal(log.berat_pagi_kg) : '—'}
-            unit="kg"
-            warna={colors.text}
-          />
+          <StatKecil label="Sisa protein" nilai={formatAngka(sisaProtein)} unit="g" warna={colors.jade} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
-          <StatKecil
-            label="Sisa protein"
-            nilai={formatAngka(sisaProtein)}
-            unit="g"
-            warna={colors.jade}
-          />
+          <StatKecil label="Sisa lemak" nilai={formatAngka(sisaLemak)} unit="g" warna={colors.text} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
           <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.text} kecil />
         </View>
       </Card>
+
+      {/* Timbang pagi — jalur tercepat: ketuk kartu, lalu Simpan (dua tap) */}
+      <KartuTimbangPagi
+        beratKg={log.berat_pagi_kg}
+        sumber={log.sumber_berat}
+        beratSebelumnyaKg={beratSebelumnya}
+        onSimpan={simpanBeratPagi}
+      />
 
       {/* Rincian makro vs target absolut hari ini */}
       <View>

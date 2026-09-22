@@ -116,3 +116,13 @@ export function mockSnapshotHariIni(): DailySnapshot {
   const target = cariTarget(log.day_type_id, fase);
   return { log, dayType, target, fase, macros: susunMacros(log, target) };
 }
+
+/**
+ * Berat terakhir yang tercatat SEBELUM tanggal tertentu.
+ * Dipakai kartu Timbang Pagi sebagai nilai awal, supaya menyimpan berat
+ * hari ini cukup dua tap (buka kartu → Simpan) tanpa mengetik.
+ */
+export function beratTerakhirSebelum(tanggal: string): number | null {
+  const sebelum = mockRiwayatBerat.filter((r) => r.tanggal < tanggal);
+  return sebelum.length ? sebelum[sebelum.length - 1].berat_pagi_kg : null;
+}
