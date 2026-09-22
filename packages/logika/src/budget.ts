@@ -1,4 +1,4 @@
-import type { BudgetMingguan, HariBudget, RingkasanHariBudget } from './tipe';
+import type { BudgetMingguan, HariBudget, LajuBudget, RingkasanHariBudget } from './tipe';
 import { majuHari } from './tren';
 
 /**
@@ -83,4 +83,35 @@ export function budgetMingguan(hari: HariBudget[], hariIni: string): BudgetMingg
 function bulatkan(nilai: number, desimal: number): number {
   const f = 10 ** desimal;
   return Math.round(nilai * f) / f;
+}
+
+/**
+ * Apakah pemakaian budget SESUAI LAJU untuk titik minggu ini.
+ *
+ * Sisa saja tidak cukup. "Sisa 13.580 kcal" terdengar banyak, padahal maknanya
+ * bergantung hari ini hari ke berapa. Yang menjawab adalah membandingkan yang
+ * sudah terpakai dengan yang SEHARUSNYA sudah terpakai sampai titik ini.
+ *
+ * Pembandingnya memakai jumlah TARGET hari-hari yang sudah berjalan, bukan
+ * proporsi hari (2 dari 7). Target harian berbeda-beda, jadi proporsi hari akan
+ * menyesatkan pada minggu yang hari beratnya menumpuk di awal atau akhir.
+ */
+export function lajuBudget(budget: BudgetMingguan, ambangKcal = 300): LajuBudget {
+  const berjalan = budget.rincian.filter((h) => h.status !== 'mendatang');
+  const seharusnya = berjalan.reduce((n, h) => n + h.targetKalori, 0);
+
+  if (berjalan.length === 0) {
+    return { seharusnya: 0, selisih: 0, status: 'belum mulai', ambangKcal };
+  }
+
+  const selisih = budget.terpakai - seharusnya;
+  if (Math.abs(selisih) <= ambangKcal) {
+    return { seharusnya, selisih, status: 'sesuai laju', ambangKcal };
+  }
+  return {
+    seharusnya,
+    selisih,
+    status: selisih > 0 ? 'lebih cepat' : 'lebih lambat',
+    ambangKcal,
+  };
 }

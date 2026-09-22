@@ -160,3 +160,14 @@ export type BudgetMingguan = {
   rencanaPerHari: number | null;
   rincian: RingkasanHariBudget[];
 };
+
+/** Perbandingan pemakaian budget terhadap laju yang seharusnya. */
+export type LajuBudget = {
+  /** Jumlah target hari-hari yang sudah berjalan. */
+  seharusnya: number;
+  /** Terpakai dikurangi seharusnya; positif berarti lebih cepat dari laju. */
+  selisih: number;
+  status: 'sesuai laju' | 'lebih cepat' | 'lebih lambat' | 'belum mulai';
+  /** Selisih di bawah ini masih dianggap sesuai laju. */
+  ambangKcal: number;
+};

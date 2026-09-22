@@ -4,9 +4,10 @@ import {
   budgetMingguan,
   formatAngka,
   formatTanggalPanjang,
+  lajuBudget,
 } from '@recomp/logika';
 import type { RingkasanHariBudget } from '@recomp/logika';
-import { Card, HeroNumber, PemilihFase, Pill, SectionHeader } from '@/components';
+import { Card, HeroNumber, MeterBudget, PemilihFase, Pill, SectionHeader } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
@@ -27,6 +28,7 @@ export default function BudgetScreen() {
   const hariIni = mockDailyLogHariIni.tanggal;
   const budget = budgetMingguan(mockHariBudget(hariIni, profil.fase_aktif), hariIni);
 
+  const laju = lajuBudget(budget);
   const lewat = budget.sisa < 0;
 
   return (
@@ -58,6 +60,11 @@ export default function BudgetScreen() {
           keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
           warna={lewat ? colors.coral : colors.amber}
         />
+
+        {/* Meter laju: sisa saja tidak menjawab "apakah lajunya wajar". */}
+        <View style={{ marginTop: spacing.xl }}>
+          <MeterBudget budget={budget} laju={laju} />
+        </View>
 
         <View
           style={{
