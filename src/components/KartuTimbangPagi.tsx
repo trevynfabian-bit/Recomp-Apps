@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
+import { PenandaSumber } from './PenandaSumber';
+import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal } from '@/lib/format';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -44,6 +46,7 @@ export function KartuTimbangPagi({ beratKg, sumber, beratSebelumnyaKg, onSimpan 
   const valid = drafAngka !== null && drafAngka >= BERAT_MIN && drafAngka <= BERAT_MAKS;
   const selisih =
     beratKg !== null && beratSebelumnyaKg !== null ? beratKg - beratSebelumnyaKg : null;
+  const jenisSumber = beratKg !== null ? sumberBerat(sumber) : null;
 
   function geser(delta: number) {
     ketukRingan();
@@ -104,13 +107,21 @@ export function KartuTimbangPagi({ beratKg, sumber, beratSebelumnyaKg, onSimpan 
                 <Text style={{ ...typography.display, color: colors.textFaint }}>—</Text>
               )}
 
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
-                {beratKg === null
-                  ? 'Belum ditimbang · ketuk untuk catat'
-                  : sumber === 'healthkit'
-                    ? 'Dari Apple Health · ketuk untuk ubah'
-                    : 'Dicatat manual · ketuk untuk ubah'}
-              </Text>
+              {jenisSumber !== null ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <PenandaSumber
+                    jenis={jenisSumber}
+                    detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
+                  />
+                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                    ketuk untuk ubah
+                  </Text>
+                </View>
+              ) : (
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  Belum ditimbang · ketuk untuk catat
+                </Text>
+              )}
             </View>
 
             <View

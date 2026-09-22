@@ -5,8 +5,10 @@ import {
   Card,
   HeroNumber,
   KartuTimbangPagi,
+  LegendaSumber,
   PanelRingkasanMakro,
   PemilihTipeHari,
+  PenandaSumber,
   Pill,
   SectionHeader,
   SheetCatatFoto,
@@ -14,6 +16,7 @@ import {
 } from '@/components';
 import { formatAngka, formatTanggalPanjang } from '@/lib/format';
 import { ketukRingan } from '@/lib/haptics';
+import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
 import {
   beratTerakhirSebelum,
   cariTarget,
@@ -50,6 +53,7 @@ export default function LogHarianScreen() {
   const sisaProtein = target.target_protein_g - log.protein_g;
   const sisaLemak = target.target_lemak_g - log.lemak_g;
   const beratSebelumnya = beratTerakhirSebelum(log.tanggal);
+  const jumlahEstimasi = hitungEstimasi(foodLogs);
 
   function simpanBeratPagi(beratKg: number) {
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
@@ -162,12 +166,19 @@ export default function LogHarianScreen() {
       {/* Rincian makro vs target absolut hari ini */}
       <View>
         <SectionHeader judul="Makro hari ini" aksi={`target ${dayType.nama} · ${fase}`} />
-        <PanelRingkasanMakro macros={macros} />
+        <PanelRingkasanMakro macros={macros} jumlahEstimasi={jumlahEstimasi} />
       </View>
 
       {/* Daftar makanan hari ini + jalan masuk catat via foto */}
       <View>
-        <SectionHeader judul="Makanan" aksi={`${foodLogs.length} entri`} />
+        <SectionHeader
+          judul="Makanan"
+          aksi={
+            jumlahEstimasi > 0
+              ? `${foodLogs.length} entri · ${jumlahEstimasi} estimasi`
+              : `${foodLogs.length} entri`
+          }
+        />
         <Card flat>
           {foodLogs.map((food, i) => (
             <View
@@ -181,23 +192,18 @@ export default function LogHarianScreen() {
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ flex: 1, gap: 3, paddingRight: spacing.md }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text
-                    style={{ ...typography.body, color: colors.text, flexShrink: 1 }}
-                    numberOfLines={1}
-                  >
-                    {food.nama_makanan}
-                  </Text>
-                  {/* Entri dari foto SELALU ditandai estimasi, bukan data mentah. */}
-                  {food.sumber === 'foto_ai' ? (
-                    <Text style={{ ...typography.caption, color: colors.amber }}>ESTIMASI</Text>
-                  ) : null}
-                </View>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
-                  P {formatAngka(food.protein_g)}g · L {formatAngka(food.lemak_g)}g · K{' '}
-                  {formatAngka(food.karbo_g)}g
+              <View style={{ flex: 1, gap: 4, paddingRight: spacing.md }}>
+                <Text style={{ ...typography.body, color: colors.text }} numberOfLines={1}>
+                  {food.nama_makanan}
                 </Text>
+                {/* Asal tiap entri ditandai, termasuk yang dicatat manual. */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <PenandaSumber jenis={sumberMakanan(food.sumber)} />
+                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                    P {formatAngka(food.protein_g)}g · L {formatAngka(food.lemak_g)}g · K{' '}
+                    {formatAngka(food.karbo_g)}g
+                  </Text>
+                </View>
               </View>
               <Text style={{ ...typography.label, color: colors.amber }}>
                 {formatAngka(food.kalori)} kcal
@@ -250,6 +256,14 @@ export default function LogHarianScreen() {
         onTutup={() => setSheetFotoTerbuka(false)}
         onSimpan={tambahMakanan}
       />
+
+      {/* Arti tiap penanda, dijelaskan sekali di bawah */}
+      <View>
+        <SectionHeader judul="Arti penanda" />
+        <Card>
+          <LegendaSumber />
+        </Card>
+      </View>
 
       {/* Penanda eksplisit bahwa Fase 1 masih memakai data tiruan */}
       <View style={{ alignItems: 'center' }}>

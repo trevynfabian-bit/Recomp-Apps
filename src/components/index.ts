@@ -5,6 +5,7 @@ export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { MacroRow } from './MacroRow';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
 export { PemilihTipeHari } from './PemilihTipeHari';
+export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';

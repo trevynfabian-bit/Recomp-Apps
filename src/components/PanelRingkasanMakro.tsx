@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Card } from './Card';
 import { MacroRow } from './MacroRow';
+import { PenandaSumber } from './PenandaSumber';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, typography } from '@/theme';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
 
 type Props = {
   macros: MacroProgress[];
+  /** Berapa entri makanan hari ini yang berasal dari estimasi (foto AI). */
+  jumlahEstimasi?: number;
 };
 
 /**
@@ -16,7 +19,7 @@ type Props = {
  * dan "Terpakai" (berapa yang sudah masuk), jadi pengguna tidak perlu
  * menghitung sendiri di kepala.
  */
-export function PanelRingkasanMakro({ macros }: Props) {
+export function PanelRingkasanMakro({ macros, jumlahEstimasi = 0 }: Props) {
   const [mode, setMode] = useState<ModeMakro>('sisa');
 
   return (
@@ -30,10 +33,21 @@ export function PanelRingkasanMakro({ macros }: Props) {
           ))}
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
-          Sat fat dihitung sebagai BATAS, bukan sasaran. Karbo sengaja tidak
-          ditargetkan — hanya dicatat.
-        </Text>
+        <View style={{ gap: spacing.sm }}>
+          {/* Angka total bisa tercampur estimasi — katakan terus terang. */}
+          {jumlahEstimasi > 0 ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <PenandaSumber jenis="estimasi" />
+              <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
+                Total di atas memuat {jumlahEstimasi} entri hasil perkiraan.
+              </Text>
+            </View>
+          ) : null}
+          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            Sat fat dihitung sebagai BATAS, bukan sasaran. Karbo sengaja tidak
+            ditargetkan — hanya dicatat.
+          </Text>
+        </View>
       </View>
     </Card>
   );

@@ -111,3 +111,16 @@ export type HitunganMakro = {
   /** Rasio 0..1 untuk bar progress. */
   progres: number;
 };
+
+/**
+ * Asal sebuah angka. Dipakai di seluruh app supaya data mentah dan hasil
+ * perkiraan selalu bisa dibedakan — syarat non-fungsional di PRD dan dasar
+ * bagi AI coach untuk menandai mana catatan asli, mana tebakan.
+ */
+export type JenisSumber =
+  /** Diketik sendiri oleh pengguna. Data mentah. */
+  | 'manual'
+  /** Ditarik dari perangkat/layanan (HealthKit, WHOOP, Strava, Hevy). Data mentah. */
+  | 'sinkron'
+  /** Hasil perkiraan model atau rumus (foto AI, BF Navy, TDEE). Bisa meleset. */
+  | 'estimasi';
