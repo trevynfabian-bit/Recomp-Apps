@@ -65,6 +65,34 @@ export type DailyLogRow = {
   updated_at: string;
 };
 
+/** Baris view `v_tipe_hari_aktif`: tipe hari + target untuk fase yang aktif. */
+export type TipeHariAktifRow = {
+  day_type_id: string;
+  user_id: string;
+  nama: string;
+  auto_detect: boolean;
+  is_default: boolean;
+  urutan: number;
+  fase: FaseProgram;
+  target_id: string | null;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+};
+
+/** Hasil `ambil_target_harian`: target yang berlaku untuk satu tanggal. */
+export type TargetHarianRow = {
+  day_type_id: string;
+  nama_tipe_hari: string;
+  fase: FaseProgram;
+  override: boolean;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+};
+
 export type FoodLogRow = {
   id: string;
   user_id: string;
@@ -116,7 +144,10 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      v_tipe_hari_aktif: {
+        Row: TipeHariAktifRow;
+        Relationships: [];
+      };
     };
     Functions: {
       simpan_berat_pagi: {
@@ -126,6 +157,18 @@ export type Database = {
           p_sumber: SumberBeratDb;
         };
         Returns: DailyLogRow;
+      };
+      setel_tipe_hari: {
+        Args: {
+          p_tanggal: string;
+          p_day_type_id: string;
+          p_override: boolean;
+        };
+        Returns: DailyLogRow;
+      };
+      ambil_target_harian: {
+        Args: { p_tanggal: string };
+        Returns: TargetHarianRow[];
       };
     };
     Enums: {
