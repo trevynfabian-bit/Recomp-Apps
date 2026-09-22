@@ -348,6 +348,145 @@ try {
   console.log(
     `✓ ${deretSql.length} titik cocok — deret rata-rata 7 hari di SQL dan TypeScript sejalan.`,
   );
+
+  // === Bagian 5: endpoint gabungan (arah & kecukupan) ======================
+  //
+  // Endpoint gabungan menghitung ULANG sinyal arah dan kecukupan data di SQL.
+  // Keduanya punya aturan yang halus dan mudah menyimpang tanpa kelihatan:
+  // "datar" ditentukan ambang 0,2 kg, dan `hariLagiUntukArah` dihitung dari
+  // timbangan PERTAMA, bukan dari hari ini.
+  console.log();
+  const { sinyalArah, kecukupanTren } = muatLogikaTs();
+
+  // Pengguna KEDUA dengan riwayat dua pekan penuh. Riwayat pengguna pertama
+  // sengaja berlubang di bagian 3–4, jadi jendela sebelumnya selalu kosong dan
+  // arahnya selalu "belum cukup data" — cabang yang paling tidak menarik.
+  // Menambah timbangan ke sana akan mengubah angka bagian 3 & 4, jadi cabang
+  // naik/turun/datar diuji di pengguna terpisah.
+  const UID2 = 'ffff0000-0000-0000-0000-00000000f001';
+  sql(`insert into auth.users (id, email) values ('${UID2}', 'paritas-tren@contoh.test');`);
+
+  const RIWAYAT2 = [
+    ['2026-09-09', 73.9], ['2026-09-10', 74.2], ['2026-09-11', 73.8],
+    ['2026-09-12', 74.1], ['2026-09-13', 74.4], ['2026-09-14', 74.0],
+    ['2026-09-15', 74.3], ['2026-09-16', 74.1], ['2026-09-17', 74.5],
+    ['2026-09-18', 74.2], ['2026-09-19', 74.7], ['2026-09-20', 74.4],
+    ['2026-09-21', 74.8], ['2026-09-22', 74.6],
+  ];
+  for (const [tgl, kg] of RIWAYAT2) {
+    sql(`set request.jwt.claim.sub = '${UID2}'; select 1 from public.simpan_berat_pagi(date '${tgl}', ${kg});`);
+  }
+  const riwayat2Ts = RIWAYAT2.map(([tanggal, kg]) => ({ tanggal, berat_pagi_kg: kg }));
+
+  // Pengguna KETIGA menguji AMBANG-nya, bukan cuma aritmetikanya. Tiga blok
+  // 14 hari yang terpisah jauh (jendelanya tidak saling menyentuh), masing-
+  // masing disusun agar selisihnya jatuh persis di sekitar ambang 0,2 kg:
+  // +0,20 tepat di ambang (harus "naik", bukan "datar"), +0,15 di bawahnya
+  // ("datar"), dan −0,30 ("turun"). Operator yang salah — `<=` alih-alih `<`
+  // — hanya terlihat di kasus pertama.
+  const UID3 = 'ffff0000-0000-0000-0000-00000000f002';
+  sql(`insert into auth.users (id, email) values ('${UID3}', 'paritas-ambang@contoh.test');`);
+
+  const BLOK = [
+    { awal: '2026-07-01', lalu: 74.0, kini: 74.2, akhir: '2026-07-14', harap: 'naik' },
+    { awal: '2026-08-01', lalu: 74.0, kini: 74.15, akhir: '2026-08-14', harap: 'datar' },
+    { awal: '2026-09-01', lalu: 74.5, kini: 74.2, akhir: '2026-09-14', harap: 'turun' },
+  ];
+  const riwayat3Ts = [];
+  for (const b of BLOK) {
+    for (let i = 0; i < 14; i += 1) {
+      const tgl = new Date(Date.parse(`${b.awal}T00:00:00Z`) + i * 86400000)
+        .toISOString()
+        .slice(0, 10);
+      const kg = i < 7 ? b.lalu : b.kini;
+      sql(`set request.jwt.claim.sub = '${UID3}'; select 1 from public.simpan_berat_pagi(date '${tgl}', ${kg});`);
+      riwayat3Ts.push({ tanggal: tgl, berat_pagi_kg: kg });
+    }
+  }
+
+  let gagalAmbang = 0;
+  console.log('ambang 0,2 kg   SQL arah   TS arah    SQL Δ     TS Δ      diharapkan');
+  console.log('─'.repeat(72));
+  for (const b of BLOK) {
+    const baris = sql(
+      `set request.jwt.claim.sub = '${UID3}';
+       select (j -> 'arah' ->> 'arah') || '|' || coalesce(j -> 'arah' ->> 'perubahan_kg', 'null')
+         from (select public.tren_berat_7_hari(date '${b.akhir}', 14) as j) t;`,
+    );
+    const [arahSql, ubahSql] = baris.split('|');
+    const ts = sinyalArah(riwayat3Ts, b.akhir);
+    const tsUbah = ts.perubahanKg === null ? 'null' : String(ts.perubahanKg);
+
+    const cocok =
+      arahSql === ts.arah &&
+      arahSql === b.harap &&
+      Math.abs(Number(ubahSql) - Number(tsUbah)) < 1e-9;
+    if (!cocok) gagalAmbang += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${b.akhir}  ${arahSql.padEnd(9)}  ${ts.arah.padEnd(9)}  ` +
+        `${ubahSql.padStart(6)}  ${tsUbah.padStart(7)}  ${b.harap}`,
+    );
+  }
+  console.log();
+  if (gagalAmbang > 0) {
+    console.error(`✗ ${gagalAmbang} kasus BERBEDA (ambang sinyal arah).`);
+    process.exit(1);
+  }
+  console.log(`✓ ${BLOK.length} kasus cocok — ambang "datar" 0,2 kg sejalan di SQL dan TypeScript.`);
+  console.log();
+
+  const KASUS_GABUNGAN = ['2026-09-22', '2026-09-20', '2026-09-18', '2026-09-16'];
+  let gagalGabungan = 0;
+  console.log('tanggal        SQL arah          TS arah           SQL Δ     TS Δ      hari lagi');
+  console.log('─'.repeat(86));
+  for (const tgl of KASUS_GABUNGAN) {
+    // Rentang 14 hari; TS diberi riwayat yang sama supaya pembandingnya adil.
+    const baris = sql(
+      `set request.jwt.claim.sub = '${UID2}';
+       select (j -> 'arah' ->> 'arah') || '|' ||
+              coalesce(j -> 'arah' ->> 'perubahan_kg', 'null') || '|' ||
+              (j -> 'kecukupan' ->> 'cukup_arah') || '|' ||
+              coalesce(j -> 'kecukupan' ->> 'hari_lagi_untuk_arah', 'null') || '|' ||
+              (j -> 'kecukupan' ->> 'jendela_penuh') || '|' ||
+              (j -> 'kecukupan' ->> 'jumlah_dalam_jendela')
+         from (select public.tren_berat_7_hari(date '${tgl}', 14) as j) t;`,
+    );
+    const [arahSql, ubahSql, cukupSql, hariSql, penuhSql, nSql] = baris.split('|');
+
+    const ts = sinyalArah(riwayat2Ts, tgl);
+    // TS menerima riwayat 14 hari yang berakhir di tanggal itu — sama dengan
+    // rentang yang dipakai SQL untuk menghitung kecukupan.
+    const dariTs = new Date(Date.parse(`${tgl}T00:00:00Z`) - 13 * 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const riwayatJendela = riwayat2Ts.filter((r) => r.tanggal >= dariTs && r.tanggal <= tgl);
+    const kec = kecukupanTren(riwayatJendela, tgl);
+
+    const tsUbah = ts.perubahanKg === null ? 'null' : String(ts.perubahanKg);
+    const tsHari = kec.hariLagiUntukArah === null ? 'null' : String(kec.hariLagiUntukArah);
+
+    const cocok =
+      arahSql === ts.arah &&
+      (ubahSql === 'null' ? tsUbah === 'null' : Math.abs(Number(ubahSql) - Number(tsUbah)) < 1e-9) &&
+      (cukupSql === 'true') === kec.cukupArah &&
+      hariSql === tsHari &&
+      (penuhSql === 'true') === kec.jendelaPenuh &&
+      Number(nSql) === kec.jumlahDalamJendela;
+    if (!cocok) gagalGabungan += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${tgl}  ${arahSql.padEnd(16)}  ${ts.arah.padEnd(16)}  ` +
+        `${ubahSql.padStart(6)}  ${tsUbah.padStart(7)}  ${hariSql.padStart(4)}/${tsHari}`,
+    );
+  }
+
+  console.log();
+  if (gagalGabungan > 0) {
+    console.error(`✗ ${gagalGabungan} kasus BERBEDA (endpoint tren gabungan).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${KASUS_GABUNGAN.length} kasus cocok — sinyal arah & kecukupan di SQL dan TypeScript sejalan.`,
+  );
 } finally {
   hentikanPostgres();
 }

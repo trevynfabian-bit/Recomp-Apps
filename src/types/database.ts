@@ -17,6 +17,9 @@ export type ProfileRow = {
   nama: string | null;
   satuan: string;
   fase_aktif: FaseProgram;
+  /** Jangkar koridor target; null sebelum fase pertama dicatat. */
+  fase_mulai_tanggal: string | null;
+  fase_berat_awal_kg: number | null;
   tinggi_cm: number | null;
   jenis_kelamin: 'pria' | 'wanita' | null;
   batas_pinggang_cm: number | null;
@@ -156,6 +159,38 @@ export type RataRataBeratRow = {
 export type DeretRataRataRow = RataRataBeratRow & {
   /** Berat pagi mentah hari itu; `null` bila tidak ditimbang. */
   berat_harian_kg: number | null;
+};
+
+/**
+ * Hasil `tren_berat_7_hari` — satu snapshot layar Tren.
+ * Nama kunci mengikuti SQL; service yang menerjemahkannya ke bentuk TS.
+ */
+export type TrenSnapshotRow = {
+  dari: string;
+  sampai: string;
+  deret: DeretRataRataRow[];
+  rata_rata: RataRataBeratRow;
+  sepekan_lalu: RataRataBeratRow;
+  arah: {
+    arah: 'naik' | 'turun' | 'datar' | 'belum cukup data';
+    perubahan_kg: number | null;
+    ambang_kg: number;
+  };
+  kecukupan: {
+    ada_timbangan: boolean;
+    jumlah_total: number;
+    jumlah_dalam_jendela: number;
+    cukup_rata_rata: boolean;
+    jendela_penuh: boolean;
+    cukup_arah: boolean;
+    hari_lagi_untuk_arah: number | null;
+  };
+  /** `null` bila pengguna belum pernah menimbang sama sekali. */
+  jangkar_fase: {
+    fase: FaseProgram;
+    tanggal_mulai: string;
+    berat_awal_kg: number;
+  } | null;
 };
 
 export type WorkoutRow = {
@@ -299,6 +334,10 @@ export type Database = {
       deret_rata_rata_7_hari: {
         Args: { p_dari: string; p_sampai: string };
         Returns: DeretRataRataRow[];
+      };
+      tren_berat_7_hari: {
+        Args: { p_sampai: string; p_hari: number };
+        Returns: TrenSnapshotRow;
       };
       deteksi_tipe_hari: {
         Args: { p_tanggal: string; p_user_id: string | null };

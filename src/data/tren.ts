@@ -1,6 +1,12 @@
 import { supabase } from '@/lib/supabase';
-import type { TitikTren } from '@recomp/logika';
-import type { DeretRataRataRow } from '@/types/database';
+import type {
+  Fase,
+  KecukupanTren,
+  RataRata7Hari,
+  SinyalArah,
+  TitikTren,
+} from '@recomp/logika';
+import type { DeretRataRataRow, TrenSnapshotRow } from '@/types/database';
 
 /**
  * Akses data tren berat.
@@ -97,4 +103,80 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanTren {
     default:
       return new KesalahanTren('Gagal memuat tren. Periksa koneksi lalu coba lagi.', true);
   }
+}
+
+/** Bentuk siap pakai layar Tren, sudah diterjemahkan dari JSON SQL. */
+export type SnapshotTren = {
+  dari: string;
+  sampai: string;
+  deret: TitikTren[];
+  rataRata: RataRata7Hari;
+  sepekanLalu: RataRata7Hari;
+  arah: SinyalArah;
+  kecukupan: KecukupanTren;
+  /** `null` bila pengguna belum pernah menimbang sama sekali. */
+  jangkarFase: { fase: Fase; tanggalMulai: string; beratAwalKg: number } | null;
+};
+
+/**
+ * Satu snapshot untuk seluruh layar Tren.
+ *
+ * Dipanggil SEKALI, bukan lima kali. Alasannya bukan cuma kecepatan:
+ * timbangan pagi yang masuk di antara dua panggilan menghasilkan layar yang
+ * angkanya tidak cocok satu sama lain — deret mengatakan satu hal, ringkasan
+ * di atasnya mengatakan hal lain — dan ketidakcocokan seperti itu tidak akan
+ * pernah bisa direproduksi saat dilaporkan.
+ */
+export async function snapshotTren(sampai: string, hari = 14): Promise<SnapshotTren> {
+  const { data, error } = await supabase.rpc('tren_berat_7_hari', {
+    p_sampai: sampai,
+    p_hari: hari,
+  });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanTren('Server tidak mengembalikan data tren.', true);
+
+  const j = data as TrenSnapshotRow;
+  const angka = (n: number | null) => (n === null ? null : Number(n));
+
+  return {
+    dari: j.dari,
+    sampai: j.sampai,
+    deret: j.deret.map((b) => ({
+      tanggal: b.tanggal,
+      rataRataKg: angka(b.rata_rata_kg),
+      beratHarianKg: angka(b.berat_harian_kg),
+    })),
+    rataRata: {
+      tanggal: j.rata_rata.tanggal,
+      rataRataKg: angka(j.rata_rata.rata_rata_kg),
+      jumlahTimbangan: j.rata_rata.jumlah_timbangan,
+    },
+    sepekanLalu: {
+      tanggal: j.sepekan_lalu.tanggal,
+      rataRataKg: angka(j.sepekan_lalu.rata_rata_kg),
+      jumlahTimbangan: j.sepekan_lalu.jumlah_timbangan,
+    },
+    arah: {
+      arah: j.arah.arah,
+      perubahanKg: angka(j.arah.perubahan_kg),
+      ambangKg: Number(j.arah.ambang_kg),
+    },
+    kecukupan: {
+      adaTimbangan: j.kecukupan.ada_timbangan,
+      jumlahTotal: j.kecukupan.jumlah_total,
+      jumlahDalamJendela: j.kecukupan.jumlah_dalam_jendela,
+      cukupRataRata: j.kecukupan.cukup_rata_rata,
+      jendelaPenuh: j.kecukupan.jendela_penuh,
+      cukupArah: j.kecukupan.cukup_arah,
+      hariLagiUntukArah: j.kecukupan.hari_lagi_untuk_arah,
+    },
+    jangkarFase: j.jangkar_fase
+      ? {
+          fase: j.jangkar_fase.fase,
+          tanggalMulai: j.jangkar_fase.tanggal_mulai,
+          beratAwalKg: Number(j.jangkar_fase.berat_awal_kg),
+        }
+      : null,
+  };
 }
