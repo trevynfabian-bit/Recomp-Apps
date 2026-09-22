@@ -12,6 +12,8 @@ export type {
   HariBudget,
   HariRedistribusi,
   HasilRedistribusi,
+  HasilTdee,
+  InputTdee,
   LajuBudget,
   EntriBeratRingkas,
   Fase,
@@ -21,6 +23,7 @@ export type {
   KecukupanTren,
   KoridorTarget,
   MacroProgress,
+  MetodeTdee,
   ModeMakro,
   OpsiRedistribusi,
   ProteksiProtein,
@@ -69,3 +72,11 @@ export {
   selisihPerluDipindah,
   terapkanRedistribusi,
 } from './redistribusi';
+
+export {
+  bandingkanTargetTdee,
+  estimasiTdee,
+  KCAL_PER_KG,
+  pengaliRataRata,
+  PENGALI_AKTIVITAS,
+} from './tdee';

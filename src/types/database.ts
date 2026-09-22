@@ -20,6 +20,7 @@ export type ProfileRow = {
   tinggi_cm: number | null;
   jenis_kelamin: 'pria' | 'wanita' | null;
   batas_pinggang_cm: number | null;
+  tanggal_lahir: string | null;
   created_at: string;
   updated_at: string;
 };

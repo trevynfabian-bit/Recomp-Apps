@@ -33,6 +33,8 @@ export type Profile = {
   tinggi_cm: number;
   jenis_kelamin: 'pria' | 'wanita';
   batas_pinggang_cm: number;
+  /** Dibutuhkan rumus Mifflin-St Jeor pada estimasi TDEE; boleh null. */
+  tanggal_lahir: string | null;
 };
 
 /** day_type_targets — target ABSOLUT per (tipe hari x fase). */

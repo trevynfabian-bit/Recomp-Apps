@@ -6,6 +6,8 @@ import {
   formatAngka,
   formatTanggalPanjang,
   lajuBudget,
+  bandingkanTargetTdee,
+  estimasiTdee,
   periksaProteksiProtein,
   rincianKumulatif,
   terapkanRedistribusi,
@@ -15,6 +17,7 @@ import {
   Card,
   HeroNumber,
   IndikatorProteinTerlindungi,
+  KartuTdee,
   MeterBudget,
   PanelRedistribusi,
   StatusRedistribusi,
@@ -23,7 +26,7 @@ import {
   SectionHeader,
 } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
-import { mockDailyLogHariIni } from '@/mocks/dailyLog';
+import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -64,6 +67,34 @@ export default function BudgetScreen() {
   const mendatangSebelum = hariDasar.filter((h) => h.tanggal > hariIni);
   const mendatangSesudah = hariSetelah.filter((h) => h.tanggal > hariIni);
   const proteksi = periksaProteksiProtein(mendatangSebelum, mendatangSesudah);
+
+  /*
+   * TDEE dari tiga metode. Metode berbasis data memakai riwayat berat yang ada
+   * dan rata-rata asupan hari-hari yang sudah berjalan minggu ini — di Fase 2
+   * rentangnya diganti data asli yang lebih panjang.
+   */
+  const berjalan = budget.rincian.filter((h) => h.status !== 'mendatang');
+  const beratAwal = mockRiwayatBerat[0]?.berat_pagi_kg ?? null;
+  const beratAkhir = mockRiwayatBerat[mockRiwayatBerat.length - 1]?.berat_pagi_kg ?? null;
+
+  const tdee = estimasiTdee({
+    beratKg: beratAkhir ?? 75,
+    tinggiCm: profil.tinggi_cm,
+    usiaTahun: usiaDari(profil.tanggal_lahir, hariIni),
+    jenisKelamin: profil.jenis_kelamin,
+    // Body fat Navy butuh ukuran pinggang & leher — itu Fase 2, jadi metode
+    // Katch-McArdle sengaja dilewati sampai datanya ada.
+    persenLemak: null,
+    tipeHariMinggu: budget.rincian.map((h) => h.namaTipeHari),
+    hariData: mockRiwayatBerat.length,
+    rataAsupanKalori:
+      berjalan.length > 0
+        ? berjalan.reduce((n, h) => n + h.terpakaiKalori, 0) / berjalan.length
+        : null,
+    perubahanBeratKg: beratAwal !== null && beratAkhir !== null ? beratAkhir - beratAwal : null,
+  });
+
+  const hariIniRinci = budget.rincian.find((h) => h.status === 'hari ini');
 
   const laju = lajuBudget(budget);
   const rincian = rincianKumulatif(budget);
@@ -196,6 +227,19 @@ export default function BudgetScreen() {
         )}
       </View>
 
+      {/* TDEE: rentang dari beberapa metode, bukan satu angka */}
+      <View>
+        <SectionHeader judul="Kebutuhan energi" aksi={`${tdee.metode.length} metode`} />
+        <KartuTdee
+          tdee={tdee}
+          perbandingan={
+            hariIniRinci
+              ? bandingkanTargetTdee(hariIniRinci.targetKalori, tdee.tengah, profil.fase_aktif)
+              : null
+          }
+        />
+      </View>
+
       {/* Proteksi protein — dibuktikan dari data, bukan sekadar diklaim */}
       <View>
         <SectionHeader judul="Proteksi protein" aksi="tidak pernah dipotong" />
@@ -299,6 +343,17 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
       </View>
     </View>
   );
+}
+
+/** Usia penuh tahun pada tanggal acuan; `null` bila tanggal lahir belum diisi. */
+function usiaDari(tanggalLahir: string | null, pada: string): number | null {
+  if (!tanggalLahir) return null;
+  const [ly, lm, ld] = tanggalLahir.split('-').map(Number);
+  const [py, pm, pd] = pada.split('-').map(Number);
+  let usia = py - ly;
+  // Belum ulang tahun di tahun itu.
+  if (pm < lm || (pm === lm && pd < ld)) usia -= 1;
+  return usia;
 }
 
 const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

@@ -5,6 +5,7 @@ export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { InputAngka } from './InputAngka';
 export { KartuCatatan } from './KartuCatatan';
+export { KartuTdee } from './KartuTdee';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';

@@ -239,3 +239,40 @@ export type ProteksiProtein = {
     kaloriSesudah: number;
   }[];
 };
+
+/** Masukan untuk estimasi TDEE. Field `null` berarti metodenya dilewati. */
+export type InputTdee = {
+  beratKg: number;
+  tinggiCm: number | null;
+  usiaTahun: number | null;
+  jenisKelamin: 'pria' | 'wanita' | null;
+  /** Persen lemak tubuh bila diketahui; dibutuhkan Katch-McArdle. */
+  persenLemak: number | null;
+  /** Tipe hari sepanjang minggu, untuk pengali aktivitas. */
+  tipeHariMinggu: string[];
+  /** Berapa hari data asupan & berat yang tersedia. */
+  hariData: number;
+  rataAsupanKalori: number | null;
+  /** Perubahan berat sepanjang periode data; positif berarti naik. */
+  perubahanBeratKg: number | null;
+};
+
+/** Satu metode perhitungan TDEE. */
+export type MetodeTdee = {
+  nama: string;
+  nilai: number;
+  /** Ringkasan dari mana angkanya, supaya bisa ditelusuri. */
+  dasar: string;
+  /** true bila memakai data pengguna, bukan rumus populasi. */
+  berbasisData: boolean;
+};
+
+/** Hasil estimasi TDEE sebagai rentang. */
+export type HasilTdee = {
+  metode: MetodeTdee[];
+  min: number | null;
+  maks: number | null;
+  tengah: number | null;
+  keyakinan: 'rendah' | 'sedang' | 'tinggi';
+  alasanKeyakinan: string;
+};

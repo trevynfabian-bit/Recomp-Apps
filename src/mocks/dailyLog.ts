@@ -24,6 +24,9 @@ export const mockProfile: Profile = {
   tinggi_cm: 176,
   jenis_kelamin: 'pria',
   batas_pinggang_cm: 86,
+  // Dibutuhkan Mifflin-St Jeor; kolom `profiles.tanggal_lahir` ditambahkan
+  // migrasi 20260922000900.
+  tanggal_lahir: '1994-03-12',
 };
 
 export const mockDayTypes: DayType[] = [
