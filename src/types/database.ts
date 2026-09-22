@@ -65,6 +65,11 @@ export type DailyLogRow = {
   karbo_g: number;
   sat_fat_g: number;
   target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+  /** Fase yang BERLAKU pada tanggal itu, bukan fase aktif saat dibaca. */
+  fase: FaseProgram | null;
   catatan: string | null;
   sumber_berat: SumberBeratDb | null;
   created_at: string;
@@ -201,6 +206,19 @@ export type TrenSnapshotRow = {
   };
 };
 
+/** fase_periode — riwayat fase program. */
+export type FasePeriodeRow = {
+  id: string;
+  user_id: string;
+  fase: FaseProgram;
+  mulai_tanggal: string;
+  /** `null` berarti periode yang sedang berjalan; hanya boleh satu. */
+  selesai_tanggal: string | null;
+  /** Rata-rata 7 hari saat periode dimulai; jangkar koridor target. */
+  berat_awal_kg: number | null;
+  created_at: string;
+};
+
 export type WorkoutRow = {
   id: string;
   user_id: string;
@@ -263,6 +281,16 @@ export type Database = {
         Row: DailyLogRow;
         Insert: Partial<DailyLogRow> & { user_id: string; tanggal: string };
         Update: Partial<DailyLogRow>;
+        Relationships: [];
+      };
+      fase_periode: {
+        Row: FasePeriodeRow;
+        Insert: Partial<FasePeriodeRow> & {
+          user_id: string;
+          fase: FaseProgram;
+          mulai_tanggal: string;
+        };
+        Update: Partial<FasePeriodeRow>;
         Relationships: [];
       };
       food_logs: {
@@ -346,6 +374,14 @@ export type Database = {
       tren_berat_7_hari: {
         Args: { p_sampai: string; p_hari: number };
         Returns: TrenSnapshotRow;
+      };
+      fase_pada_tanggal: {
+        Args: { p_tanggal: string };
+        Returns: FaseProgram;
+      };
+      ganti_fase: {
+        Args: { p_fase: FaseProgram; p_tanggal: string | null };
+        Returns: FasePeriodeRow;
       };
       deteksi_tipe_hari: {
         Args: { p_tanggal: string; p_user_id: string | null };
