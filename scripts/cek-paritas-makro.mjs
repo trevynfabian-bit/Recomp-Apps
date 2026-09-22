@@ -11,7 +11,7 @@
  * `hitungMakro` dari src/lib/makro.ts, lalu hasilnya dibandingkan.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -73,20 +73,62 @@ function muatLogikaTs() {
   const kerja = mkdtempSync(join(tmpdir(), 'paritas-'));
   copyFileSync('src/lib/format.ts', join(kerja, 'format.ts'));
   copyFileSync('src/types/domain.ts', join(kerja, 'domain.ts'));
+  copyFileSync('src/mocks/workout.ts', join(kerja, 'workout.ts'));
 
   // Alias `@/…` tidak ada di luar proyek, jadi diarahkan ke berkas tetangga.
   writeFileSync(
     join(kerja, 'makro.ts'),
-    readFileSync('src/lib/makro.ts', 'utf8').replace("@/types/domain", "./domain"),
+    readFileSync('src/lib/makro.ts', 'utf8').replace('@/types/domain', './domain'),
+  );
+  writeFileSync(
+    join(kerja, 'deteksiTipeHari.ts'),
+    readFileSync('src/lib/deteksiTipeHari.ts', 'utf8')
+      .replace('@/types/domain', './domain')
+      .replace('@/mocks/workout', './workout'),
   );
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-    ['makro.ts', 'format.ts', 'domain.ts', '--module', 'commonjs', '--target', 'es2022',
+    ['makro.ts', 'format.ts', 'domain.ts', 'workout.ts', 'deteksiTipeHari.ts',
+     '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
-  return require(join(kerja, 'keluar', 'makro.js'));
+  return {
+    ...require(join(kerja, 'keluar', 'makro.js')),
+    ...require(join(kerja, 'keluar', 'deteksiTipeHari.js')),
+  };
+}
+
+/** Kasus uji deteksi tipe hari: kombinasi jenis workout dalam satu hari. */
+const KASUS_DETEKSI = [
+  { label: 'tanpa workout', jenis: [] },
+  { label: 'angkat beban saja', jenis: ['angkat_beban'] },
+  { label: 'lari saja', jenis: ['lari'] },
+  { label: 'beban + lari', jenis: ['angkat_beban', 'lari'] },
+  { label: 'padel saja', jenis: ['padel'] },
+  { label: 'beban + padel', jenis: ['angkat_beban', 'padel'] },
+  { label: 'lari + padel', jenis: ['lari', 'padel'] },
+  { label: 'beban + lari + padel', jenis: ['angkat_beban', 'lari', 'padel'] },
+  { label: 'hanya jenis lainnya', jenis: ['lainnya'] },
+  { label: 'lainnya + beban', jenis: ['lainnya', 'angkat_beban'] },
+];
+
+function psqlFile(berkas, db = 'postgres') {
+  execFileSync(
+    'psql',
+    ['-v', 'ON_ERROR_STOP=1', '-h', PGROOT, '-p', PORT, '-U', 'postgres', '-d', db, '-q', '-f', berkas],
+    { encoding: 'utf8', stdio: 'pipe' },
+  );
+}
+
+/** Pasang tiruan auth Supabase + seluruh migrasi, supaya fungsi SQL bisa dipanggil. */
+function pasangSkema() {
+  sql('create extension if not exists "pgcrypto";');
+  psqlFile('supabase/tests/harness.sql');
+  for (const f of readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).sort()) {
+    psqlFile(join('supabase/migrations', f));
+  }
 }
 
 mulaiPostgres();
@@ -138,10 +180,66 @@ try {
 
   console.log();
   if (gagal > 0) {
-    console.error(`✗ ${gagal} kasus BERBEDA antara SQL dan TypeScript.`);
+    console.error(`✗ ${gagal} kasus BERBEDA antara SQL dan TypeScript (aturan sisa).`);
     process.exit(1);
   }
   console.log(`✓ ${KASUS.length} kasus cocok — aturan sisa di SQL dan TypeScript sejalan.`);
+
+  // === Bagian 2: aturan deteksi tipe hari ==================================
+  console.log();
+  pasangSkema();
+
+  const UID = '99999999-9999-9999-9999-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID}', 'paritas@contoh.test');`);
+
+  const { deteksiTipeHari } = muatLogikaTs();
+  // Tipe hari sisi TS harus mencerminkan yang dibuat seed di database.
+  const dayTypes = sql(
+    `select string_agg(id || '|' || nama || '|' || auto_detect, E'\n' order by urutan)
+       from public.day_types where user_id = '${UID}';`,
+  )
+    .split('\n')
+    .map((b) => {
+      const [id, nama, auto] = b.split('|');
+      return { id, nama, auto_detect: auto === 't' || auto === 'true', is_default: nama === 'Rest' };
+    });
+
+  let gagalDeteksi = 0;
+  console.log('kasus deteksi                  SQL             TS');
+  console.log('─'.repeat(64));
+  KASUS_DETEKSI.forEach((k, i) => {
+    const tanggal = `2026-10-${String(i + 1).padStart(2, '0')}`;
+    k.jenis.forEach((j, n) => {
+      sql(
+        `insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+         values ('${UID}', date '${tanggal}', 'w${n}', '${j}', 'manual', '${tanggal}-${n}');`,
+      );
+    });
+
+    const namaSql = sql(
+      `select coalesce((select nama from public.deteksi_tipe_hari(date '${tanggal}', '${UID}')), 'â€”');`,
+    );
+
+    const workouts = k.jenis.map((j, n) => ({
+      id: `w${n}`, nama: `w${n}`, jenis: j, sumber: 'manual', durasi_menit: 30,
+    }));
+    const namaTs = deteksiTipeHari(workouts, dayTypes).nama ?? 'â€”';
+
+    const cocok = namaSql === namaTs;
+    if (!cocok) gagalDeteksi += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${k.label.padEnd(28)} ${namaSql.padEnd(15)} ${namaTs}`,
+    );
+  });
+
+  console.log();
+  if (gagalDeteksi > 0) {
+    console.error(`✗ ${gagalDeteksi} kasus BERBEDA (aturan deteksi tipe hari).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${KASUS_DETEKSI.length} kasus cocok — aturan deteksi tipe hari di SQL dan TypeScript sejalan.`,
+  );
 } finally {
   hentikanPostgres();
 }

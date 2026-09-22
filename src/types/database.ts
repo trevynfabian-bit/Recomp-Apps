@@ -9,6 +9,8 @@
 export type FaseProgram = 'Maintenance' | 'Lean Gain' | 'Cut';
 export type SumberBeratDb = 'manual' | 'healthkit';
 export type SumberMakananDb = 'manual' | 'foto_ai';
+export type JenisOlahragaDb = 'angkat_beban' | 'lari' | 'padel' | 'lainnya';
+export type SumberWorkoutDb = 'hevy' | 'strava' | 'whoop' | 'healthkit' | 'manual';
 
 export type ProfileRow = {
   user_id: string;
@@ -149,6 +151,27 @@ export type RataRataBeratRow = {
   jumlah_timbangan: number;
 };
 
+export type WorkoutRow = {
+  id: string;
+  user_id: string;
+  /** Sudah dinormalisasi ke Asia/Jakarta sebelum ditulis. */
+  tanggal: string;
+  nama: string;
+  jenis: JenisOlahragaDb;
+  sumber: SumberWorkoutDb;
+  durasi_menit: number | null;
+  external_id: string | null;
+  created_at: string;
+};
+
+/** Hasil `deteksi_tipe_hari`: tebakan tipe hari beserta dasarnya. */
+export type DeteksiTipeHariRow = {
+  day_type_id: string;
+  nama: string;
+  /** Workout yang menentukan hasilnya, mis. "Push Day A (hevy)". */
+  dasar: string[];
+};
+
 export type FoodLogRow = {
   id: string;
   user_id: string;
@@ -196,6 +219,12 @@ export type Database = {
         Row: FoodLogRow;
         Insert: Omit<FoodLogRow, 'id' | 'created_at'>;
         Update: Partial<FoodLogRow>;
+        Relationships: [];
+      };
+      workouts: {
+        Row: WorkoutRow;
+        Insert: Omit<WorkoutRow, 'id' | 'created_at'>;
+        Update: Partial<WorkoutRow>;
         Relationships: [];
       };
     };
@@ -255,6 +284,14 @@ export type Database = {
       rata_rata_berat_7_hari: {
         Args: { p_tanggal: string };
         Returns: RataRataBeratRow[];
+      };
+      deteksi_tipe_hari: {
+        Args: { p_tanggal: string; p_user_id: string | null };
+        Returns: DeteksiTipeHariRow[];
+      };
+      ikuti_auto_deteksi: {
+        Args: { p_tanggal: string };
+        Returns: DailyLogRow;
       };
     };
     Enums: {
