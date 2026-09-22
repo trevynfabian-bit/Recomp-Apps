@@ -17,6 +17,8 @@ import {
 } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
+import { supabaseSiap } from '@/lib/supabase';
+import { simpanCatatanHarian } from '@/data/catatan';
 import { deteksiTipeHari } from '@recomp/logika';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
 import { mockWorkoutsHariIni } from '@/mocks/workout';
@@ -77,7 +79,18 @@ export default function LogHarianScreen() {
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
   }
 
-  function simpanCatatan(catatan: string | null) {
+  /**
+   * Simpan catatan harian.
+   *
+   * Fase 1 masih berjalan di atas data tiruan dan belum punya layar masuk,
+   * jadi penulisan ke Supabase hanya dilakukan bila kredensialnya sudah diisi.
+   * Tanpa itu app tetap bisa diklik-klik seperti biasa. Galat sengaja
+   * dilemparkan kembali supaya kartu yang menampilkannya, bukan ditelan di sini.
+   */
+  async function simpanCatatan(catatan: string | null) {
+    if (supabaseSiap) {
+      await simpanCatatanHarian(log.tanggal, catatan);
+    }
     setLog((prev) => ({ ...prev, catatan }));
   }
 

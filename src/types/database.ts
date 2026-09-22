@@ -273,6 +273,10 @@ export type Database = {
         Args: { p_tanggal: string; p_catatan: string | null };
         Returns: DailyLogRow;
       };
+      ambil_catatan_harian: {
+        Args: { p_tanggal: string };
+        Returns: string | null;
+      };
       ringkasan_harian: {
         Args: { p_tanggal: string };
         Returns: RingkasanHarianRow[];

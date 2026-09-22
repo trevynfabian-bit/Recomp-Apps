@@ -9,7 +9,11 @@ const MAKS_KARAKTER = 500;
 
 type Props = {
   catatan: string | null;
-  onSimpan: (catatan: string | null) => void;
+  /**
+   * Menyimpan catatan. Boleh async dan boleh menolak — kartu menampilkan
+   * status "Menyimpan…" dan pesan gagal tanpa membuang tulisan pengguna.
+   */
+  onSimpan: (catatan: string | null) => void | Promise<void>;
 };
 
 /**
@@ -21,18 +25,32 @@ type Props = {
 export function KartuCatatan({ catatan, onSimpan }: Props) {
   const [menyunting, setMenyunting] = useState(false);
   const [draf, setDraf] = useState(catatan ?? '');
+  const [menyimpan, setMenyimpan] = useState(false);
+  const [galat, setGalat] = useState<string | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   // Mulai menyunting dari isi terbaru, bukan sisa draf sebelumnya.
   useEffect(() => {
-    if (menyunting) setDraf(catatan ?? '');
+    if (menyunting) {
+      setDraf(catatan ?? '');
+      setGalat(null);
+    }
   }, [menyunting, catatan]);
 
-  function simpan() {
-    ketukBerhasil();
+  async function simpan() {
     const bersih = draf.trim();
-    onSimpan(bersih === '' ? null : bersih);
-    setMenyunting(false);
+    setMenyimpan(true);
+    setGalat(null);
+    try {
+      await onSimpan(bersih === '' ? null : bersih);
+      ketukBerhasil();
+      setMenyunting(false);
+    } catch (e) {
+      // Tetap di mode sunting supaya tulisan pengguna tidak hilang.
+      setGalat(e instanceof Error ? e.message : 'Gagal menyimpan catatan.');
+    } finally {
+      setMenyimpan(false);
+    }
   }
 
   if (!menyunting) {
@@ -93,6 +111,12 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
           }}
         />
 
+        {galat ? (
+          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral, lineHeight: 16 }}>
+            {galat}
+          </Text>
+        ) : null}
+
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text style={{ ...typography.caption, color: colors.textFaint }}>
             {draf.length} / {MAKS_KARAKTER}
@@ -101,6 +125,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Pressable
               accessibilityRole="button"
+              disabled={menyimpan}
               onPress={() => setMenyunting(false)}
               style={({ pressed }) => ({
                 minHeight: TAP_MIN,
@@ -115,17 +140,25 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
 
             <Pressable
               accessibilityRole="button"
+              disabled={menyimpan}
               onPress={simpan}
               style={({ pressed }) => ({
                 minHeight: TAP_MIN,
                 justifyContent: 'center',
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
-                backgroundColor: colors.amber,
+                backgroundColor: menyimpan ? colors.surfaceSunken : colors.amber,
                 opacity: pressed ? 0.8 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: colors.bg }}>Simpan</Text>
+              <Text
+                style={{
+                  ...typography.label,
+                  color: menyimpan ? colors.textFaint : colors.bg,
+                }}
+              >
+                {menyimpan ? 'Menyimpan…' : 'Simpan'}
+              </Text>
             </Pressable>
           </View>
         </View>

@@ -77,21 +77,6 @@ export async function hapusMakanan(foodLogId: string): Promise<void> {
   if (error) throw terjemahkan(error);
 }
 
-/** Simpan catatan bebas harian. String kosong/spasi disimpan sebagai NULL. */
-export async function simpanCatatanHarian(
-  tanggal: string,
-  catatan: string | null,
-): Promise<DailyLogRow> {
-  const { data, error } = await supabase.rpc('simpan_catatan_harian', {
-    p_tanggal: tanggal,
-    p_catatan: catatan,
-  });
-
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanMakanan('Server tidak mengembalikan data', true);
-  return data;
-}
-
 /** Ringkasan satu hari: total, target berlaku, catatan, dan jumlah estimasi. */
 export async function ringkasanHarian(tanggal: string): Promise<RingkasanHarianRow | null> {
   const { data, error } = await supabase.rpc('ringkasan_harian', { p_tanggal: tanggal });
