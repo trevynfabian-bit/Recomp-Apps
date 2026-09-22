@@ -7,13 +7,15 @@ import {
   formatTanggalPanjang,
   lajuBudget,
   rincianKumulatif,
+  terapkanRedistribusi,
 } from '@recomp/logika';
-import type { BarisKumulatif } from '@recomp/logika';
+import type { BarisKumulatif, HasilRedistribusi } from '@recomp/logika';
 import {
   Card,
   HeroNumber,
   MeterBudget,
   PanelRedistribusi,
+  StatusRedistribusi,
   PemilihFase,
   Pill,
   SectionHeader,
@@ -42,14 +44,23 @@ export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
   const { profil, gantiFase } = useProfil();
   const hariIni = mockDailyLogHariIni.tanggal;
-  const budget = budgetMingguan(mockHariBudget(hariIni, profil.fase_aktif), hariIni);
+  /*
+   * Redistribusi yang sudah diterapkan minggu ini. Disimpan di state pada
+   * Fase 1; kolom aslinya (`weekly_budgets.opsi_redistribusi`,
+   * `redistribusi_terpakai`, `redistribusi_diterapkan_pada`) dipasang di task
+   * backend tanpa mengubah bentuk data di sini.
+   */
+  const [redistribusi, setRedistribusi] = useState<HasilRedistribusi | null>(null);
+
+  // Target hari mendatang memakai hasil redistribusi bila sudah diterapkan —
+  // tanpa ini panelnya terkunci tapi angka di bawahnya tidak berubah sama sekali.
+  const hariDasar = mockHariBudget(hariIni, profil.fase_aktif);
+  const budget = budgetMingguan(terapkanRedistribusi(hariDasar, redistribusi), hariIni);
 
   const laju = lajuBudget(budget);
   const rincian = rincianKumulatif(budget);
 
-  // Fase 1 menyimpan jejak redistribusi di memori; kolom aslinya
-  // (`weekly_budgets.redistribusi_terpakai`) dipasang di task backend.
-  const [redistribusiDipakai, setRedistribusiDipakai] = useState(false);
+
   const lewat = budget.sisa < 0;
 
   return (
@@ -161,13 +172,20 @@ export default function BudgetScreen() {
 
       {/* Redistribusi: menawarkan, tidak pernah menerapkan sendiri */}
       <View>
-        <SectionHeader judul="Redistribusi kalori" aksi="maksimal 1x per minggu" />
-        <PanelRedistribusi
-          budget={budget}
-          batasBawahKalori={BATAS_BAWAH_KALORI}
-          sudahDipakai={redistribusiDipakai}
-          onTerapkan={() => setRedistribusiDipakai(true)}
+        <SectionHeader
+          judul="Redistribusi kalori"
+          aksi={redistribusi ? 'sudah dipakai' : 'maksimal 1x per minggu'}
         />
+        {redistribusi ? (
+          <StatusRedistribusi hasil={redistribusi} diterapkanPada={hariIni} />
+        ) : (
+          <PanelRedistribusi
+            budget={budget}
+            batasBawahKalori={BATAS_BAWAH_KALORI}
+            sudahDipakai={false}
+            onTerapkan={setRedistribusi}
+          />
+        )}
       </View>
 
       {/* Kenapa angkanya begitu — perhitungannya bisa ditelusuri */}

@@ -52,7 +52,10 @@ export function budgetMingguan(hari: HariBudget[], hariIni: string): BudgetMingg
     };
   });
 
-  const budgetTotal = rincian.reduce((n, h) => n + h.targetKalori, 0);
+  // Budget minggu memakai RENCANA SEMULA. Kalau ia ikut turun saat target
+  // dipotong redistribusi, defisitnya tidak pernah berkurang — fiturnya
+  // membatalkan dirinya sendiri.
+  const budgetTotal = rincian.reduce((n, h) => n + (h.targetAsliKalori ?? h.targetKalori), 0);
   const terpakai = rincian
     .filter((h) => h.status !== 'mendatang')
     .reduce((n, h) => n + h.terpakaiKalori, 0);

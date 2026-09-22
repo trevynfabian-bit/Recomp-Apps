@@ -61,4 +61,9 @@ export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
 
 export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';
 
-export { hitungRedistribusi, KELIPATAN_KCAL, selisihPerluDipindah } from './redistribusi';
+export {
+  hitungRedistribusi,
+  KELIPATAN_KCAL,
+  selisihPerluDipindah,
+  terapkanRedistribusi,
+} from './redistribusi';

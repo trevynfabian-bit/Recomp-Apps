@@ -131,7 +131,15 @@ export type KecukupanTren = {
 export type HariBudget = {
   tanggal: string;
   namaTipeHari: string;
+  /** Target yang berlaku — bisa sudah diubah redistribusi. */
   targetKalori: number;
+  /**
+   * Target menurut RENCANA SEMULA (day_type_targets), sebelum redistribusi.
+   * Budget mingguan dihitung dari sini, bukan dari target yang sudah diubah:
+   * kalau budget ikut turun saat target dipotong, redistribusi membatalkan
+   * dirinya sendiri dan defisitnya tidak pernah berkurang.
+   */
+  targetAsliKalori?: number;
   terpakaiKalori: number;
 };
 

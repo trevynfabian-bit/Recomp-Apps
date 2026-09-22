@@ -1,6 +1,7 @@
 import { formatAngka } from './format';
 import type {
   BudgetMingguan,
+  HariBudget,
   HasilRedistribusi,
   HariRedistribusi,
   OpsiRedistribusi,
@@ -146,4 +147,28 @@ function susunAlasan(
   }
 
   return catatan.length > 0 ? `${dasar} — ${catatan.join(', ')}.` : `${dasar}.`;
+}
+
+/**
+ * Terapkan hasil redistribusi ke daftar hari.
+ *
+ * Dipisah dari `hitungRedistribusi` dengan sengaja: menghitung tawaran dan
+ * menerapkannya adalah dua hal berbeda, dan PRD menuntut penerapan selalu
+ * merupakan keputusan pengguna. Memisahkannya juga membuat pratinjau memakai
+ * jalur yang SAMA dengan penerapan, jadi yang dilihat pengguna sebelum menekan
+ * persis yang ia dapat sesudahnya.
+ */
+export function terapkanRedistribusi(
+  hari: HariBudget[],
+  hasil: HasilRedistribusi | null,
+): HariBudget[] {
+  if (!hasil || hasil.opsi === 'abaikan') return hari;
+
+  const peta = new Map(hasil.hari.map((h) => [h.tanggal, h.targetBaru]));
+  return hari.map((h) => {
+    const baru = peta.get(h.tanggal);
+    if (baru === undefined) return h;
+    // Rencana semula disimpan supaya budget mingguan tetap memakai angka itu.
+    return { ...h, targetKalori: baru, targetAsliKalori: h.targetAsliKalori ?? h.targetKalori };
+  });
 }
