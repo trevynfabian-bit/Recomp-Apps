@@ -12,7 +12,9 @@
     "lint": "expo lint",
     "db:cek": "bash scripts/cek-migrasi.sh",
     "cek:paritas": "node scripts/cek-paritas-makro.mjs",
-    "cek:db": "npm run db:cek && npm run cek:paritas"
+    "cek:db": "npm run db:cek && npm run cek:paritas",
+    "cek:edge": "bash scripts/cek-edge.sh",
+    "cek:semua": "npm run typecheck && npm run cek:edge && npm run cek:db"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -34,6 +36,7 @@
     "react-native-url-polyfill": "^4.0.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
     "@types/react": "~19.2.2",
     "@types/react-dom": "^19.3.0",
     "react-dom": "^19.2.3",
