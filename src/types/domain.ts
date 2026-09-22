@@ -10,8 +10,10 @@
  * batas paketnya.
  */
 export type {
+  ArahMetrik,
   DayType,
   Fase,
+  HasilEvaluasi,
   HasilBodyFat,
   KekuranganBodyFat,
   KomposisiTubuh,
@@ -22,7 +24,13 @@ export type {
   WorkoutRingkas,
 } from '@recomp/logika';
 
-import type { DayType, Fase, MacroProgress } from '@recomp/logika';
+import type {
+  ArahMetrik,
+  DayType,
+  Fase,
+  HasilEvaluasi,
+  MacroProgress,
+} from '@recomp/logika';
 
 /** Sumber angka berat — dipakai untuk membedakan data mentah vs hasil sync. */
 export type SumberBerat = 'manual' | 'healthkit';
@@ -226,6 +234,26 @@ export type RingkasanMingguan = {
   lanjutan?: string[];
 };
 
+/**
+ * Evaluasi 4 mingguan siap tampil: verdict beserta ketiga sumbu yang
+ * menghasilkannya.
+ *
+ * Verdict saja tidak cukup. "Kenaikan didominasi lemak" tanpa angka di
+ * belakangnya adalah vonis yang tidak bisa diperiksa; dengan ketiga sumbunya
+ * terlihat, pembaca bisa menilai sendiri apakah kesimpulannya masuk akal —
+ * dan itu yang membuat rekomendasinya layak diikuti.
+ */
+export type EvaluasiEmpatPekan = {
+  periode: { dari: string; sampai: string };
+  sumbu: {
+    label: string;
+    nilai: string;
+    arah: ArahMetrik;
+    sumber: JenisSumber;
+  }[];
+  hasil: HasilEvaluasi;
+};
+
 /** Satu pesan dalam percakapan AI Coach. */
 export type PesanCoach = {
   id: string;
@@ -253,6 +281,8 @@ export type PesanCoach = {
    * sebagai KARTU, bukan gelembung — ia tidak menjawab apa pun.
    */
   ringkasan?: RingkasanMingguan;
+  /** Verdict evaluasi 4 mingguan; juga dirender sebagai kartu, bukan gelembung. */
+  evaluasi?: EvaluasiEmpatPekan;
 };
 
 /**

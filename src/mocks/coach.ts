@@ -1,4 +1,4 @@
-import { judulPercakapan } from '@recomp/logika';
+import { evaluasi4Mingguan, judulPercakapan } from '@recomp/logika';
 import type {
   Percakapan,
   PesanCoach,
@@ -63,6 +63,28 @@ export const mockPercakapan: PesanCoach[] = [
         'Kenapa pinggang naik lebih cepat pekan ini?',
         'Bagaimana cara menutup kekurangan protein?',
       ],
+    },
+  },
+  {
+    // Jatuh di hari yang sama karena 22 September sekaligus batas empat pekan.
+    id: 'm0b',
+    peran: 'coach',
+    teks: '',
+    waktu: '2026-09-22T06:01:00+07:00',
+    evaluasi: {
+      periode: { dari: '2026-08-25', sampai: '2026-09-21' },
+      sumbu: [
+        { label: 'Berat', nilai: '+1,1 kg rata-rata 7 hari', arah: 'naik', sumber: 'manual' },
+        { label: 'Pinggang', nilai: '+0,9 cm', arah: 'naik', sumber: 'manual' },
+        { label: 'Kekuatan', nilai: '3 dari 4 gerakan naik', arah: 'naik', sumber: 'sinkron' },
+      ],
+      hasil: evaluasi4Mingguan({
+        fase: 'Lean Gain',
+        arahBerat: 'naik',
+        arahPinggang: 'naik',
+        arahKekuatan: 'naik',
+        pekanData: 4,
+      }),
     },
   },
   {

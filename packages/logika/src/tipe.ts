@@ -389,3 +389,28 @@ export type KelompokPesan = {
   label: string;
   idPesan: string[];
 };
+
+/** Arah sebuah metrik selama periode evaluasi. */
+export type ArahMetrik = 'naik' | 'datar' | 'turun' | 'belum jelas';
+
+/** Masukan evaluasi 4 mingguan. */
+export type InputEvaluasi = {
+  fase: Fase;
+  arahBerat: ArahMetrik;
+  arahPinggang: ArahMetrik;
+  arahKekuatan: ArahMetrik;
+  /** Berapa pekan data yang benar-benar ada. */
+  pekanData: number;
+};
+
+/** Verdict evaluasi 4 mingguan. */
+export type HasilEvaluasi = {
+  /** Kode stabil; dipakai pengujian dan penelusuran, bukan untuk ditampilkan. */
+  kode: string;
+  judul: string;
+  ringkas: string;
+  rekomendasi: string;
+  /** Sumbu mana yang paling menentukan verdict ini. */
+  penentu: string;
+  keyakinan: 'rendah' | 'sedang' | 'tinggi';
+};

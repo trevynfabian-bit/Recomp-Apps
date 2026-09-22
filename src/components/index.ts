@@ -14,6 +14,7 @@ export { KartuCatatan } from './KartuCatatan';
 export { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
 export { KartuTdee } from './KartuTdee';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
+export { KartuVerdictEvaluasi } from './KartuVerdictEvaluasi';
 export { KartuWidgetCoach } from './KartuWidgetCoach';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';

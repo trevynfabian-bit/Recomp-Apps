@@ -6,6 +6,7 @@
  * yang bisa basi.
  */
 export type {
+  ArahMetrik,
   BarisKumulatif,
   BudgetMingguan,
   DayType,
@@ -13,8 +14,10 @@ export type {
   HariRedistribusi,
   HasilRedistribusi,
   HasilBodyFat,
+  HasilEvaluasi,
   HasilTdee,
   InputBodyFat,
+  InputEvaluasi,
   InputTdee,
   LajuBudget,
   EntriBeratRingkas,
@@ -69,6 +72,8 @@ export {
 } from './percakapan';
 
 export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFat';
+
+export { evaluasi4Mingguan, PEKAN_EVALUASI } from './evaluasi';
 
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 

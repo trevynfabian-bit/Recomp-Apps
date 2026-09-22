@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import { formatJam } from '@recomp/logika';
 import { DaftarRujukan } from './DaftarRujukan';
 import { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
+import { KartuVerdictEvaluasi } from './KartuVerdictEvaluasi';
 import { KartuWidgetCoach } from './KartuWidgetCoach';
 import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
@@ -38,6 +39,20 @@ export function GelembungPesan({
 }: Props) {
   const dariPengguna = pesan.peran === 'pengguna';
   const gagal = pesan.status === 'gagal';
+
+  // Verdict evaluasi juga laporan, bukan balasan — sama seperti ringkasan.
+  if (pesan.evaluasi) {
+    return (
+      <View style={{ gap: spacing.xs }}>
+        <KartuVerdictEvaluasi evaluasi={pesan.evaluasi} />
+        {tampilkanJam ? (
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            {formatJam(pesan.waktu)}
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
 
   // Ringkasan mingguan bukan balasan, jadi ia tidak pernah jadi gelembung.
   if (pesan.ringkasan) {
