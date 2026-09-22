@@ -103,3 +103,31 @@ export type JenisSumber =
   | 'sinkron'
   /** Hasil perkiraan model atau rumus (foto AI, BF Navy, TDEE). Bisa meleset. */
   | 'estimasi';
+
+/**
+ * body_measurements — ukuran tubuh mingguan.
+ * Lengan dan paha dipisah KIRI/KANAN: asimetri itu nyata dan berguna dilacak,
+ * jadi tidak dirata-ratakan diam-diam.
+ */
+export type UkuranTubuh = {
+  id: string;
+  tanggal: string;
+  pinggang_cm: number;
+  dada_cm: number;
+  leher_cm: number;
+  lengan_kiri_cm: number;
+  lengan_kanan_cm: number;
+  paha_kiri_cm: number;
+  paha_kanan_cm: number;
+};
+
+/** Satu bagian tubuh beserta nilai terbaru dan perubahannya. */
+export type BarisUkuran = {
+  kunci: keyof Omit<UkuranTubuh, 'id' | 'tanggal'>;
+  label: string;
+  nilai: number;
+  /** Selisih terhadap pencatatan sebelumnya; `null` bila belum ada pembanding. */
+  selisih: number | null;
+  /** Pasangan kiri/kanan agar bisa ditampilkan berdampingan. */
+  pasangan?: 'kiri' | 'kanan';
+};

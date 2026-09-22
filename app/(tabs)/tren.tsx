@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   arahSesuaiFase,
@@ -46,6 +47,7 @@ import { colors, radius, spacing, typography } from '@/theme';
 export default function TrenScreen() {
   const insets = useSafeAreaInsets();
   const { profil } = useProfil();
+  const router = useRouter();
   const [tampilkanHarian, setTampilkanHarian] = useState(true);
 
   const riwayat = mockRiwayatBerat;
@@ -215,6 +217,26 @@ export default function TrenScreen() {
           </View>
         </Card>
       </View>
+
+      {/* Jalan masuk ke ukuran tubuh — pelengkap berat, bukan penggantinya */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Buka ukuran tubuh"
+        onPress={() => router.push('/ukuran')}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <Card>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ gap: 3, flex: 1 }}>
+              <Text style={{ ...typography.label, color: colors.text }}>Ukuran tubuh</Text>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                Pinggang, dada, lengan, paha, leher — yang tidak terlihat dari timbangan
+              </Text>
+            </View>
+            <Text style={{ ...typography.title, color: colors.amber }}>›</Text>
+          </View>
+        </Card>
+      </Pressable>
 
       {/* Daftar timbangan terakhir, dengan asal tiap angkanya */}
       <View>
