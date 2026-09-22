@@ -13,6 +13,7 @@ export { KartuBodyFat } from './KartuBodyFat';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuTdee } from './KartuTdee';
 export { KartuTimbangPagi } from './KartuTimbangPagi';
+export { KartuWidgetCoach } from './KartuWidgetCoach';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';
 export { MeterBudget } from './MeterBudget';

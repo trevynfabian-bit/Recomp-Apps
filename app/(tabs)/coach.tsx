@@ -113,6 +113,9 @@ export default function CoachScreen() {
             // Asal angka datang sebagai DATA dari balasan, bukan diurai dari
             // kalimatnya — itu yang membuat penandanya bisa dipercaya.
             rujukan: jawaban.rujukan,
+            // Kartu angka hasil function calling; dihitung app, bukan diketik
+            // ulang model ke dalam teks.
+            widget: jawaban.widget,
           },
         ]);
       } catch {
@@ -204,6 +207,9 @@ export default function CoachScreen() {
 
       <ScrollView
         ref={gulungRef}
+        // Daerah percakapan diberi nama supaya pembaca layar bisa melompat ke
+        // sini langsung, tanpa menyusuri kepala layar tiap kali.
+        accessibilityLabel="Daftar pesan percakapan"
         keyboardShouldPersistTaps="handled"
         onContentSizeChange={keBawah}
         contentContainerStyle={{

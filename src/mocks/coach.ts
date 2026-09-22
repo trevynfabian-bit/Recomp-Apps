@@ -1,5 +1,5 @@
 import { judulPercakapan } from '@recomp/logika';
-import type { Percakapan, PesanCoach, RujukanData } from '@/types/domain';
+import type { Percakapan, PesanCoach, RujukanData, WidgetCoach } from '@/types/domain';
 
 /**
  * Percakapan tiruan AI Coach.
@@ -28,6 +28,20 @@ export const mockPercakapan: PesanCoach[] = [
       'tubuh tidak bisa menambah setengah kilo jaringan dalam sehari tanpa surplus sekitar 3.850 ' +
       'kkal. Asupan Anda kemarin 2.980 kkal terhadap target 2.850.',
     waktu: '2026-09-22T07:14:12+07:00',
+    widget: [
+      {
+        jenis: 'angka',
+        fungsi: 'ambil_rata_rata_7_hari',
+        label: 'Rata-rata berat 7 hari',
+        nilai: '74,5',
+        unit: 'kg',
+        delta: '+0,3 kg terhadap pekan lalu',
+        arahDelta: 'sesuai',
+        keterangan: 'Koridor Lean Gain: +0,19 sampai +0,37 kg per pekan.',
+        sumber: 'manual',
+        deret: [74.0, 74.1, 74.2, 74.3, 74.35, 74.4, 74.5],
+      },
+    ],
     rujukan: [
       {
         label: 'Rata-rata berat 7 hari',
@@ -66,6 +80,20 @@ export const mockPercakapan: PesanCoach[] = [
       'naik 0,5 poin, sejalan dengan pinggang yang naik 0,9 cm. Kalau ingin angka yang bisa ' +
       'dijadikan patokan, DXA adalah satu-satunya jawabannya.',
     waktu: '2026-09-22T07:16:09+07:00',
+    widget: [
+      {
+        jenis: 'angka',
+        fungsi: 'estimasi_body_fat_navy',
+        label: 'Estimasi body fat',
+        nilai: '16,5',
+        unit: '%',
+        delta: '+0,5 poin sejak 1 September',
+        arahDelta: 'berlawanan',
+        keterangan: 'Rentang wajar 12,5–20,5% — galat baku metode ini ±4 poin.',
+        sumber: 'estimasi',
+        deret: [16.0, 16.1, 16.4, 16.5],
+      },
+    ],
     rujukan: [
       {
         label: 'Body fat',
@@ -102,6 +130,8 @@ export const SARAN_PERTANYAAN = [
 export type BalasanCoach = {
   teks: string;
   rujukan: RujukanData[];
+  /** Kartu angka yang diminta coach lewat function calling. */
+  widget: WidgetCoach[];
 };
 
 /**
@@ -144,6 +174,20 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
           dasar: '4 pencatatan mingguan',
         },
       ],
+      [
+        {
+          jenis: 'angka',
+          fungsi: 'ambil_rata_rata_7_hari',
+          label: 'Rata-rata berat 7 hari',
+          nilai: '74,5',
+          unit: 'kg',
+          delta: '+0,3 kg terhadap pekan lalu',
+          arahDelta: 'sesuai',
+          keterangan: 'Koridor Lean Gain: +0,19 sampai +0,37 kg per pekan.',
+          sumber: 'manual',
+          deret: [74.0, 74.1, 74.2, 74.3, 74.35, 74.4, 74.5],
+        },
+      ],
     );
   }
 
@@ -167,6 +211,20 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
           dasar: '7 timbangan pagi',
         },
       ],
+      [
+        {
+          jenis: 'angka',
+          fungsi: 'ambil_deret_ukuran',
+          label: 'Pinggang',
+          nilai: '85,4',
+          unit: 'cm',
+          delta: '+0,9 cm sejak 1 September',
+          arahDelta: 'berlawanan',
+          keterangan: 'Batas yang Anda tetapkan 86,0 cm.',
+          sumber: 'manual',
+          deret: [84.5, 84.8, 85.2, 85.4],
+        },
+      ],
     );
   }
 
@@ -187,6 +245,29 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
           nilai: '2.850 kkal',
           jenis: 'manual',
           dasar: 'tipe hari Angkat Beban',
+        },
+      ],
+      [
+        {
+          jenis: 'angka',
+          fungsi: 'ambil_ringkasan_sisa_harian',
+          label: 'Sisa kalori hari ini',
+          nilai: '870',
+          unit: 'kkal',
+          keterangan: 'Dari target 2.850 kkal untuk tipe hari Angkat Beban.',
+          sumber: 'estimasi',
+        },
+        {
+          jenis: 'makro',
+          fungsi: 'ambil_ringkasan_harian',
+          label: 'Makro hari ini',
+          sumber: 'estimasi',
+          baris: [
+            { nama: 'Kalori', terpakai: 1980, target: 2850, kunci: 'kalori' },
+            { nama: 'Protein', terpakai: 128, target: 180, kunci: 'protein' },
+            { nama: 'Lemak', terpakai: 62, target: 85, kunci: 'lemak' },
+            { nama: 'Sat fat', terpakai: 17, target: 25, kunci: 'satFat' },
+          ],
         },
       ],
     );
@@ -237,8 +318,12 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
   );
 }
 
-function teksDanRujukan(teks: string, rujukan: RujukanData[]): BalasanCoach {
-  return { teks, rujukan };
+function teksDanRujukan(
+  teks: string,
+  rujukan: RujukanData[],
+  widget: WidgetCoach[] = [],
+): BalasanCoach {
+  return { teks, rujukan, widget };
 }
 
 /** Percakapan lama, untuk menguji daftar riwayat dan pemisah tanggal. */

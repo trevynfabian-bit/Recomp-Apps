@@ -159,6 +159,47 @@ export type RujukanData = {
   dasar?: string;
 };
 
+/**
+ * Kartu angka yang dirender app atas permintaan coach.
+ *
+ * Inti mekanismenya: coach TIDAK menghitung sendiri. Ia memanggil fungsi
+ * ("function calling"), app yang menghitung dari data asli, lalu hasilnya
+ * dikembalikan sebagai kartu — bukan diketikkan ulang ke dalam kalimat.
+ * Dengan begitu angka di chat dijamin sama persis dengan angka di layar lain,
+ * dan tidak ada ruang bagi model untuk salah menyalin.
+ *
+ * `fungsi` disimpan supaya asal kartunya bisa ditelusuri saat angkanya
+ * terasa aneh — tanpa itu, kartu yang salah tidak bisa dilacak ke pemanggilnya.
+ */
+export type WidgetCoach =
+  | {
+      jenis: 'angka';
+      /** Nama fungsi yang dipanggil, mis. `ambil_rata_rata_7_hari`. */
+      fungsi: string;
+      label: string;
+      /** Nilai yang sudah diformat, mis. "74,5". */
+      nilai: string;
+      unit: string;
+      /** Perubahan bertanda, mis. "+0,3 kg" — sudah diformat. */
+      delta?: string;
+      /** Arah delta menurut TUJUAN pengguna, bukan menurut tandanya. */
+      arahDelta?: 'sesuai' | 'berlawanan' | 'netral';
+      keterangan?: string;
+      sumber: JenisSumber;
+      /** Deret untuk sparkline; kosong berarti tanpa grafik. */
+      deret?: number[];
+    }
+  | {
+      jenis: 'makro';
+      fungsi: string;
+      label: string;
+      sumber: JenisSumber;
+      baris: { nama: string; terpakai: number; target: number; kunci: MacroKeyWidget }[];
+    };
+
+/** Kunci warna makro yang boleh dipakai widget coach. */
+export type MacroKeyWidget = 'kalori' | 'protein' | 'lemak' | 'karbo' | 'satFat';
+
 /** Satu pesan dalam percakapan AI Coach. */
 export type PesanCoach = {
   id: string;
@@ -176,6 +217,11 @@ export type PesanCoach = {
    * coach; pesan pengguna tidak mengutip data.
    */
   rujukan?: RujukanData[];
+  /**
+   * Kartu angka hasil function calling. Dirender app dari data asli, bukan
+   * diketik ulang oleh model ke dalam teks.
+   */
+  widget?: WidgetCoach[];
 };
 
 /**

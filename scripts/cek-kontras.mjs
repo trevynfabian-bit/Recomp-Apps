@@ -134,6 +134,14 @@ const PASANGAN = [
 
   // Mark grafik dan tepi KONTROL — ambang 3:1 (WCAG 1.4.11)
   ['garis amber di surface (mark)', c.amber, c.surface, true],
+  // Bar makro terhadap TRACK-nya: batas "sudah terpakai" adalah informasi,
+  // jadi ia tunduk pada ambang 3:1 untuk objek grafis (WCAG 1.4.11).
+  ...['kalori', 'protein', 'lemak', 'karbo', 'satFat'].map((k) => [
+    `bar ${k} vs track surfaceSunken`,
+    c.macro[k],
+    c.surfaceSunken,
+    true,
+  ]),
   ['borderKuat di surface', c.borderKuat, c.surface, true],
   ['borderKuat di surfaceSunken', c.borderKuat, c.surfaceSunken, true],
   ['borderKuat di bg', c.borderKuat, c.bg, true],
