@@ -83,3 +83,28 @@ export type SinyalArah = {
   /** Ambang yang dianggap masih "datar". */
   ambangKg: number;
 };
+
+/** Batas bawah & atas koridor target untuk satu tanggal. */
+export type TitikKoridor = {
+  tanggal: string;
+  bawahKg: number;
+  atasKg: number;
+};
+
+/** Koridor target lengkap beserta jangkarnya. */
+export type KoridorTarget = {
+  fase: Fase;
+  /** Berat (rata-rata 7 hari) saat fase dimulai. */
+  beratJangkarKg: number;
+  tanggalJangkar: string;
+  titik: TitikKoridor[];
+};
+
+/** Posisi rata-rata sekarang terhadap koridor. */
+export type StatusKoridor = {
+  posisi: 'di dalam koridor' | 'di atas koridor' | 'di bawah koridor' | 'belum bisa dinilai';
+  /** Jarak ke batas terdekat; 0 bila di dalam, `null` bila belum bisa dinilai. */
+  selisihKg: number | null;
+  bawahKg: number | null;
+  atasKg: number | null;
+};

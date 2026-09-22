@@ -11,10 +11,13 @@ export type {
   Fase,
   HitunganMakro,
   JenisOlahraga,
+  KoridorTarget,
   MacroProgress,
   ModeMakro,
   RataRata7Hari,
   SinyalArah,
+  StatusKoridor,
+  TitikKoridor,
   TitikTren,
   WorkoutRingkas,
 } from './tipe';
@@ -41,3 +44,5 @@ export {
   rataRata7Hari,
   sinyalArah,
 } from './tren';
+
+export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';

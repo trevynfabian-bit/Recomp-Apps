@@ -3,6 +3,9 @@ import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   deretTren,
+  koridorTarget,
+  LAJU_PER_MINGGU,
+  statusKoridor,
   formatDesimal,
   formatTanggalPanjang,
   JENDELA_HARI,
@@ -11,7 +14,7 @@ import {
   sinyalArah,
 } from '@recomp/logika';
 import { Card, GrafikTren, HeroNumber, PenandaSumber, Pill, SectionHeader } from '@/components';
-import { mockProfile, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { mockJangkarFase, mockProfile, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -40,6 +43,15 @@ export default function TrenScreen() {
   // Rata-rata sepekan lalu, untuk menunjukkan perbandingannya secara eksplisit.
   const sepekanLalu = rataRata7Hari(riwayat, mundurHari(hariIni, JENDELA_HARI));
   const deret = deretTren(riwayat, mundurHari(hariIni, 13), hariIni);
+
+  // Koridor digambar sejak fase dimulai, cukup panjang untuk menutupi grafik.
+  const koridor = koridorTarget(
+    mockJangkarFase.berat_awal_kg,
+    mockJangkarFase.tanggal_mulai,
+    mockProfile.fase_aktif,
+    60,
+  );
+  const posisi = statusKoridor(koridor, hariIni, rata.rataRataKg);
 
   const warnaArah =
     sinyal.arah === 'naik'
@@ -126,7 +138,40 @@ export default function TrenScreen() {
             titik={deret}
             tampilkanHarian={tampilkanHarian}
             onUbahTampilkanHarian={setTampilkanHarian}
+            koridor={koridor}
           />
+        </Card>
+      </View>
+
+      {/* Posisi terhadap koridor target */}
+      <View>
+        <SectionHeader judul="Koridor target" aksi={`fase ${mockProfile.fase_aktif}`} />
+        <Card>
+          <View style={{ gap: spacing.md }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
+              <Text style={{ ...typography.title, color: warnaKoridor(posisi.posisi) }}>
+                {posisi.posisi === 'di dalam koridor' ? 'Di dalam koridor' : ubahHuruf(posisi.posisi)}
+              </Text>
+            </View>
+            {posisi.bawahKg !== null && posisi.atasKg !== null ? (
+              <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+                Rentang hari ini {formatDesimal(posisi.bawahKg)}–{formatDesimal(posisi.atasKg)} kg;
+                rata-rata Anda {rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'} kg
+                {posisi.selisihKg !== null && posisi.selisihKg !== 0
+                  ? `, selisih ${formatDesimal(Math.abs(posisi.selisihKg))} kg dari batas terdekat.`
+                  : '.'}
+              </Text>
+            ) : (
+              <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+                Belum cukup data untuk menilai posisi terhadap koridor.
+              </Text>
+            )}
+            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              Koridor memakai laju {persenLaju(mockProfile.fase_aktif)} berat badan per minggu sejak
+              fase dimulai ({formatTanggalPanjang(mockJangkarFase.tanggal_mulai)}, {formatDesimal(mockJangkarFase.berat_awal_kg)} kg).
+              Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.
+            </Text>
+          </View>
         </Card>
       </View>
 
@@ -220,6 +265,23 @@ export default function TrenScreen() {
       </View>
     </ScrollView>
   );
+}
+
+/** Warna status koridor; di dalam = jade, di luar = amber (fakta, bukan alarm). */
+function warnaKoridor(posisi: string): string {
+  return posisi === 'di dalam koridor' ? colors.aksenTeks.jade : colors.amber;
+}
+
+/** Kapitalkan huruf pertama untuk dipakai sebagai judul status. */
+function ubahHuruf(teks: string): string {
+  return teks.charAt(0).toUpperCase() + teks.slice(1);
+}
+
+/** Laju koridor fase aktif, dinyatakan dalam persen per minggu. */
+function persenLaju(fase: typeof mockProfile.fase_aktif): string {
+  const l = LAJU_PER_MINGGU[fase];
+  const p = (n: number) => `${n > 0 ? '+' : ''}${formatDesimal(n * 100, 2)}%`;
+  return `${p(l.min)} s/d ${p(l.maks)}`;
 }
 
 /** Penanda asal timbangan satu hari; kosong bila hari itu tidak ditimbang. */

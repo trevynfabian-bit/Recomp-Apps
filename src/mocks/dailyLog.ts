@@ -162,3 +162,13 @@ export function riwayatBeratTerakhir(tanggal: string, jumlah = 3): EntriBerat[] 
 export function simpanBeratStub(_beratKg: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 700));
 }
+
+/**
+ * Jangkar fase aktif untuk koridor target.
+ * Fase 2 mengisinya dari `program_phases`; di Fase 1 ini tiruan yang masuk akal:
+ * fase Lean Gain dimulai di awal rentang riwayat yang ada.
+ */
+export const mockJangkarFase = {
+  tanggal_mulai: mockRiwayatBerat[0].tanggal,
+  berat_awal_kg: mockRiwayatBerat[0].berat_pagi_kg,
+};

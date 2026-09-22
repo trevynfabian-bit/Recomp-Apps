@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { PanResponder, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
-import type { TitikTren } from '@recomp/logika';
+import type { KoridorTarget, TitikTren } from '@recomp/logika';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Tinggi area gambar, tidak termasuk label sumbu. */
@@ -17,6 +17,8 @@ type Props = {
   /** Tampilkan titik timbangan harian. Bisa dimatikan bila terasa ramai. */
   tampilkanHarian?: boolean;
   onUbahTampilkanHarian?: (nilai: boolean) => void;
+  /** Koridor target; digambar sebagai pita di belakang garis. */
+  koridor?: KoridorTarget | null;
 };
 
 /**
@@ -34,6 +36,7 @@ export function GrafikTren({
   titik,
   tampilkanHarian = true,
   onUbahTampilkanHarian,
+  koridor = null,
 }: Props) {
   const [lebar, setLebar] = useState(0);
   const [aktif, setAktif] = useState<number | null>(null);
@@ -43,11 +46,16 @@ export function GrafikTren({
 
   /** Domain sumbu Y dibulatkan ke 0,5 kg supaya angkanya enak dibaca. */
   const { min, maks, tick } = useMemo(() => {
-    const nilai = titik.flatMap((t) =>
+    const dariTitik = titik.flatMap((t) =>
       (tampilkanHarian ? [t.rataRataKg, t.beratHarianKg] : [t.rataRataKg]).filter(
         (n): n is number => n !== null,
       ),
     );
+    // Koridor ikut menentukan domain; tanpa ini pitanya terpotong di tepi.
+    const dariKoridor = (koridor?.titik ?? [])
+      .filter((k) => titik.some((t) => t.tanggal === k.tanggal))
+      .flatMap((k) => [k.bawahKg, k.atasKg]);
+    const nilai = [...dariTitik, ...dariKoridor];
     if (nilai.length === 0) return { min: 0, maks: 1, tick: [] as number[] };
 
     const lo = Math.floor((Math.min(...nilai) - 0.3) * 2) / 2;
@@ -58,7 +66,7 @@ export function GrafikTren({
       maks: hi,
       tick: [0, 1, 2, 3].map((i) => Math.round((lo + langkah * i) * 10) / 10),
     };
-  }, [titik, tampilkanHarian]);
+  }, [titik, tampilkanHarian, koridor]);
 
   const x = (i: number) =>
     PAD_KIRI + (titik.length <= 1 ? lebarPlot / 2 : (i / (titik.length - 1)) * lebarPlot);
@@ -109,6 +117,32 @@ export function GrafikTren({
       onPanResponderTerminate: () => setAktif(null),
     }),
   ).current;
+
+  /** Pita koridor + kedua garis batasnya, selaras dengan sumbu X titik tren. */
+  const { jalurKoridor, garisKoridorAtas, garisKoridorBawah } = useMemo(() => {
+    if (!koridor) return { jalurKoridor: '', garisKoridorAtas: '', garisKoridorBawah: '' };
+
+    const pasangan = titik
+      .map((t, i) => ({ i, k: koridor.titik.find((k) => k.tanggal === t.tanggal) }))
+      .filter((p): p is { i: number; k: NonNullable<typeof p.k> } => p.k !== undefined);
+
+    if (pasangan.length < 2) {
+      return { jalurKoridor: '', garisKoridorAtas: '', garisKoridorBawah: '' };
+    }
+
+    const atas = pasangan.map(({ i, k }, n) => `${n === 0 ? 'M' : 'L'}${x(i)} ${y(k.atasKg)}`).join(' ');
+    const bawah = pasangan.map(({ i, k }, n) => `${n === 0 ? 'M' : 'L'}${x(i)} ${y(k.bawahKg)}`).join(' ');
+    const bawahBalik = [...pasangan]
+      .reverse()
+      .map(({ i, k }) => `L${x(i)} ${y(k.bawahKg)}`)
+      .join(' ');
+
+    return {
+      jalurKoridor: `${atas} ${bawahBalik} Z`,
+      garisKoridorAtas: atas,
+      garisKoridorBawah: bawah,
+    };
+  }, [koridor, titik, lebar, min, maks]);
 
   function pilihDariSentuhan(px: number) {
     const { lebarPlot: lp, jumlah } = terkini.current;
@@ -171,6 +205,30 @@ export function GrafikTren({
       >
         {lebar > 0 ? (
           <Svg width={lebar} height={TINGGI_PLOT + PAD_ATAS + PAD_BAWAH}>
+            {/*
+              Pita koridor target — digambar paling belakang supaya menjadi
+              LATAR, bukan seri yang bersaing dengan garis rata-rata.
+            */}
+            {jalurKoridor ? (
+              <>
+                <Path d={jalurKoridor} fill={colors.jade} fillOpacity={0.14} />
+                <Path
+                  d={garisKoridorAtas}
+                  stroke={colors.aksenTeks.jade}
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                  fill="none"
+                />
+                <Path
+                  d={garisKoridorBawah}
+                  stroke={colors.aksenTeks.jade}
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                  fill="none"
+                />
+              </>
+            ) : null}
+
             {/* Garis bantu: hairline solid, sengaja redup */}
             {tick.map((v) => (
               <Line
@@ -184,7 +242,14 @@ export function GrafikTren({
               />
             ))}
 
-            {jalurArea ? <Path d={jalurArea} fill={colors.amber} fillOpacity={0.1} /> : null}
+            {/*
+              Wash di bawah garis hanya digambar kalau TIDAK ada koridor.
+              Dua wash bertumpuk (amber di atas jade) menghasilkan noda yang
+              menutupi pita koridor, padahal pita itu yang lebih bermakna.
+            */}
+            {jalurArea && !koridor ? (
+              <Path d={jalurArea} fill={colors.amber} fillOpacity={0.1} />
+            ) : null}
 
             {/*
               Titik berat harian — konteks, bukan cerita utama.
@@ -310,15 +375,37 @@ export function GrafikTren({
       </View>
 
       {/* Keterangan mark: identitas lewat BENTUK, bukan warna saja */}
-      <View style={{ flexDirection: 'row', gap: spacing.lg, paddingTop: spacing.xs }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1, minHeight: TAP_MIN }}
-        >
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          columnGap: spacing.lg,
+          rowGap: spacing.xs,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
           <View
             style={{ width: 12, height: 2, backgroundColor: colors.amber, borderRadius: radius.pill }}
           />
           <Text style={{ ...typography.caption, color: colors.textFaint }}>rata-rata 7 hari</Text>
         </View>
+        {koridor ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
+            <View
+              style={{
+                width: 12,
+                height: 8,
+                borderRadius: 2,
+                backgroundColor: colors.jade + '33',
+                borderWidth: 1,
+                borderColor: colors.aksenTeks.jade + '88',
+              }}
+            />
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>koridor target</Text>
+          </View>
+        ) : null}
+
         {/* Keterangan sekaligus sakelar: titik harian bisa disembunyikan bila ramai. */}
         <Pressable
           accessibilityRole="switch"
@@ -332,6 +419,7 @@ export function GrafikTren({
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.xs + 1,
+            // Hanya sakelar ini yang interaktif, jadi hanya ia yang butuh 44pt.
             minHeight: TAP_MIN,
             opacity: pressed ? 0.6 : 1,
           })}
