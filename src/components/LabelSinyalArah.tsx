@@ -63,8 +63,10 @@ export function LabelSinyalArah({ sinyal, fase, tampilan = 'penuh' }: Props) {
           }}
         >
           <Text style={{ ...typography.label, color: warna }}>{panah}</Text>
-          <Text style={{ ...typography.label, color: warna, textTransform: 'capitalize' }}>
-            {sinyal.arah}
+          <Text style={{ ...typography.label, color: warna }}>
+            {/* `capitalize` di CSS mengubah TIAP kata; frasa seperti
+                "belum cukup data" jadi salah. Cukup huruf pertama. */}
+            {sinyal.arah.charAt(0).toUpperCase() + sinyal.arah.slice(1)}
           </Text>
         </View>
 

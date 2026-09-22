@@ -111,3 +111,18 @@ export type StatusKoridor = {
 
 /** Kecocokan arah berat terhadap yang diharapkan fase aktif. */
 export type KecocokanFase = 'sesuai' | 'belum bergerak' | 'berlawanan' | 'belum bisa dinilai';
+
+/** Seberapa cukup data untuk tiap angka di layar Tren. */
+export type KecukupanTren = {
+  adaTimbangan: boolean;
+  /** Seluruh timbangan yang pernah tercatat. */
+  jumlahTotal: number;
+  /** Timbangan dalam jendela 7 hari yang berakhir di tanggal tersebut. */
+  jumlahDalamJendela: number;
+  cukupRataRata: boolean;
+  /** true bila ketujuh hari dalam jendela benar-benar ditimbang. */
+  jendelaPenuh: boolean;
+  /** Sinyal arah butuh DUA jendela berisi, bukan satu. */
+  cukupArah: boolean;
+  hariLagiUntukArah: number | null;
+};

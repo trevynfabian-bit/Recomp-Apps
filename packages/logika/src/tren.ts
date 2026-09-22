@@ -2,6 +2,7 @@ import type {
   EntriBeratRingkas,
   Fase,
   KecocokanFase,
+  KecukupanTren,
   RataRata7Hari,
   SinyalArah,
   TitikTren,
@@ -136,4 +137,53 @@ export function arahSesuaiFase(arah: SinyalArah['arah'], fase: Fase): KecocokanF
   // Datar bukan berlawanan — ia hanya belum bergerak ke arah yang dituju.
   if (arah === 'datar') return 'belum bergerak';
   return 'berlawanan';
+}
+
+/**
+ * Seberapa cukup data untuk tiap angka di layar Tren.
+ *
+ * Dipisah karena tiap angka punya syarat berbeda: rata-rata sudah bisa
+ * dihitung dari satu timbangan, tapi SINYAL ARAH butuh dua jendela penuh
+ * (14 hari) karena ia membandingkan rata-rata dengan rata-rata.
+ *
+ * Yang ditampilkan saat data tipis tetap angkanya, bukan layar kosong —
+ * menyembunyikannya membuat pengguna mengira app-nya rusak. Yang ditambahkan
+ * adalah keterangan sejujurnya tentang seberapa tipis dasarnya.
+ */
+export function kecukupanTren(
+  riwayat: EntriBeratRingkas[],
+  sampaiTanggal: string,
+): KecukupanTren {
+  const berisi = riwayat.filter((r) => r.berat_pagi_kg !== null);
+  const jendelaIni = rataRata7Hari(riwayat, sampaiTanggal);
+  const jendelaLalu = rataRata7Hari(riwayat, mundurHari(sampaiTanggal, JENDELA_HARI));
+
+  const cukupArah = jendelaIni.jumlahTimbangan > 0 && jendelaLalu.jumlahTimbangan > 0;
+
+  return {
+    adaTimbangan: berisi.length > 0,
+    jumlahTotal: berisi.length,
+    jumlahDalamJendela: jendelaIni.jumlahTimbangan,
+    // Satu timbangan sudah menghasilkan rata-rata, hanya saja tipis dasarnya.
+    cukupRataRata: jendelaIni.jumlahTimbangan > 0,
+    jendelaPenuh: jendelaIni.jumlahTimbangan >= JENDELA_HARI,
+    cukupArah,
+    /** Perkiraan hari lagi sampai sinyal arah bisa dihitung. */
+    hariLagiUntukArah: cukupArah ? 0 : perkiraanHariLagi(berisi, sampaiTanggal),
+  };
+}
+
+/**
+ * Perkiraan berapa hari lagi sampai jendela sebelumnya ikut berisi.
+ * Dihitung dari timbangan PERTAMA: sinyal arah baru mungkin setelah ada
+ * timbangan di jendela 7 hari sebelumnya, yaitu 7 hari sesudah yang pertama.
+ */
+function perkiraanHariLagi(berisi: EntriBeratRingkas[], sampaiTanggal: string): number | null {
+  if (berisi.length === 0) return null;
+  const pertama = berisi[0].tanggal;
+  const target = majuHari(pertama, JENDELA_HARI);
+  const selisih = Math.ceil(
+    (Date.parse(`${target}T00:00:00Z`) - Date.parse(`${sampaiTanggal}T00:00:00Z`)) / 86_400_000,
+  );
+  return Math.max(selisih, 0);
 }

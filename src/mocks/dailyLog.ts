@@ -169,6 +169,7 @@ export function simpanBeratStub(_beratKg: number): Promise<void> {
  * fase Lean Gain dimulai di awal rentang riwayat yang ada.
  */
 export const mockJangkarFase = {
-  tanggal_mulai: mockRiwayatBerat[0].tanggal,
-  berat_awal_kg: mockRiwayatBerat[0].berat_pagi_kg,
+  // Riwayat bisa kosong untuk pengguna baru; jangkar tetap harus ada nilainya.
+  tanggal_mulai: mockRiwayatBerat[0]?.tanggal ?? '2026-09-09',
+  berat_awal_kg: mockRiwayatBerat[0]?.berat_pagi_kg ?? 70,
 };

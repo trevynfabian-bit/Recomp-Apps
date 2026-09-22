@@ -4,18 +4,21 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   arahSesuaiFase,
   deretTren,
-  koridorTarget,
-  LAJU_PER_MINGGU,
-  statusKoridor,
   formatDesimal,
   formatTanggalPanjang,
   JENDELA_HARI,
+  kecukupanTren,
+  koridorTarget,
+  LAJU_PER_MINGGU,
   mundurHari,
   rataRata7Hari,
   sinyalArah,
+  statusKoridor,
+  tanggalHariIni,
 } from '@recomp/logika';
 import {
   Card,
+  CatatanKecukupan,
   GrafikTren,
   HeroNumber,
   LabelSinyalArah,
@@ -43,7 +46,9 @@ export default function TrenScreen() {
   const [tampilkanHarian, setTampilkanHarian] = useState(true);
 
   const riwayat = mockRiwayatBerat;
-  const hariIni = riwayat[riwayat.length - 1]?.tanggal ?? '';
+  // Tanpa satu pun timbangan, tanggal acuan jatuh ke hari ini — kalau dibiarkan
+  // string kosong, pemformat tanggal dan seluruh grafik ikut pecah.
+  const hariIni = riwayat[riwayat.length - 1]?.tanggal ?? tanggalHariIni();
 
   const rata = rataRata7Hari(riwayat, hariIni);
   const sinyal = sinyalArah(riwayat, hariIni);
@@ -61,6 +66,7 @@ export default function TrenScreen() {
     60,
   );
   const posisi = statusKoridor(koridor, hariIni, rata.rataRataKg);
+  const kecukupan = kecukupanTren(riwayat, hariIni);
 
   // Warna mengikuti KECOCOKAN dengan fase, bukan arah — aturan yang sama
   // dipakai LabelSinyalArah, supaya stat dan label tidak bertentangan warnanya.
@@ -140,6 +146,10 @@ export default function TrenScreen() {
             warna={colors.textMuted}
           />
         </View>
+
+        <View style={{ marginTop: spacing.lg }}>
+          <CatatanKecukupan kecukupan={kecukupan} untuk="rataRata" />
+        </View>
       </Card>
 
       {/* Grafik: rata-rata 7 hari sebagai garis, timbangan harian sebagai titik */}
@@ -165,7 +175,7 @@ export default function TrenScreen() {
                 {posisi.posisi === 'di dalam koridor' ? 'Di dalam koridor' : ubahHuruf(posisi.posisi)}
               </Text>
             </View>
-            {posisi.bawahKg !== null && posisi.atasKg !== null ? (
+            {posisi.bawahKg !== null && posisi.atasKg !== null && kecukupan.cukupRataRata ? (
               <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
                 Rentang hari ini {formatDesimal(posisi.bawahKg)}–{formatDesimal(posisi.atasKg)} kg;
                 rata-rata Anda {rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'} kg
@@ -193,6 +203,7 @@ export default function TrenScreen() {
         <Card>
           <View style={{ gap: spacing.md }}>
             <LabelSinyalArah sinyal={sinyal} fase={mockProfile.fase_aktif} />
+            <CatatanKecukupan kecukupan={kecukupan} untuk="arah" />
             <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
               Dihitung dari rata-rata {JENDELA_HARI} hari dibanding rata-rata {JENDELA_HARI} hari
               sebelumnya — rata-rata lawan rata-rata, supaya satu hari yang aneh tidak
