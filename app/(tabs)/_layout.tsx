@@ -32,6 +32,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="budget"
+        options={{
+          title: 'Budget',
+          tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="coach"
         options={{
           title: 'Coach',
@@ -41,7 +48,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="pengaturan"
         options={{
-          title: 'Pengaturan',
+          title: 'Setelan',
           tabBarIcon: ({ color, size }) => <Ionicons name="options-outline" size={size} color={color} />,
         }}
       />

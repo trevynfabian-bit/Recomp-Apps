@@ -6,7 +6,9 @@
  * yang bisa basi.
  */
 export type {
+  BudgetMingguan,
   DayType,
+  HariBudget,
   EntriBeratRingkas,
   Fase,
   HitunganMakro,
@@ -17,6 +19,7 @@ export type {
   MacroProgress,
   ModeMakro,
   RataRata7Hari,
+  RingkasanHariBudget,
   SinyalArah,
   StatusKoridor,
   TitikKoridor,
@@ -50,3 +53,5 @@ export {
 } from './tren';
 
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
+
+export { awalMinggu, budgetMingguan, hariDalamMinggu } from './budget';

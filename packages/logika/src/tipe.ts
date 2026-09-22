@@ -126,3 +126,37 @@ export type KecukupanTren = {
   cukupArah: boolean;
   hariLagiUntukArah: number | null;
 };
+
+/** Satu hari dalam minggu beserta target dan konsumsinya. */
+export type HariBudget = {
+  tanggal: string;
+  namaTipeHari: string;
+  targetKalori: number;
+  terpakaiKalori: number;
+};
+
+/** Hari budget yang sudah diberi status & selisih. */
+export type RingkasanHariBudget = HariBudget & {
+  status: 'lampau' | 'hari ini' | 'mendatang';
+  /** Konsumsi dikurangi target; `null` untuk hari yang belum terjadi. */
+  selisih: number | null;
+};
+
+/** Ringkasan budget kalori satu minggu. */
+export type BudgetMingguan = {
+  mingguMulai: string;
+  budgetTotal: number;
+  terpakai: number;
+  /** Boleh negatif: negatif berarti jatah minggu ini sudah terlampaui. */
+  sisa: number;
+  /**
+   * Hari yang BELUM berjalan. Hari ini tidak termasuk: konsumsinya sudah
+   * dikurangkan dari `sisa`, jadi menghitungnya lagi akan menggandakan jatah.
+   */
+  hariTersisa: number;
+  targetMendatang: number;
+  sisaPerHari: number | null;
+  /** Jatah per hari menurut rencana semula; pembanding bagi `sisaPerHari`. */
+  rencanaPerHari: number | null;
+  rincian: RingkasanHariBudget[];
+};

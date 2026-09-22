@@ -1,0 +1,86 @@
+import type { BudgetMingguan, HariBudget, RingkasanHariBudget } from './tipe';
+import { majuHari } from './tren';
+
+/**
+ * Budget kalori mingguan.
+ *
+ * Budget mingguan BUKAN angka tetap: ia jumlah target harian sepanjang minggu,
+ * dan target harian sendiri bergantung tipe hari. Minggu berisi dua hari
+ * Beban+Lari punya budget lebih besar daripada minggu penuh Rest — itu memang
+ * yang diinginkan, bukan kebocoran.
+ *
+ * Gunanya: satu hari yang kelebihan tidak otomatis merusak minggu. Yang dilihat
+ * adalah sisa jatah sampai akhir minggu.
+ */
+
+/** Minggu dimulai Senin, sesuai skema `weekly_budgets.minggu_mulai`. */
+export function awalMinggu(tanggal: string): string {
+  const [y, m, d] = tanggal.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d));
+  // getUTCDay: 0 = Minggu. Geser supaya Senin jadi awal.
+  const geser = (t.getUTCDay() + 6) % 7;
+  return majuHari(tanggal, -geser);
+}
+
+/** Tujuh tanggal dalam minggu yang memuat `tanggal`, Senin → Minggu. */
+export function hariDalamMinggu(tanggal: string): string[] {
+  const senin = awalMinggu(tanggal);
+  return [0, 1, 2, 3, 4, 5, 6].map((i) => majuHari(senin, i));
+}
+
+/**
+ * Hitung budget mingguan dari target & konsumsi tiap hari.
+ *
+ * @param hari tujuh hari minggu ini beserta target dan konsumsinya
+ * @param hariIni tanggal acuan; hari sesudahnya dianggap belum terjadi
+ */
+export function budgetMingguan(hari: HariBudget[], hariIni: string): BudgetMingguan {
+  const rincian: RingkasanHariBudget[] = hari.map((h) => {
+    const lampau = h.tanggal < hariIni;
+    const iniHariIni = h.tanggal === hariIni;
+    return {
+      ...h,
+      status: lampau ? 'lampau' : iniHariIni ? 'hari ini' : 'mendatang',
+      // Selisih hanya bermakna untuk hari yang sudah/sedang berjalan.
+      selisih: lampau || iniHariIni ? bulatkan(h.terpakaiKalori - h.targetKalori, 0) : null,
+    };
+  });
+
+  const budgetTotal = rincian.reduce((n, h) => n + h.targetKalori, 0);
+  const terpakai = rincian
+    .filter((h) => h.status !== 'mendatang')
+    .reduce((n, h) => n + h.terpakaiKalori, 0);
+
+  // Jatah hari yang belum terjadi; dipakai untuk menghitung sisa per hari.
+  const mendatang = rincian.filter((h) => h.status === 'mendatang');
+  const targetMendatang = mendatang.reduce((n, h) => n + h.targetKalori, 0);
+
+  const sisa = budgetTotal - terpakai;
+
+  /*
+   * Hari ini SENGAJA tidak dihitung sebagai hari tersisa. Konsumsi hari ini
+   * sudah ikut dikurangkan dari `sisa`, jadi memberinya jatah lagi berarti
+   * menghitungnya dua kali dan membuat "bila dibagi rata" tampak lebih longgar
+   * dari yang sebenarnya. Sisa itu jatah untuk hari-hari yang BELUM berjalan.
+   */
+  const hariTersisa = mendatang.length;
+
+  return {
+    mingguMulai: rincian[0]?.tanggal ?? hariIni,
+    budgetTotal,
+    terpakai,
+    sisa,
+    hariTersisa,
+    targetMendatang,
+    /** Rata-rata kalori per hari bila sisa dibagi rata ke hari yang tersisa. */
+    sisaPerHari: hariTersisa > 0 ? Math.round(sisa / hariTersisa) : null,
+    /** Rata-rata jatah per hari menurut rencana semula, untuk pembanding. */
+    rencanaPerHari: hariTersisa > 0 ? Math.round(targetMendatang / hariTersisa) : null,
+    rincian,
+  };
+}
+
+function bulatkan(nilai: number, desimal: number): number {
+  const f = 10 ** desimal;
+  return Math.round(nilai * f) / f;
+}
