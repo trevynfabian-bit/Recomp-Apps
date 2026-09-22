@@ -152,6 +152,12 @@ export type RataRataBeratRow = {
   jumlah_timbangan: number;
 };
 
+/** Hasil `deret_rata_rata_7_hari` — satu baris per tanggal dalam rentang. */
+export type DeretRataRataRow = RataRataBeratRow & {
+  /** Berat pagi mentah hari itu; `null` bila tidak ditimbang. */
+  berat_harian_kg: number | null;
+};
+
 export type WorkoutRow = {
   id: string;
   user_id: string;
@@ -289,6 +295,10 @@ export type Database = {
       rata_rata_berat_7_hari: {
         Args: { p_tanggal: string };
         Returns: RataRataBeratRow[];
+      };
+      deret_rata_rata_7_hari: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: DeretRataRataRow[];
       };
       deteksi_tipe_hari: {
         Args: { p_tanggal: string; p_user_id: string | null };

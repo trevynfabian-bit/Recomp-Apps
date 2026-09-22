@@ -290,6 +290,64 @@ try {
     process.exit(1);
   }
   console.log(`✓ ${KASUS_RATA.length} kasus cocok — rata-rata 7 hari di SQL dan TypeScript sejalan.`);
+
+  // === Bagian 4: DERET rata-rata 7 hari ====================================
+  //
+  // Bagian 3 membandingkan satu tanggal per panggilan. Layar Tren memakai
+  // `deret_rata_rata_7_hari`, yang menghitung seluruh rentang dalam satu query
+  // — implementasi yang sama sekali berbeda, dan karena itu bisa menyimpang
+  // sendiri meski versi satu-tanggalnya benar. Titik yang paling rawan adalah
+  // titik PERTAMA rentang: jendelanya harus menjangkau enam hari SEBELUM
+  // rentang yang diminta.
+  console.log();
+  const { deretTren } = muatLogikaTs();
+
+  const DARI = '2026-09-18';
+  const SAMPAI = '2026-09-24';
+  const barisDeret = sql(
+    `set request.jwt.claim.sub = '${UID}';
+     select string_agg(
+       tanggal::text || '|' || coalesce(rata_rata_kg::text, 'null') || '|' ||
+       coalesce(berat_harian_kg::text, 'null'), ';' order by tanggal)
+       from public.deret_rata_rata_7_hari(date '${DARI}', date '${SAMPAI}');`,
+  );
+  const deretSql = barisDeret.split(';').map((b) => {
+    const [tanggal, rata, harian] = b.split('|');
+    return { tanggal, rata, harian };
+  });
+  const deretTs = deretTren(riwayatTs, DARI, SAMPAI);
+
+  let gagalDeret = 0;
+  console.log('tanggal        SQL rata  TS rata   SQL harian  TS harian');
+  console.log('─'.repeat(60));
+  for (const [i, baris] of deretSql.entries()) {
+    const ts = deretTs[i];
+    const tsRata = ts.rataRataKg === null ? 'null' : String(ts.rataRataKg);
+    const tsHarian = ts.beratHarianKg === null ? 'null' : String(ts.beratHarianKg);
+
+    const cocok =
+      baris.tanggal === ts.tanggal &&
+      (baris.rata === 'null' ? tsRata === 'null' : Math.abs(Number(baris.rata) - Number(tsRata)) < 1e-9) &&
+      (baris.harian === 'null' ? tsHarian === 'null' : Math.abs(Number(baris.harian) - Number(tsHarian)) < 1e-9);
+    if (!cocok) gagalDeret += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${baris.tanggal}  ${baris.rata.padStart(8)}  ${tsRata.padStart(7)}  ` +
+        `${baris.harian.padStart(10)}  ${tsHarian.padStart(9)}`,
+    );
+  }
+
+  console.log();
+  if (deretSql.length !== deretTs.length) {
+    console.error(`✗ Panjang deret berbeda: SQL ${deretSql.length}, TS ${deretTs.length}.`);
+    process.exit(1);
+  }
+  if (gagalDeret > 0) {
+    console.error(`✗ ${gagalDeret} titik BERBEDA (deret rata-rata 7 hari).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${deretSql.length} titik cocok — deret rata-rata 7 hari di SQL dan TypeScript sejalan.`,
+  );
 } finally {
   hentikanPostgres();
 }
