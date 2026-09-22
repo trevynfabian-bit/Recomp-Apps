@@ -1,4 +1,5 @@
 export { Card } from './Card';
+export { GrafikTren } from './GrafikTren';
 export { HeroNumber } from './HeroNumber';
 export { InputAngka } from './InputAngka';
 export { KartuCatatan } from './KartuCatatan';

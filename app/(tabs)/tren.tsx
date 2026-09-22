@@ -9,7 +9,7 @@ import {
   rataRata7Hari,
   sinyalArah,
 } from '@recomp/logika';
-import { Card, HeroNumber, PenandaSumber, Pill, SectionHeader } from '@/components';
+import { Card, GrafikTren, HeroNumber, PenandaSumber, Pill, SectionHeader } from '@/components';
 import { mockProfile, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -115,6 +115,14 @@ export default function TrenScreen() {
           />
         </View>
       </Card>
+
+      {/* Grafik: rata-rata 7 hari sebagai garis, timbangan harian sebagai titik */}
+      <View>
+        <SectionHeader judul="Rata-rata 7 hari" aksi="14 hari terakhir" />
+        <Card>
+          <GrafikTren titik={deret} />
+        </Card>
+      </View>
 
       {/* Sinyal arah, dijelaskan dengan kalimat — bukan hanya panah */}
       <View>
