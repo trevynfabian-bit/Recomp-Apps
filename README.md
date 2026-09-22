@@ -36,6 +36,23 @@ src/
   types/domain.ts    tipe domain mengikuti skema Supabase di PRD
 ```
 
+## Database (Supabase)
+
+Migrasi ada di `supabase/migrations/` dan dijalankan di proyek Supabase yang
+**sudah ada** (dipakai bersama web Next.js) — bukan proyek baru. Semua objek
+dibuat dengan `IF NOT EXISTS` sehingga aman dijalankan ulang di database yang
+sudah berisi tabel milik web.
+
+```bash
+npm run db:cek   # jalankan migrasi di Postgres lokal bersih + uji RLS
+```
+
+Skrip itu menyiapkan Postgres kosong, memasang tiruan `auth.users`/`auth.uid()`
+(hanya untuk uji lokal, tidak pernah dipakai di Supabase asli), menjalankan
+migrasi **dua kali** untuk membuktikan idempoten, lalu menjalankan uji RLS yang
+memeriksa dua pengguna tidak bisa saling melihat atau mengubah data. Keluar
+dengan kode bukan-nol bila ada yang gagal, jadi bisa dipakai di CI.
+
 ## Status
 
 **Fase 1 — frontend** sedang dikerjakan di atas **data tiruan** (`src/mocks/`).
