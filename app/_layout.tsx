@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PenyediaProfil } from '@/state/profil';
 import { colors } from '@/theme';
 
 /**
@@ -10,15 +11,17 @@ import { colors } from '@/theme';
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <PenyediaProfil>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.bg },
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </PenyediaProfil>
     </SafeAreaProvider>
   );
 }

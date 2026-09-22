@@ -6,9 +6,10 @@ import {
   formatTanggalPanjang,
 } from '@recomp/logika';
 import type { RingkasanHariBudget } from '@recomp/logika';
-import { Card, HeroNumber, Pill, SectionHeader } from '@/components';
+import { Card, HeroNumber, PemilihFase, Pill, SectionHeader } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
-import { mockDailyLogHariIni, mockProfile } from '@/mocks/dailyLog';
+import { mockDailyLogHariIni } from '@/mocks/dailyLog';
+import { useProfil } from '@/state/profil';
 import { colors, radius, spacing, typography } from '@/theme';
 
 /**
@@ -22,8 +23,9 @@ import { colors, radius, spacing, typography } from '@/theme';
  */
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
+  const { profil, gantiFase } = useProfil();
   const hariIni = mockDailyLogHariIni.tanggal;
-  const budget = budgetMingguan(mockHariBudget(hariIni), hariIni);
+  const budget = budgetMingguan(mockHariBudget(hariIni, profil.fase_aktif), hariIni);
 
   const lewat = budget.sisa < 0;
 
@@ -44,7 +46,7 @@ export default function BudgetScreen() {
             Mulai {formatTanggalPanjang(budget.mingguMulai)}
           </Text>
         </View>
-        <Pill label={mockProfile.fase_aktif} warna={colors.aksenTeks.jade} />
+        <Pill label={profil.fase_aktif} warna={colors.aksenTeks.jade} />
       </View>
 
       {/* Angka utama: sisa jatah minggu ini */}
@@ -87,6 +89,12 @@ export default function BudgetScreen() {
         </View>
       </Card>
 
+      {/* Fase program — mengubahnya mengubah target, koridor, dan budget */}
+      <View>
+        <SectionHeader judul="Fase program" aksi="mengubah semua target" />
+        <PemilihFase terpilih={profil.fase_aktif} onPilih={gantiFase} />
+      </View>
+
       {/* Rincian tujuh hari */}
       <View>
         <SectionHeader judul="Minggu ini" aksi="Senin – Minggu" />
@@ -102,7 +110,7 @@ export default function BudgetScreen() {
         <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
           Budget mingguan adalah JUMLAH target harian sepanjang minggu, jadi minggu dengan
           lebih banyak hari latihan memang punya jatah lebih besar — itu bukan kebocoran.
-          Target harian sendiri mengikuti tipe hari pada fase {mockProfile.fase_aktif}.
+          Target harian sendiri mengikuti tipe hari pada fase {profil.fase_aktif}.
         </Text>
       </Card>
 

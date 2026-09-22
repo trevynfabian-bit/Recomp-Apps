@@ -8,6 +8,7 @@ export { KartuTimbangPagi } from './KartuTimbangPagi';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
+export { PemilihFase } from './PemilihFase';
 export { PemilihTipeHari } from './PemilihTipeHari';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';

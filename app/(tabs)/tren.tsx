@@ -16,6 +16,7 @@ import {
   statusKoridor,
   tanggalHariIni,
 } from '@recomp/logika';
+import type { Fase } from '@recomp/logika';
 import {
   Card,
   CatatanKecukupan,
@@ -26,7 +27,8 @@ import {
   Pill,
   SectionHeader,
 } from '@/components';
-import { mockJangkarFase, mockProfile, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { mockJangkarFase, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { useProfil } from '@/state/profil';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -43,6 +45,7 @@ import { colors, radius, spacing, typography } from '@/theme';
  */
 export default function TrenScreen() {
   const insets = useSafeAreaInsets();
+  const { profil } = useProfil();
   const [tampilkanHarian, setTampilkanHarian] = useState(true);
 
   const riwayat = mockRiwayatBerat;
@@ -62,7 +65,7 @@ export default function TrenScreen() {
   const koridor = koridorTarget(
     mockJangkarFase.berat_awal_kg,
     mockJangkarFase.tanggal_mulai,
-    mockProfile.fase_aktif,
+    profil.fase_aktif,
     60,
   );
   const posisi = statusKoridor(koridor, hariIni, rata.rataRataKg);
@@ -70,7 +73,7 @@ export default function TrenScreen() {
 
   // Warna mengikuti KECOCOKAN dengan fase, bukan arah — aturan yang sama
   // dipakai LabelSinyalArah, supaya stat dan label tidak bertentangan warnanya.
-  const cocok = arahSesuaiFase(sinyal.arah, mockProfile.fase_aktif);
+  const cocok = arahSesuaiFase(sinyal.arah, profil.fase_aktif);
   const warnaArah =
     cocok === 'sesuai'
       ? colors.aksenTeks.jade
@@ -95,7 +98,7 @@ export default function TrenScreen() {
             {formatTanggalPanjang(hariIni)}
           </Text>
         </View>
-        <Pill label={mockProfile.fase_aktif} warna={colors.aksenTeks.jade} />
+        <Pill label={profil.fase_aktif} warna={colors.aksenTeks.jade} />
       </View>
 
       {/* Angka utama: rata-rata 7 hari, bukan berat hari ini */}
@@ -167,7 +170,7 @@ export default function TrenScreen() {
 
       {/* Posisi terhadap koridor target */}
       <View>
-        <SectionHeader judul="Koridor target" aksi={`fase ${mockProfile.fase_aktif}`} />
+        <SectionHeader judul="Koridor target" aksi={`fase ${profil.fase_aktif}`} />
         <Card>
           <View style={{ gap: spacing.md }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
@@ -189,7 +192,7 @@ export default function TrenScreen() {
               </Text>
             )}
             <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
-              Koridor memakai laju {persenLaju(mockProfile.fase_aktif)} berat badan per minggu sejak
+              Koridor memakai laju {persenLaju(profil.fase_aktif)} berat badan per minggu sejak
               fase dimulai ({formatTanggalPanjang(mockJangkarFase.tanggal_mulai)}, {formatDesimal(mockJangkarFase.berat_awal_kg)} kg).
               Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.
             </Text>
@@ -202,7 +205,7 @@ export default function TrenScreen() {
         <SectionHeader judul="Sinyal arah" aksi={`ambang ${formatDesimal(sinyal.ambangKg)} kg`} />
         <Card>
           <View style={{ gap: spacing.md }}>
-            <LabelSinyalArah sinyal={sinyal} fase={mockProfile.fase_aktif} />
+            <LabelSinyalArah sinyal={sinyal} fase={profil.fase_aktif} />
             <CatatanKecukupan kecukupan={kecukupan} untuk="arah" />
             <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
               Dihitung dari rata-rata {JENDELA_HARI} hari dibanding rata-rata {JENDELA_HARI} hari
@@ -283,7 +286,7 @@ function ubahHuruf(teks: string): string {
 }
 
 /** Laju koridor fase aktif, dinyatakan dalam persen per minggu. */
-function persenLaju(fase: typeof mockProfile.fase_aktif): string {
+function persenLaju(fase: Fase): string {
   const l = LAJU_PER_MINGGU[fase];
   const p = (n: number) => `${n > 0 ? '+' : ''}${formatDesimal(n * 100, 2)}%`;
   return `${p(l.min)} s/d ${p(l.maks)}`;

@@ -33,12 +33,32 @@ export const mockDayTypes: DayType[] = [
   { id: 'dt-padel', nama: 'Padel', auto_detect: true, is_default: false },
 ];
 
-/** Target absolut per (tipe hari x fase) — nilai dipakai langsung, tanpa pengali. */
+/**
+ * Target absolut per (tipe hari x fase) — nilai dipakai langsung, tanpa pengali.
+ *
+ * Isinya SAMA PERSIS dengan yang di-seed migrasi
+ * `20260922000200_seed_pengguna_baru_dan_rls.sql`. Keduanya harus cocok:
+ * kalau mock hanya memuat sebagian fase, mengganti fase di app akan diam-diam
+ * jatuh ke nilai cadangan dan membuat fitur "target menyesuaikan" tampak
+ * bekerja padahal angkanya salah.
+ */
 export const mockDayTypeTargets: DayTypeTarget[] = [
-  { id: 'tgt-1', day_type_id: 'dt-rest', fase: 'Lean Gain', target_kalori: 2450, target_protein_g: 165, target_lemak_g: 75, batas_sat_fat_g: 22 },
-  { id: 'tgt-2', day_type_id: 'dt-angkat', fase: 'Lean Gain', target_kalori: 2850, target_protein_g: 180, target_lemak_g: 82, batas_sat_fat_g: 25 },
-  { id: 'tgt-3', day_type_id: 'dt-beban-lari', fase: 'Lean Gain', target_kalori: 3100, target_protein_g: 185, target_lemak_g: 88, batas_sat_fat_g: 26 },
-  { id: 'tgt-4', day_type_id: 'dt-padel', fase: 'Lean Gain', target_kalori: 2950, target_protein_g: 175, target_lemak_g: 85, batas_sat_fat_g: 25 },
+  // Rest
+  { id: 'tgt-rest-m', day_type_id: 'dt-rest', fase: 'Maintenance', target_kalori: 2300, target_protein_g: 150, target_lemak_g: 72, batas_sat_fat_g: 21 },
+  { id: 'tgt-rest-l', day_type_id: 'dt-rest', fase: 'Lean Gain', target_kalori: 2450, target_protein_g: 165, target_lemak_g: 75, batas_sat_fat_g: 22 },
+  { id: 'tgt-rest-c', day_type_id: 'dt-rest', fase: 'Cut', target_kalori: 2000, target_protein_g: 175, target_lemak_g: 60, batas_sat_fat_g: 18 },
+  // Angkat Beban
+  { id: 'tgt-ab-m', day_type_id: 'dt-angkat', fase: 'Maintenance', target_kalori: 2650, target_protein_g: 165, target_lemak_g: 78, batas_sat_fat_g: 23 },
+  { id: 'tgt-ab-l', day_type_id: 'dt-angkat', fase: 'Lean Gain', target_kalori: 2850, target_protein_g: 180, target_lemak_g: 82, batas_sat_fat_g: 25 },
+  { id: 'tgt-ab-c', day_type_id: 'dt-angkat', fase: 'Cut', target_kalori: 2350, target_protein_g: 190, target_lemak_g: 65, batas_sat_fat_g: 19 },
+  // Beban+Lari
+  { id: 'tgt-bl-m', day_type_id: 'dt-beban-lari', fase: 'Maintenance', target_kalori: 2900, target_protein_g: 170, target_lemak_g: 84, batas_sat_fat_g: 25 },
+  { id: 'tgt-bl-l', day_type_id: 'dt-beban-lari', fase: 'Lean Gain', target_kalori: 3100, target_protein_g: 185, target_lemak_g: 88, batas_sat_fat_g: 26 },
+  { id: 'tgt-bl-c', day_type_id: 'dt-beban-lari', fase: 'Cut', target_kalori: 2600, target_protein_g: 195, target_lemak_g: 70, batas_sat_fat_g: 20 },
+  // Padel
+  { id: 'tgt-pd-m', day_type_id: 'dt-padel', fase: 'Maintenance', target_kalori: 2750, target_protein_g: 160, target_lemak_g: 80, batas_sat_fat_g: 24 },
+  { id: 'tgt-pd-l', day_type_id: 'dt-padel', fase: 'Lean Gain', target_kalori: 2950, target_protein_g: 175, target_lemak_g: 85, batas_sat_fat_g: 25 },
+  { id: 'tgt-pd-c', day_type_id: 'dt-padel', fase: 'Cut', target_kalori: 2450, target_protein_g: 185, target_lemak_g: 68, batas_sat_fat_g: 19 },
 ];
 
 /** Log hari ini — sebagian terisi, supaya progress bar terlihat hidup. */
@@ -99,7 +119,13 @@ export const mockRiwayatBerat: EntriBerat[] = [
 export function cariTarget(dayTypeId: string, fase: Fase): DayTypeTarget {
   const hit = mockDayTypeTargets.find((t) => t.day_type_id === dayTypeId && t.fase === fase);
   if (hit) return hit;
-  // Fallback aman: target tipe hari default pada fase yang diminta.
+
+  // Sampai di sini berarti datanya kurang, bukan keadaan normal. Cadangan tetap
+  // dikembalikan supaya layar tidak pecah, tapi jangan sampai lolos diam-diam:
+  // sebelumnya justru ini yang membuat fase Cut memakai angka Lean Gain.
+  if (__DEV__) {
+    console.warn(`[mock] target tidak ada untuk ${dayTypeId} pada fase ${fase}`);
+  }
   return mockDayTypeTargets[0];
 }
 

@@ -18,6 +18,7 @@ import {
 import { formatAngka, formatMakro, formatTanggalPanjang } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
+import { useProfil } from '@/state/profil';
 import { simpanCatatanHarian } from '@/data/catatan';
 import { deteksiTipeHari } from '@recomp/logika';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
@@ -44,6 +45,7 @@ import type { DailyLog, FoodLog } from '@/types/domain';
  */
 export default function LogHarianScreen() {
   const insets = useSafeAreaInsets();
+  const { profil } = useProfil();
 
   // Log hari ini disimpan di state supaya kartu Timbang Pagi & pemilih tipe hari
   // bisa menulis balik. Semua angka target diturunkan dari state ini.
@@ -51,7 +53,7 @@ export default function LogHarianScreen() {
   const [foodLogs, setFoodLogs] = useState<FoodLog[]>(mockFoodLogsHariIni);
   const [sheetFotoTerbuka, setSheetFotoTerbuka] = useState(false);
 
-  const fase = mockProfile.fase_aktif;
+  const fase = profil.fase_aktif;
 
   // Tanpa override, tipe hari MENGIKUTI hasil deteksi dari workout hari ini;
   // dengan override, pilihan pengguna yang menang.
@@ -154,7 +156,7 @@ export default function LogHarianScreen() {
       {/* Header: sapaan + tanggal + fase aktif */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Hai, {mockProfile.nama}</Text>
+          <Text style={{ ...typography.title, color: colors.text }}>Hai, {profil.nama}</Text>
           <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
             {formatTanggalPanjang(log.tanggal)}
           </Text>

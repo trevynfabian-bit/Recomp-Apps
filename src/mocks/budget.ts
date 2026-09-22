@@ -1,6 +1,7 @@
 import type { HariBudget } from '@recomp/logika';
 import { hariDalamMinggu } from '@recomp/logika';
-import { cariTarget, mockDayTypes, mockProfile } from './dailyLog';
+import type { Fase } from '@recomp/logika';
+import { cariTarget, mockDayTypes } from './dailyLog';
 
 /**
  * Data tiruan budget mingguan.
@@ -25,10 +26,10 @@ const TIPE_MINGGU_INI = [
 const KONSUMSI_MINGGU_INI: (number | null)[] = [2910, 3260, 2300, 2760, null, null, null];
 
 /** Tujuh hari minggu ini beserta target dan konsumsinya. */
-export function mockHariBudget(hariIni: string): HariBudget[] {
+export function mockHariBudget(hariIni: string, fase: Fase): HariBudget[] {
   return hariDalamMinggu(hariIni).map((tanggal, i) => {
     const dayTypeId = TIPE_MINGGU_INI[i];
-    const target = cariTarget(dayTypeId, mockProfile.fase_aktif);
+    const target = cariTarget(dayTypeId, fase);
     const nama = mockDayTypes.find((d) => d.id === dayTypeId)?.nama ?? 'Rest';
     return {
       tanggal,
