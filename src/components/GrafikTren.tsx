@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
-import { PanResponder, Text, View } from 'react-native';
+import { PanResponder, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { TitikTren } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Tinggi area gambar, tidak termasuk label sumbu. */
 const TINGGI_PLOT = 180;
@@ -14,6 +14,9 @@ const PAD_BAWAH = 22;
 
 type Props = {
   titik: TitikTren[];
+  /** Tampilkan titik timbangan harian. Bisa dimatikan bila terasa ramai. */
+  tampilkanHarian?: boolean;
+  onUbahTampilkanHarian?: (nilai: boolean) => void;
 };
 
 /**
@@ -27,7 +30,11 @@ type Props = {
  * jade terhadap warna titik harian hanya berjarak ΔE 1,7 pada deuteranopia —
  * praktis tak terbedakan bagi mata buta warna merah-hijau. Amber berjarak 18,1.
  */
-export function GrafikTren({ titik }: Props) {
+export function GrafikTren({
+  titik,
+  tampilkanHarian = true,
+  onUbahTampilkanHarian,
+}: Props) {
   const [lebar, setLebar] = useState(0);
   const [aktif, setAktif] = useState<number | null>(null);
 
@@ -37,7 +44,9 @@ export function GrafikTren({ titik }: Props) {
   /** Domain sumbu Y dibulatkan ke 0,5 kg supaya angkanya enak dibaca. */
   const { min, maks, tick } = useMemo(() => {
     const nilai = titik.flatMap((t) =>
-      [t.rataRataKg, t.beratHarianKg].filter((n): n is number => n !== null),
+      (tampilkanHarian ? [t.rataRataKg, t.beratHarianKg] : [t.rataRataKg]).filter(
+        (n): n is number => n !== null,
+      ),
     );
     if (nilai.length === 0) return { min: 0, maks: 1, tick: [] as number[] };
 
@@ -49,7 +58,7 @@ export function GrafikTren({ titik }: Props) {
       maks: hi,
       tick: [0, 1, 2, 3].map((i) => Math.round((lo + langkah * i) * 10) / 10),
     };
-  }, [titik]);
+  }, [titik, tampilkanHarian]);
 
   const x = (i: number) =>
     PAD_KIRI + (titik.length <= 1 ? lebarPlot / 2 : (i / (titik.length - 1)) * lebarPlot);
@@ -177,18 +186,28 @@ export function GrafikTren({ titik }: Props) {
 
             {jalurArea ? <Path d={jalurArea} fill={colors.amber} fillOpacity={0.1} /> : null}
 
-            {/* Titik berat harian — konteks, bukan cerita utama */}
-            {titik.map((t, i) =>
-              t.beratHarianKg !== null ? (
-                <Circle
-                  key={`h-${t.tanggal}`}
-                  cx={x(i)}
-                  cy={y(t.beratHarianKg)}
-                  r={2.5}
-                  fill={colors.textFaint}
-                />
-              ) : null,
-            )}
+            {/*
+              Titik berat harian — konteks, bukan cerita utama.
+              Cincin warna permukaan menjaganya tetap terbaca di tempat ia
+              memotong garis rata-rata; tanpa cincin, titik dan garis melebur
+              jadi noda. Isiannya dibuat samar supaya tidak menyaingi garis.
+            */}
+            {tampilkanHarian
+              ? titik.map((t, i) =>
+                  t.beratHarianKg !== null ? (
+                    <Circle
+                      key={`h-${t.tanggal}`}
+                      cx={x(i)}
+                      cy={y(t.beratHarianKg)}
+                      r={3}
+                      fill={colors.textFaint}
+                      fillOpacity={aktif === i ? 1 : 0.55}
+                      stroke={colors.surface}
+                      strokeWidth={1.5}
+                    />
+                  ) : null,
+                )
+              : null}
 
             {/* Garis rata-rata: 2px, ujung & sambungan membulat */}
             <Path
@@ -229,6 +248,16 @@ export function GrafikTren({ titik }: Props) {
                     cy={y(titik[aktif].rataRataKg as number)}
                     r={4}
                     fill={colors.amber}
+                    stroke={colors.surface}
+                    strokeWidth={2}
+                  />
+                ) : null}
+                {tampilkanHarian && titik[aktif].beratHarianKg !== null ? (
+                  <Circle
+                    cx={x(aktif)}
+                    cy={y(titik[aktif].beratHarianKg as number)}
+                    r={4}
+                    fill={colors.text}
                     stroke={colors.surface}
                     strokeWidth={2}
                   />
@@ -282,16 +311,51 @@ export function GrafikTren({ titik }: Props) {
 
       {/* Keterangan mark: identitas lewat BENTUK, bukan warna saja */}
       <View style={{ flexDirection: 'row', gap: spacing.lg, paddingTop: spacing.xs }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1, minHeight: TAP_MIN }}
+        >
           <View
             style={{ width: 12, height: 2, backgroundColor: colors.amber, borderRadius: radius.pill }}
           />
           <Text style={{ ...typography.caption, color: colors.textFaint }}>rata-rata 7 hari</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
-          <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: colors.textFaint }} />
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>timbangan harian</Text>
-        </View>
+        {/* Keterangan sekaligus sakelar: titik harian bisa disembunyikan bila ramai. */}
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityState={{ checked: tampilkanHarian }}
+          accessibilityLabel={
+            tampilkanHarian ? 'Sembunyikan timbangan harian' : 'Tampilkan timbangan harian'
+          }
+          disabled={!onUbahTampilkanHarian}
+          onPress={() => onUbahTampilkanHarian?.(!tampilkanHarian)}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs + 1,
+            minHeight: TAP_MIN,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              backgroundColor: tampilkanHarian ? colors.textFaint : 'transparent',
+              borderWidth: 1,
+              borderColor: colors.textFaint,
+            }}
+          />
+          <Text
+            style={{
+              ...typography.caption,
+              color: colors.textFaint,
+              textDecorationLine: tampilkanHarian ? 'none' : 'line-through',
+            }}
+          >
+            timbangan harian
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

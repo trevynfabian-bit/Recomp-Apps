@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -27,6 +28,7 @@ import { colors, radius, spacing, typography } from '@/theme';
  */
 export default function TrenScreen() {
   const insets = useSafeAreaInsets();
+  const [tampilkanHarian, setTampilkanHarian] = useState(true);
 
   const riwayat = mockRiwayatBerat;
   const hariIni = riwayat[riwayat.length - 1]?.tanggal ?? '';
@@ -120,7 +122,11 @@ export default function TrenScreen() {
       <View>
         <SectionHeader judul="Rata-rata 7 hari" aksi="14 hari terakhir" />
         <Card>
-          <GrafikTren titik={deret} />
+          <GrafikTren
+            titik={deret}
+            tampilkanHarian={tampilkanHarian}
+            onUbahTampilkanHarian={setTampilkanHarian}
+          />
         </Card>
       </View>
 
