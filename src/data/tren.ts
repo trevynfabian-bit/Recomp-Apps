@@ -4,6 +4,8 @@ import type {
   KecukupanTren,
   RataRata7Hari,
   SinyalArah,
+  StatusKoridor,
+  TitikKoridor,
   TitikTren,
 } from '@recomp/logika';
 import type { DeretRataRataRow, TrenSnapshotRow } from '@/types/database';
@@ -116,6 +118,13 @@ export type SnapshotTren = {
   kecukupan: KecukupanTren;
   /** `null` bila pengguna belum pernah menimbang sama sekali. */
   jangkarFase: { fase: Fase; tanggalMulai: string; beratAwalKg: number } | null;
+  /**
+   * Titik koridor sepanjang rentang yang digambar — dihitung SERVER, bukan
+   * klien. Widget lock screen dan AI coach memakai batas yang sama, dan
+   * keduanya tidak bisa menjalankan TypeScript.
+   */
+  koridor: TitikKoridor[];
+  statusKoridor: StatusKoridor;
 };
 
 /**
@@ -178,5 +187,16 @@ export async function snapshotTren(sampai: string, hari = 14): Promise<SnapshotT
           beratAwalKg: Number(j.jangkar_fase.berat_awal_kg),
         }
       : null,
+    koridor: j.koridor.map((k) => ({
+      tanggal: k.tanggal,
+      bawahKg: Number(k.bawah_kg),
+      atasKg: Number(k.atas_kg),
+    })),
+    statusKoridor: {
+      posisi: j.status_koridor.posisi,
+      selisihKg: angka(j.status_koridor.selisih_kg),
+      bawahKg: angka(j.status_koridor.bawah_kg),
+      atasKg: angka(j.status_koridor.atas_kg),
+    },
   };
 }

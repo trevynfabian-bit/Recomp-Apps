@@ -136,6 +136,76 @@ begin
     format('jangkar berat %s, seharusnya 74.0', j -> 'jangkar_fase' ->> 'berat_awal_kg');
 end $$;
 
+-- 7b. Koridor ikut dikirim, sepanjang rentang yang digambar — bukan sejak
+--     jangkar. Jangkar 14 Sep, rentang 9–22 Sep → koridor 14–22 Sep = 9 titik.
+do $$
+declare j jsonb;
+begin
+  j := public.tren_berat_7_hari(date '2026-09-22', 14);
+  assert jsonb_array_length(j -> 'koridor') = 9,
+    format('koridor berisi %s titik, seharusnya 9', jsonb_array_length(j -> 'koridor'));
+  assert ((j -> 'koridor') -> 0 ->> 'tanggal') = '2026-09-14',
+    format('koridor mulai %s', (j -> 'koridor') -> 0 ->> 'tanggal');
+  -- Titik pertama = jangkar itu sendiri, jadi kedua batasnya = berat jangkar.
+  assert ((j -> 'koridor') -> 0 ->> 'bawah_kg')::numeric = 74.0
+     and ((j -> 'koridor') -> 0 ->> 'atas_kg')::numeric = 74.0,
+    'titik jangkar seharusnya 74,0–74,0';
+  -- Batas atas selalu ≥ batas bawah di SETIAP titik, termasuk fase Cut yang
+  -- kedua lajunya negatif.
+  assert not exists (
+    select 1 from jsonb_array_elements(j -> 'koridor') k
+     where (k ->> 'atas_kg')::numeric < (k ->> 'bawah_kg')::numeric
+  ), 'ada titik dengan batas atas di bawah batas bawah';
+end $$;
+
+-- 7c. Fase Cut membalik arah koridor; batas "bawah" berasal dari laju maks.
+do $$
+declare j jsonb;
+begin
+  update public.profiles set fase_aktif = 'Cut'
+   where user_id = 'eeee3333-0000-0000-0000-000000000003';
+
+  j := public.tren_berat_7_hari(date '2026-09-22', 14);
+  assert not exists (
+    select 1 from jsonb_array_elements(j -> 'koridor') k
+     where (k ->> 'atas_kg')::numeric < (k ->> 'bawah_kg')::numeric
+  ), 'fase Cut: batas atas/bawah tertukar';
+  -- Delapan hari setelah jangkar, koridor Cut harus TURUN di bawah jangkar.
+  assert ((j -> 'koridor') -> 8 ->> 'atas_kg')::numeric < 74.0,
+    format('koridor Cut hari ke-8 atas %s, seharusnya < 74,0',
+           (j -> 'koridor') -> 8 ->> 'atas_kg');
+
+  update public.profiles set fase_aktif = 'Lean Gain'
+   where user_id = 'eeee3333-0000-0000-0000-000000000003';
+end $$;
+
+-- 7d. Posisi terhadap koridor ikut dikirim dan konsisten dengan batasnya.
+do $$
+declare
+  j jsonb;
+  v_rata numeric;
+  v_bawah numeric;
+  v_atas numeric;
+  v_posisi text;
+begin
+  j := public.tren_berat_7_hari(date '2026-09-22', 14);
+  v_rata := (j -> 'rata_rata' ->> 'rata_rata_kg')::numeric;
+  v_bawah := (j -> 'status_koridor' ->> 'bawah_kg')::numeric;
+  v_atas := (j -> 'status_koridor' ->> 'atas_kg')::numeric;
+  v_posisi := j -> 'status_koridor' ->> 'posisi';
+
+  assert v_posisi in ('di bawah koridor', 'di dalam koridor', 'di atas koridor'),
+    format('posisi %s tidak dikenal', v_posisi);
+  -- Posisinya harus benar-benar mengikuti angkanya, bukan sekadar terisi.
+  if v_rata < v_bawah then
+    assert v_posisi = 'di bawah koridor', format('%s < %s tapi posisi %s', v_rata, v_bawah, v_posisi);
+  elsif v_rata > v_atas then
+    assert v_posisi = 'di atas koridor', format('%s > %s tapi posisi %s', v_rata, v_atas, v_posisi);
+  else
+    assert v_posisi = 'di dalam koridor', format('%s dalam %s–%s tapi posisi %s', v_rata, v_bawah, v_atas, v_posisi);
+  end if;
+end $$;
+
 -- 8. Periode di luar batas ditolak, bukan dipotong diam-diam.
 do $$
 declare v_gagal boolean := false;
@@ -178,6 +248,9 @@ begin
   assert (j -> 'kecukupan' ->> 'hari_lagi_untuk_arah') is null,
     'tanpa timbangan, perkiraan hari tidak bisa ditebak';
   assert j -> 'jangkar_fase' = 'null'::jsonb, 'jangkar seharusnya null';
+  assert jsonb_array_length(j -> 'koridor') = 0, 'tanpa jangkar, koridor kosong';
+  assert (j -> 'status_koridor' ->> 'posisi') = 'belum bisa dinilai',
+    format('posisi %s, seharusnya "belum bisa dinilai"', j -> 'status_koridor' ->> 'posisi');
 end $$;
 
 -- 10. anon ditolak di tingkat hak akses.

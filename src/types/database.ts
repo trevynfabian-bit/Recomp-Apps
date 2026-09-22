@@ -191,6 +191,14 @@ export type TrenSnapshotRow = {
     tanggal_mulai: string;
     berat_awal_kg: number;
   } | null;
+  /** Titik koridor sepanjang rentang yang digambar; kosong bila tanpa jangkar. */
+  koridor: { tanggal: string; bawah_kg: number; atas_kg: number }[];
+  status_koridor: {
+    posisi: 'di bawah koridor' | 'di dalam koridor' | 'di atas koridor' | 'belum bisa dinilai';
+    selisih_kg: number | null;
+    bawah_kg: number | null;
+    atas_kg: number | null;
+  };
 };
 
 export type WorkoutRow = {

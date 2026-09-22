@@ -89,10 +89,11 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/makro.ts', join(kerja, 'makro.ts'));
   copyFileSync('packages/logika/src/deteksiTipeHari.ts', join(kerja, 'deteksiTipeHari.ts'));
   copyFileSync('packages/logika/src/tren.ts', join(kerja, 'tren.ts'));
+  copyFileSync('packages/logika/src/koridor.ts', join(kerja, 'koridor.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-    ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts',
+    ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -101,6 +102,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'makro.js')),
     ...require(join(kerja, 'keluar', 'deteksiTipeHari.js')),
     ...require(join(kerja, 'keluar', 'tren.js')),
+    ...require(join(kerja, 'keluar', 'koridor.js')),
   };
 }
 
@@ -486,6 +488,108 @@ try {
   }
   console.log(
     `✓ ${KASUS_GABUNGAN.length} kasus cocok — sinyal arah & kecukupan di SQL dan TypeScript sejalan.`,
+  );
+
+  // === Bagian 6: koridor target ===========================================
+  //
+  // Koridor memakai laju MAJEMUK — `(1 + laju) ^ (hari/7)` — jadi selisih
+  // presisi sekecil apa pun menumpuk sepanjang hari. Ia juga punya jebakan
+  // penamaan: pada fase Cut kedua lajunya negatif, sehingga batas "bawah"
+  // justru berasal dari laju MAKS. Ketiga fase diuji sepanjang 60 hari penuh,
+  // titik demi titik.
+  console.log();
+  const { koridorTarget, statusKoridor } = muatLogikaTs();
+
+  const FASE_UJI = ['Lean Gain', 'Cut', 'Maintenance'];
+  const JANGKAR_KG = 74.3;
+  const JANGKAR_TGL = '2026-09-01';
+  const HARI_KORIDOR = 60;
+
+  let gagalKoridor = 0;
+  let titikDiperiksa = 0;
+  console.log('fase          titik   selisih maks (kg)   contoh hari ke-59 (SQL / TS)');
+  console.log('─'.repeat(78));
+  for (const fase of FASE_UJI) {
+    const baris = sql(
+      `select string_agg(tanggal::text || '|' || bawah_kg::text || '|' || atas_kg::text, ';' order by tanggal)
+         from public.koridor_target(${JANGKAR_KG}, date '${JANGKAR_TGL}', '${fase}'::public.fase_program, ${HARI_KORIDOR});`,
+    );
+    const sqlTitik = baris.split(';').map((b) => {
+      const [tanggal, bawah, atas] = b.split('|');
+      return { tanggal, bawah: Number(bawah), atas: Number(atas) };
+    });
+    const tsKoridor = koridorTarget(JANGKAR_KG, JANGKAR_TGL, fase, HARI_KORIDOR);
+
+    let maksSelisih = 0;
+    let cocok = sqlTitik.length === tsKoridor.titik.length;
+    for (const [i, t] of sqlTitik.entries()) {
+      const ts = tsKoridor.titik[i];
+      if (!ts || t.tanggal !== ts.tanggal) { cocok = false; break; }
+      maksSelisih = Math.max(
+        maksSelisih,
+        Math.abs(t.bawah - ts.bawahKg),
+        Math.abs(t.atas - ts.atasKg),
+      );
+      if (t.bawah !== ts.bawahKg || t.atas !== ts.atasKg) cocok = false;
+      titikDiperiksa += 1;
+    }
+    if (!cocok) gagalKoridor += 1;
+    const akhirSql = sqlTitik[sqlTitik.length - 1];
+    const akhirTs = tsKoridor.titik[tsKoridor.titik.length - 1];
+    console.log(
+      `${cocok ? '✓' : '✗'} ${fase.padEnd(12)}  ${String(sqlTitik.length).padStart(4)}   ` +
+        `${maksSelisih.toFixed(4).padStart(9)}   ` +
+        `${akhirSql.bawah}–${akhirSql.atas} / ${akhirTs.bawahKg}–${akhirTs.atasKg}`,
+    );
+  }
+
+  // Posisi terhadap koridor: di bawah, di dalam, di atas, dan tidak bisa dinilai.
+  const KASUS_STATUS = [
+    { tanggal: '2026-09-29', rata: 70.0, harap: 'di bawah koridor' },
+    // 29 Sep = hari ke-28 = 4 pekan; Lean Gain dari 74,3 kg memberi koridor
+    // 75,05–75,80 kg, jadi 75,4 ada di dalamnya sementara 74,5 sudah di bawah.
+    { tanggal: '2026-09-29', rata: 75.4, harap: 'di dalam koridor' },
+    { tanggal: '2026-09-29', rata: 80.0, harap: 'di atas koridor' },
+    { tanggal: '2026-08-20', rata: 74.5, harap: 'belum bisa dinilai' },
+  ];
+  let gagalStatus = 0;
+  console.log();
+  console.log('posisi terhadap koridor (Lean Gain)   SQL                  TS');
+  console.log('─'.repeat(78));
+  const koridorTs = koridorTarget(JANGKAR_KG, JANGKAR_TGL, 'Lean Gain', HARI_KORIDOR);
+  for (const k of KASUS_STATUS) {
+    const baris = sql(
+      `select posisi || '|' || coalesce(selisih_kg::text, 'null')
+         from public.status_koridor(${JANGKAR_KG}, date '${JANGKAR_TGL}',
+              'Lean Gain'::public.fase_program, date '${k.tanggal}', ${k.rata});`,
+    );
+    const [posisiSql, selisihSql] = baris.split('|');
+    const ts = statusKoridor(koridorTs, k.tanggal, k.rata);
+    const tsSelisih = ts.selisihKg === null ? 'null' : String(ts.selisihKg);
+
+    const cocok =
+      posisiSql === ts.posisi &&
+      posisiSql === k.harap &&
+      (selisihSql === 'null'
+        ? tsSelisih === 'null'
+        : Math.abs(Number(selisihSql) - Number(tsSelisih)) < 1e-9);
+    if (!cocok) gagalStatus += 1;
+    console.log(
+      `${cocok ? '✓' : '✗'} ${k.tanggal} ${String(k.rata).padStart(5)} kg   ` +
+        `${posisiSql.padEnd(19)}  ${ts.posisi}`,
+    );
+  }
+
+  console.log();
+  if (gagalKoridor > 0 || gagalStatus > 0) {
+    console.error(
+      `✗ ${gagalKoridor} fase & ${gagalStatus} posisi BERBEDA (koridor target).`,
+    );
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${titikDiperiksa} titik koridor & ${KASUS_STATUS.length} posisi cocok — ` +
+      'koridor target di SQL dan TypeScript sejalan.',
   );
 } finally {
   hentikanPostgres();
