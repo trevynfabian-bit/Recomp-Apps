@@ -17,7 +17,9 @@ import {
 } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang } from '@/lib/format';
 import { ketukRingan } from '@/lib/haptics';
+import { deteksiTipeHari } from '@/lib/deteksiTipeHari';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
+import { mockWorkoutsHariIni } from '@/mocks/workout';
 import {
   beratTerakhirSebelum,
   cariTarget,
@@ -47,8 +49,15 @@ export default function LogHarianScreen() {
   const [sheetFotoTerbuka, setSheetFotoTerbuka] = useState(false);
 
   const fase = mockProfile.fase_aktif;
-  const dayType = mockDayTypes.find((d) => d.id === log.day_type_id) ?? mockDayTypes[0];
-  const target = cariTarget(log.day_type_id, fase);
+
+  // Tanpa override, tipe hari MENGIKUTI hasil deteksi dari workout hari ini;
+  // dengan override, pilihan pengguna yang menang.
+  const deteksi = deteksiTipeHari(mockWorkoutsHariIni, mockDayTypes);
+  const dayTypeId =
+    log.day_type_override || deteksi.dayTypeId === null ? log.day_type_id : deteksi.dayTypeId;
+
+  const dayType = mockDayTypes.find((d) => d.id === dayTypeId) ?? mockDayTypes[0];
+  const target = cariTarget(dayTypeId, fase);
   const macros = susunMacros(log, target);
 
   const sisaKalori = target.target_kalori - log.kalori;
@@ -90,13 +99,25 @@ export default function LogHarianScreen() {
    * Ganti tipe hari secara manual. `target_kalori` ikut diperbarui karena
    * kolom itu adalah SNAPSHOT target hari tersebut di `daily_logs`.
    */
-  function pilihTipeHari(dayTypeId: string) {
-    const targetBaru = cariTarget(dayTypeId, fase);
+  function pilihTipeHari(idBaru: string) {
+    const targetBaru = cariTarget(idBaru, fase);
     setLog((prev) => ({
       ...prev,
-      day_type_id: dayTypeId,
+      day_type_id: idBaru,
       day_type_override: true,
       target_kalori: targetBaru.target_kalori,
+    }));
+  }
+
+  /** Buang override dan ikuti lagi tebakan dari workout. */
+  function kembalikanAuto() {
+    const idAuto = deteksi.dayTypeId ?? log.day_type_id;
+    const targetAuto = cariTarget(idAuto, fase);
+    setLog((prev) => ({
+      ...prev,
+      day_type_id: idAuto,
+      day_type_override: false,
+      target_kalori: targetAuto.target_kalori,
     }));
   }
 
@@ -162,11 +183,13 @@ export default function LogHarianScreen() {
         <SectionHeader judul="Tipe hari" aksi={log.day_type_override ? 'diubah manual' : 'auto'} />
         <PemilihTipeHari
           daftar={mockDayTypes}
-          terpilihId={log.day_type_id}
+          terpilihId={dayTypeId}
           target={target}
           fase={fase}
           override={log.day_type_override}
+          deteksi={deteksi}
           onPilih={pilihTipeHari}
+          onKembalikanAuto={kembalikanAuto}
         />
       </View>
 
