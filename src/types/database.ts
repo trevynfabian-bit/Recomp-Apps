@@ -896,6 +896,28 @@ export type ImportJobRow = {
   selesai_pada: string | null;
 };
 
+/**
+ * Baris `settings_notifications` — satu per pengguna. Sakelar `<jenis>_aktif`
+ * mengikuti KATALOG_NOTIFIKASI; jam dalam format kolom `time` ("06:30:00").
+ */
+export type SettingsNotificationsRow = {
+  user_id: string;
+  timbang_aktif: boolean;
+  ukuran_aktif: boolean;
+  ringkasan_aktif: boolean;
+  evaluasi_aktif: boolean;
+  sumber_aktif: boolean;
+  jam_timbang: string;
+  /** `null` = akhir pekan memakai jam hari kerja. */
+  jam_timbang_akhir_pekan: string | null;
+  /** Angka tampil di widget layar kunci. */
+  widget_aktif: boolean;
+  /** Selalu true — dikunci CHECK database. */
+  notif_netral: true;
+  created_at: string;
+  updated_at: string;
+};
+
 /** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
 export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
 
@@ -1170,6 +1192,13 @@ export type Database = {
         Row: WorkoutSetRow;
         Insert: never;
         Update: never;
+        Relationships: [];
+      };
+      settings_notifications: {
+        Row: SettingsNotificationsRow;
+        Insert: Pick<SettingsNotificationsRow, 'user_id'> &
+          Partial<Omit<SettingsNotificationsRow, 'user_id' | 'created_at' | 'updated_at'>>;
+        Update: Partial<Omit<SettingsNotificationsRow, 'user_id' | 'notif_netral' | 'created_at' | 'updated_at'>>;
         Relationships: [];
       };
       import_jobs: {
@@ -1475,6 +1504,10 @@ export type Database = {
       impor_terakhir: {
         Args: Record<string, never>;
         Returns: ImportJobRow[];
+      };
+      pengaturan_notifikasi: {
+        Args: Record<string, never>;
+        Returns: SettingsNotificationsRow;
       };
       snapshot_hari_ini: {
         Args: { p_tanggal?: string | null; p_user_id?: string | null };

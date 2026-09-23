@@ -23,6 +23,7 @@ const {
   isiWidgetLingkar, jamPengingatUntuk, MIN_TIMBANGAN_SARAN, pelanggaranNada, perluPengingatTimbang,
   RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
   siapkanWidget, BATAS_SEGAR_MS, KATALOG_NOTIFIKASI, jenisNotifikasiBawaan, ringkasJenisAktif,
+  LANGKAH_JAM_MENIT, menitDariJamSql, jamSqlDariMenit,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -115,6 +116,23 @@ console.log('\nKatalog notifikasi per jenis');
   cek(`semua nyala: "${ringkasJenisAktif(bawaan)}"`, ringkasJenisAktif(bawaan) === 'Semua aktif');
   cek('dua dimatikan: "3 dari 5 jenis aktif"', ringkasJenisAktif({ ...bawaan, ukuran: false, sumber: false }) === '3 dari 5 jenis aktif');
   cek('semua dimatikan', ringkasJenisAktif(Object.fromEntries(jenis.map((j) => [j, false]))) === 'Semua dimatikan');
+}
+
+console.log('\nSkema settings_notifications sejalan dengan logika');
+{
+  const sql = readFileSync('supabase/migrations/20260922004200_preferensi_widget_pengingat.sql', 'utf8');
+  const tanpaKolom = KATALOG_NOTIFIKASI.filter((n) => !new RegExp(`${n.jenis}_aktif boolean not null default ${n.bawaan}`).test(sql));
+  cek('setiap jenis di katalog punya kolom <jenis>_aktif dengan bawaan yang sama', tanpaKolom.length === 0,
+    tanpaKolom.map((n) => n.jenis).join(', '));
+  const bawaan = /jam_timbang time not null default '(\d{2}:\d{2})'/.exec(sql);
+  cek(`jam bawaan SQL ${bawaan?.[1]} = JAM_TIMBANG_BAWAAN`, bawaan && menitDariJamSql(bawaan[1]) === JAM_TIMBANG_BAWAAN);
+  const rentang = /jam_timbang between time '(\d{2}:\d{2})' and time '(\d{2}:\d{2})'/.exec(sql);
+  cek(`rentang SQL ${rentang?.[1]}–${rentang?.[2]} = RENTANG_JAM_TIMBANG`,
+    rentang && menitDariJamSql(rentang[1]) === RENTANG_JAM_TIMBANG.min && menitDariJamSql(rentang[2]) === RENTANG_JAM_TIMBANG.maks);
+  cek('kelipatan menit SQL = LANGKAH_JAM_MENIT', sql.includes(`% ${LANGKAH_JAM_MENIT} = 0`));
+  cek('konversi jam bolak-balik', menitDariJamSql('06:30:00') === 390 && jamSqlDariMenit(390) === '06:30'
+    && jamSqlDariMenit(menitDariJamSql('11:00')) === '11:00');
+  cek('nada netral dikunci database (bukan sakelar)', /check \(notif_netral\)/.test(sql));
 }
 
 console.log('\nTeks widget');

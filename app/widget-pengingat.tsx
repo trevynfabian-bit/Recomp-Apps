@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +13,13 @@ import {
 } from '@recomp/logika';
 import type { JenisNotifikasi } from '@recomp/logika';
 import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
+import {
+  ambilPengaturanPengingat,
+  simpanPengaturanPengingat,
+  type PerubahanPengingat,
+} from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
+import { supabaseSiap } from '@/lib/supabase';
 import {
   LABEL_SKENARIO_WIDGET,
   mockMasukanWidget,
@@ -53,9 +59,33 @@ export default function WidgetPengingatScreen() {
   const [waktuTimbang] = useState(() => mockWaktuTimbang());
   const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);
 
-  const ubah = (p: Partial<typeof atur>) => setAtur((lama) => ({ ...lama, ...p }));
-  const ubahJenis = (jenis: JenisNotifikasi, v: boolean) =>
+  useEffect(() => {
+    if (!supabaseSiap) return;
+    let batal = false;
+    ambilPengaturanPengingat()
+      .then((p) => {
+        if (!batal) setAtur(p);
+      })
+      .catch(() => {
+        // Tetap memakai bawaan; perubahan berikutnya mencoba menyimpan lagi.
+      });
+    return () => {
+      batal = true;
+    };
+  }, []);
+
+  /** Simpan hanya yang berubah; tampilan tidak menunggu jaringan. */
+  const simpan = (p: PerubahanPengingat) => {
+    if (supabaseSiap) simpanPengaturanPengingat(p).catch(() => undefined);
+  };
+  const ubah = (p: Partial<typeof atur>) => {
+    setAtur((lama) => ({ ...lama, ...p }));
+    simpan(p);
+  };
+  const ubahJenis = (jenis: JenisNotifikasi, v: boolean) => {
     setAtur((lama) => ({ ...lama, jenis: { ...lama.jenis, [jenis]: v } }));
+    simpan({ jenis: { [jenis]: v } });
+  };
   const aktif = KATALOG_NOTIFIKASI.filter((n) => atur.jenis[n.jenis]);
   const jadwal = useMemo(
     () => ({ hariKerjaMenit: atur.jamTimbangMenit, akhirPekanMenit: atur.jamAkhirPekanMenit }),

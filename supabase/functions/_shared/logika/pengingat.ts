@@ -36,6 +36,17 @@ export function formatJamMenit(menit: number): string {
   return `${String(j).padStart(2, '0')}.${String(m).padStart(2, '0')}`;
 }
 
+/** Kolom `time` Postgres ("06:30:00") → menit sejak tengah malam. */
+export function menitDariJamSql(jam: string): number {
+  const [j, m] = jam.split(':').map(Number);
+  return j * 60 + m;
+}
+
+/** Menit sejak tengah malam → nilai kolom `time` ("06:30"). */
+export function jamSqlDariMenit(menit: number): string {
+  return `${String(Math.floor(menit / 60)).padStart(2, '0')}:${String(menit % 60).padStart(2, '0')}`;
+}
+
 /** Geser jam pengingat, tertahan di rentang pagi. */
 export function geserJamTimbang(menit: number, delta: number): number {
   return Math.min(RENTANG_JAM_TIMBANG.maks, Math.max(RENTANG_JAM_TIMBANG.min, menit + delta));
