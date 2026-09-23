@@ -30,6 +30,11 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'anon') then
     create role anon nologin;
   end if;
+  -- Peran yang dipakai kunci service role. Di Supabase ia melewati RLS; di sini
+  -- ditiru supaya uji fungsi berhak tinggi menguji hal yang sama.
+  if not exists (select 1 from pg_roles where rolname = 'service_role') then
+    create role service_role nologin bypassrls;
+  end if;
 end $$;
 
 grant usage on schema public to authenticated, anon;
@@ -43,3 +48,12 @@ alter default privileges in schema public
   grant all on tables to authenticated, anon;
 alter default privileges in schema public
   grant all on sequences to authenticated, anon;
+
+-- Supabase juga memberi EXECUTE atas setiap FUNGSI baru kepada anon,
+-- authenticated, dan service_role LANGSUNG — bukan lewat PUBLIC. Akibatnya
+-- `revoke all on function ... from public` TIDAK mencabut hak anon di produksi.
+-- Tanpa baris ini, uji "anon tidak boleh menjalankan X" akan lulus di sini dan
+-- tidak berarti apa-apa di Supabase sungguhan.
+alter default privileges in schema public
+  grant execute on functions to authenticated, anon, service_role;
+grant usage on schema public to service_role;
