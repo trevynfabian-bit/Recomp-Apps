@@ -30,6 +30,46 @@ export type HasilLab = {
   penanda: PenandaLab[];
 };
 
+/**
+ * Satu hasil lab seperti dikirim RPC `muat_hasil_lab` / `simpan_hasil_lab`
+ * (jsonb). Angka dari kolom `numeric` bisa sampai sebagai string, tergantung
+ * klien yang membacanya, jadi tipenya longgar di sini.
+ */
+export type BarisHasilLabServer = {
+  id: string;
+  tanggal: string;
+  nama: string;
+  laboratorium: string | null;
+  diperbarui_pada: string;
+  penanda: {
+    nama: string;
+    nilai: number | string;
+    satuan: string;
+    rujukanMin: number | string | null;
+    rujukanMaks: number | string | null;
+  }[];
+};
+
+/**
+ * Baris server → `HasilLab`. Dipakai app DAN Edge Function coach, supaya
+ * yang dibaca coach persis yang tampil di layar hasil lab.
+ */
+export function hasilLabDariServer(b: BarisHasilLabServer): HasilLab {
+  return {
+    id: b.id,
+    tanggal: b.tanggal,
+    nama: b.nama,
+    laboratorium: b.laboratorium,
+    penanda: b.penanda.map((p) => ({
+      nama: p.nama,
+      nilai: Number(p.nilai),
+      satuan: p.satuan,
+      rujukanMin: p.rujukanMin === null ? null : Number(p.rujukanMin),
+      rujukanMaks: p.rujukanMaks === null ? null : Number(p.rujukanMaks),
+    })),
+  };
+}
+
 export type PosisiPenanda = 'dalam rentang' | 'di bawah rentang' | 'di atas rentang' | 'tanpa rujukan';
 
 /** Posisi nilai terhadap rentang rujukan lab. Batas rentang termasuk "dalam". */

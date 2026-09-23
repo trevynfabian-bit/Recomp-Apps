@@ -86,7 +86,7 @@ export function susunStatusPrivasi(m: MasukanStatusPrivasi): ButirStatusPrivasi[
       status: 'Hanya saat Anda bertanya',
       nada: 'info',
       penjelasan:
-        'Pertanyaan Anda dan ringkasan data yang relevan dikirim ke penyedia model AI (Anthropic) untuk menyusun jawaban. Pertanyaan soal obat atau dosis dijawab langsung di perangkat, tanpa dikirim.',
+        'Pertanyaan Anda dan ringkasan data yang relevan dikirim ke penyedia model AI (Anthropic) untuk menyusun jawaban. Dari hasil lab, yang selalu ikut hanya tanggal dan nama panelnya; nilainya ikut hanya saat coach membutuhkannya untuk menjawab. Pertanyaan soal obat atau dosis dijawab langsung di perangkat, tanpa dikirim.',
     },
     {
       kunci: 'ringkasan',

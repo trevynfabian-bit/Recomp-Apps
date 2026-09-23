@@ -1,5 +1,5 @@
-import { BATAS_PANJANG_LAB } from '@recomp/logika';
-import type { HasilLab } from '@recomp/logika';
+import { BATAS_PANJANG_LAB, hasilLabDariServer } from '@recomp/logika';
+import type { BarisHasilLabServer, HasilLab } from '@recomp/logika';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -34,36 +34,15 @@ export class KesalahanHasilLab extends Error {
 /** Hasil lab dari server, dengan waktu terakhir berubah untuk simpanan berikutnya. */
 export type HasilLabServer = HasilLab & { diperbaruiPada: string };
 
-type BarisServer = {
-  id: string;
-  tanggal: string;
-  nama: string;
-  laboratorium: string | null;
-  diperbarui_pada: string;
-  penanda: { nama: string; nilai: number; satuan: string; rujukanMin: number | null; rujukanMaks: number | null }[];
-};
-
-function keHasilLab(b: BarisServer): HasilLabServer {
-  return {
-    id: b.id,
-    tanggal: b.tanggal,
-    nama: b.nama,
-    laboratorium: b.laboratorium,
-    diperbaruiPada: b.diperbarui_pada,
-    penanda: b.penanda.map((p) => ({
-      nama: p.nama,
-      nilai: Number(p.nilai),
-      satuan: p.satuan,
-      rujukanMin: p.rujukanMin === null ? null : Number(p.rujukanMin),
-      rujukanMaks: p.rujukanMaks === null ? null : Number(p.rujukanMaks),
-    })),
-  };
+/** Bentuk barisnya sama dengan yang dibaca coach (`hasilLabDariServer`). */
+function keHasilLab(b: BarisHasilLabServer): HasilLabServer {
+  return { ...hasilLabDariServer(b), diperbaruiPada: b.diperbarui_pada };
 }
 
 export async function muatHasilLab(): Promise<HasilLabServer[]> {
   const { data, error } = await supabase.rpc('muat_hasil_lab');
   if (error) throw terjemahkan(error, 'muat');
-  return (data as BarisServer[]).map(keHasilLab);
+  return (data as BarisHasilLabServer[]).map(keHasilLab);
 }
 
 /** Tambah (tanpa `id`) atau ganti seluruh isi satu hasil lab (dengan `id`). */
@@ -82,7 +61,7 @@ export async function simpanHasilLabServer(
     p_id: ubah?.id ?? null,
   });
   if (error) throw terjemahkan(error, 'simpan');
-  return keHasilLab(data as BarisServer);
+  return keHasilLab(data as BarisHasilLabServer);
 }
 
 export async function hapusHasilLabServer(id: string): Promise<void> {

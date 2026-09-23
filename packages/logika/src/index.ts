@@ -361,6 +361,7 @@ export {
 
 export type {
   BarisDataMentahLab,
+  BarisHasilLabServer,
   GalatPenandaLab,
   HasilLab,
   HasilPeriksaLab,
@@ -373,6 +374,7 @@ export type {
 export {
   barisDataMentahLab,
   BATAS_PANJANG_LAB,
+  hasilLabDariServer,
   hasilLabSama,
   isianDariHasilLab,
   kalimatRingkasanLab,

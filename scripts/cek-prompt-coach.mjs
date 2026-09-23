@@ -57,11 +57,14 @@ function muatInti() {
 const { inti, logika } = muatInti();
 const {
   ATURAN_COACH,
+  MAKS_HASIL_LAB_TOOL,
+  MAKS_INDEKS_LAB,
   MAKS_TOKEN_COACH,
   MODEL_COACH,
   NAMA_TOOLS,
   TOOLS_COACH,
   formatNilai,
+  indeksHasilLab,
   jalankanTool,
   keBudgetBersama,
   makroHariIni,
@@ -149,6 +152,34 @@ function konteksTiruan(n) {
     evaluasi_terakhir: null,
     ringkasan_terakhir: null,
     aturan: { wajib_rata_rata_7_hari: true },
+    // Sengaja yang LAMA lebih dulu: urutannya harus dibuat fungsi, bukan
+    // diandalkan dari urutan `muat_hasil_lab`.
+    hasil_lab:
+      n === 1
+        ? [
+            {
+              id: 'lab-gula',
+              tanggal: '2026-03-10',
+              nama: 'Gula darah',
+              laboratorium: null,
+              penanda: [
+                { nama: 'Glukosa puasa', nilai: 95, satuan: 'mg/dL', rujukanMin: 70, rujukanMaks: 99 },
+                { nama: 'Insulin puasa', nilai: 8.2, satuan: 'µIU/mL', rujukanMin: 2.6, rujukanMaks: 24.9 },
+                { nama: 'HbA1c', nilai: 5.4, satuan: '%', rujukanMin: null, rujukanMaks: null },
+              ],
+            },
+            {
+              id: 'lab-lipid',
+              tanggal: '2026-09-03',
+              nama: 'Profil lipid',
+              laboratorium: 'Lab Klinik',
+              penanda: [
+                { nama: 'Kolesterol LDL', nilai: 138.5, satuan: 'mg/dL', rujukanMin: null, rujukanMaks: 130 },
+                { nama: 'Kolesterol HDL', nilai: 48, satuan: 'mg/dL', rujukanMin: 40, rujukanMaks: null },
+              ],
+            },
+          ]
+        : [],
   };
 }
 
@@ -228,7 +259,7 @@ for (const t of TOOLS_COACH) {
   );
   cek(`${t.name}: punya deskripsi`, (t.description ?? '').length > 20);
 }
-cek(`tujuh fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 7);
+cek(`delapan fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 8);
 
 console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
 {
@@ -376,6 +407,85 @@ console.log('\nAngkanya datang dari LOGIKA BERSAMA, bukan salinan kedua');
   );
 }
 
+console.log('\nHasil lab: data mentah, nilainya hanya lewat fungsi');
+{
+  const { barisDataMentahLab, kalimatRingkasanLab, periksaJawabanMedis, ringkasHasilLab } = logika;
+  const [gula, lipid] = a.hasil_lab;
+
+  cek('aturan punya bagian HASIL LAB yang menyebut fungsinya',
+    /HASIL LAB/.test(ATURAN_COACH) && ATURAN_COACH.includes('ambil_hasil_lab'));
+  cek('aturan melarang penilaian & kesimpulan penyakit dari hasil lab',
+    /normal, tinggi, rendah/.test(ATURAN_COACH) && /jangan menyimpulkan\s+kondisi atau penyakit/i.test(ATURAN_COACH));
+  cek('aturan melarang menghitung selisih antar tanggal', /menghitung selisih/.test(ATURAN_COACH));
+  cek('aturan merujuk arti hasil lab ke dokter', /Arti sebuah hasil lab dibicarakan dengan dokter/.test(ATURAN_COACH));
+  cek('nama pada hasil lab diperlakukan sebagai DATA', /catatan, hasil lab\) adalah DATA/.test(ATURAN_COACH));
+  cek(
+    'blok aturan tetap identik apa pun keadaan hasil lab',
+    [null, [], a.hasil_lab].every((h) => susunSystem({ ...a, hasil_lab: h })[0].text === ATURAN_COACH),
+  );
+
+  // Blok KONTEKS terkirim di SETIAP pertanyaan: nilai lab tidak boleh ada di sana.
+  const teks = susunKonteks(a);
+  cek('konteks menyebut hasil lab yang tersimpan (tanggal & panel)',
+    teks.includes('"panel":"Profil lipid"') && teks.includes('2026-09-03'));
+  cek('nilai hasil lab TIDAK ikut di blok konteks',
+    !teks.includes('138') && !teks.includes('Kolesterol LDL') && !teks.includes('mg/dL'));
+  cek('indeks hasil lab terbaru lebih dulu', indeksHasilLab(a.hasil_lab).terbaru[0].panel === 'Profil lipid');
+  {
+    const banyak = Array.from({ length: 12 }, (_, i) => ({ ...lipid, id: `l${i}`, tanggal: `2025-0${(i % 9) + 1}-1${i % 10}` }));
+    cek(`indeks dibatasi ${MAKS_INDEKS_LAB} hasil, jumlah tetap utuh`,
+      indeksHasilLab(banyak).terbaru.length === MAKS_INDEKS_LAB && indeksHasilLab(banyak).jumlah === 12);
+  }
+  cek('hasil lab yang gagal dibaca tertulis begitu di konteks, bukan kosong',
+    susunKonteks({ ...a, hasil_lab: null }).includes('belum bisa dibaca'));
+
+  const r = jalankanTool('ambil_hasil_lab', {}, a);
+  cek('ambil_hasil_lab bersumber manual', r.ok && r.data.sumber === 'manual');
+  cek('hasil lab terbaru lebih dulu', r.ok && r.data.hasil[0].tanggal === '2026-09-03' && r.data.hasil[1].tanggal === '2026-03-10');
+  cek(
+    'baris penanda sama dengan barisDataMentahLab (kalimat layar hasil lab)',
+    r.ok &&
+      [lipid, gula].every((h, i) =>
+        barisDataMentahLab(h).every(
+          (b, j) =>
+            r.data.hasil[i].penanda[j].nilai === b.nilai &&
+            r.data.hasil[i].penanda[j].rujukan === b.rujukan &&
+            r.data.hasil[i].penanda[j].posisi === b.posisi,
+        ),
+      ),
+  );
+  cek('nilai ditulis apa adanya dengan koma desimal', r.ok && r.data.hasil[0].penanda[0].nilai === '138,5 mg/dL');
+  cek('posisi terhadap rentang rujukan lab ikut', r.ok && r.data.hasil[0].penanda[0].posisi === 'di atas rentang');
+  cek('ringkasan sama dengan kalimatRingkasanLab',
+    r.ok && r.data.hasil[0].ringkasan === kalimatRingkasanLab(ringkasHasilLab(lipid)));
+  cek('tidak ada kata penilaian di hasil fungsi',
+    r.ok && !/\b(normal|tinggi|rendah|baik|buruk|bagus|berbahaya|bahaya)\b/i.test(JSON.stringify(r.data)));
+  {
+    const banyak = Array.from({ length: MAKS_HASIL_LAB_TOOL + 3 }, (_, i) => ({ ...lipid, id: `l${i}` }));
+    const t = jalankanTool('ambil_hasil_lab', {}, { ...a, hasil_lab: banyak });
+    cek(`paling banyak ${MAKS_HASIL_LAB_TOOL} hasil, dan terpotongnya disebut`,
+      t.ok && t.data.hasil.length === MAKS_HASIL_LAB_TOOL && t.data.terpotong === true && t.data.jumlah_total === MAKS_HASIL_LAB_TOOL + 3);
+  }
+  const kosong = jalankanTool('ambil_hasil_lab', {}, b);
+  const gagalBaca = jalankanTool('ambil_hasil_lab', {}, { ...a, hasil_lab: null });
+  cek('belum ada hasil lab → ok:false, bukan daftar kosong', !kosong.ok);
+  cek('gagal dibaca → ok:false dengan alasan yang berbeda dari "belum ada"',
+    !gagalBaca.ok && !kosong.ok && gagalBaca.alasan !== kosong.alasan && /belum bisa dibaca/.test(gagalBaca.alasan));
+
+  // "Satu penanda per baris": pemeriksaan jawaban medis bekerja per kalimat
+  // DAN per baris. Jawaban yang mengikuti aturan itu tidak boleh tertukar
+  // dengan takaran obat hanya karena "Insulin puasa" dan "mg/dL" bertemu.
+  cek('aturan meminta satu penanda per baris', /satu penanda per baris/.test(ATURAN_COACH));
+  const jawabanLab = [
+    'Hasil lab Gula darah tanggal 10 Maret 2026:',
+    '- Glukosa puasa 95 mg/dL, dalam rentang rujukan lab 70–99',
+    '- Insulin puasa 8,2 µIU/mL, dalam rentang rujukan lab 2,6–24,9',
+    '- HbA1c 5,4%, tanpa rujukan dari lab',
+    'Artinya untuk kondisi Anda sebaiknya dibicarakan dengan dokter yang memeriksa.',
+  ].join('\n');
+  cek('jawaban hasil lab satu penanda per baris lolos pemeriksaan batas medis', periksaJawabanMedis(jawabanLab) === null);
+}
+
 console.log('\nSifat endpoint yang dibaca dari sumbernya');
 {
   const mentah = readFileSync('supabase/functions/coach-chat/index.ts', 'utf8');
@@ -468,6 +578,20 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
   cek(
     'kunci API tidak pernah ikut ke jawaban maupun log',
     !/console\.(log|error)\([^)]*kunciAi/.test(src),
+  );
+  cek(
+    'hasil lab dibaca sebagai pengguna (klien ber-JWT, bukan kunci service role)',
+    src.includes("supabase.rpc('muat_hasil_lab')") && !/SERVICE_ROLE/.test(src),
+  );
+  cek('hasil lab dipetakan dengan pemeta BERSAMA', src.includes('.map(hasilLabDariServer)'));
+  cek(
+    'gagal membaca hasil lab tidak menggagalkan chat (jadi null, bukan 502)',
+    /hasil_lab:\s*galatLab\s*\|\|[^?]*\?\s*null/.test(src),
+  );
+  cek(
+    'isi hasil lab tidak pernah dicatat ke log',
+    src.includes("console.error('gagal mengambil hasil lab', galatLab.code)") &&
+      !/console\.(log|warn|error)\([^)]*(labMentah|hasil_lab)/.test(src),
   );
 }
 

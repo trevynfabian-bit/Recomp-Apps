@@ -24,11 +24,15 @@
  * 3. KUOTA harian ditegakkan baris `pesan_coach` (pemicu di database), dan
  *    pertanyaan disimpan SEBELUM model dipanggil — jadi pertanyaan di atas
  *    batas ditolak sebelum satu token pun dibayar.
- * 4. ANGKA tidak pernah dihitung model. Model memanggil tujuh fungsi; semuanya
+ * 4. ANGKA tidak pernah dihitung model. Model memanggil delapan fungsi; semuanya
  *    dijawab dari konteks yang sudah dihitung app dan diturunkan dengan fungsi
  *    dari `@recomp/logika` (lihat `_shared/promptCoach.ts`) — termasuk bentuk
  *    tampilnya, jadi model tidak pernah memformat angka sendiri. Asal tiap angka
  *    dicatat ke `pesan_coach.rujukan` sebagai DATA.
+ * 5. HASIL LAB dibaca lewat `muat_hasil_lab` dengan klien yang sama (RLS), dan
+ *    hanya tanggal & nama panelnya yang ikut di setiap pertanyaan. Nilainya
+ *    sampai ke model hanya bila model memanggil `ambil_hasil_lab`, dan isinya
+ *    tidak pernah dicatat ke log.
  *
  * Aturan "protein tidak pernah dipotong", "wajib rata-rata 7 hari", dan
  * seterusnya tidak dititipkan ke prompt saja — bentuk datanyalah yang
@@ -52,6 +56,7 @@
 import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { periksaBatasMedis, periksaJawabanMedis } from '../_shared/logika/batasMedis.ts';
+import { hasilLabDariServer, type BarisHasilLabServer } from '../_shared/logika/hasilLab.ts';
 import {
   BETA_FALLBACK,
   jalankanTool,
@@ -127,15 +132,31 @@ Deno.serve(async (req: Request) => {
     { global: { headers: { Authorization: otorisasi } } },
   );
 
-  const { data: konteksMentah, error: galatKonteks } = await supabase.rpc('konteks_coach', {
-    p_tanggal: null,
-    p_persen_lemak: typeof badan.persen_lemak === 'number' ? badan.persen_lemak : null,
-  });
+  // Hasil lab dibaca terpisah dari `konteks_coach`, sama-sama sebagai pengguna.
+  // Gagal membacanya TIDAK menggagalkan chat: pertanyaan soal berat atau budget
+  // tetap terjawab, dan `ambil_hasil_lab` berkata datanya belum terbaca —
+  // bukan "belum ada".
+  const [{ data: konteksMentah, error: galatKonteks }, { data: labMentah, error: galatLab }] =
+    await Promise.all([
+      supabase.rpc('konteks_coach', {
+        p_tanggal: null,
+        p_persen_lemak: typeof badan.persen_lemak === 'number' ? badan.persen_lemak : null,
+      }),
+      supabase.rpc('muat_hasil_lab'),
+    ]);
   if (galatKonteks || !konteksMentah) {
     console.error('gagal mengambil konteks', galatKonteks);
     return jawab({ galat: 'Gagal membaca data Anda' }, 502);
   }
-  const konteks = konteksMentah as KonteksCoach;
+  // Yang dicatat hanya kodenya; isi hasil lab tidak pernah masuk log.
+  if (galatLab) console.error('gagal mengambil hasil lab', galatLab.code);
+  const konteks: KonteksCoach = {
+    ...(konteksMentah as Omit<KonteksCoach, 'hasil_lab'>),
+    hasil_lab:
+      galatLab || !Array.isArray(labMentah)
+        ? null
+        : (labMentah as BarisHasilLabServer[]).map(hasilLabDariServer),
+  };
 
   // --- Percakapan & pesan pengguna ----------------------------------------
   const { data: pengguna } = await supabase.auth.getUser();
