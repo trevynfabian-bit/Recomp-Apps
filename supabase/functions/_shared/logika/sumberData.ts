@@ -330,3 +330,74 @@ export function validasiKunciHevy(
 export function samarkanKunci(kunci: string): string {
   return kunci.length <= 4 ? '••••' : `••••${kunci.slice(-4)}`;
 }
+
+// ---------------------------------------------------------------------------
+// Indikator sinkron seluruh app
+// ---------------------------------------------------------------------------
+
+/** Keadaan sinkron yang dibaca indikator di kepala layar. */
+export type KeadaanSinkronApp = {
+  /** Koneksi Realtime ke server. */
+  realtime: 'menyambung' | 'terhubung' | 'terputus';
+  /** Sedang ada tarikan/kiriman yang berjalan (mis. HealthKit saat app dibuka). */
+  sedangMenyinkron: boolean;
+  /** Perubahan lokal yang belum terkirim (dicatat saat offline). */
+  tertunda: number;
+  /** ISO 8601 data terakhir yang MASUK lewat Realtime; `null` bila belum ada. */
+  terakhirMasuk: string | null;
+  /** Jumlah sumber yang bermasalah atau terlambat. */
+  sumberPerluPerhatian: number;
+};
+
+export type TingkatSinkronApp = 'terputus' | 'menyinkron' | 'menyambung' | 'perhatian' | 'langsung';
+
+/**
+ * Satu status untuk indikator kecil di kepala layar.
+ *
+ * Urutannya adalah inti fungsi ini — yang lebih mendesak MENUTUPI yang lain:
+ *   1. terputus  — tanpa koneksi, "langsung" dan "12 menit lalu" sama-sama tidak
+ *                  bisa dipercaya; yang perlu diketahui adalah catatan baru
+ *                  tersimpan di perangkat dan menunggu dikirim;
+ *   2. menyinkron / menyambung — keadaan sesaat yang menjelaskan kenapa angka
+ *                  sebentar lagi bisa berubah;
+ *   3. perhatian — ada sumber yang perlu tindakan; ketukan membawa ke sana;
+ *   4. langsung  — semuanya mengalir.
+ */
+export function statusSinkronApp(
+  k: KeadaanSinkronApp,
+  sekarang: Date,
+): { tingkat: TingkatSinkronApp; label: string; aksesLabel: string } {
+  if (k.realtime === 'terputus') {
+    const menunggu = k.tertunda > 0 ? ` · ${k.tertunda} perubahan menunggu` : '';
+    return {
+      tingkat: 'terputus',
+      label: `Offline${menunggu}`,
+      aksesLabel:
+        k.tertunda > 0
+          ? `Offline. ${k.tertunda} perubahan tersimpan di perangkat dan dikirim saat online.`
+          : 'Offline. Data baru dari perangkat lain belum bisa masuk.',
+    };
+  }
+  if (k.sedangMenyinkron) {
+    return { tingkat: 'menyinkron', label: 'Menyinkron…', aksesLabel: 'Sedang menyinkron data.' };
+  }
+  if (k.realtime === 'menyambung') {
+    return { tingkat: 'menyambung', label: 'Menyambung…', aksesLabel: 'Menyambung ke server.' };
+  }
+  if (k.sumberPerluPerhatian > 0) {
+    const n = k.sumberPerluPerhatian;
+    return {
+      tingkat: 'perhatian',
+      label: `${n} sumber perlu perhatian`,
+      aksesLabel: `${n} sumber data perlu perhatian.`,
+    };
+  }
+  const kapan = k.terakhirMasuk ? formatWaktuRelatif(k.terakhirMasuk, sekarang) : null;
+  return {
+    tingkat: 'langsung',
+    label: kapan ? `Langsung · ${kapan}` : 'Langsung',
+    aksesLabel: kapan
+      ? `Tersinkron langsung. Data terakhir masuk ${kapan}.`
+      : 'Tersinkron langsung.',
+  };
+}

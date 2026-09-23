@@ -1,4 +1,5 @@
 import type { HasilHubungkan, KoneksiSumber, SumberData } from '@recomp/logika';
+import type { KejadianMasuk } from '@/state/sinkron';
 
 /**
  * Koneksi sumber data tiruan untuk halaman Sumber Data (Fase 3, sisi frontend).
@@ -78,4 +79,22 @@ export function mockHubungkan(sumber: SumberData, kunci: string | null): Promise
 /** Tiruan pemutusan; `hapusData` diabaikan karena tidak ada data sungguhan. */
 export function mockPutuskan(_sumber: SumberData, _hapusData: boolean): Promise<void> {
   return new Promise((selesai) => setTimeout(selesai, JEDA_PUTUSKAN_MS));
+}
+
+/**
+ * Satu kiriman tiruan lewat Realtime: langkah dan energi aktif dari Apple
+ * Health. Sengaja BUKAN berat pagi — berat yang diganti diam-diam oleh sinkron
+ * adalah keputusan tersendiri (sumber mana yang menang), bukan urusan tiruan
+ * indikator.
+ */
+export function mockKejadianMasuk(sekarang: Date = new Date()): KejadianMasuk {
+  return {
+    id: `masuk-${sekarang.getTime()}`,
+    sumber: 'apple_health',
+    waktu: sekarang.toISOString(),
+    masuk: [
+      { label: 'langkah', jumlah: 1204 },
+      { label: 'kcal energi aktif', jumlah: 86 },
+    ],
+  };
 }

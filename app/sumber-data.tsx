@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,11 +13,9 @@ import {
   SheetPutuskanSumber,
 } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { mockHubungkan, mockKoneksiSumber, mockPutuskan } from '@/mocks/sumberData';
+import { mockHubungkan, mockPutuskan } from '@/mocks/sumberData';
+import { useSinkron } from '@/state/sinkron';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
-
-/** Seberapa sering "12 menit lalu" disegarkan selama layar terbuka. */
-const SEGARKAN_MS = 60_000;
 
 /**
  * Layar Sumber Data: apakah data dari Apple Health, WHOOP, Strava, dan Hevy
@@ -28,8 +26,8 @@ const SEGARKAN_MS = 60_000;
  * sumber yang AKTIF, kartu yang butuh tindakan diurutkan paling atas, dan tiap
  * kartu hanya menawarkan satu tindakan yang relevan untuk keadaannya.
  *
- * Fase 3 sisi frontend: koneksi berasal dari data tiruan yang disimpan di state
- * layar ini, dan alur menghubungkan/memutuskan memakai fungsi tiruan yang
+ * Fase 3 sisi frontend: koneksi berasal dari data tiruan di penyedia sinkron
+ * bersama (`useSinkron`), dan alur menghubungkan/memutuskan memakai fungsi tiruan yang
  * DISUNTIKKAN ke sheet-nya (`mockHubungkan`, `mockPutuskan`). Task backend cukup
  * menukar kedua fungsi itu dan sumber daftar koneksinya dengan
  * `health_connections`, izin HealthKit, dan OAuth yang sebenarnya.
@@ -38,15 +36,10 @@ export default function SumberDataScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [sekarang, setSekarang] = useState(() => new Date());
-  const [koneksi, setKoneksi] = useState<KoneksiSumber[]>(() => mockKoneksiSumber(sekarang));
-
-  // Waktu relatif ("12 menit lalu") dan status "terlambat" bergantung jam,
-  // jadi keduanya disegarkan selama layar terbuka — bukan dibekukan saat dibuka.
-  useEffect(() => {
-    const id = setInterval(() => setSekarang(new Date()), SEGARKAN_MS);
-    return () => clearInterval(id);
-  }, []);
+  // Koneksi dan jam dibaca dari penyedia sinkron BERSAMA, bukan state layar:
+  // indikator di layar Hari Ini membaca daftar yang sama, jadi menyambung ulang
+  // di sini langsung menghapus "perlu perhatian" di sana.
+  const { koneksi, ubahKoneksi: ubah, sekarang } = useSinkron();
 
   // Urutan ditetapkan SEKALI saat layar dibuka. Kalau diurutkan ulang setiap
   // kali status berubah, kartu yang baru saja disambungkan ulang akan melompat
@@ -64,10 +57,6 @@ export default function SumberDataScreen() {
 
   const ringkasan = ringkasanKoneksi(koneksi, sekarang);
 
-  function ubah(sumber: SumberData, perubahan: Partial<KoneksiSumber>) {
-    setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? { ...k, ...perubahan } : k)));
-  }
-
   // Sheet yang sedang terbuka; `null` berarti tertutup.
   const [akanDihubungkan, setAkanDihubungkan] = useState<SumberData | null>(null);
   const [akanDiputuskan, setAkanDiputuskan] = useState<SumberData | null>(null);
@@ -84,7 +73,6 @@ export default function SumberDataScreen() {
 
   function sinkronSekarang(sumber: SumberData) {
     ubah(sumber, { sinkronTerakhir: new Date().toISOString(), galatTerakhir: null });
-    setSekarang(new Date());
     ketukBerhasil();
   }
 

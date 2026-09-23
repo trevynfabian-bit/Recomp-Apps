@@ -36,6 +36,7 @@ const {
   PROFIL_SUMBER,
   ringkasanKoneksi,
   samarkanKunci,
+  statusSinkronApp,
   urutkanKoneksi,
   validasiKunciHevy,
 } = muat();
@@ -156,6 +157,27 @@ console.log('\nMenghubungkan & memutuskan');
     PROFIL_SUMBER.apple_health.otorisasi === 'healthkit' && PROFIL_SUMBER.hevy.otorisasi === 'kunci_api' &&
       PROFIL_SUMBER.strava.otorisasi === 'oauth' && PROFIL_SUMBER.whoop.otorisasi === 'oauth' && jenis.length === 4);
   cek('Apple Health menyatakan app hanya membaca', /hanya membaca/.test(PROFIL_SUMBER.apple_health.caraHubungkan));
+}
+
+console.log('\nIndikator sinkron app');
+{
+  const dasarK = { realtime: 'terhubung', sedangMenyinkron: false, tertunda: 0, terakhirMasuk: null, sumberPerluPerhatian: 0 };
+  const st = (k) => statusSinkronApp({ ...dasarK, ...k }, SEKARANG);
+  cek('semua baik → langsung', st({}).tingkat === 'langsung' && st({}).label === 'Langsung');
+  cek('langsung menyebut kiriman terakhir', st({ terakhirMasuk: lalu(12) }).label === 'Langsung · 12 menit lalu');
+  cek('sumber bermasalah → perhatian', st({ sumberPerluPerhatian: 2 }).label === '2 sumber perlu perhatian');
+  cek('menyambung mendahului perhatian', st({ realtime: 'menyambung', sumberPerluPerhatian: 1 }).tingkat === 'menyambung');
+  cek('menyinkron mendahului perhatian & menyambung',
+    st({ sedangMenyinkron: true, realtime: 'menyambung', sumberPerluPerhatian: 1 }).tingkat === 'menyinkron');
+  // Terputus menutupi SEMUANYA, termasuk "langsung · baru saja" yang basi.
+  const off = st({ realtime: 'terputus', sedangMenyinkron: true, sumberPerluPerhatian: 1, terakhirMasuk: lalu(1) });
+  cek('terputus mendahului semua keadaan lain', off.tingkat === 'terputus' && off.label === 'Offline');
+  const offTertunda = st({ realtime: 'terputus', tertunda: 3 });
+  cek('offline menyebut perubahan yang menunggu', offTertunda.label === 'Offline · 3 perubahan menunggu'
+    && /dikirim saat online/.test(offTertunda.aksesLabel));
+  const semua = [{}, { sumberPerluPerhatian: 1 }, { realtime: 'terputus' }, { sedangMenyinkron: true }, { realtime: 'menyambung' }];
+  cek('lima keadaan menghasilkan lima tingkat, masing-masing dengan label pembaca layar',
+    new Set(semua.map((k) => st(k).tingkat)).size === 5 && semua.every((k) => st(k).aksesLabel.length > 10));
 }
 
 console.log(gagal === 0 ? '\n✓ Status sumber data: jeda dibaca per mekanisme, webhook yang diam tidak dianggap macet' : `\n✗ ${gagal} pemeriksaan gagal`);

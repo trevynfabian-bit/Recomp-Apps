@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   HeroNumber,
+  IndikatorSinkron,
   KartuCatatan,
   KartuTimbangPagi,
   LegendaSumber,
@@ -160,6 +161,10 @@ export default function LogHarianScreen() {
           <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
             {formatTanggalPanjang(log.tanggal)}
           </Text>
+          {/* Seberapa segar angka di bawahnya; ketuk untuk membuka Sumber data. */}
+          <View style={{ marginTop: spacing.sm }}>
+            <IndikatorSinkron />
+          </View>
         </View>
         <Pill label={fase} warna={colors.aksenTeks.jade} />
       </View>

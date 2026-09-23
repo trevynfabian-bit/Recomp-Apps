@@ -164,12 +164,14 @@ export {
 export type {
   HasilHubungkan,
   JenisOtorisasi,
+  KeadaanSinkronApp,
   KesehatanKoneksi,
   KoneksiSumber,
   MekanismeSync,
   StatusKoneksi,
   SumberData,
   TingkatKesehatan,
+  TingkatSinkronApp,
 } from './sumberData';
 
 export {
@@ -179,6 +181,7 @@ export {
   PROFIL_SUMBER,
   ringkasanKoneksi,
   samarkanKunci,
+  statusSinkronApp,
   URUTAN_SUMBER,
   urutkanKoneksi,
   validasiKunciHevy,

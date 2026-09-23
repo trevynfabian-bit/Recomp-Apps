@@ -1,4 +1,5 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
+export { BannerDataMasuk } from './BannerDataMasuk';
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { DaftarRujukan } from './DaftarRujukan';
@@ -7,6 +8,7 @@ export { GrafikTren } from './GrafikTren';
 export { GrafikUkuran } from './GrafikUkuran';
 export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
+export { IndikatorSinkron } from './IndikatorSinkron';
 export { InputAngka } from './InputAngka';
 export { InputChat } from './InputChat';
 export { KartuBodyFat } from './KartuBodyFat';
