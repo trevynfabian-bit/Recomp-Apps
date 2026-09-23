@@ -93,11 +93,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/budget.ts', join(kerja, 'budget.ts'));
   copyFileSync('packages/logika/src/redistribusi.ts', join(kerja, 'redistribusi.ts'));
   copyFileSync('packages/logika/src/tdee.ts', join(kerja, 'tdee.ts'));
+  copyFileSync('packages/logika/src/bodyFat.ts', join(kerja, 'bodyFat.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts', 'redistribusi.ts', 'tdee.ts',
+     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -110,6 +111,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'budget.js')),
     ...require(join(kerja, 'keluar', 'redistribusi.js')),
     ...require(join(kerja, 'keluar', 'tdee.js')),
+    ...require(join(kerja, 'keluar', 'bodyFat.js')),
   };
 }
 
@@ -1126,6 +1128,150 @@ try {
     process.exit(1);
   }
   console.log(`✓ ${KASUS_TDEE.length} kasus cocok — estimasi TDEE di SQL dan TypeScript sejalan.`);
+
+  // === Bagian 11: estimasi body fat Navy ===================================
+  //
+  // Rumusnya memuat DUA logaritma basis 10 dan pembagian berantai, jadi yang
+  // diuji di sini bukan logikanya melainkan presisinya: selisih pada desimal
+  // ketiga sudah cukup menggeser persen yang ditampilkan. Ditambah tiga jalur
+  // penolakan yang harus DIBEDAKAN — pinggang ≤ leher, hasil di luar 3–70%,
+  // dan profil yang belum lengkap — karena ketiganya menuntut tindakan berbeda
+  // dari pengguna.
+  console.log();
+  const { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } = muatLogikaTs();
+
+  const bfSql = Number(sql('select public.ketidakpastian_bf();'));
+  if (bfSql !== KETIDAKPASTIAN_BF) {
+    console.error(`✗ Ketidakpastian BF BERBEDA: SQL ${bfSql} vs TS ${KETIDAKPASTIAN_BF}.`);
+    process.exit(1);
+  }
+  console.log(`✓ ketidakpastian metode Navy sama: ±${bfSql} poin`);
+
+  const UID_BF = '99999999-7777-7777-7777-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_BF}', 'paritas-bf@contoh.test');`);
+
+  // Tanggal ukuran dipatok RELATIF ke hari ini karena `simpan_ukuran` menolak
+  // tanggal masa depan menurut jam server.
+  const HARI_INI = sql("select (now() at time zone 'Asia/Jakarta')::date;");
+
+  const KASUS_BF = [
+    { label: 'pria biasa', jk: 'pria', tinggi: 178, pinggang: 85.4, leher: 38.5 },
+    { label: 'pria kurus', jk: 'pria', tinggi: 178, pinggang: 74.2, leher: 36.0 },
+    { label: 'pria gemuk', jk: 'pria', tinggi: 172, pinggang: 110.5, leher: 42.5 },
+    { label: 'tinggi ekstrem', jk: 'pria', tinggi: 205, pinggang: 96.3, leher: 41.2 },
+    { label: 'desimal ganjil', jk: 'pria', tinggi: 177.3, pinggang: 85.37, leher: 38.44 },
+    // Pinggang ≤ leher → rumusnya tidak bisa dihitung sama sekali.
+    { label: 'pinggang < leher', jk: 'pria', tinggi: 178, pinggang: 50.0, leher: 55.0 },
+    // Hasil di bawah batas hidup manusia.
+    { label: 'hasil < 3%', jk: 'pria', tinggi: 178, pinggang: 60.0, leher: 30.0 },
+    // Hasil di atas yang pernah terukur.
+    { label: 'hasil > 70%', jk: 'pria', tinggi: 100, pinggang: 160.0, leher: 25.0 },
+    // Profil belum lengkap, dua bentuk.
+    { label: 'tanpa jenis kelamin', jk: null, tinggi: 178, pinggang: 85.4, leher: 38.5 },
+    { label: 'tanpa tinggi', jk: 'pria', tinggi: null, pinggang: 85.4, leher: 38.5 },
+    // Wanita: rumusnya butuh pinggul yang belum dicatat app ini.
+    { label: 'wanita tanpa pinggul', jk: 'wanita', tinggi: 165, pinggang: 74.0, leher: 32.0 },
+  ];
+
+  let gagalBf = 0;
+  console.log('kasus                  SQL persen  TS persen  SQL rentang    TS rentang     kurang');
+  console.log('─'.repeat(96));
+  for (const k of KASUS_BF) {
+    sql(`update public.profiles
+            set jenis_kelamin = ${k.jk === null ? 'null' : `'${k.jk}'`},
+                tinggi_cm = ${k.tinggi === null ? 'null' : k.tinggi}
+          where user_id = '${UID_BF}';`);
+    // Satu pencatatan, ditimpa tiap kasus lewat jalur normalnya.
+    sql(`
+      set request.jwt.claim.sub = '${UID_BF}';
+      select public.hapus_ukuran(date '${HARI_INI}');
+      select public.simpan_ukuran(date '${HARI_INI}', ${k.pinggang}, null, ${k.leher});`);
+
+    const b = JSON.parse(
+      sql(
+        `set request.jwt.claim.sub = '${UID_BF}';
+         select public.estimasi_body_fat(date '${HARI_INI}')::text;`,
+      ),
+    );
+    const m = b.masukan;
+    const ts = estimasiBodyFatNavy({
+      jenisKelamin: m.jenis_kelamin,
+      tinggiCm: m.tinggi_cm === null ? null : Number(m.tinggi_cm),
+      pinggangCm: Number(m.pinggang_cm),
+      leherCm: Number(m.leher_cm),
+      pinggulCm: m.pinggul_cm === null ? null : Number(m.pinggul_cm),
+    });
+
+    const beda = [];
+    const cek = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    const angka = (n) => (n === null || n === undefined ? null : Number(n));
+    cek('metode', b.metode, ts.metode);
+    cek('persen', angka(b.persen), ts.persen);
+    cek('ketidakpastian', b.ketidakpastian, ts.ketidakpastian);
+    cek('kurang', b.kurang, ts.kurang);
+    cek('rentang.bawah', angka(b.rentang?.bawah) ?? null, ts.rentang?.bawah ?? null);
+    cek('rentang.atas', angka(b.rentang?.atas) ?? null, ts.rentang?.atas ?? null);
+    cek('sensitivitas', angka(b.sensitivitas_pinggang), ts.sensitivitasPinggang);
+    // Rentangnya tidak pernah boleh ada tanpa persennya, dan sebaliknya.
+    if ((b.persen === null) !== (b.rentang === null)) {
+      beda.push('persen & rentang tidak sepakat soal ada/tidaknya');
+    }
+
+    if (beda.length > 0) gagalBf += 1;
+    const rSql = b.rentang ? `${b.rentang.bawah}–${b.rentang.atas}` : '—';
+    const rTs = ts.rentang ? `${ts.rentang.bawah}–${ts.rentang.atas}` : '—';
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${k.label.padEnd(21)} ${String(b.persen ?? '—').padStart(10)}  ` +
+        `${String(ts.persen ?? '—').padStart(9)}  ${rSql.padEnd(13)}  ${rTs.padEnd(13)}  ` +
+        `${b.kurang ?? '—'}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  // Komposisi tubuh: memecah berat memakai persen yang DITAMPILKAN, bukan nilai
+  // mentahnya — "18,2% dari 75 kg" yang menghasilkan massa lemak dari 18,23%
+  // akan terbaca sebagai aritmetika yang salah.
+  sql(`update public.profiles set jenis_kelamin = 'pria', tinggi_cm = 178
+        where user_id = '${UID_BF}';`);
+  sql(`
+    set request.jwt.claim.sub = '${UID_BF}';
+    select public.hapus_ukuran(date '${HARI_INI}');
+    select public.simpan_ukuran(date '${HARI_INI}', 85.4, null, 38.5);
+    select public.simpan_berat_pagi(date '${HARI_INI}', 75.0);`);
+  const bKomp = JSON.parse(
+    sql(
+      `set request.jwt.claim.sub = '${UID_BF}';
+       select public.estimasi_body_fat(date '${HARI_INI}')::text;`,
+    ),
+  );
+  const kompTs = komposisiTubuh(Number(bKomp.persen), Number(bKomp.berat_kg));
+  const bedaKomp = [];
+  if (Number(bKomp.komposisi.lemak_kg) !== kompTs.lemakKg) {
+    bedaKomp.push(`lemak_kg: SQL ${bKomp.komposisi.lemak_kg} vs TS ${kompTs.lemakKg}`);
+  }
+  if (Number(bKomp.komposisi.bebas_lemak_kg) !== kompTs.bebasLemakKg) {
+    bedaKomp.push(
+      `bebas_lemak_kg: SQL ${bKomp.komposisi.bebas_lemak_kg} vs TS ${kompTs.bebasLemakKg}`,
+    );
+  }
+  if (bedaKomp.length > 0) gagalBf += 1;
+  console.log(
+    `${bedaKomp.length === 0 ? '✓' : '✗'} komposisi ${bKomp.persen}% × ${bKomp.berat_kg} kg → ` +
+      `SQL ${bKomp.komposisi.lemak_kg}/${bKomp.komposisi.bebas_lemak_kg} kg · ` +
+      `TS ${kompTs.lemakKg}/${kompTs.bebasLemakKg} kg`,
+  );
+  for (const d of bedaKomp) console.log(`    ↳ ${d}`);
+
+  console.log();
+  if (gagalBf > 0) {
+    console.error(`✗ ${gagalBf} kasus BERBEDA (estimasi body fat Navy).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${KASUS_BF.length + 1} kasus cocok — estimasi body fat Navy di SQL dan TypeScript sejalan.`,
+  );
 } finally {
   hentikanPostgres();
 }

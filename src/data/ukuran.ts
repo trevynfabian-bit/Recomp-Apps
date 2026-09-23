@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { lajuTerkini, ringkasPerubahan, statusBatasPinggang } from '@recomp/logika';
 import type { RingkasanPerubahan, StatusBatasPinggang, TitikUkuran } from '@recomp/logika';
-import type { BodyMeasurementRow } from '@/types/database';
+import type { BodyMeasurementRow, EstimasiBodyFatRow } from '@/types/database';
 
 /**
  * Akses data ukuran tubuh mingguan.
@@ -41,6 +41,33 @@ export type PencatatanUkuran = {
   pahaKiriCm: number | null;
   pahaKananCm: number | null;
   catatan: string | null;
+};
+
+/**
+ * Estimasi body fat beserta masukannya.
+ *
+ * `alasanKosong` sengaja TIDAK ada: server mengirim kode `kurang`, dan
+ * kalimatnya disusun `estimasiBodyFatNavy` di @recomp/logika supaya hanya ada
+ * satu penyusun kalimat.
+ */
+export type BuktiBodyFat = {
+  metode: 'Navy';
+  persen: number | null;
+  rentang: { bawah: number; atas: number } | null;
+  ketidakpastian: number;
+  sensitivitasPinggang: number | null;
+  kurang: EstimasiBodyFatRow['kurang'];
+  komposisi: { lemakKg: number; bebasLemakKg: number } | null;
+  beratKg: number | null;
+  /** Tanggal pencatatan yang dipakai; `null` bila belum ada yang bisa dipakai. */
+  tanggalUkuran: string | null;
+  masukan: {
+    jenisKelamin: 'pria' | 'wanita' | null;
+    tinggiCm: number | null;
+    pinggangCm: number | null;
+    leherCm: number | null;
+    pinggulCm: number | null;
+  };
 };
 
 /** Bagian tubuh yang bisa dicatat; kuncinya dipakai grafik & riwayat. */
@@ -92,6 +119,59 @@ export async function hapusUkuran(tanggal: string): Promise<boolean> {
 
   if (error) throw terjemahkan(error);
   return data === true;
+}
+
+/**
+ * Estimasi persen lemak tubuh dari pencatatan ukuran terakhir.
+ *
+ * SELALU dikembalikan sebagai rentang, tidak pernah satu angka telanjang: galat
+ * baku metode Navy terhadap DXA sekitar ±4 poin pada individu, jadi 18% bisa
+ * saja 14% atau 22% pada tubuh yang sama. Yang jauh lebih bisa dipercaya adalah
+ * ARAHNYA dari pekan ke pekan, karena galat yang sama ikut terbawa di setiap
+ * pengukuran dan sebagian besar saling meniadakan saat dibandingkan dengan diri
+ * sendiri.
+ *
+ * `kurang` membedakan EMPAT sebab kegagalan yang berbeda, dan bedanya penting:
+ * "lengkapi profil" dan "periksa lagi meteranmu" menuntut tindakan yang tidak
+ * sama, dan menyamakan keduanya jadi "tidak bisa dihitung" membuat orang
+ * memperbaiki hal yang salah.
+ */
+export async function estimasiBodyFat(
+  tanggal: string | null = null,
+): Promise<BuktiBodyFat> {
+  const { data, error } = await supabase.rpc('estimasi_body_fat', { p_tanggal: tanggal });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan estimasi.', true);
+
+  const j = data as EstimasiBodyFatRow;
+  const angka = (n: number | null) => (n === null ? null : Number(n));
+
+  return {
+    metode: j.metode,
+    persen: angka(j.persen),
+    rentang: j.rentang
+      ? { bawah: Number(j.rentang.bawah), atas: Number(j.rentang.atas) }
+      : null,
+    ketidakpastian: j.ketidakpastian,
+    sensitivitasPinggang: angka(j.sensitivitas_pinggang),
+    kurang: j.kurang,
+    komposisi: j.komposisi
+      ? {
+          lemakKg: Number(j.komposisi.lemak_kg),
+          bebasLemakKg: Number(j.komposisi.bebas_lemak_kg),
+        }
+      : null,
+    beratKg: angka(j.berat_kg),
+    tanggalUkuran: j.masukan.tanggal_ukuran,
+    masukan: {
+      jenisKelamin: j.masukan.jenis_kelamin,
+      tinggiCm: angka(j.masukan.tinggi_cm),
+      pinggangCm: angka(j.masukan.pinggang_cm),
+      leherCm: angka(j.masukan.leher_cm),
+      pinggulCm: angka(j.masukan.pinggul_cm),
+    },
+  };
 }
 
 /** Riwayat pencatatan, lama → baru (urutan yang dipakai grafik & selisih). */

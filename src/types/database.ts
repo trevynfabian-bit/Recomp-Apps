@@ -373,6 +373,39 @@ export type ProteksiProteinRow = {
 };
 
 /**
+ * Hasil `estimasi_body_fat`.
+ *
+ * `kurang` adalah KODE, bukan kalimat: kalimatnya disusun `estimasiBodyFatNavy`
+ * di @recomp/logika dari `masukan` yang sama. Satu kode hanya ada di sisi
+ * server — `catatan` — karena TypeScript menerima lingkar pinggang & leher
+ * sebagai angka, jadi keadaan "belum pernah mencatat ukuran" tidak punya
+ * padanan di sana.
+ */
+export type EstimasiBodyFatRow = {
+  metode: 'Navy';
+  /** `null` bila datanya tidak cukup; `kurang` menyebut sebabnya. */
+  persen: number | null;
+  rentang: { bawah: number; atas: number } | null;
+  /** Galat baku metode terhadap DXA, dalam poin persentase. */
+  ketidakpastian: number;
+  /** Pergeseran estimasi bila meteran pinggang meleset 1 cm. */
+  sensitivitas_pinggang: number | null;
+  kurang: 'catatan' | 'jenis-kelamin' | 'tinggi' | 'pinggul' | 'ukuran' | null;
+  /** `null` bila belum ada timbangan untuk dipecah. */
+  komposisi: { lemak_kg: number; bebas_lemak_kg: number } | null;
+  /** Rata-rata 7 hari yang dipakai memecah komposisi. */
+  berat_kg: number | null;
+  masukan: {
+    tanggal_ukuran: string | null;
+    jenis_kelamin: 'pria' | 'wanita' | null;
+    tinggi_cm: number | null;
+    pinggang_cm: number | null;
+    leher_cm: number | null;
+    pinggul_cm: number | null;
+  };
+};
+
+/**
  * body_measurements — satu pencatatan ukuran tubuh per tanggal.
  *
  * Semua kolom ukuran NULLABLE: orang yang pekan ini cuma mengukur pinggang
@@ -706,6 +739,14 @@ export type Database = {
       hapus_ukuran: {
         Args: { p_tanggal: string };
         Returns: boolean;
+      };
+      estimasi_body_fat: {
+        Args: { p_tanggal: string | null };
+        Returns: EstimasiBodyFatRow;
+      };
+      ketidakpastian_bf: {
+        Args: Record<string, never>;
+        Returns: number;
       };
       estimasi_tdee: {
         Args: { p_sampai: string | null; p_hari: number; p_persen_lemak: number | null };
