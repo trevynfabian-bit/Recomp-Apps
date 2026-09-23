@@ -1,24 +1,33 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  alasanDeteksi,
   aturanDeteksiTipeHari,
-  deteksiTipeHari,
   formatAngka,
   formatMakro,
+  formatTanggalPanjang,
   isianBerubah,
   isianDariTarget,
   karboTersisaG,
   periksaTarget,
+  periodeBerjalan,
   susunMatriksTarget,
 } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
-import { Card, KerangkaSheet, MatriksTarget, Pill, TombolBertepi, TombolUtama } from '@/components';
+import {
+  Card,
+  KerangkaSheet,
+  MatriksTarget,
+  PemilihTipeHari,
+  Pill,
+  SectionHeader,
+  SheetGantiFase,
+  TombolBertepi,
+  TombolUtama,
+} from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { mockTipeHariIni } from '@/mocks/dailyLog';
-import { mockWorkoutsHariIni, NAMA_SUMBER } from '@/mocks/workout';
+import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -45,6 +54,10 @@ type Status = { jenis: 'diam' } | { jenis: 'menyimpan' } | { jenis: 'tersimpan';
  * layar, karena target Cut paling masuk akal disiapkan SEBELUM berpindah ke
  * Cut, bukan setelahnya.
  *
+ * Di atas, "Berlaku hari ini": tipe hari ini (pemilih yang SAMA dengan Hari
+ * Ini, lewat `useHariIni`, jadi memilih di satu tempat mengubah keduanya) dan
+ * fase aktif dengan tombol ganti fase yang meminta konfirmasi berangka.
+ *
  * Halaman ini dibuka untuk MEMBACA lebih dulu: tiap tipe hari dengan
  * targetnya, sisa karbo, kapan ia terpilih otomatis (`aturanDeteksiTipeHari`),
  * dan tanda tipe hari ini beserta alasannya. Menyunting adalah mode yang
@@ -65,7 +78,7 @@ type Status = { jenis: 'diam' } | { jenis: 'menyimpan' } | { jenis: 'tersimpan';
 export default function TargetHarianScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { profil } = useProfil();
+  const { profil, riwayatFase } = useProfil();
   const { tipeHari, target, cariTarget, simpanTarget } = useTarget();
   const [fase, setFase] = useState<Fase>(profil.fase_aktif);
   /** Isian yang sudah disentuh, per baris; baris lain memakai nilai tersimpan. */
@@ -77,8 +90,15 @@ export default function TargetHarianScreen() {
   const [konfirmasiKeluar, setKonfirmasiKeluar] = useState(false);
   /** Membaca lebih dulu; menyunting adalah langkah yang dipilih, bukan keadaan bawaan. */
   const [mode, setMode] = useState<'baca' | 'sunting'>('baca');
-  const tipeHariIni = mockTipeHariIni();
-  const deteksiHariIni = deteksiTipeHari(mockWorkoutsHariIni, tipeHari);
+  const { dayTypeId: tipeHariIni, override, deteksi: deteksiHariIni, pilihTipeHari, kembalikanAuto } = useHariIni();
+  const [sheetFase, setSheetFase] = useState(false);
+  const faseMulai = periodeBerjalan(riwayatFase)?.mulai ?? null;
+  // Fase diganti dari halaman ini (atau di tempat lain): tab fase ikut fase yang baru aktif.
+  useEffect(() => {
+    if (mode === 'baca') setFase(profil.fase_aktif);
+    // Hanya saat fase aktif berganti, bukan saat mode berubah.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profil.fase_aktif]);
   const menyunting = mode === 'sunting';
   /** Mode baca: satu fase dalam kartu, atau ketiga fase berdampingan. */
   const [tampilan, setTampilan] = useState<'per-fase' | 'matriks'>('per-fase');
@@ -204,6 +224,54 @@ export default function TargetHarianScreen() {
         </View>
 
         {!menyunting ? (
+          <View>
+            <SectionHeader judul="Berlaku hari ini" aksi={override ? 'tipe hari diubah manual' : 'tipe hari otomatis'} />
+            <View style={{ gap: spacing.md }}>
+              <PemilihTipeHari
+                daftar={tipeHari}
+                terpilihId={tipeHariIni}
+                target={cariTarget(tipeHariIni, profil.fase_aktif)}
+                fase={profil.fase_aktif}
+                override={override}
+                deteksi={deteksiHariIni}
+                onPilih={pilihTipeHari}
+                onKembalikanAuto={kembalikanAuto}
+              />
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ ...typography.caption, color: colors.textMuted }}>FASE AKTIF</Text>
+                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{profil.fase_aktif}</Text>
+                  {faseMulai ? (
+                    <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+                      sejak {formatTanggalPanjang(faseMulai).split(', ')[1]}
+                    </Text>
+                  ) : null}
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ganti fase, sekarang ${profil.fase_aktif}`}
+                  onPress={() => {
+                    ketukRingan();
+                    setSheetFase(true);
+                  }}
+                  style={({ pressed }) => ({
+                    minHeight: TAP_MIN,
+                    paddingHorizontal: spacing.lg,
+                    justifyContent: 'center',
+                    borderRadius: radius.pill,
+                    borderWidth: 1,
+                    borderColor: colors.borderKuat,
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <Text style={{ ...typography.label, color: colors.text }}>Ganti fase</Text>
+                </Pressable>
+              </Card>
+            </View>
+          </View>
+        ) : null}
+
+        {!menyunting ? (
           <PilihTampilan
             terpilih={tampilan}
             onPilih={(t) => {
@@ -232,12 +300,7 @@ export default function TargetHarianScreen() {
               ? `${fase} adalah fase aktif; angka ini yang dipakai Hari Ini.`
               : `${fase} belum aktif. Angka ini dipakai saat Anda berpindah ke ${fase}.`}
           </Text>
-          {!menyunting && fase === profil.fase_aktif ? (
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
-              Hari ini terbaca {tipeHari.find((d) => d.id === tipeHariIni)?.nama ?? 'Rest'}:{' '}
-              {alasanDeteksi(deteksiHariIni, NAMA_SUMBER)}.
-            </Text>
-          ) : null}
+
         </View>
 
         {(matriks ? [] : tipeHari).map((d) =>
@@ -311,6 +374,8 @@ export default function TargetHarianScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <SheetGantiFase terbuka={sheetFase} onTutup={() => setSheetFase(false)} />
 
       <KerangkaSheet terbuka={konfirmasiKeluar} onTutup={() => setKonfirmasiKeluar(false)} label="Perubahan belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>Buang perubahan?</Text>

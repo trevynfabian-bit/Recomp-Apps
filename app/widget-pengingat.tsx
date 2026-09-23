@@ -36,7 +36,7 @@ import {
   mockWaktuTimbang,
   type SkenarioWidget,
 } from '@/mocks/widget';
-import { mockTipeHariIni } from '@/mocks/dailyLog';
+import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -65,7 +65,8 @@ export default function WidgetPengingatScreen() {
   // sama dengan Hari Ini: pratinjau tidak boleh memakai angka yang sudah diganti.
   const { profil } = useProfil();
   const { cariTarget } = useTarget();
-  const targetHariIni = cariTarget(mockTipeHariIni(), profil.fase_aktif);
+  const { dayTypeId } = useHariIni();
+  const targetHariIni = cariTarget(dayTypeId, profil.fase_aktif);
   const [sekarang] = useState(() => new Date());
   // Lewat `siapkanWidget` yang sama dengan widget native: ringkasan kemarin
   // dibuang di sini, bukan disembunyikan oleh layar pratinjau.

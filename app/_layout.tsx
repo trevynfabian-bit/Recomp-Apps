@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BannerDataMasuk, BannerEksporSiap } from '@/components';
 import { segarkanPengingat } from '@/data/pengingat';
 import { PenyediaEkspor } from '@/state/ekspor';
+import { PenyediaHariIni } from '@/state/hariIni';
 import { PenyediaProfil } from '@/state/profil';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
@@ -55,39 +56,41 @@ function TumpukanAkar() {
 
   // State per akun dimulai dari nol setiap pengguna berganti (termasuk
   // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, target,
-  // koneksi, atau kiriman yang belum dibaca dari akun sebelumnya.
+  // tipe hari, koneksi, berkas ekspor, atau kiriman yang belum dibaca.
   return (
     <PenyediaProfil key={pengguna?.id ?? 'tamu'}>
       <PenyediaTarget>
-        <PenyediaEkspor>
-          <PenyediaSinkron>
-            <StatusBar style="light" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.bg },
-              }}
-            >
-              <Stack.Protected guard={sudahMasuk}>
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
-              </Stack.Protected>
-              <Stack.Protected guard={!sudahMasuk}>
-                <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
-              </Stack.Protected>
-            </Stack>
-            {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
-            {sudahMasuk ? <BannerDataMasuk /> : null}
-            {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
-            {sudahMasuk ? <BannerEksporSiap /> : null}
-          </PenyediaSinkron>
-        </PenyediaEkspor>
+        <PenyediaHariIni>
+          <PenyediaEkspor>
+            <PenyediaSinkron>
+              <StatusBar style="light" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.bg },
+                }}
+              >
+                <Stack.Protected guard={sudahMasuk}>
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
+                </Stack.Protected>
+                <Stack.Protected guard={!sudahMasuk}>
+                  <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
+                </Stack.Protected>
+              </Stack>
+              {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
+              {sudahMasuk ? <BannerDataMasuk /> : null}
+              {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
+              {sudahMasuk ? <BannerEksporSiap /> : null}
+            </PenyediaSinkron>
+          </PenyediaEkspor>
+        </PenyediaHariIni>
       </PenyediaTarget>
     </PenyediaProfil>
   );

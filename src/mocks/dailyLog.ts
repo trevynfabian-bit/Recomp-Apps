@@ -8,8 +8,6 @@ import type {
   MacroProgress,
   Profile,
 } from '@/types/domain';
-import { deteksiTipeHari } from '@recomp/logika';
-import { mockWorkoutsHariIni } from './workout';
 
 /**
  * DATA TIRUAN (stub) untuk Fase 1 frontend.
@@ -145,17 +143,6 @@ export function susunMacros(log: DailyLog, target: DayTypeTarget): MacroProgress
     { key: 'karbo', label: 'Karbo', terpakai: log.karbo_g, target: null, unit: 'g' },
     { key: 'satFat', label: 'Sat Fat', terpakai: log.sat_fat_g, target: target.batas_sat_fat_g, unit: 'g', isBatas: true },
   ];
-}
-
-/**
- * Tipe hari yang dipakai Hari Ini saat dibuka: pilihan pengguna bila ia
- * meng-override, selain itu hasil deteksi dari workout hari ini — aturan yang
- * sama dengan layar Hari Ini, supaya pratinjau widget memakai tipe hari yang sama.
- */
-export function mockTipeHariIni(): string {
-  const log = mockDailyLogHariIni;
-  const deteksi = deteksiTipeHari(mockWorkoutsHariIni, mockDayTypes);
-  return log.day_type_override || deteksi.dayTypeId === null ? log.day_type_id : deteksi.dayTypeId;
 }
 
 /**
