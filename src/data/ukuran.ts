@@ -2,6 +2,8 @@ import { supabase } from '@/lib/supabase';
 import { lajuTerkini, ringkasPerubahan, statusBatasPinggang } from '@recomp/logika';
 import type { RingkasanPerubahan, StatusBatasPinggang, TitikUkuran } from '@recomp/logika';
 import type {
+  AlertPinggangHasilRow,
+  AlertPinggangRow,
   BodyMeasurementRow,
   EstimasiBodyFatRow,
   RiwayatUkuranRow,
@@ -220,6 +222,49 @@ export async function riwayatDanDelta(
   if (error) throw terjemahkan(error);
   if (!data) throw new KesalahanUkuran('Server tidak mengembalikan riwayat.', true);
   return data as RiwayatUkuranRow;
+}
+
+/**
+ * Periksa keadaan batas pinggang dan apakah peringatan perlu dikirim.
+ *
+ * Aturan pengirimannya ada di SERVER, bukan di layar, dan itu disengaja: layar
+ * hanya bisa memperingatkan saat dibuka, padahal justru pengguna yang berhenti
+ * membuka layar ukuran yang paling perlu diingatkan. Notifikasi dan AI coach
+ * juga membaca angka yang sama tanpa bisa menjalankan TypeScript.
+ *
+ * `perluKirim` true HANYA saat keadaannya MEMBURUK dibanding yang terakhir
+ * tercatat. Mengirim "pinggangmu masih di atas batas" setiap pekan adalah cara
+ * tercepat membuat orang mematikan notifikasi — dan setelah itu peringatan yang
+ * benar-benar penting pun tidak akan sampai.
+ *
+ * @param catat `false` menjadikannya PRATINJAU: melaporkan keadaan tanpa
+ *   menulis jejak, jadi layar bisa menampilkannya tanpa menghabiskan
+ *   kesempatan pengiriman notifikasinya.
+ */
+export async function periksaAlertPinggang(
+  tanggal: string | null = null,
+  catat = false,
+): Promise<AlertPinggangHasilRow> {
+  const { data, error } = await supabase.rpc('periksa_alert_pinggang', {
+    p_tanggal: tanggal,
+    p_catat: catat,
+  });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan keadaan batas.', true);
+  return data as AlertPinggangHasilRow;
+}
+
+/** Jejak keadaan batas pinggang, terbaru lebih dulu. */
+export async function riwayatAlertPinggang(batas = 20): Promise<AlertPinggangRow[]> {
+  const { data, error } = await supabase
+    .from('alert_pinggang')
+    .select('*')
+    .order('urutan', { ascending: false })
+    .limit(batas);
+
+  if (error) throw terjemahkan(error);
+  return data ?? [];
 }
 
 /**

@@ -372,6 +372,58 @@ export type ProteksiProteinRow = {
   rincian: ProteksiProteinHariRow[];
 };
 
+/** alert_pinggang — jejak keadaan batas pinggang. */
+export type AlertPinggangRow = {
+  id: string;
+  /** Urutan monoton; dipakai menentukan keadaan TERAKHIR, bukan created_at. */
+  urutan: number;
+  user_id: string;
+  keadaan: 'belum-ditetapkan' | 'aman' | 'mendekat' | 'lewat';
+  tanggal_ukuran: string;
+  pinggang_cm: number;
+  batas_cm: number | null;
+  selisih_cm: number | null;
+  laju_per_pekan: number | null;
+  pekan_lagi: number | null;
+  /** false untuk perbaikan yang dicatat tapi tidak diberitahukan. */
+  dikirim: boolean;
+  created_at: string;
+};
+
+/** Keadaan batas pinggang, sama bentuknya di riwayat maupun alert. */
+export type StatusBatasPinggangRow = {
+  keadaan: 'belum-ditetapkan' | 'lewat' | 'mendekat' | 'aman';
+  batas_cm: number | null;
+  pinggang_cm: number;
+  selisih_cm: number | null;
+  laju_per_pekan: number | null;
+  pekan_lagi: number | null;
+  ambang_pekan: number;
+};
+
+/**
+ * Hasil `periksa_alert_pinggang`.
+ *
+ * `perlu_kirim` true HANYA saat keadaannya memburuk dibanding yang terakhir
+ * tercatat: mengirim "masih di atas batas" setiap pekan adalah cara tercepat
+ * membuat orang mematikan notifikasi.
+ */
+export type AlertPinggangHasilRow = {
+  /** `null` bila belum ada satu pun lingkar pinggang untuk dinilai. */
+  status: StatusBatasPinggangRow | null;
+  tanggal_ukuran?: string | null;
+  perlu_kirim: boolean;
+  sebab: 'tanpa pencatatan' | 'tidak perlu' | 'sudah diberitahukan' | 'memburuk';
+  /** Id jejak yang baru ditulis; `null` pada pratinjau. */
+  dicatat_id?: string | null;
+  alert_terakhir: {
+    keadaan: AlertPinggangRow['keadaan'];
+    tanggal_ukuran: string;
+    dikirim: boolean;
+    created_at: string;
+  } | null;
+};
+
 /**
  * Hasil `riwayat_ukuran` — riwayat beserta delta per bagian tubuh.
  *
@@ -662,6 +714,12 @@ export type Database = {
         Update: Partial<RedistribusiHariRow>;
         Relationships: [];
       };
+      alert_pinggang: {
+        Row: AlertPinggangRow;
+        Insert: Omit<AlertPinggangRow, 'id' | 'urutan' | 'created_at'>;
+        Update: Partial<AlertPinggangRow>;
+        Relationships: [];
+      };
       body_measurements: {
         Row: BodyMeasurementRow;
         Insert: Omit<BodyMeasurementRow, 'id' | 'created_at' | 'updated_at'>;
@@ -797,6 +855,19 @@ export type Database = {
       hapus_ukuran: {
         Args: { p_tanggal: string };
         Returns: boolean;
+      };
+      periksa_alert_pinggang: {
+        Args: { p_tanggal: string | null; p_catat: boolean };
+        Returns: AlertPinggangHasilRow;
+      };
+      status_batas_pinggang: {
+        Args: {
+          p_pinggang_cm: number;
+          p_batas_cm: number | null;
+          p_laju_per_pekan: number | null;
+          p_ambang_pekan: number | null;
+        };
+        Returns: StatusBatasPinggangRow | null;
       };
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
