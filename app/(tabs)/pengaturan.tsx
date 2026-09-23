@@ -31,7 +31,7 @@ import {
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
-import { mockAkun, mockHasilLab, mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
+import { mockAkun, mockHasilLab } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
@@ -53,8 +53,9 @@ type Sheet = 'profil' | 'fase' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hap
  * membuka apa pun.
  *
  * Fase 4 sisi frontend: profil & fase lewat `useProfil` (tiruan di memori);
- * akun, isi ekspor, dan hasil lab tiruan (`@/mocks/pengaturan`). Menyimpan ke
- * `profiles`, ekspor sungguhan, dan penghapusan akun adalah task backend.
+ * akun dan hasil lab tiruan (`@/mocks/pengaturan`); ekspor lewat `useEkspor`.
+ * Menyimpan ke `profiles`, ekspor dari data server, dan penghapusan akun
+ * adalah task backend.
  */
 export default function PengaturanScreen() {
   const insets = useSafeAreaInsets();
@@ -350,7 +351,7 @@ export default function PengaturanScreen() {
         </View>
         <TombolBertepi label="Tutup" onPress={tutup} />
       </KerangkaSheet>
-      <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={tutup} isi={mockIsiEkspor} siapkan={mockSiapkanEkspor} />
+      <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={tutup} />
       <SheetKeluarAkun terbuka={sheet === 'keluar'} onTutup={tutup} email={email} keluar={keluar} />
       <SheetHapusAkun
         terbuka={sheet === 'hapus'}

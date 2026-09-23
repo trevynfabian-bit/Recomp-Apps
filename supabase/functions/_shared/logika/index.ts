@@ -338,3 +338,15 @@ export { faseSaat, jangkarKoridor, periodeBerjalan, terapkanGantiFase } from './
 
 export type { ButirStatusPrivasi, KunciStatusPrivasi, MasukanStatusPrivasi } from './privasi.ts';
 export { DATA_TERSIMPAN, susunStatusPrivasi } from './privasi.ts';
+
+export type { BerkasEkspor, NilaiSel, TabelEkspor } from './ekspor.ts';
+export {
+  csvDariTabel,
+  formatUkuranBerkas,
+  namaBerkasEkspor,
+  NOTIF_EKSPOR_SIAP,
+  ringkasIsiEkspor,
+  selCsv,
+  susunBerkasEkspor,
+  VERSI_FORMAT_EKSPOR,
+} from './ekspor.ts';

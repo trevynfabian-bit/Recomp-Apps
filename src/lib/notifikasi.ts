@@ -108,3 +108,18 @@ export async function batalkanSemuaPengingat(): Promise<void> {
   if (!notifikasiDidukung) return;
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
+
+/**
+ * Notifikasi SEKETIKA (bukan terjadwal), mis. "ekspor data siap" saat app di
+ * latar. Hanya dikirim bila izin SUDAH diberikan — tidak pernah memunculkan
+ * dialog izin di tengah proses lain. Mengembalikan apakah terkirim.
+ */
+export async function kirimNotifikasiSekarang(n: { judul: string; isi: string; jenis: string }): Promise<boolean> {
+  if (!notifikasiDidukung) return false;
+  if ((await izinNotifikasi()) !== 'diizinkan') return false;
+  await Notifications.scheduleNotificationAsync({
+    content: { title: n.judul, body: n.isi, data: { jenis: n.jenis }, sound: false },
+    trigger: null,
+  });
+  return true;
+}

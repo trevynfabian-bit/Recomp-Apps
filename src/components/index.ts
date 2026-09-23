@@ -1,5 +1,6 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { BannerDataMasuk } from './BannerDataMasuk';
+export { BannerEksporSiap } from './BannerEksporSiap';
 export { Card } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { DaftarRujukan } from './DaftarRujukan';

@@ -336,3 +336,15 @@ export { faseSaat, jangkarKoridor, periodeBerjalan, terapkanGantiFase } from './
 
 export type { ButirStatusPrivasi, KunciStatusPrivasi, MasukanStatusPrivasi } from './privasi';
 export { DATA_TERSIMPAN, susunStatusPrivasi } from './privasi';
+
+export type { BerkasEkspor, NilaiSel, TabelEkspor } from './ekspor';
+export {
+  csvDariTabel,
+  formatUkuranBerkas,
+  namaBerkasEkspor,
+  NOTIF_EKSPOR_SIAP,
+  ringkasIsiEkspor,
+  selCsv,
+  susunBerkasEkspor,
+  VERSI_FORMAT_EKSPOR,
+} from './ekspor';

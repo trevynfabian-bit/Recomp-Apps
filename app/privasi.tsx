@@ -9,7 +9,6 @@ import { Card, SectionHeader, SheetEksporData, SheetHapusAkun } from '@/componen
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
-import { mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
 import { mockFotoMakananDisimpan } from '@/mocks/privasi';
 import { mockPengaturanPengingat } from '@/mocks/widget';
 import { useSesi } from '@/state/sesi';
@@ -213,7 +212,7 @@ export default function PrivasiScreen() {
         ) : null}
       </View>
 
-      <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={() => setSheet(null)} isi={mockIsiEkspor} siapkan={mockSiapkanEkspor} />
+      <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={() => setSheet(null)} />
       <SheetHapusAkun
         terbuka={sheet === 'hapus'}
         onTutup={() => setSheet(null)}
