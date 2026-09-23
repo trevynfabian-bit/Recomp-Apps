@@ -874,6 +874,28 @@ export type HasilSinkronHealthKit = {
   sinkron_terakhir: string;
 };
 
+/** Sumber impor riwayat sekali; sama dengan `SumberImpor` di SheetImporRiwayat. */
+export type SumberImporDb = 'hevy_csv' | 'apple_health' | 'ukuran_lama';
+
+/** Baris `import_jobs` — satu impor riwayat beserta kemajuannya. */
+export type ImportJobRow = {
+  id: string;
+  user_id: string;
+  sumber: SumberImporDb;
+  status: 'berjalan' | 'selesai' | 'gagal';
+  total: number;
+  selesai: number;
+  ringkas: string;
+  /** Baris berkas yang dilewati parser di perangkat. */
+  dilewati_berkas: { baris: number; alasan: string }[];
+  /** Hitungan server. `sudah_ada`: data yang lebih dulu ada dan TIDAK ditimpa. */
+  hasil: { disimpan: number; sudah_ada: number; dilewati: number };
+  galat: string | null;
+  dibuat_pada: string;
+  diperbarui_pada: string;
+  selesai_pada: string | null;
+};
+
 /** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
 export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
 
@@ -1146,6 +1168,13 @@ export type Database = {
       };
       workout_sets: {
         Row: WorkoutSetRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      import_jobs: {
+        Row: ImportJobRow;
+        /** Lewat `mulai_impor`; ditulis langsung hanya untuk job milik sendiri. */
         Insert: never;
         Update: never;
         Relationships: [];
@@ -1424,6 +1453,28 @@ export type Database = {
       ikuti_auto_deteksi: {
         Args: { p_tanggal: string };
         Returns: DailyLogRow;
+      };
+      mulai_impor: {
+        Args: {
+          p_sumber: SumberImporDb;
+          p_total: number;
+          p_ringkas: string;
+          p_dilewati?: { baris: number; alasan: string }[];
+        };
+        Returns: ImportJobRow;
+      };
+      impor_batch: {
+        /** `{ sesi }` untuk hevy_csv, `{ baris }` untuk ukuran_lama, KirimanHealthKit untuk apple_health. */
+        Args: { p_job: string; p_isi: Record<string, unknown> };
+        Returns: ImportJobRow;
+      };
+      selesaikan_impor: {
+        Args: { p_job: string; p_galat?: string | null };
+        Returns: ImportJobRow;
+      };
+      impor_terakhir: {
+        Args: Record<string, never>;
+        Returns: ImportJobRow[];
       };
       sinkron_healthkit: {
         Args: { p_kiriman: KirimanHealthKit };

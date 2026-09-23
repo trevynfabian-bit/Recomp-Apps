@@ -215,7 +215,15 @@ export type {
   HasilImporUkuran,
 } from './impor';
 
-export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor';
+export {
+  potongBatch,
+  UKURAN_BATCH_IMPOR,
+  uraiCsv,
+  uraiCsvHevy,
+  uraiCsvUkuran,
+  uraiTanggal,
+  uraiWaktuHevy,
+} from './impor';
 
 export type {
   JamPengingat,

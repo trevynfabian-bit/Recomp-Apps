@@ -1,4 +1,4 @@
-import type { SesiLatihan, SetLatihan } from './latihan';
+import type { JenisSet, SesiLatihan, SetLatihan } from './latihan';
 import { KG_PER_LB } from './satuan';
 import { RENTANG_UKURAN_CM, type BagianUkuran } from './ukuran';
 
@@ -137,6 +137,8 @@ export type HasilImporHevy = {
   dilewati: BarisDilewati[];
 };
 
+const JENIS_SET_CSV: readonly JenisSet[] = ['normal', 'warmup', 'dropset', 'failure'];
+
 /** Kolom yang WAJIB ada di ekspor Hevy. */
 const KOLOM_HEVY = ['title', 'start_time', 'exercise_title', 'set_index', 'reps'] as const;
 
@@ -174,6 +176,7 @@ export function uraiCsvHevy(teks: string): HasilImporHevy | { galat: string } {
     const reps = angka(b[i('reps')]);
     const bebanMentah = angka(b[satuanBeban === 'kg' ? iKg : iLb]);
     const indeks = angka(b[i('set_index')]);
+    const jenisSet = i('set_type') >= 0 ? (b[i('set_type')] ?? '').trim().toLowerCase() : '';
 
     if (!mulai) {
       dilewati.push({ baris: nomor, alasan: 'waktu mulai tidak terbaca' });
@@ -227,6 +230,8 @@ export function uraiCsvHevy(teks: string): HasilImporHevy | { galat: string } {
       set_ke: indeks !== null && Number.isInteger(indeks) && indeks >= 0 ? indeks + 1 : l.sets.length + 1,
       beban_kg: beban,
       reps,
+      // Sama seperti API: pemanasan dikenali, jenis asing dibaca "normal".
+      ...(jenisSet ? { jenis: (JENIS_SET_CSV as readonly string[]).includes(jenisSet) ? (jenisSet as JenisSet) : 'normal' } : {}),
     };
     l.sets.push(set);
   }
@@ -379,4 +384,24 @@ export function uraiCsvUkuran(teks: string, hariIni: string): HasilImporUkuran |
     baris: [...perTanggal.values()].map((x) => x.data).sort((a, b) => a.tanggal.localeCompare(b.tanggal)),
     dilewati: dilewati.sort((a, b) => a.baris - b.baris),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Pengiriman bertahap
+// ---------------------------------------------------------------------------
+
+/**
+ * Ukuran potongan per sumber — SAMA dengan `maks_isi_batch_impor` di SQL.
+ * Potongan kecil membuat kemajuan terasa ("120 dari 312") dan membuat satu
+ * potongan yang gagal cukup diulang sendiri; potongan yang melebihi batas
+ * server ditolak utuh.
+ */
+export const UKURAN_BATCH_IMPOR = { hevy_csv: 100, ukuran_lama: 500, apple_health: 5000 } as const;
+
+/** Potong daftar menjadi potongan berurutan; daftar kosong → tanpa potongan. */
+export function potongBatch<T>(daftar: readonly T[], ukuran: number): T[][] {
+  if (!Number.isInteger(ukuran) || ukuran < 1) throw new Error('Ukuran potongan harus bilangan bulat positif');
+  const hasil: T[][] = [];
+  for (let i = 0; i < daftar.length; i += ukuran) hasil.push(daftar.slice(i, i + ukuran));
+  return hasil;
 }

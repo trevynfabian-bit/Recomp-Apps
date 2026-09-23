@@ -11,7 +11,9 @@ import {
 import type { BarisDilewati } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
 import { TombolBertepi, TombolUtama } from './Tombol';
+import { jalankanImporRiwayat, KesalahanImpor, type IsiImpor } from '@/data/imporRiwayat';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { supabaseSiap } from '@/lib/supabase';
 import {
   CONTOH_CSV_HEVY,
   CONTOH_CSV_UKURAN,
@@ -33,6 +35,8 @@ type Pratinjau = {
   satuan: string;
   catatan: string[];
   dilewati: BarisDilewati[];
+  /** Isi yang akan dikirim; `null` untuk Apple Health (dibaca perangkat saat impor). */
+  isi: IsiImpor | null;
 };
 
 type Langkah =
@@ -100,6 +104,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
             'Berat dari Apple Health ditandai "sinkron"; berat yang Anda ketik sendiri tidak ditimpa.',
           ],
           dilewati: [],
+          isi: null,
         },
       });
       return;
@@ -119,6 +124,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           satuan: 'sesi',
           catatan: h.satuanBeban === 'lb' ? ['Beban di berkas dalam pound; dikonversi ke kilogram.'] : [],
           dilewati: h.dilewati,
+          isi: { sumber: 'hevy_csv', sesi: h.sesi },
         },
       });
       return;
@@ -135,14 +141,30 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
         satuan: 'tanggal',
         catatan: [],
         dilewati: u.dilewati,
+        isi: { sumber: 'ukuran_lama', baris: u.baris },
       },
     });
   }
 
   async function impor(p: Pratinjau) {
     if (sumber === null) return;
+    setGalat(null);
     setLangkah({ jenis: 'proses', p, selesai: 0 });
-    await mockJalankanImpor(p.jumlah, (selesai) => setLangkah({ jenis: 'proses', p, selesai }));
+    // Tanpa Supabase (pratinjau web, pengembangan) — dan untuk Apple Health
+    // sampai pembaca HealthKit native ada — kemajuannya tiruan.
+    if (supabaseSiap && p.isi !== null) {
+      try {
+        await jalankanImporRiwayat(p.isi, p.ringkas, p.dilewati, (selesai) =>
+          setLangkah({ jenis: 'proses', p, selesai }),
+        );
+      } catch (e) {
+        setGalat(e instanceof KesalahanImpor ? e.message : 'Impor gagal. Coba lagi.');
+        setLangkah({ jenis: 'pratinjau', p });
+        return;
+      }
+    } else {
+      await mockJalankanImpor(p.jumlah, (selesai) => setLangkah({ jenis: 'proses', p, selesai }));
+    }
     ketukBerhasil();
     onSelesai(sumber, p.ringkas);
     setLangkah({ jenis: 'selesai', p });
@@ -273,7 +295,12 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
             <Teks key={c}>{c}</Teks>
           ))}
           {langkah.p.dilewati.length > 0 ? <DaftarDilewati dilewati={langkah.p.dilewati} /> : null}
-          <Teks redup>Mengimpor ulang tidak menggandakan data: yang sudah ada dilewati atau diperbarui.</Teks>
+          <Teks redup>Mengimpor ulang tidak menggandakan data, dan tidak menimpa yang sudah tercatat di app.</Teks>
+          {galat ? (
+            <Text accessibilityRole="alert" style={{ ...typography.label, fontWeight: '500', color: colors.text }}>
+              {galat}
+            </Text>
+          ) : null}
           <View style={{ gap: spacing.sm }}>
             <TombolUtama
               label={`Impor ${formatAngka(langkah.p.jumlah)} ${langkah.p.satuan}`}
@@ -284,7 +311,10 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                 pembaca layar. Labelnya menyebut apa yang akan diubah. */}
             <TombolBertepi
               label={sumber === 'apple_health' ? 'Ganti rentang' : 'Ganti berkas'}
-              onPress={() => setLangkah({ jenis: 'masukan' })}
+              onPress={() => {
+                setGalat(null);
+                setLangkah({ jenis: 'masukan' });
+              }}
             />
           </View>
         </>

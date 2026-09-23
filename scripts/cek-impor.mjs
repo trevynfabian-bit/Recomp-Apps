@@ -19,7 +19,8 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['impor.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } = require(join(kerja, 'keluar', 'impor.js'));
+const { potongBatch, UKURAN_BATCH_IMPOR, uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } =
+  require(join(kerja, 'keluar', 'impor.js'));
 const { RENTANG_UKURAN_CM } = require(join(kerja, 'keluar', 'ukuran.js'));
 
 let gagal = 0;
@@ -82,7 +83,13 @@ console.log('\nEkspor Hevy');
   const push = h.sesi[1];
   cek(`durasi dari start/end: ${push.durasi_menit} menit`, push.durasi_menit === 64);
   cek('set_index Hevy (mulai 0) menjadi set_ke mulai 1',
-    sama(push.latihan[0].sets, [{ set_ke: 1, beban_kg: 60, reps: 10 }, { set_ke: 2, beban_kg: 80, reps: 8 }]));
+    sama(push.latihan[0].sets.map(({ set_ke, beban_kg, reps }) => ({ set_ke, beban_kg, reps })),
+      [{ set_ke: 1, beban_kg: 60, reps: 10 }, { set_ke: 2, beban_kg: 80, reps: 8 }]));
+  cek('kolom set_type dibaca: pemanasan dikenali', push.latihan[0].sets[0].jenis === 'warmup'
+    && push.latihan[0].sets[1].jenis === 'normal');
+  const asing = uraiCsvHevy(HEVY.replace(',1,normal,80,8,', ',1,cluster,80,8,'));
+  cek('jenis set asing dibaca "normal" (CHECK database hanya menerima empat jenis)',
+    asing.sesi[1].latihan[0].sets[1].jenis === 'normal');
   cek('beban kosong = berat badan (null), bukan 0 kg', push.latihan[1].sets[0].beban_kg === null);
   cek(`jumlah set: ${h.jumlahSet}`, h.jumlahSet === 4);
   cek('setiap baris yang dilewati menyebut nomor & alasannya',
@@ -134,6 +141,19 @@ console.log('\nUkuran lama');
   cek('berkas tanpa kolom tanggal ditolak', uraiCsvUkuran('pinggang\n85', '2026-09-23').galat === 'Kolom tanggal tidak ada.');
   cek('judul Inggris dikenali (date, waist)',
     uraiCsvUkuran('date,waist\n2026-09-01,85.5', '2026-09-23').baris?.[0]?.pinggang_cm === 85.5);
+}
+
+console.log('\nPengiriman bertahap');
+{
+  const p = potongBatch([1, 2, 3, 4, 5, 6, 7], 3);
+  cek('7 isi, potongan 3 → 3+3+1, urutan tetap', sama(p, [[1, 2, 3], [4, 5, 6], [7]]));
+  cek('daftar kosong → tanpa potongan', sama(potongBatch([], 100), []));
+  let ditolak = false;
+  try { potongBatch([1], 0); } catch { ditolak = true; }
+  cek('ukuran 0 ditolak (bukan perulangan tanpa akhir)', ditolak);
+  const sql = readFileSync('supabase/migrations/20260922004000_impor_riwayat.sql', 'utf8');
+  const beda = Object.entries(UKURAN_BATCH_IMPOR).filter(([s, n]) => !new RegExp(`when '${s}' then ${n}\\b`).test(sql));
+  cek('ukuran potongan SAMA dengan maks_isi_batch_impor di SQL', beda.length === 0, JSON.stringify(beda));
 }
 
 console.log(gagal === 0 ? '\n✓ Impor riwayat: tidak ada baris yang hilang diam-diam, satuan & tanggal dibaca benar' : `\n✗ ${gagal} pemeriksaan gagal`);
