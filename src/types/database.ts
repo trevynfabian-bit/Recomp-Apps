@@ -79,6 +79,13 @@ export type DailyLogRow = {
   fase: FaseProgram | null;
   catatan: string | null;
   sumber_berat: SumberBeratDb | null;
+  /**
+   * Jam timbang: dari sampel HealthKit, atau saat diketik untuk berat HARI
+   * INI. `null` untuk berat hari lalu yang diketik belakangan.
+   */
+  waktu_timbang: string | null;
+  /** Nama asal berat HealthKit (mis. "Withings"); `null` untuk berat yang diketik. */
+  asal_berat: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -804,6 +811,48 @@ export type HealthDataRow = {
   updated_at: string;
 };
 
+/**
+ * Masukan `sinkron_healthkit`: satu kiriman dari HKAnchoredObjectQuery.
+ * Jangkar di perangkat baru boleh dimajukan setelah panggilan berhasil.
+ */
+export type KirimanHealthKit = {
+  sampel?: {
+    jenis: Exclude<JenisDataKesehatan, 'recovery' | 'strain'>;
+    /** UUID sampel, atau `total:<YYYY-MM-DD>` untuk total harian. */
+    id: string;
+    /** Bundle id HKSource; kosongkan untuk total gabungan HealthKit. */
+    asal?: string | null;
+    nilai: number;
+    mulai: string;
+    selesai?: string | null;
+  }[];
+  dihapus?: { jenis: JenisDataKesehatan; id: string; asal?: string | null }[];
+  berat?: { id: string; kg: number; waktu: string; nama_asal?: string | null }[];
+};
+
+export type StatusBeratSinkron = 'disimpan' | 'manual_dipertahankan' | 'ada_yang_lebih_pagi' | 'bukan_pagi';
+
+/** Keluaran `sinkron_healthkit`. */
+export type HasilSinkronHealthKit = {
+  disimpan: number;
+  dihapus: number;
+  dilewati: {
+    bagian: 'sampel' | 'berat';
+    indeks: number;
+    alasan:
+      | 'nilai_di_luar_rentang'
+      | 'jenis_tidak_dikenal'
+      | 'bukan_apple_health'
+      | 'format_tidak_sah'
+      | 'waktu_tidak_sah'
+      | 'tidak_sah';
+  }[];
+  berat: { tanggal: string; kg: number; status: StatusBeratSinkron; nama_asal: string | null }[];
+  /** Tambahan HARI INI per jenis, setelah anti-dobel — isi banner "data baru masuk". */
+  masuk: { jenis: 'kalori_aktif' | 'langkah' | 'tidur'; jumlah: number }[];
+  sinkron_terakhir: string;
+};
+
 /** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
 export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
 
@@ -1346,6 +1395,10 @@ export type Database = {
       ikuti_auto_deteksi: {
         Args: { p_tanggal: string };
         Returns: DailyLogRow;
+      };
+      sinkron_healthkit: {
+        Args: { p_kiriman: KirimanHealthKit };
+        Returns: HasilSinkronHealthKit;
       };
     };
     Enums: {
