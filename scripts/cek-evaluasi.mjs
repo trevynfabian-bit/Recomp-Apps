@@ -8,7 +8,7 @@
  * kombinasi dijalankan (3 fase × 4 arah berat × 4 arah pinggang × 4 arah
  * kekuatan = 192), bukan beberapa contoh pilihan.
  */
-import { copyFileSync, mkdtempSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -184,6 +184,61 @@ cek(
   'arah berat belum terbaca → berhenti, bukan menebak',
   tanpaBerat.kode === 'data-kurang' && tanpaBerat.keyakinan === 'rendah',
 );
+
+console.log('\nKode verdict sejalan dengan CHECK di database');
+{
+  // Kode verdict disimpan di `evaluasi_periodik.kode` dengan daftar CHECK-nya
+  // sendiri. Dua daftar yang harus cocok akan menyimpang begitu satu verdict
+  // baru ditambahkan di TypeScript — dan gejalanya bukan tampilan yang salah,
+  // melainkan penyimpanan yang GAGAL saat verdict itu pertama kali muncul,
+  // berpekan-pekan setelah kodenya ditulis.
+  const ARAH = ['naik', 'datar', 'turun', 'belum jelas'];
+  const FASE = ['Lean Gain', 'Cut', 'Maintenance'];
+  const dihasilkan = new Set();
+  for (const fase of FASE) {
+    for (const arahBerat of ARAH) {
+      for (const arahPinggang of ARAH) {
+        for (const arahKekuatan of ARAH) {
+          for (const pekanData of [0, 1, 2, 3, 4]) {
+            dihasilkan.add(
+              evaluasi4Mingguan({ fase, arahBerat, arahPinggang, arahKekuatan, pekanData }).kode,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  const migrasi = readFileSync('supabase/migrations/20260922002700_ringkasan_evaluasi.sql', 'utf8');
+  const blok = migrasi.slice(
+    migrasi.indexOf('constraint evaluasi_kode_dikenal'),
+    migrasi.indexOf('constraint evaluasi_teks_wajar'),
+  );
+  const diizinkan = new Set([...blok.matchAll(/'([a-z0-9-]+)'/g)].map((m) => m[1]));
+
+  const kurang = [...dihasilkan].filter((k) => !diizinkan.has(k)).sort();
+  const lebih = [...diizinkan].filter((k) => !dihasilkan.has(k)).sort();
+  cek(
+    `${dihasilkan.size} kode dihasilkan dari ${FASE.length * ARAH.length ** 3 * 5} kombinasi masukan`,
+    dihasilkan.size > 0,
+  );
+  cek(
+    kurang.length === 0
+      ? 'setiap kode yang bisa dihasilkan diizinkan database'
+      : `kode belum diizinkan database: ${kurang.join(', ')}`,
+    kurang.length === 0,
+  );
+  cek(
+    lebih.length === 0
+      ? 'tidak ada kode diizinkan yang tidak pernah dihasilkan'
+      : `kode diizinkan tapi mati: ${lebih.join(', ')}`,
+    lebih.length === 0,
+  );
+  cek(
+    `PEKAN_EVALUASI ${PEKAN_EVALUASI} ada sebagai konstanta SQL`,
+    migrasi.includes(`as $$ select ${PEKAN_EVALUASI}; $$;`),
+  );
+}
 
 console.log(gagal === 0 ? '\n✓ Semua pemeriksaan evaluasi lulus' : `\n✗ ${gagal} pemeriksaan gagal`);
 process.exit(gagal === 0 ? 0 : 1);

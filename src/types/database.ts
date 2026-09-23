@@ -372,6 +372,52 @@ export type ProteksiProteinRow = {
   rincian: ProteksiProteinHariRow[];
 };
 
+/** ringkasan_mingguan — laporan berkala mingguan. */
+export type RingkasanMingguanRow = {
+  id: string;
+  user_id: string;
+  /** Senin pekan yang diringkas; database menuntut Senin dan tepat 7 hari. */
+  periode_dari: string;
+  periode_sampai: string;
+  poin: unknown[];
+  bacaan: string;
+  lanjutan: unknown[] | null;
+  /** Pesan yang mengantarkannya; jadi `null` bila pesannya dihapus. */
+  pesan_id: string | null;
+  created_at: string;
+};
+
+/** Arah sebuah metrik selama periode evaluasi. */
+export type ArahMetrikDb = 'naik' | 'datar' | 'turun' | 'belum jelas';
+
+/**
+ * evaluasi_periodik — verdict evaluasi 4 mingguan.
+ *
+ * Ketiga sumbu masukannya disimpan, bukan hanya verdictnya: tanpa itu, verdict
+ * yang terasa salah tidak bisa ditelusuri ke masukannya. `kode` dibatasi CHECK
+ * ke daftar yang benar-benar dihasilkan `evaluasi4Mingguan`, dan kesamaan kedua
+ * daftar itu dijaga `npm run cek:evaluasi`.
+ */
+export type EvaluasiPeriodikRow = {
+  id: string;
+  user_id: string;
+  periode_dari: string;
+  periode_sampai: string;
+  fase: FaseProgram;
+  arah_berat: ArahMetrikDb;
+  arah_pinggang: ArahMetrikDb;
+  arah_kekuatan: ArahMetrikDb;
+  pekan_data: number;
+  kode: string;
+  judul: string;
+  ringkas: string;
+  rekomendasi: string;
+  penentu: string;
+  keyakinan: 'rendah' | 'sedang' | 'tinggi';
+  pesan_id: string | null;
+  created_at: string;
+};
+
 /** percakapan — satu utas AI Coach. */
 export type PercakapanRow = {
   id: string;
@@ -748,6 +794,18 @@ export type Database = {
         Row: RedistribusiHariRow;
         Insert: Omit<RedistribusiHariRow, 'id'>;
         Update: Partial<RedistribusiHariRow>;
+        Relationships: [];
+      };
+      ringkasan_mingguan: {
+        Row: RingkasanMingguanRow;
+        Insert: Omit<RingkasanMingguanRow, 'id' | 'created_at'>;
+        Update: Partial<RingkasanMingguanRow>;
+        Relationships: [];
+      };
+      evaluasi_periodik: {
+        Row: EvaluasiPeriodikRow;
+        Insert: Omit<EvaluasiPeriodikRow, 'id' | 'created_at'>;
+        Update: Partial<EvaluasiPeriodikRow>;
         Relationships: [];
       };
       percakapan: {
