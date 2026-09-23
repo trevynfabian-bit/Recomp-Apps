@@ -23,6 +23,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
 const {
   posisiPenanda, ringkasHasilLab, kalimatRingkasanLab, kelompokkanPerTahun,
   uraiNilaiLab, uraiTanggalLab, periksaHasilLab, penandaDariTemplat, TEMPLAT_PANEL_LAB, PENANDA_KOSONG,
+  isianDariHasilLab, hasilLabSama,
 } = require(join(kerja, 'keluar', 'hasilLab.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -99,6 +100,31 @@ const pesanForm = [kosong, depan, terbalik, ganda, tanpaSatuan, format].flatMap(
 ])).filter(Boolean);
 const pesanBernada = pesanForm.filter((t) => pelanggaranNada(t).length > 0 || /\b(tinggi|rendah|normal|berbahaya)\b/i.test(t));
 cek(`${pesanForm.length} pesan form netral & tanpa tafsiran`, pesanForm.length >= 8 && pesanBernada.length === 0, pesanBernada.join(' | '));
+
+console.log('\nUbah entri: pulang-pergi isian');
+const contoh = {
+  id: 'x', tanggal: '2026-06-04', nama: 'Panel campuran', laboratorium: null,
+  penanda: [
+    { nama: 'HbA1c', nilai: 5.3, satuan: '%', rujukanMin: null, rujukanMaks: 5.7 },
+    { nama: 'Kreatinin', nilai: 1, satuan: 'mg/dL', rujukanMin: 0.7, rujukanMaks: 1.3 },
+    { nama: 'TSH', nilai: 2.345, satuan: 'mIU/L', rujukanMin: 0.4, rujukanMaks: 4 },
+    { nama: 'Feritin', nilai: 0.75, satuan: 'µg/L', rujukanMin: null, rujukanMaks: null },
+  ],
+};
+const isianContoh = isianDariHasilLab(contoh);
+cek('isian: tanggal ditulis 4/6/2026', isianContoh.tanggal === '4/6/2026');
+cek('isian: koma desimal, tanpa nol di belakang', isianContoh.penanda[0].nilai === '5,3' && isianContoh.penanda[1].nilai === '1' && isianContoh.penanda[2].nilai === '2,345');
+cek('isian: rentang & lab kosong jadi teks kosong', isianContoh.penanda[3].rujukanMin === '' && isianContoh.laboratorium === '');
+const balik = periksaHasilLab(isianContoh, '2026-09-23');
+cek('diperiksa lagi → hasil yang sama persis', balik.sah && hasilLabSama(balik.hasil, contoh), JSON.stringify(balik.sah ? balik.hasil : balik.galat));
+// Semua penanda di data tiruan ikut pulang-pergi.
+const semuaMock = { id: 'm', tanggal: '2026-09-03', nama: 'Semua penanda tiruan', laboratorium: 'Lab klinik',
+  penanda: [...readFileSync('src/mocks/hasilLab.ts', 'utf8').matchAll(/\{ nama: '([^']+)', nilai: ([\d.]+), satuan: '([^']*)', rujukanMin: (null|[\d.]+), rujukanMaks: (null|[\d.]+) \}/g)]
+    .map((m, i) => ({ nama: `${m[1]} ${i}`, nilai: Number(m[2]), satuan: m[3], rujukanMin: m[4] === 'null' ? null : Number(m[4]), rujukanMaks: m[5] === 'null' ? null : Number(m[5]) })) };
+const balikMock = periksaHasilLab(isianDariHasilLab(semuaMock), '2026-09-23');
+cek(`${semuaMock.penanda.length} penanda tiruan pulang-pergi utuh`, balikMock.sah && hasilLabSama(balikMock.hasil, semuaMock));
+const diubah = periksaHasilLab({ ...isianContoh, penanda: isianContoh.penanda.map((p, i) => (i === 0 ? { ...p, nilai: '5,4' } : p)) }, '2026-09-23');
+cek('satu nilai diubah → tidak sama', diubah.sah && !hasilLabSama(diubah.hasil, contoh));
 
 console.log('\nData tiruan masuk akal');
 const mock = readFileSync('src/mocks/hasilLab.ts', 'utf8');

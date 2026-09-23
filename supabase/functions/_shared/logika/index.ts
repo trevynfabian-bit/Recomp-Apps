@@ -367,6 +367,8 @@ export type {
   RingkasanHasilLab,
 } from './hasilLab.ts';
 export {
+  hasilLabSama,
+  isianDariHasilLab,
   kalimatRingkasanLab,
   kelompokkanPerTahun,
   PENANDA_KOSONG,

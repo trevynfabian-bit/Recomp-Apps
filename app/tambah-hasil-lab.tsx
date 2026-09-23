@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PENANDA_KOSONG, penandaDariTemplat, periksaHasilLab, tanggalHariIni, TEMPLAT_PANEL_LAB } from '@recomp/logika';
+import {
+  hasilLabSama,
+  isianDariHasilLab,
+  PENANDA_KOSONG,
+  penandaDariTemplat,
+  periksaHasilLab,
+  tanggalHariIni,
+  TEMPLAT_PANEL_LAB,
+} from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
 import { Card, KerangkaSheet, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -21,7 +29,7 @@ function hariIniTertulis(): string {
 }
 
 /**
- * Tambah hasil lab.
+ * Tambah atau ubah hasil lab (`?id=` untuk mengubah entri yang ada).
  *
  * Angkanya DISALIN dari kertas hasil, jadi form ini dirancang untuk menyalin
  * dengan setia, bukan untuk menafsirkan: satu baris per penanda (nama, nilai,
@@ -40,8 +48,11 @@ function hariIniTertulis(): string {
 export default function TambahHasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { tambah } = useHasilLab();
-  const [isian, setIsian] = useState<IsianHasilLab>(ISIAN_AWAL);
+  const { riwayat, tambah, ubah: ubahEntri } = useHasilLab();
+  // Dengan `id`: mengubah entri yang ada; tanpa: menambah yang baru.
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const asal = id ? riwayat.find((h) => h.id === id) : undefined;
+  const [isian, setIsian] = useState<IsianHasilLab>(() => (asal ? isianDariHasilLab(asal) : ISIAN_AWAL));
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<'diam' | 'menyimpan' | 'gagal'>('diam');
   const [konfirmasiBatal, setKonfirmasiBatal] = useState(false);
@@ -50,11 +61,15 @@ export default function TambahHasilLabScreen() {
   const galat: GalatLab = hasil.sah ? { perPenanda: [] } : hasil.galat;
   const tampil = cobaSimpan;
   const menyimpan = status === 'menyimpan';
-  const berisi =
-    isian.nama.trim() !== '' ||
-    isian.tanggal.trim() !== '' ||
-    isian.laboratorium.trim() !== '' ||
-    isian.penanda.some((p) => p.nilai.trim() !== '' || p.rujukanMin.trim() !== '' || p.rujukanMaks.trim() !== '');
+  // Perlu konfirmasi saat kembali: tambah → ada yang terisi; ubah → ada yang berbeda dari entri tersimpan.
+  const berisi = asal
+    ? JSON.stringify(isian) !== JSON.stringify(isianDariHasilLab(asal))
+    : isian.nama.trim() !== '' ||
+      isian.tanggal.trim() !== '' ||
+      isian.laboratorium.trim() !== '' ||
+      isian.penanda.some((p) => p.nilai.trim() !== '' || p.rujukanMin.trim() !== '' || p.rujukanMaks.trim() !== '');
+  /** Mengubah tanpa perubahan apa pun: tombol simpan tidak aktif. */
+  const tanpaPerubahan = Boolean(asal && hasil.sah && hasilLabSama(hasil.hasil, asal));
 
   const ubah = (perubahan: Partial<IsianHasilLab>) => {
     setIsian((x) => ({ ...x, ...perubahan }));
@@ -74,9 +89,11 @@ export default function TambahHasilLabScreen() {
   async function simpan() {
     setCobaSimpan(true);
     if (!hasil.sah || menyimpan) return;
+    if (tanpaPerubahan) return;
     setStatus('menyimpan');
     try {
-      await tambah(hasil.hasil);
+      if (asal) await ubahEntri(asal.id, hasil.hasil);
+      else await tambah(hasil.hasil);
       ketukBerhasil();
       router.back();
     } catch {
@@ -87,6 +104,18 @@ export default function TambahHasilLabScreen() {
   function kembali() {
     if (berisi) setKonfirmasiBatal(true);
     else router.back();
+  }
+
+  if (id && !asal) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
+        <Text style={{ ...typography.title, color: colors.text }}>Hasil lab ini tidak ditemukan</Text>
+        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+          Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
+        </Text>
+        <TombolBertepi label="Kembali ke riwayat" onPress={() => router.back()} />
+      </View>
+    );
   }
 
   return (
@@ -125,7 +154,7 @@ export default function TambahHasilLabScreen() {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
-              Tambah hasil lab
+              {asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
             </Text>
             <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>Salin dari kertas hasilnya</Text>
           </View>
@@ -222,14 +251,21 @@ export default function TambahHasilLabScreen() {
         <View style={{ gap: spacing.sm }}>
           {tampil && !hasil.sah ? <TeksGalat teks="Ada isian yang perlu diperbaiki sebelum disimpan." /> : null}
           {status === 'gagal' ? <TeksGalat teks="Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini." /> : null}
-          <TombolUtama label="Simpan hasil lab" memproses={menyimpan} onPress={() => void simpan()} />
+          <TombolUtama
+            label={asal ? 'Simpan perubahan' : 'Simpan hasil lab'}
+            nonaktif={tanpaPerubahan}
+            memproses={menyimpan}
+            onPress={() => void simpan()}
+          />
         </View>
       </ScrollView>
 
       <KerangkaSheet terbuka={konfirmasiBatal} onTutup={() => setKonfirmasiBatal(false)} label="Isian belum disimpan">
-        <Text style={{ ...typography.title, color: colors.text }}>Buang isian ini?</Text>
+        <Text style={{ ...typography.title, color: colors.text }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
         <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
-          Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.
+          {asal
+            ? 'Perubahan belum disimpan. Entri yang tersimpan tetap seperti sebelumnya.'
+            : 'Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.'}
         </Text>
         <View style={{ gap: spacing.sm }}>
           <TombolUtama label="Lanjut mengisi" onPress={() => setKonfirmasiBatal(false)} />

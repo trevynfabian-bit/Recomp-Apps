@@ -220,3 +220,53 @@ export function periksaHasilLab(isian: IsianHasilLab, hariIni: string): HasilPer
   if (adaGalat || tanggal === null) return { sah: false, galat };
   return { sah: true, hasil: { nama, tanggal, laboratorium: isian.laboratorium.trim() || null, penanda } };
 }
+
+/** Angka untuk isian: koma desimal, tanpa nol di belakang ("5,3", "1", "0,75"). */
+function angkaIsian(n: number | null): string {
+  return n === null ? '' : String(n).replace('.', ',');
+}
+
+/**
+ * Hasil tersimpan → isian form, untuk MENGUBAH entri. Kebalikan
+ * `periksaHasilLab`: memeriksa isian ini lagi menghasilkan hasil yang sama
+ * persis (dijaga `npm run cek:lab` untuk setiap entri tiruan).
+ */
+export function isianDariHasilLab(h: HasilLab): IsianHasilLab {
+  const [y, m, d] = h.tanggal.split('-').map(Number);
+  return {
+    nama: h.nama,
+    tanggal: `${d}/${m}/${y}`,
+    laboratorium: h.laboratorium ?? '',
+    penanda: h.penanda.map((p) => ({
+      nama: p.nama,
+      nilai: angkaIsian(p.nilai),
+      satuan: p.satuan,
+      rujukanMin: angkaIsian(p.rujukanMin),
+      rujukanMaks: angkaIsian(p.rujukanMaks),
+    })),
+  };
+}
+
+/**
+ * Apakah hasil pemeriksaan isian sama dengan entri tersimpan (tidak ada yang
+ * diubah). Dibandingkan per kolom, bukan lewat JSON — urutan kunci objek
+ * tidak boleh membuat entri yang tidak disentuh tampak berubah.
+ */
+export function hasilLabSama(a: Omit<HasilLab, 'id'>, b: HasilLab): boolean {
+  return (
+    a.nama === b.nama &&
+    a.tanggal === b.tanggal &&
+    a.laboratorium === b.laboratorium &&
+    a.penanda.length === b.penanda.length &&
+    a.penanda.every((p, i) => {
+      const q = b.penanda[i];
+      return (
+        p.nama === q.nama &&
+        p.nilai === q.nilai &&
+        p.satuan === q.satuan &&
+        p.rujukanMin === q.rujukanMin &&
+        p.rujukanMaks === q.rujukanMaks
+      );
+    })
+  );
+}

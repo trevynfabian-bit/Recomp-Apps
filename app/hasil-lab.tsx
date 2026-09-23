@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -10,8 +11,8 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import { Card, SectionHeader, TombolUtama } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+import { Card, KerangkaSheet, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useHasilLab } from '@/state/hasilLab';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
@@ -33,8 +34,24 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 export default function HasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { riwayat } = useHasilLab();
+  const { riwayat, hapus } = useHasilLab();
   const kelompok = kelompokkanPerTahun(riwayat);
+  /** Entri yang sedang dikonfirmasi untuk dihapus. */
+  const [akanDihapus, setAkanDihapus] = useState<HasilLab | null>(null);
+  const [statusHapus, setStatusHapus] = useState<'diam' | 'menghapus' | 'gagal' | 'terhapus'>('diam');
+
+  async function jalankanHapus() {
+    if (!akanDihapus) return;
+    setStatusHapus('menghapus');
+    try {
+      await hapus(akanDihapus.id);
+      ketukBerhasil();
+      setAkanDihapus(null);
+      setStatusHapus('terhapus');
+    } catch {
+      setStatusHapus('gagal');
+    }
+  }
 
   return (
     <ScrollView
@@ -95,6 +112,12 @@ export default function HasilLabScreen() {
         </Card>
       ) : null}
 
+      {statusHapus === 'terhapus' ? (
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.jade }}>
+          Hasil lab dihapus.
+        </Text>
+      ) : null}
+
       <TombolUtama label="Tambah hasil lab" onPress={() => router.push('/tambah-hasil-lab')} />
 
       {kelompok.map((k) => (
@@ -102,16 +125,50 @@ export default function HasilLabScreen() {
           <SectionHeader judul={k.tahun} aksi={`${k.hasil.length} hasil`} />
           <View accessibilityRole="list" style={{ gap: spacing.md }}>
             {k.hasil.map((h) => (
-              <KartuHasilLab key={h.id} hasil={h} />
+              <KartuHasilLab
+                key={h.id}
+                hasil={h}
+                onUbah={() => router.push({ pathname: '/tambah-hasil-lab', params: { id: h.id } })}
+                onHapus={() => {
+                  setStatusHapus('diam');
+                  setAkanDihapus(h);
+                }}
+              />
             ))}
           </View>
         </View>
       ))}
+
+      <KerangkaSheet
+        terbuka={akanDihapus !== null}
+        onTutup={statusHapus === 'menghapus' ? null : () => setAkanDihapus(null)}
+        label="Hapus hasil lab"
+      >
+        {akanDihapus ? (
+          <>
+            <Text style={{ ...typography.title, color: colors.text }}>Hapus hasil lab ini?</Text>
+            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+              {akanDihapus.nama}, {formatTanggalPanjang(akanDihapus.tanggal).split(', ')[1]} {akanDihapus.tanggal.slice(0, 4)} ·{' '}
+              {akanDihapus.penanda.length} penanda. Coach tidak lagi membacanya sebagai konteks, dan penghapusan ini tidak
+              bisa dibatalkan.
+            </Text>
+            {statusHapus === 'gagal' ? (
+              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral }}>
+                Belum terhapus. Periksa koneksi, lalu coba lagi.
+              </Text>
+            ) : null}
+            <View style={{ gap: spacing.sm }}>
+              <TombolUtama merusak label="Hapus hasil lab" memproses={statusHapus === 'menghapus'} onPress={() => void jalankanHapus()} />
+              <TombolBertepi label="Batal" onPress={() => setAkanDihapus(null)} nonaktif={statusHapus === 'menghapus'} />
+            </View>
+          </>
+        ) : null}
+      </KerangkaSheet>
     </ScrollView>
   );
 }
 
-function KartuHasilLab({ hasil }: { hasil: HasilLab }) {
+function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: () => void; onHapus: () => void }) {
   const r = ringkasHasilLab(hasil);
   const tanggal = formatTanggalPanjang(hasil.tanggal).split(', ')[1];
   const ringkasan = kalimatRingkasanLab(r);
@@ -140,6 +197,31 @@ function KartuHasilLab({ hasil }: { hasil: HasilLab }) {
             ))}
           </View>
         ) : null}
+      </View>
+      {/* Tindakan terpisah dari isi kartu: tetap terjangkau pembaca layar. */}
+      <View style={{ flexDirection: 'row', gap: spacing.lg }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Ubah ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          onPress={() => {
+            ketukRingan();
+            onUbah();
+          }}
+          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+        >
+          <Text style={{ ...typography.label, color: colors.amber }}>Ubah</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Hapus ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          onPress={() => {
+            ketukRingan();
+            onHapus();
+          }}
+          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+        >
+          <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>Hapus</Text>
+        </Pressable>
       </View>
     </Card>
   );
