@@ -98,3 +98,13 @@ export async function batalkanPengingatTimbangHariIni(): Promise<void> {
   if (!notifikasiDidukung) return;
   await Notifications.cancelScheduledNotificationAsync(`timbang-${tanggalHariIni()}`);
 }
+
+/**
+ * Keluar dari akun: SEMUA pengingat yang dijadwalkan app dibatalkan. Ponsel
+ * yang sudah keluar tidak boleh terus mengingatkan timbang untuk akun yang
+ * tidak lagi masuk di sana.
+ */
+export async function batalkanSemuaPengingat(): Promise<void> {
+  if (!notifikasiDidukung) return;
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}

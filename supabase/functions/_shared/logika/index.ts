@@ -307,3 +307,6 @@ export {
   sesiDariWorkoutHevy,
   tambahDetik,
 } from './sinkronLuar.ts';
+
+export type { KodeGagalMasuk } from './akun.ts';
+export { emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK } from './akun.ts';

@@ -31,6 +31,7 @@ import { mockDayTypes, mockDayTypeTargets } from '@/mocks/dailyLog';
 import { mockAkun, mockFaseMulai, mockHasilLab, mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
+import { useSesi } from '@/state/sesi';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'target' | 'pinggang' | 'lab' | 'ekspor' | 'hapus' | null;
@@ -55,6 +56,9 @@ export default function PengaturanScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { profil, gantiFase, perbaruiProfil } = useProfil();
+  const { pengguna, keluar } = useSesi();
+  const email = pengguna?.email ?? mockAkun.email;
+  const [keluarBerjalan, setKeluarBerjalan] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [pesanTiruan, setPesanTiruan] = useState<string | null>(null);
   const tutup = () => setSheet(null);
@@ -83,7 +87,7 @@ export default function PengaturanScreen() {
       {/* --- Profil ----------------------------------------------------------- */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Profil ${profil.nama}, ${mockAkun.email}`}
+        accessibilityLabel={`Profil ${profil.nama}, ${email}`}
         accessibilityHint="Membuka isian tinggi, jenis kelamin, dan tanggal lahir"
         onPress={() => {
           ketukRingan();
@@ -108,7 +112,7 @@ export default function PengaturanScreen() {
           </View>
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{profil.nama}</Text>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{mockAkun.email}</Text>
+            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{email}</Text>
             {profilLengkap ? (
               <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
                 {[
@@ -250,6 +254,19 @@ export default function PengaturanScreen() {
           </View>
         </Card>
         <Card flat style={{ marginTop: spacing.md }}>
+          <BarisPengaturan
+            ikon="log-out-outline"
+            judul={keluarBerjalan ? 'Keluar…' : 'Keluar'}
+            nilai={email}
+            petunjuk="Keluar dari akun di perangkat ini. Data tetap tersimpan di akun Anda."
+            onPress={() => {
+              if (keluarBerjalan) return;
+              setKeluarBerjalan(true);
+              // Berhasil: tata letak akar berganti ke layar masuk; layar ini dilepas.
+              keluar().catch(() => setKeluarBerjalan(false));
+            }}
+          />
+          <Pemisah />
           <BarisPengaturan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
