@@ -1,0 +1,74 @@
+import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
+import { KerangkaSheet } from './KerangkaSheet';
+import { TombolBertepi, TombolUtama } from './Tombol';
+import { colors, spacing, typography } from '@/theme';
+
+type Props = {
+  terbuka: boolean;
+  onTutup: () => void;
+  /** Akun yang sedang masuk; disebut supaya jelas akun mana yang dipakai untuk masuk lagi. */
+  email: string;
+  /** Selalu berhasil di perangkat; setelahnya tata letak akar pindah ke layar masuk. */
+  keluar: () => Promise<void>;
+};
+
+/**
+ * Keluar dari akun.
+ *
+ * Bukan tindakan merusak — tidak ada data yang hilang — jadi tombolnya bukan
+ * coral. Yang disebut adalah apa yang BERUBAH di perangkat ini, karena itu
+ * yang tidak terlihat: pengingat berhenti, dan Apple Health (yang dibaca dari
+ * iPhone) tidak terkirim sampai masuk lagi. Sumber yang tersambung di server
+ * tetap berjalan, supaya orang tidak mengira datanya bolong.
+ */
+export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
+  const [memproses, setMemproses] = useState(false);
+
+  useEffect(() => {
+    if (terbuka) setMemproses(false);
+  }, [terbuka]);
+
+  if (!terbuka) return null;
+
+  return (
+    <KerangkaSheet terbuka onTutup={memproses ? null : onTutup} label="Keluar dari akun">
+      <Text style={{ ...typography.title, color: colors.text }}>Keluar dari akun?</Text>
+      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+        Semua data tetap tersimpan di akun Anda dan kembali utuh saat masuk lagi.
+      </Text>
+
+      <View accessibilityRole="list" style={{ gap: spacing.md }}>
+        <Butir ikon="notifications-off-outline">Pengingat di perangkat ini berhenti.</Butir>
+        <Butir ikon="heart-outline">Data Apple Health dari iPhone ini tidak terkirim selama Anda keluar.</Butir>
+        <Butir ikon="cloud-done-outline">Strava, WHOOP, dan Hevy tetap tersinkron di server.</Butir>
+        <Butir ikon="log-in-outline">Masuk lagi dengan {email}.</Butir>
+      </View>
+
+      <View style={{ gap: spacing.sm }}>
+        <TombolUtama
+          label="Keluar"
+          memproses={memproses}
+          onPress={() => {
+            setMemproses(true);
+            // Berhasil: layar ini dilepas bersama seluruh tumpukan app.
+            void keluar();
+          }}
+        />
+        <TombolBertepi label="Batal" onPress={onTutup} nonaktif={memproses} />
+      </View>
+    </KerangkaSheet>
+  );
+}
+
+function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>['name']; children: React.ReactNode }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
+      <Ionicons name={ikon} size={20} color={colors.textMuted} />
+      <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        {children}
+      </Text>
+    </View>
+  );
+}

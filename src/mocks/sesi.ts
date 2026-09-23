@@ -26,7 +26,8 @@ export function mockMasuk(email: string, sandi: string): Promise<PenggunaTiruan>
       if (e.startsWith('offline')) return gagal({ status: 0, message: 'Failed to fetch' });
       if (e.endsWith('@belum.contoh')) return gagal({ code: 'email_not_confirmed', status: 400 });
       if (sandi === 'salah') return gagal({ code: 'invalid_credentials', status: 400 });
-      selesai({ id: 'stub-user', email: e });
+      // Id per email: berganti akun benar-benar berganti pengguna.
+      selesai({ id: `tiruan:${e}`, email: e });
     }, JEDA_MS),
   );
 }
@@ -35,8 +36,16 @@ export function mockKirimAturUlang(_email: string): Promise<void> {
   return new Promise((selesai) => setTimeout(selesai, JEDA_MS));
 }
 
+/** Mencabut sesi di server. Gagal bila perangkat luring (untuk mencoba jalur itu di web). */
 export function mockKeluar(): Promise<void> {
-  return new Promise((selesai) => setTimeout(selesai, 300));
+  return new Promise((selesai, gagal) =>
+    setTimeout(() => {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        return gagal({ status: 0, message: 'Failed to fetch' });
+      }
+      selesai();
+    }, 300),
+  );
 }
 
 const KUNCI_SESI = 'recomp.sesi-tiruan';

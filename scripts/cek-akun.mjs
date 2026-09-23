@@ -123,22 +123,28 @@ for (const [kode, pesan] of Object.entries(PESAN_GAGAL_MASUK)) {
   const p = pelanggaranNada(pesan);
   cek(`${kode} netral`, p.length === 0, `melanggar: ${p.join(', ')}`);
 }
-// Kalimat yang ditulis langsung di layar masuk (bukan dari katalog): semua
+// Kalimat yang ditulis langsung di layar masuk & sheet keluar: semua
 // literal string & teks JSX, dibaca lewat parser TypeScript, bukan regex.
 const ts = require('typescript');
-const sumber = ts.createSourceFile('masuk.tsx', readFileSync('app/masuk.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const kalimat = [];
-(function jelajah(n) {
-  if (ts.isImportDeclaration(n)) return;
-  if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isJsxText(n)) {
-    const t = n.text.replace(/\s+/g, ' ').trim();
-    // Kalimat untuk manusia: ada spasi & huruf (bukan nama ikon, warna, atau kunci).
-    if (/\s/.test(t) && /[a-z]{3}/i.test(t)) kalimat.push(t);
-  }
-  ts.forEachChild(n, jelajah);
-})(sumber);
-cek('layar masuk punya kalimat untuk diperiksa', kalimat.length >= 8, `hanya ${kalimat.length}`);
-for (const t of kalimat) {
+function kalimatDi(berkas) {
+  const sumber = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const hasil = [];
+  (function jelajah(n) {
+    if (ts.isImportDeclaration(n)) return;
+    if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isJsxText(n)) {
+      const t = n.text.replace(/\s+/g, ' ').trim();
+      // Kalimat untuk manusia: ada spasi & huruf (bukan nama ikon, warna, atau kunci).
+      if (/\s/.test(t) && /[a-z]{3}/i.test(t)) hasil.push(t);
+    }
+    ts.forEachChild(n, jelajah);
+  })(sumber);
+  return hasil;
+}
+const kalimatMasuk = kalimatDi('app/masuk.tsx');
+const kalimatKeluar = kalimatDi('src/components/SheetKeluarAkun.tsx');
+cek('layar masuk punya kalimat untuk diperiksa', kalimatMasuk.length >= 8, `hanya ${kalimatMasuk.length}`);
+cek('sheet keluar punya kalimat untuk diperiksa', kalimatKeluar.length >= 5, `hanya ${kalimatKeluar.length}`);
+for (const t of [...kalimatMasuk, ...kalimatKeluar]) {
   const p = pelanggaranNada(t);
   cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, p.length === 0, `melanggar: ${p.join(', ')}`);
 }
@@ -164,6 +170,11 @@ for (const n of layarApp) {
   }
 }
 cek('tamu hanya melihat layar masuk', JSON.stringify(tamu) === '["masuk"]', `tamu = ${JSON.stringify(tamu)}`);
+// State per akun (profil, koneksi, kiriman) dimulai ulang tiap pengguna berganti.
+const kunciProfil = tataLetak.indexOf("<PenyediaProfil key={pengguna?.id ?? 'tamu'}>");
+cek('penyedia per akun berkunci id pengguna', kunciProfil >= 0);
+cek('penyedia sinkron di dalam penyedia berkunci',
+  kunciProfil >= 0 && tataLetak.indexOf('<PenyediaSinkron>') > kunciProfil && tataLetak.indexOf('<PenyediaSinkron>') < tataLetak.indexOf('</PenyediaProfil>'));
 // Kiriman Realtime tidak boleh muncul di atas layar masuk.
 cek('banner data masuk hanya saat masuk', /\{sudahMasuk \? <BannerDataMasuk \/> : null\}/.test(tataLetak));
 

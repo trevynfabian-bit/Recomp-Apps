@@ -54,6 +54,25 @@ type KonteksSesi = {
 
 const TANPA_PEMULIHAN: Pemulihan = { pesan: null, email: null };
 
+/** Paling lama menunggu server saat keluar. */
+const BATAS_KELUAR_MS = 3000;
+
+function dalamBatasWaktu<T>(janji: Promise<T>, ms: number): Promise<T> {
+  return new Promise((selesai, gagal) => {
+    const t = setTimeout(() => gagal(new Error('batas waktu')), ms);
+    janji.then(
+      (v) => {
+        clearTimeout(t);
+        selesai(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        gagal(e);
+      },
+    );
+  });
+}
+
 const Konteks = createContext<KonteksSesi | null>(null);
 
 export function PenyediaSesi({ children }: { children: React.ReactNode }) {
@@ -124,7 +143,10 @@ export function PenyediaSesi({ children }: { children: React.ReactNode }) {
   );
 
   const keluar = useCallback(async () => {
-    await mockKeluar();
+    // Server lebih dulu (mencabut sesinya di sana), tetapi perangkat SELALU
+    // keluar: tanpa jaringan pun, orang yang mengetuk Keluar harus benar-benar
+    // keluar — bukan tertahan di app menunggu server yang tidak terjangkau.
+    await dalamBatasWaktu(mockKeluar(), BATAS_KELUAR_MS).catch(() => undefined);
     await akhiri(TANPA_PEMULIHAN);
   }, [akhiri]);
 

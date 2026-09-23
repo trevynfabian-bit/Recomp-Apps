@@ -22,6 +22,7 @@ import {
   SheetBatasPinggang,
   SheetEksporData,
   SheetHapusAkun,
+  SheetKeluarAkun,
   SheetLengkapiProfil,
   SheetTargetTipeHari,
   TombolBertepi,
@@ -34,7 +35,7 @@ import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
-type Sheet = 'profil' | 'fase' | 'target' | 'pinggang' | 'lab' | 'ekspor' | 'hapus' | null;
+type Sheet = 'profil' | 'fase' | 'target' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hapus' | null;
 
 /**
  * Pengaturan.
@@ -58,7 +59,6 @@ export default function PengaturanScreen() {
   const { profil, gantiFase, perbaruiProfil } = useProfil();
   const { pengguna, keluar } = useSesi();
   const email = pengguna?.email ?? mockAkun.email;
-  const [keluarBerjalan, setKeluarBerjalan] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [pesanTiruan, setPesanTiruan] = useState<string | null>(null);
   const tutup = () => setSheet(null);
@@ -256,15 +256,10 @@ export default function PengaturanScreen() {
         <Card flat style={{ marginTop: spacing.md }}>
           <BarisPengaturan
             ikon="log-out-outline"
-            judul={keluarBerjalan ? 'Keluar…' : 'Keluar'}
+            judul="Keluar"
             nilai={email}
-            petunjuk="Keluar dari akun di perangkat ini. Data tetap tersimpan di akun Anda."
-            onPress={() => {
-              if (keluarBerjalan) return;
-              setKeluarBerjalan(true);
-              // Berhasil: tata letak akar berganti ke layar masuk; layar ini dilepas.
-              keluar().catch(() => setKeluarBerjalan(false));
-            }}
+            petunjuk="Membuka konfirmasi keluar dari akun di perangkat ini"
+            onPress={() => setSheet('keluar')}
           />
           <Pemisah />
           <BarisPengaturan
@@ -347,6 +342,7 @@ export default function PengaturanScreen() {
         <TombolBertepi label="Tutup" onPress={tutup} />
       </KerangkaSheet>
       <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={tutup} isi={mockIsiEkspor} siapkan={mockSiapkanEkspor} />
+      <SheetKeluarAkun terbuka={sheet === 'keluar'} onTutup={tutup} email={email} keluar={keluar} />
       <SheetHapusAkun
         terbuka={sheet === 'hapus'}
         onTutup={tutup}

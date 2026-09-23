@@ -42,6 +42,7 @@ export { SheetEksporData } from './SheetEksporData';
 export { SheetHapusAkun } from './SheetHapusAkun';
 export { SheetHubungkanSumber } from './SheetHubungkanSumber';
 export { SheetImporRiwayat, type SumberImpor } from './SheetImporRiwayat';
+export { SheetKeluarAkun } from './SheetKeluarAkun';
 export { SheetJamTimbang } from './SheetJamTimbang';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
 export { SheetPutuskanSumber } from './SheetPutuskanSumber';

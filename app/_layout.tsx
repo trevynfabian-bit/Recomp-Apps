@@ -31,7 +31,7 @@ export default function RootLayout() {
  * kembali ke layar masuk tanpa tiap layar memeriksanya sendiri.
  */
 function TumpukanAkar() {
-  const { status } = useSesi();
+  const { status, pengguna } = useSesi();
   const sudahMasuk = status === 'masuk';
 
   // Jadwal pengingat disegarkan saat app dibuka dan setiap kali kembali ke
@@ -51,8 +51,11 @@ function TumpukanAkar() {
   // layar masuk yang lalu hilang.
   if (status === 'memuat') return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
+  // State per akun dimulai dari nol setiap pengguna berganti (termasuk
+  // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, koneksi,
+  // atau kiriman yang belum dibaca dari akun sebelumnya.
   return (
-    <PenyediaProfil>
+    <PenyediaProfil key={pengguna?.id ?? 'tamu'}>
       <PenyediaSinkron>
         <StatusBar style="light" />
         <Stack
