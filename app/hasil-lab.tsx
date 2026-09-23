@@ -13,6 +13,7 @@ import {
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
 import { Card, KerangkaSheet, PenandaSumber, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
@@ -35,16 +36,18 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * dari kertas hasil, tidak diperkirakan app. Nilai lengkapnya bisa dibuka per
  * kartu, persis seperti tertulis, supaya yang dibaca coach bisa diperiksa.
  *
- * Fase 4 sisi frontend: riwayat dari `useHasilLab` (tiruan di memori).
+ * Riwayat dari `useHasilLab`: dari Supabase saat masuk, atau tiruan tanpa
+ * kredensial Supabase. Gagal memuat hanya berpengaruh di layar ini.
  */
 export default function HasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { riwayat, hapus } = useHasilLab();
+  const { riwayat, status: statusMuat, pesanGagal, muatUlang, hapus } = useHasilLab();
   const kelompok = kelompokkanPerTahun(riwayat);
   /** Entri yang sedang dikonfirmasi untuk dihapus. */
   const [akanDihapus, setAkanDihapus] = useState<HasilLab | null>(null);
   const [statusHapus, setStatusHapus] = useState<'diam' | 'menghapus' | 'gagal' | 'terhapus'>('diam');
+  const [pesanGagalHapus, setPesanGagalHapus] = useState('');
 
   async function jalankanHapus() {
     if (!akanDihapus) return;
@@ -54,7 +57,8 @@ export default function HasilLabScreen() {
       ketukBerhasil();
       setAkanDihapus(null);
       setStatusHapus('terhapus');
-    } catch {
+    } catch (e) {
+      setPesanGagalHapus(e instanceof KesalahanHasilLab ? e.message : 'Belum terhapus. Periksa koneksi, lalu coba lagi.');
       setStatusHapus('gagal');
     }
   }
@@ -96,7 +100,13 @@ export default function HasilLabScreen() {
             Hasil lab
           </Text>
           <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
-            {riwayat.length > 0 ? `${riwayat.length} hasil tersimpan` : 'Belum ada yang tersimpan'}
+            {statusMuat === 'memuat'
+              ? 'Memuat…'
+              : statusMuat === 'gagal'
+                ? 'Belum termuat'
+                : riwayat.length > 0
+                  ? `${riwayat.length} hasil tersimpan`
+                  : 'Belum ada yang tersimpan'}
           </Text>
         </View>
       </View>
@@ -110,7 +120,17 @@ export default function HasilLabScreen() {
         </Text>
       </View>
 
-      {kelompok.length === 0 ? (
+      {statusMuat === 'gagal' ? (
+        <Card style={{ gap: spacing.sm }}>
+          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>Hasil lab belum termuat</Text>
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            {pesanGagal}
+          </Text>
+          <TombolBertepi label="Coba lagi" onPress={muatUlang} />
+        </Card>
+      ) : null}
+
+      {statusMuat === 'siap' && kelompok.length === 0 ? (
         <Card style={{ gap: spacing.sm }}>
           <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>Belum ada hasil lab</Text>
           <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
@@ -125,7 +145,7 @@ export default function HasilLabScreen() {
         </Text>
       ) : null}
 
-      <TombolUtama label="Tambah hasil lab" onPress={() => router.push('/tambah-hasil-lab')} />
+      <TombolUtama label="Tambah hasil lab" nonaktif={statusMuat !== 'siap'} onPress={() => router.push('/tambah-hasil-lab')} />
 
       {kelompok.map((k) => (
         <View key={k.tahun}>
@@ -161,7 +181,7 @@ export default function HasilLabScreen() {
             </Text>
             {statusHapus === 'gagal' ? (
               <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral }}>
-                Belum terhapus. Periksa koneksi, lalu coba lagi.
+                {pesanGagalHapus}
               </Text>
             ) : null}
             <View style={{ gap: spacing.sm }}>

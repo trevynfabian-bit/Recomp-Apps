@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,6 +14,7 @@ import {
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
 import { Card, KerangkaSheet, PenandaSumber, TombolBertepi, TombolUtama } from '@/components';
+import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
@@ -44,18 +45,29 @@ function hariIniTertulis(): string {
  * terbalik, penanda tidak ganda. Baris yang sepenuhnya kosong diabaikan.
  * Galat tampil setelah percobaan simpan pertama.
  *
- * Fase 4 sisi frontend: simpan lewat `useHasilLab` (tiruan, gagal saat luring).
+ * Simpan lewat `useHasilLab`: `simpan_hasil_lab` di Supabase (hasil & penanda
+ * dalam satu transaksi), atau tiruan tanpa kredensial Supabase.
  */
 export default function TambahHasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { riwayat, tambah, ubah: ubahEntri } = useHasilLab();
+  const { riwayat, status: statusMuat, tambah, ubah: ubahEntri } = useHasilLab();
   // Dengan `id`: mengubah entri yang ada; tanpa: menambah yang baru.
   const { id } = useLocalSearchParams<{ id?: string }>();
   const asal = id ? riwayat.find((h) => h.id === id) : undefined;
   const [isian, setIsian] = useState<IsianHasilLab>(() => (asal ? isianDariHasilLab(asal) : ISIAN_AWAL));
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<'diam' | 'menyimpan' | 'gagal'>('diam');
+  const [pesanGagal, setPesanGagal] = useState('');
+  // Dibuka sebelum riwayat selesai dimuat dari server: isi form dari entrinya
+  // begitu tiba — sekali saja, supaya isian pengguna tidak pernah ditimpa.
+  const sudahDiisi = useRef(Boolean(asal));
+  useEffect(() => {
+    if (asal && !sudahDiisi.current) {
+      sudahDiisi.current = true;
+      setIsian(isianDariHasilLab(asal));
+    }
+  }, [asal]);
   const [konfirmasiBatal, setKonfirmasiBatal] = useState(false);
 
   const hasil = periksaHasilLab(isian, tanggalHariIni());
@@ -97,7 +109,8 @@ export default function TambahHasilLabScreen() {
       else await tambah(hasil.hasil);
       ketukBerhasil();
       router.back();
-    } catch {
+    } catch (e) {
+      setPesanGagal(e instanceof KesalahanHasilLab ? e.message : 'Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.');
       setStatus('gagal');
     }
   }
@@ -105,6 +118,16 @@ export default function TambahHasilLabScreen() {
   function kembali() {
     if (berisi) setKonfirmasiBatal(true);
     else router.back();
+  }
+
+  if (id && !asal && statusMuat === 'memuat') {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+          Memuat hasil lab…
+        </Text>
+      </View>
+    );
   }
 
   if (id && !asal) {
@@ -255,7 +278,7 @@ export default function TambahHasilLabScreen() {
 
         <View style={{ gap: spacing.sm }}>
           {tampil && !hasil.sah ? <TeksGalat teks="Ada isian yang perlu diperbaiki sebelum disimpan." /> : null}
-          {status === 'gagal' ? <TeksGalat teks="Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini." /> : null}
+          {status === 'gagal' ? <TeksGalat teks={pesanGagal} /> : null}
           <TombolUtama
             label={asal ? 'Simpan perubahan' : 'Simpan hasil lab'}
             nonaktif={tanpaPerubahan}

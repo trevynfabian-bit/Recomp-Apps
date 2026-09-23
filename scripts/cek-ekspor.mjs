@@ -131,26 +131,31 @@ cek('notifikasi seketika hanya bila izin sudah diberikan (tidak meminta izin)',
 
 console.log('\nEndpoint ekspor (ekspor_data_saya)');
 {
-  const migrasi = readFileSync('supabase/migrations/20260922004900_ekspor_data_saya.sql', 'utf8');
+  // Definisi TERBARU ekspor_data_saya (migrasi yang lebih baru menimpa yang lama).
+  const berkasEkspor = readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).sort()
+    .filter((f) => readFileSync(join('supabase/migrations', f), 'utf8').includes('create or replace function public.ekspor_data_saya()'));
+  const migrasi = readFileSync(join('supabase/migrations', berkasEkspor.at(-1)), 'utf8');
   const fnEkspor = migrasi.slice(migrasi.indexOf('create or replace function public.ekspor_data_saya'), migrasi.indexOf('create or replace function public.ringkas_ekspor_data_saya'));
-  const fnRingkas = migrasi.slice(migrasi.indexOf('create or replace function public.ringkas_ekspor_data_saya'));
+  const fnRingkas = migrasi.slice(migrasi.indexOf('create or replace function public.ringkas_ekspor_data_saya'), migrasi.indexOf('comment on function public.ringkas_ekspor_data_saya'));
   const pasangan = (teks) => [...teks.matchAll(/'nama', '([a-z_0-9]+)', 'label', '([^']+)'/g)].map((m) => `${m[1]}|${m[2]}`);
   const server = pasangan(fnEkspor);
   cek(`${server.length} tabel dari server`, server.length >= 15);
   cek('ringkas & ekspor menyebut tabel dan label yang sama, urutan sama', JSON.stringify(pasangan(fnRingkas)) === JSON.stringify(server));
   // Jalur tiruan dan jalur server menghasilkan berkas berbentuk sama: setiap
-  // tabel tiruan (selain hasil lab, yang dirakit di app) ada di server dengan label yang sama.
+  // tabel tiruan (termasuk hasil lab) ada di server dengan label yang sama.
   const dataTs = readFileSync('src/data/ekspor.ts', 'utf8');
-  const tiruan = [...dataTs.matchAll(/nama: '([a-z_0-9]+)',\s*\n\s*label: '([^']+)'/g)].map((m) => `${m[1]}|${m[2]}`)
-    .filter((x) => !x.startsWith('hasil_lab|') && !x.startsWith('penanda_lab|'));
+  const tiruan = [...dataTs.matchAll(/nama: '([a-z_0-9]+)',\s*\n\s*label: '([^']+)'/g)].map((m) => `${m[1]}|${m[2]}`);
   const hilang = tiruan.filter((x) => !server.includes(x));
-  cek(`${tiruan.length} tabel tiruan ada di server dengan label sama`, tiruan.length >= 8 && hilang.length === 0, hilang.join(', '));
-  cek('nama tabel lab tidak bertabrakan dengan tabel server', !server.some((x) => /^(hasil_lab|penanda_lab)\|/.test(x)));
+  cek(`${tiruan.length} tabel tiruan ada di server dengan label sama`, tiruan.length >= 10 && hilang.length === 0, hilang.join(', '));
+  // Kolom tabel hasil lab sama persis di kedua jalur.
+  const kolomTs = (nama) => dataTs.match(new RegExp(`nama: '${nama}',[\\s\\S]*?kolom: \\[([^\\]]+)\\]`))?.[1].replace(/\s+/g, '');
+  const kolomSql = (nama) => fnEkspor.match(new RegExp(`'nama', '${nama}',[\\s\\S]*?'kolom', jsonb_build_array\\(([^)]+)\\)`))?.[1].replace(/\s+/g, '');
+  for (const t of ['hasil_lab', 'penanda_lab']) cek(`kolom ${t} sama di tiruan & server`, !!kolomTs(t) && kolomTs(t) === kolomSql(t), `${kolomTs(t)} ≠ ${kolomSql(t)}`);
   cek('rahasia & kolom teknis tidak dibaca ekspor', !/health_connection_secrets|access_token|refresh_token|kunci_api|kursor_sinkron/.test(fnEkspor));
   cek('ekspor & ringkas SECURITY INVOKER (RLS tetap berlaku)', !/security definer/i.test(migrasi));
   const penyedia = readFileSync('src/state/ekspor.tsx', 'utf8');
   cek('penyedia: server hanya saat masuk & kredensial ada', /const pakaiServer = supabaseSiap && pengguna !== null;/.test(penyedia));
-  cek('penyedia: hasil lab ditempelkan ke tabel server', /\[\.\.\.dariServer\.tabel, \.\.\.tabelLab\]/.test(penyedia));
+  cek('penyedia: tabel server dipakai utuh (hasil lab sudah di dalamnya, tidak ditempel ganda)', /tabel: dariServer\.tabel,/.test(penyedia) && !/tabelLab/.test(penyedia));
   cek('penyedia: ekspor & hitungan berbatas waktu', /dalamBatasWaktu\(eksporDataSaya\(\), BATAS_EKSPOR_MS\)/.test(penyedia) && /dalamBatasWaktu\(ringkasEksporDataSaya\(\), BATAS_HITUNG_MS\)/.test(penyedia));
 }
 

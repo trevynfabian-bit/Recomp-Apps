@@ -150,6 +150,27 @@ console.log('\nPanjang teks (sama dengan tabel lab_results)');
   cek('form menampilkan galat laboratorium', /galat=\{tampil \? galat\.laboratorium : undefined\}/.test(readFileSync('app/tambah-hasil-lab.tsx', 'utf8')));
 }
 
+console.log('\nService hasil lab (Supabase)');
+{
+  const migrasi = readFileSync('supabase/migrations/20260922005400_hasil_lab.sql', 'utf8');
+  const dataTs = readFileSync('src/data/hasilLab.ts', 'utf8');
+  const penyedia = readFileSync('src/state/hasilLab.tsx', 'utf8');
+  const aturan = [...new Set([...migrasi.matchAll(/constraint (lab_result[a-z_]*_(?:wajar|awal|urut))\s/g)].map((m) => m[1]))];
+  cek(`${aturan.length} aturan CHECK hasil lab ditemukan`, aturan.length >= 9, aturan.join(', '));
+  const tanpaPesan = aturan.filter((a) => !new RegExp(`^\\s*${a}:`, 'm').test(dataTs));
+  cek('setiap aturan tabel punya pesan di @/data/hasilLab', tanpaPesan.length === 0, tanpaPesan.join(', '));
+  const pesan = [...dataTs.matchAll(/'([^'\n]{12,})'|`([^`\n]{12,})`/g)].map((m) => (m[1] ?? m[2]).replace(/\$\{[^}]*\}/g, 'X'))
+    .filter((t) => /\s/.test(t));
+  const bernada = pesan.filter((t) => pelanggaranNada(t).length > 0 || /\b(tinggi|rendah|normal|berbahaya)\b/i.test(t));
+  cek(`${pesan.length} pesan service netral & tanpa tafsiran`, pesan.length >= 12 && bernada.length === 0, bernada.join(' | '));
+  cek('penyedia memakai server hanya saat masuk & kredensial ada', /const pakaiServer = supabaseSiap && pengguna !== null;/.test(penyedia));
+  cek('hasil lab TIDAK disalin ke perangkat', !/cadangan|AsyncStorage/.test(penyedia) && !/cadangan|AsyncStorage/.test(dataTs));
+  cek('ubah membawa waktu muat; konflik/terhapus memuat ulang', /diperbaruiPada: waktu\.current\[id\]/.test(penyedia) && /e\.kode === 'konflik' \|\| e\.kode === 'tidak-ada'/.test(penyedia));
+  const layar = readFileSync('app/hasil-lab.tsx', 'utf8');
+  cek('layar riwayat: memuat & gagal (dengan Coba lagi) tidak terbaca "belum ada"',
+    /statusMuat === 'siap' && kelompok\.length === 0/.test(layar) && /label="Coba lagi" onPress=\{muatUlang\}/.test(layar));
+}
+
 console.log('\nLabel data mentah');
 cek('nilai ditulis apa adanya: 5,3 · 245 · 0,75 · 2,345',
   [[5.3, '5,3'], [245, '245'], [0.75, '0,75'], [2.345, '2,345']].every(([n, t]) => tulisNilaiLab(n) === t));

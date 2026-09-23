@@ -46,6 +46,14 @@ begin
   insert into public.percakapan (user_id, judul) values (a, 'Soal protein') returning id into v_per;
   insert into public.pesan_coach (percakapan_id, user_id, peran, teks) values (v_per, a, 'pengguna', 'Protein cukup?');
 end $$;
+do $$
+declare a uuid := 'e4e40001-0000-4000-8000-000000000001'; v_lab uuid;
+begin
+  insert into public.lab_results (user_id, tanggal, nama, laboratorium) values (a, date '2026-09-03', 'Profil lipid', 'Lab klinik')
+  returning id into v_lab;
+  insert into public.lab_result_markers (lab_result_id, user_id, urutan, nama, nilai, satuan, rujukan_maks)
+  values (v_lab, a, 1, 'Kolesterol LDL', 138, 'mg/dL', 130), (v_lab, a, 2, 'TSH', 2.345, 'mIU/L', null);
+end $$;
 
 -- Data Budi: tidak boleh ada satu pun di ekspor Ani.
 do $$
@@ -74,7 +82,7 @@ begin
   assert v_nama = array['profil', 'riwayat_fase', 'tipe_hari', 'target_tipe_hari', 'catatan_harian', 'makanan',
                         'ukuran_tubuh', 'sesi_latihan', 'latihan', 'data_kesehatan', 'sumber_data', 'prioritas_sumber',
                         'redistribusi', 'redistribusi_hari', 'percakapan_coach', 'ringkasan_mingguan',
-                        'evaluasi_4_mingguan', 'preferensi_notifikasi'],
+                        'evaluasi_4_mingguan', 'preferensi_notifikasi', 'hasil_lab', 'penanda_lab'],
     format('daftar tabel ekspor: %s', v_nama);
   assert jsonb_array_length(r) = jsonb_array_length(e->'tabel'), 'ringkas & ekspor beda jumlah tabel';
 
@@ -94,6 +102,10 @@ begin
   assert (select jsonb_array_length(x->'baris') from jsonb_array_elements(e->'tabel') x where x->>'nama' = 'latihan') = 2, 'dua set latihan';
   assert (select jsonb_array_length(x->'baris') from jsonb_array_elements(e->'tabel') x where x->>'nama' = 'data_kesehatan') = 1, 'satu data tersinkron';
   assert (select jsonb_array_length(x->'baris') from jsonb_array_elements(e->'tabel') x where x->>'nama' = 'target_tipe_hari') = 12, '12 target';
+  assert (select x->'baris'->0 from jsonb_array_elements(e->'tabel') x where x->>'nama' = 'hasil_lab')
+         = '["2026-09-03", "Profil lipid", "Lab klinik", 2]'::jsonb, 'hasil lab dengan jumlah penandanya';
+  assert (select x->'baris'->1 from jsonb_array_elements(e->'tabel') x where x->>'nama' = 'penanda_lab')
+         = '["2026-09-03", "Profil lipid", "TSH", 2.345, "mIU/L", null, null]'::jsonb, 'penanda lab apa adanya, urut seperti diisi';
   v_teks := e::text;
   assert v_teks like '%=HYPERLINK(\\"x\\")%', 'nama makanan dikirim apa adanya';
   assert v_teks like '%tidur cukup%' and v_teks like '%Bench press%' and v_teks like '%Protein cukup?%', 'isi Ani lengkap';
@@ -140,4 +152,4 @@ end $$;
 -- Bersihkan: uji lain di basis data yang sama menganggap koneksi Strava-nya satu-satunya.
 delete from auth.users where id in ('e4e40001-0000-4000-8000-000000000001', 'e4e40002-0000-4000-8000-000000000002');
 
-select '✓ ekspor data saya: 18 tabel, hanya milik sendiri, tanpa token, hitungan ringkas = isi ekspor' as hasil;
+select '✓ ekspor data saya: 20 tabel (termasuk hasil lab), hanya milik sendiri, tanpa token, hitungan ringkas = isi ekspor' as hasil;

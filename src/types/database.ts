@@ -1650,6 +1650,20 @@ export type Database = {
         Args: Record<string, never>;
         Returns: { nama: string; label: string; jumlah: number }[];
       };
+      muat_hasil_lab: {
+        Args: Record<string, never>;
+        /** Bentuk `HasilLab` (@recomp/logika) + `diperbarui_pada`; lihat `@/data/hasilLab`. */
+        Returns: unknown[];
+      };
+      simpan_hasil_lab: {
+        /** Tanpa `p_id`: tambah; dengan `p_id`: ganti seluruh isi. Waktu basi → 40001. */
+        Args: { p_hasil: Record<string, unknown>; p_id?: string | null };
+        Returns: unknown;
+      };
+      hapus_hasil_lab: {
+        Args: { p_id: string };
+        Returns: undefined;
+      };
       ambil_target: {
         Args: { p_day_type_id: string; p_fase?: FaseProgram | null };
         Returns: AmbilTargetRow[];

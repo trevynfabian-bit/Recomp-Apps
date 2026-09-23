@@ -100,9 +100,9 @@ export function kumpulkanTabelEkspor(m: {
 }
 
 /**
- * Hasil lab sebagai tabel ekspor. Terpisah karena hasil lab belum punya tabel
- * di server: di kedua jalur (tiruan dan Supabase) tabelnya dirakit di app dari
- * `useHasilLab`, lalu ditempelkan ke tabel lainnya.
+ * Hasil lab sebagai tabel ekspor untuk jalur tiruan. Dengan Supabase, tabel
+ * yang sama (nama, label, kolom — dijaga `npm run cek:ekspor`) datang dari
+ * `ekspor_data_saya`.
  */
 export function tabelHasilLab(hasilLab: HasilLab[]): TabelEkspor[] {
   return [

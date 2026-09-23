@@ -86,7 +86,7 @@ export default function PengaturanScreen() {
   const ukuranTerurut = [...mockUkuran].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
   const pinggangTerbaru = ukuranTerurut[ukuranTerurut.length - 1]?.pinggang_cm ?? 85;
   const pinggangPertama = ukuranTerurut[0]?.pinggang_cm ?? null;
-  const { riwayat: riwayatLab } = useHasilLab();
+  const { riwayat: riwayatLab, status: statusLab } = useHasilLab();
   const labTerakhir = [...riwayatLab].sort((a, b) => b.tanggal.localeCompare(a.tanggal))[0];
 
   const panjang = (cm: number) => `${formatDesimal(tampilkanPanjang(cm, profil.satuan), profil.satuan === 'metrik' ? 0 : 1)} ${labelPanjang(profil.satuan)}`;
@@ -227,9 +227,13 @@ export default function PengaturanScreen() {
             ikon="flask-outline"
             judul="Hasil lab"
             nilai={
-              labTerakhir
-                ? `${riwayatLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
-                : 'Belum ada'
+              statusLab === 'memuat'
+                ? 'Memuat…'
+                : statusLab === 'gagal'
+                  ? 'Belum termuat'
+                  : labTerakhir
+                    ? `${riwayatLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
+                    : 'Belum ada'
             }
             petunjuk="Membuka riwayat hasil lab"
             onPress={() => router.push('/hasil-lab')}

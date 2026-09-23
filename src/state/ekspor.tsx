@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import { AppState } from 'react-native';
 import { namaBerkasEkspor, NOTIF_EKSPOR_SIAP, ringkasIsiEkspor, susunBerkasEkspor, tanggalHariIni } from '@recomp/logika';
 import type { TabelEkspor } from '@recomp/logika';
-import { eksporDataSaya, kumpulkanTabelEkspor, ringkasEksporDataSaya, tabelHasilLab } from '@/data/ekspor';
+import { eksporDataSaya, kumpulkanTabelEkspor, ringkasEksporDataSaya } from '@/data/ekspor';
 import { dalamBatasWaktu } from '@/lib/batasWaktu';
 import { buatZip, serahkanZip } from '@/lib/berkas';
 import { kirimNotifikasiSekarang } from '@/lib/notifikasi';
@@ -28,10 +28,9 @@ import { useTarget } from '@/state/target';
  * penyedia berkunci id pengguna, jadi berkas milik akun sebelumnya ikut
  * hilang saat keluar atau berganti akun.
  *
- * Dengan Supabase, isinya datang dari server (`ekspor_data_saya`, RLS yang
- * menjaga) ditambah hasil lab yang masih hidup di app; hitungan "apa yang
- * akan ada di berkas" diambil (`ringkas_ekspor_data_saya`) setiap sheet
- * dibuka. Tanpa kredensial Supabase, datanya tiruan (`@/data/ekspor`) dan
+ * Dengan Supabase, seluruh isinya — termasuk hasil lab — datang dari server
+ * (`ekspor_data_saya`, RLS yang menjaga); hitungan "apa yang akan ada di
+ * berkas" diambil (`ringkas_ekspor_data_saya`) setiap sheet dibuka. Tanpa kredensial Supabase, datanya tiruan (`@/data/ekspor`) dan
  * jeda `JEDA_TIRUAN_MS` meniru server yang sedang menyiapkan berkas.
  */
 
@@ -83,7 +82,6 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
 
   // Penyedia ini dipasang ulang tiap akun berganti (kunci id pengguna).
   const pakaiServer = supabaseSiap && pengguna !== null;
-  const tabelLab = useMemo(() => tabelHasilLab(hasilLab), [hasilLab]);
   const tabelTiruan = useMemo(
     () => (pakaiServer ? null : kumpulkanTabelEkspor({ profil, riwayatFase, tipeHari, target, hasilLab })),
     [pakaiServer, profil, riwayatFase, tipeHari, target, hasilLab],
@@ -91,8 +89,8 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
   const [hitunganServer, setHitunganServer] = useState<{ label: string; jumlah: number }[] | 'memuat' | 'gagal'>('memuat');
   const isi = useMemo(() => {
     if (tabelTiruan) return ringkasIsiEkspor(tabelTiruan);
-    return Array.isArray(hitunganServer) ? [...hitunganServer, ...ringkasIsiEkspor(tabelLab)] : null;
-  }, [tabelTiruan, hitunganServer, tabelLab]);
+    return Array.isArray(hitunganServer) ? hitunganServer : null;
+  }, [tabelTiruan, hitunganServer]);
 
   const hitungDariServer = useCallback(async () => {
     setHitunganServer('memuat');
@@ -112,8 +110,8 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
     const dariServer = await dalamBatasWaktu(eksporDataSaya(), BATAS_EKSPOR_MS);
     // Hitungan di sheet diganti isi yang benar-benar masuk berkas.
     setHitunganServer(ringkasIsiEkspor(dariServer.tabel));
-    return { tabel: [...dariServer.tabel, ...tabelLab], dibuatPada: dariServer.dibuatPada };
-  }, [tabelTiruan, tabelLab]);
+    return { tabel: dariServer.tabel, dibuatPada: dariServer.dibuatPada };
+  }, [tabelTiruan]);
 
   const mulai = useCallback(async () => {
     setStatus({ jenis: 'memproses' });
