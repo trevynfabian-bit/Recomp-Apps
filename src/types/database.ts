@@ -804,6 +804,51 @@ export type HealthDataRow = {
   updated_at: string;
 };
 
+/** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
+export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
+
+/** Sumber dalam urutan prioritas: sumber koneksi + `manual` (latihan saja). */
+export type SumberPrioritas = HealthConnectionRow['sumber'] | 'manual';
+
+/** Baris `source_priority` — urutan pilihan pengguna; tanpa baris = urutan bawaan. */
+export type SourcePriorityRow = {
+  id: string;
+  user_id: string;
+  olahraga: OlahragaPrioritas;
+  sumber: SumberPrioritas;
+  /** Makin tinggi makin diutamakan; unik per (pengguna, olahraga). */
+  rank: number;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * Satu angka per (hari, jenis) dari `agregat_kesehatan_harian`: total dari
+ * SATU sumber dan SATU perangkat — tidak pernah dijumlah antar keduanya.
+ */
+export type AgregatKesehatanHarianRow = {
+  tanggal: string;
+  jenis: JenisDataKesehatan;
+  nilai: number;
+  satuan: HealthDataRow['satuan'];
+  sumber: HealthConnectionRow['sumber'];
+  asal: string | null;
+  /** Sumber lain yang punya data hari itu tapi tidak dihitung. */
+  sumber_diabaikan: HealthConnectionRow['sumber'][];
+};
+
+/** Jejak per baris dari `data_kesehatan_terhitung`, untuk menjelaskan pilihan. */
+export type DataKesehatanTerhitungRow = Pick<
+  HealthDataRow,
+  'id' | 'tanggal' | 'jenis' | 'sumber' | 'asal' | 'nilai' | 'satuan'
+> & {
+  source_priority_rank: number;
+  dihitung: boolean;
+};
+
+/** Sesi dari `latihan_terhitung`: per (hari, olahraga) hanya sumber teratas. */
+export type LatihanTerhitungRow = Pick<WorkoutRow, 'id' | 'tanggal' | 'nama' | 'jenis' | 'sumber' | 'durasi_menit'>;
+
 /**
  * Hasil `endpoint_budget_mingguan` — satu snapshot untuk seluruh layar Budget.
  *
@@ -1034,6 +1079,12 @@ export type Database = {
         Update: Partial<Pick<HealthDataRow, 'nilai' | 'waktu_mulai' | 'waktu_selesai'>>;
         Relationships: [];
       };
+      source_priority: {
+        Row: SourcePriorityRow;
+        Insert: Omit<SourcePriorityRow, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Pick<SourcePriorityRow, 'rank'>>;
+        Relationships: [];
+      };
       food_logs: {
         Row: FoodLogRow;
         Insert: Omit<FoodLogRow, 'id' | 'created_at'>;
@@ -1210,6 +1261,27 @@ export type Database = {
       kuota_coach: {
         Args: Record<string, never>;
         Returns: KuotaCoachRow;
+      };
+      agregat_kesehatan_harian: {
+        Args: { p_dari: string; p_sampai: string; p_user_id?: string | null };
+        Returns: AgregatKesehatanHarianRow[];
+      };
+      data_kesehatan_terhitung: {
+        Args: { p_dari: string; p_sampai: string; p_user_id?: string | null };
+        Returns: DataKesehatanTerhitungRow[];
+      };
+      latihan_terhitung: {
+        Args: { p_dari: string; p_sampai: string; p_user_id?: string | null };
+        Returns: LatihanTerhitungRow[];
+      };
+      urutan_prioritas: {
+        Args: { p_olahraga: OlahragaPrioritas };
+        Returns: SumberPrioritas[];
+      };
+      atur_prioritas_sumber: {
+        /** Dari yang paling diutamakan; `[]` = kembali ke urutan bawaan. */
+        Args: { p_olahraga: OlahragaPrioritas; p_urutan: SumberPrioritas[] };
+        Returns: SumberPrioritas[];
       };
       poin_ringkasan_mingguan: {
         Args: { p_minggu_mulai: string | null; p_user_id: string | null };
