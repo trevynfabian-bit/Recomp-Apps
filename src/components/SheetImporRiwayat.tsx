@@ -1,0 +1,373 @@
+import { useEffect, useState } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import {
+  formatAngka,
+  formatRentangTanggal,
+  tanggalDariWaktu,
+  tanggalHariIni,
+  uraiCsvHevy,
+  uraiCsvUkuran,
+} from '@recomp/logika';
+import type { BarisDilewati } from '@recomp/logika';
+import { KerangkaSheet } from './KerangkaSheet';
+import { TombolBertepi, TombolUtama } from './Tombol';
+import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import {
+  CONTOH_CSV_HEVY,
+  CONTOH_CSV_UKURAN,
+  mockHasilAppleHealth,
+  mockJalankanImpor,
+  RENTANG_APPLE_HEALTH,
+} from '@/mocks/impor';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+
+/** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
+export type SumberImpor = 'hevy_csv' | 'apple_health' | 'ukuran_lama';
+
+type Pratinjau = {
+  /** Kalimat ringkas, mis. "3 sesi · 7 set · 8–12 September". */
+  ringkas: string;
+  /** Berapa baris/entri yang akan diimpor. */
+  jumlah: number;
+  /** Kata benda untuk `jumlah`, mis. "sesi", "tanggal". */
+  satuan: string;
+  catatan: string[];
+  dilewati: BarisDilewati[];
+};
+
+type Langkah =
+  | { jenis: 'masukan' }
+  | { jenis: 'pratinjau'; p: Pratinjau }
+  | { jenis: 'proses'; p: Pratinjau; selesai: number }
+  | { jenis: 'selesai'; p: Pratinjau };
+
+type Props = {
+  sumber: SumberImpor | null;
+  onTutup: () => void;
+  /** Dipanggil setelah impor selesai, untuk memperbarui status kartunya. */
+  onSelesai: (sumber: SumberImpor, ringkas: string) => void;
+};
+
+const JUDUL: Record<SumberImpor, string> = {
+  hevy_csv: 'Impor riwayat Hevy',
+  apple_health: 'Impor riwayat Apple Health',
+  ukuran_lama: 'Impor ukuran lama',
+};
+
+/** Berapa baris dilewati yang ditampilkan sebelum diringkas "dan N lainnya". */
+const MAKS_DILEWATI_TAMPIL = 5;
+
+/**
+ * Impor riwayat sekali: masukan → PRATINJAU → proses → selesai.
+ *
+ * Pratinjau tidak bisa dilewati. Impor adalah satu-satunya tempat di app ini
+ * yang menulis ratusan baris sekaligus, dan satu kolom yang bergeser atau
+ * satuan pound yang terbaca kilogram merusak semuanya. Yang dilewati parser
+ * ditampilkan per baris dengan alasannya, sebelum apa pun disimpan.
+ *
+ * Berkas ditempel sebagai teks untuk sementara: pemilih berkas di perangkat
+ * datang bersama backend-nya. Parsernya sudah yang sebenarnya.
+ */
+export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
+  const [langkah, setLangkah] = useState<Langkah>({ jenis: 'masukan' });
+  const [teks, setTeks] = useState('');
+  const [galat, setGalat] = useState<string | null>(null);
+  const [rentang, setRentang] = useState<(typeof RENTANG_APPLE_HEALTH)[number]['kunci']>('365');
+
+  useEffect(() => {
+    if (sumber === null) return;
+    setLangkah({ jenis: 'masukan' });
+    setTeks('');
+    setGalat(null);
+    setRentang('365');
+  }, [sumber]);
+
+  if (sumber === null) return null;
+
+  function periksa() {
+    if (sumber === null) return;
+    if (sumber === 'apple_health') {
+      const r = RENTANG_APPLE_HEALTH.find((x) => x.kunci === rentang)!;
+      const hasil = mockHasilAppleHealth(r.hari);
+      setLangkah({
+        jenis: 'pratinjau',
+        p: {
+          ringkas: hasil.map((h) => `${formatAngka(h.jumlah)} ${h.label}`).join(' · '),
+          jumlah: hasil.reduce((t, h) => t + h.jumlah, 0),
+          satuan: 'entri',
+          catatan: [
+            `Rentang: ${r.label.toLowerCase()} terakhir.`,
+            'Berat dari Apple Health ditandai "sinkron"; berat yang Anda ketik sendiri tidak ditimpa.',
+          ],
+          dilewati: [],
+        },
+      });
+      return;
+    }
+
+    if (sumber === 'hevy_csv') {
+      const h = uraiCsvHevy(teks);
+      if ('galat' in h) return setGalat(h.galat);
+      if (h.sesi.length === 0) return setGalat('Tidak ada satu pun set yang bisa diimpor.');
+      const dari = tanggalDariWaktu(h.sesi[0].mulai);
+      const sampai = tanggalDariWaktu(h.sesi[h.sesi.length - 1].mulai);
+      setLangkah({
+        jenis: 'pratinjau',
+        p: {
+          ringkas: `${formatAngka(h.sesi.length)} sesi · ${formatAngka(h.jumlahSet)} set · ${formatRentangTanggal(dari, sampai)}`,
+          jumlah: h.sesi.length,
+          satuan: 'sesi',
+          catatan: h.satuanBeban === 'lb' ? ['Beban di berkas dalam pound; dikonversi ke kilogram.'] : [],
+          dilewati: h.dilewati,
+        },
+      });
+      return;
+    }
+
+    const u = uraiCsvUkuran(teks, tanggalHariIni());
+    if ('galat' in u) return setGalat(u.galat);
+    if (u.baris.length === 0) return setGalat('Tidak ada satu pun baris ukuran yang bisa diimpor.');
+    setLangkah({
+      jenis: 'pratinjau',
+      p: {
+        ringkas: `${formatAngka(u.baris.length)} tanggal · ${formatRentangTanggal(u.baris[0].tanggal, u.baris[u.baris.length - 1].tanggal)}`,
+        jumlah: u.baris.length,
+        satuan: 'tanggal',
+        catatan: [],
+        dilewati: u.dilewati,
+      },
+    });
+  }
+
+  async function impor(p: Pratinjau) {
+    if (sumber === null) return;
+    setLangkah({ jenis: 'proses', p, selesai: 0 });
+    await mockJalankanImpor(p.jumlah, (selesai) => setLangkah({ jenis: 'proses', p, selesai }));
+    ketukBerhasil();
+    onSelesai(sumber, p.ringkas);
+    setLangkah({ jenis: 'selesai', p });
+  }
+
+  return (
+    <KerangkaSheet
+      terbuka
+      // Selama menulis, sheet tidak bisa ditutup dari latar: impor yang
+      // terputus di tengah jalan meninggalkan riwayat setengah jadi.
+      onTutup={langkah.jenis === 'proses' ? null : onTutup}
+      label="Impor riwayat"
+    >
+      <Text style={{ ...typography.title, color: colors.text }}>{JUDUL[sumber]}</Text>
+
+      {langkah.jenis === 'masukan' ? (
+        sumber === 'apple_health' ? (
+          <>
+            <Teks>
+              Berat pagi, langkah, energi aktif, dan tidur dari rentang yang dipilih. Cukup sekali; setelah
+              itu data baru masuk sendiri.
+            </Teks>
+            <View
+              accessibilityRole="radiogroup"
+              style={{ flexDirection: 'row', gap: spacing.sm }}
+            >
+              {RENTANG_APPLE_HEALTH.map((r) => {
+                const aktif = r.kunci === rentang;
+                return (
+                  <Pressable
+                    key={r.kunci}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: aktif }}
+                    accessibilityLabel={r.label}
+                    onPress={() => {
+                      ketukRingan();
+                      setRentang(r.kunci);
+                    }}
+                    style={{
+                      flex: 1,
+                      minHeight: TAP_MIN,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: radius.md,
+                      borderWidth: 1,
+                      borderColor: aktif ? colors.amber : colors.borderKuat,
+                      backgroundColor: aktif ? colors.amber + '22' : 'transparent',
+                    }}
+                  >
+                    <Text style={{ ...typography.label, color: aktif ? colors.amber : colors.text }}>{r.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <View style={{ gap: spacing.sm }}>
+              <TombolUtama label="Lihat pratinjau" onPress={periksa} />
+              <TombolBertepi label="Nanti saja" onPress={onTutup} />
+            </View>
+          </>
+        ) : (
+          <>
+            <Teks>
+              {sumber === 'hevy_csv'
+                ? 'Di Hevy: Profil › Settings › Export & Import Data › Export Workouts. Tempel isi berkas CSV-nya di sini.'
+                : 'Tempel tabel ukuran lama: satu baris per tanggal, kolom Tanggal lalu Pinggang, Dada, Leher, Lengan kiri/kanan, Paha kiri/kanan (cm). Boleh dari Excel.'}
+            </Teks>
+            <TextInput
+              value={teks}
+              onChangeText={(t) => {
+                setTeks(t);
+                if (galat) setGalat(null);
+              }}
+              multiline
+              placeholder="Tempel isi CSV di sini"
+              placeholderTextColor={colors.textFaint}
+              accessibilityLabel="Isi berkas CSV"
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+              style={{
+                minHeight: 140,
+                maxHeight: 220,
+                padding: spacing.md,
+                borderRadius: radius.md,
+                borderWidth: 1,
+                borderColor: galat ? colors.coral : colors.borderKuat,
+                backgroundColor: colors.surfaceSunken,
+                color: colors.text,
+                fontFamily: 'Menlo',
+                fontSize: 12,
+                textAlignVertical: 'top',
+              }}
+            />
+            {galat ? (
+              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                {galat}
+              </Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                ketukRingan();
+                setTeks(sumber === 'hevy_csv' ? CONTOH_CSV_HEVY : CONTOH_CSV_UKURAN);
+                setGalat(null);
+              }}
+              hitSlop={spacing.md}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              <Text style={{ ...typography.label, color: colors.amber }}>Pakai berkas contoh</Text>
+            </Pressable>
+            <View style={{ gap: spacing.sm }}>
+              <TombolUtama label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
+              <TombolBertepi label="Nanti saja" onPress={onTutup} />
+            </View>
+          </>
+        )
+      ) : null}
+
+      {langkah.jenis === 'pratinjau' ? (
+        <>
+          <View style={{ gap: spacing.xs }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              Akan diimpor
+            </Text>
+            <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{langkah.p.ringkas}</Text>
+          </View>
+          {langkah.p.catatan.map((c) => (
+            <Teks key={c}>{c}</Teks>
+          ))}
+          {langkah.p.dilewati.length > 0 ? <DaftarDilewati dilewati={langkah.p.dilewati} /> : null}
+          <Teks redup>Mengimpor ulang tidak menggandakan data: yang sudah ada dilewati atau diperbarui.</Teks>
+          <View style={{ gap: spacing.sm }}>
+            <TombolUtama
+              label={`Impor ${formatAngka(langkah.p.jumlah)} ${langkah.p.satuan}`}
+              onPress={() => impor(langkah.p)}
+            />
+            {/* Bukan "Kembali": label itu sudah dipakai tombol kembali layar di
+                belakang sheet, dan dua tombol berlabel sama membingungkan
+                pembaca layar. Labelnya menyebut apa yang akan diubah. */}
+            <TombolBertepi
+              label={sumber === 'apple_health' ? 'Ganti rentang' : 'Ganti berkas'}
+              onPress={() => setLangkah({ jenis: 'masukan' })}
+            />
+          </View>
+        </>
+      ) : null}
+
+      {langkah.jenis === 'proses' ? (
+        <View style={{ gap: spacing.md, paddingVertical: spacing.md }}>
+          <View
+            accessibilityRole="progressbar"
+            accessibilityValue={{ min: 0, max: langkah.p.jumlah, now: langkah.selesai }}
+            style={{ height: 8, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken, overflow: 'hidden' }}
+          >
+            <View
+              style={{
+                width: `${langkah.p.jumlah === 0 ? 100 : (langkah.selesai / langkah.p.jumlah) * 100}%`,
+                height: '100%',
+                backgroundColor: colors.amber,
+              }}
+            />
+          </View>
+          <Text style={{ ...typography.label, color: colors.textMuted }}>
+            Mengimpor… {formatAngka(langkah.selesai)} dari {formatAngka(langkah.p.jumlah)} {langkah.p.satuan}
+          </Text>
+        </View>
+      ) : null}
+
+      {langkah.jenis === 'selesai' ? (
+        <>
+          <Text
+            accessibilityLiveRegion="polite"
+            style={{ ...typography.body, fontWeight: '700', color: colors.aksenTeks.jade }}
+          >
+            ✓ {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
+          </Text>
+          <Teks>{langkah.p.ringkas}</Teks>
+          {langkah.p.dilewati.length > 0 ? (
+            <Teks redup>{`${langkah.p.dilewati.length} baris dilewati, seperti di pratinjau.`}</Teks>
+          ) : null}
+          <TombolUtama label="Selesai" onPress={onTutup} />
+        </>
+      ) : null}
+    </KerangkaSheet>
+  );
+}
+
+function DaftarDilewati({ dilewati }: { dilewati: BarisDilewati[] }) {
+  const tampil = dilewati.slice(0, MAKS_DILEWATI_TAMPIL);
+  const sisa = dilewati.length - tampil.length;
+  return (
+    <View
+      style={{
+        gap: spacing.xs,
+        padding: spacing.md,
+        borderRadius: radius.md,
+        backgroundColor: colors.surfaceSunken,
+      }}
+    >
+      <Text style={{ ...typography.label, color: colors.amber }}>
+        {dilewati.length} baris dilewati
+      </Text>
+      {tampil.map((d) => (
+        <Text key={`${d.baris}-${d.alasan}`} style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+          Baris {d.baris} — {d.alasan}
+        </Text>
+      ))}
+      {sisa > 0 ? (
+        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>dan {sisa} lainnya</Text>
+      ) : null}
+    </View>
+  );
+}
+
+function Teks({ children, redup = false }: { children: React.ReactNode; redup?: boolean }) {
+  return (
+    <Text
+      style={{
+        ...typography.label,
+        fontWeight: '500',
+        color: redup ? colors.textFaint : colors.textMuted,
+        lineHeight: 20,
+      }}
+    >
+      {children}
+    </Text>
+  );
+}

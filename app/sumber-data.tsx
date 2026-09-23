@@ -160,6 +160,34 @@ export default function SumberDataScreen() {
         ))}
       </View>
 
+      {/* Riwayat lama: pintu satu kali, di bawah sumber yang mengalir. */}
+      <Card flat>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Impor riwayat lama: Hevy, Apple Health, ukuran tubuh"
+          onPress={() => {
+            ketukRingan();
+            router.push('/impor-riwayat');
+          }}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            minHeight: TAP_MIN,
+            padding: spacing.lg,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>Impor riwayat lama</Text>
+            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+              Sekali saja: Hevy CSV, Apple Health, ukuran tubuh
+            </Text>
+          </View>
+          <Text style={{ ...typography.title, color: colors.textFaint }}>›</Text>
+        </Pressable>
+      </Card>
+
       {/* Anti-dobel dijelaskan di sini, di tempat orang menghubungkan perangkat
           kedua — bukan di layar kalori, tempat angka yang "terlalu kecil" baru
           terasa aneh. */}

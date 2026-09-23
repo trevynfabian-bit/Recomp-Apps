@@ -95,9 +95,12 @@ export {
 
 export { koridorTarget, LAJU_PER_MINGGU, statusKoridor } from './koridor';
 
+export type { BagianUkuran } from './ukuran';
+
 export {
   HARI_PER_PEKAN,
   lajuTerkini,
+  RENTANG_UKURAN_CM,
   ringkasPerubahan,
   statusBatasPinggang,
 } from './ukuran';
@@ -203,3 +206,12 @@ export {
   ringkasPekan,
   ringkasSesi,
 } from './latihan';
+
+export type {
+  BarisDilewati,
+  BarisUkuranImpor,
+  HasilImporHevy,
+  HasilImporUkuran,
+} from './impor';
+
+export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor';

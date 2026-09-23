@@ -38,6 +38,7 @@ export { SheetBatasPinggang } from './SheetBatasPinggang';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { SheetHubungkanSumber } from './SheetHubungkanSumber';
+export { SheetImporRiwayat, type SumberImpor } from './SheetImporRiwayat';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
 export { SheetPutuskanSumber } from './SheetPutuskanSumber';
 export { SheetRiwayatPercakapan } from './SheetRiwayatPercakapan';

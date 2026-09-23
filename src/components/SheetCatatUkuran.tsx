@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { formatDesimal, formatTanggalPanjang, majuHari, selisihHari, tanggalHariIni } from '@recomp/logika';
+import {
+  formatDesimal,
+  formatTanggalPanjang,
+  majuHari,
+  RENTANG_UKURAN_CM,
+  selisihHari,
+  tanggalHariIni,
+} from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -17,15 +24,7 @@ type KunciUkuran = keyof Omit<UkuranTubuh, 'id' | 'tanggal'>;
  * cuma satu: menahan salah ketik yang mustahil (85 jadi 8,5 atau 850), karena
  * satu angka liar merusak seluruh tren mingguan di layar ini.
  */
-const RENTANG: Record<KunciUkuran, { min: number; maks: number }> = {
-  pinggang_cm: { min: 50, maks: 160 },
-  dada_cm: { min: 60, maks: 170 },
-  leher_cm: { min: 25, maks: 60 },
-  lengan_kiri_cm: { min: 18, maks: 60 },
-  lengan_kanan_cm: { min: 18, maks: 60 },
-  paha_kiri_cm: { min: 30, maks: 95 },
-  paha_kanan_cm: { min: 30, maks: 95 },
-};
+const RENTANG: Record<KunciUkuran, { min: number; maks: number }> = RENTANG_UKURAN_CM;
 
 /** Urutan isi form: dari atas ke bawah tubuh, kiri sebelum kanan. */
 const FIELD: { kunci: KunciUkuran; label: string }[] = [

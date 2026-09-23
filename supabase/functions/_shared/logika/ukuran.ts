@@ -23,6 +23,27 @@ import type {
 export const HARI_PER_PEKAN = 7;
 
 /**
+ * Rentang wajar tiap bagian tubuh, dalam cm. SAMA dengan CHECK di tabel
+ * `body_measurements` (dijaga `npm run cek:impor`), dan dipakai BERSAMA oleh
+ * form catat ukuran dan impor ukuran lama — supaya baris yang lolos pratinjau
+ * impor tidak ditolak database saat disimpan.
+ *
+ * Batasnya sengaja lebar: tugasnya menahan salah ketik yang mustahil (85 jadi
+ * 8,5 atau 850), bukan menilai tubuh siapa pun.
+ */
+export const RENTANG_UKURAN_CM = {
+  pinggang_cm: { min: 50, maks: 160 },
+  dada_cm: { min: 60, maks: 170 },
+  leher_cm: { min: 25, maks: 60 },
+  lengan_kiri_cm: { min: 18, maks: 60 },
+  lengan_kanan_cm: { min: 18, maks: 60 },
+  paha_kiri_cm: { min: 30, maks: 95 },
+  paha_kanan_cm: { min: 30, maks: 95 },
+} as const;
+
+export type BagianUkuran = keyof typeof RENTANG_UKURAN_CM;
+
+/**
  * Susun riwayat perubahan dari deret nilai satu bagian tubuh.
  * Titik diurutkan menurut tanggal lebih dulu, jadi pemanggil tidak perlu
  * menjamin urutannya.
