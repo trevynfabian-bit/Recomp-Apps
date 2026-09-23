@@ -155,3 +155,138 @@ function susun(kategori: KategoriMedis, pemicu: string): PenolakanMedis {
     bisaDibantu,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Pemeriksaan JAWABAN
+// ---------------------------------------------------------------------------
+
+/**
+ * Obat & terapi yang tidak boleh diberi takaran atau anjuran di jawaban coach.
+ *
+ * Sama dengan `OBAT` di atas KECUALI kata "dosis" dan "resep". Di pertanyaan,
+ * dua kata itu tanda permintaan medis; di jawaban, "dosis kreatin 5 g" adalah
+ * kalimat gizi biasa, dan menolaknya akan membuang jawaban yang benar.
+ */
+const OBAT_JAWABAN = OBAT.filter((k) => k !== 'dosis' && k !== 'resep');
+
+/**
+ * Takaran obat: angka + satuan farmasi. Gram SENGAJA tidak termasuk — gram
+ * adalah satuan makanan & suplemen yang dibicarakan app ini sepanjang hari.
+ */
+const POLA_TAKARAN =
+  /\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|μg|ml|cc|iu|unit|tablet|kapsul|butir|tetes|ampul|suntikan)(?![\p{L}])/iu;
+
+/** Frekuensi minum/suntik: "2x sehari", "dua kali seminggu". */
+const POLA_FREKUENSI =
+  /(?:\d+|satu|dua|tiga|empat|sekali)\s?(?:x|kali)\s?(?:sehari|seminggu|sepekan|per\s?hari|per\s?minggu)/iu;
+
+/** Kata kerja anjuran: jawaban yang MENYURUH memulai, mengubah, atau menghentikan. */
+const ANJURAN = [
+  'coba',
+  'cobalah',
+  'mulai',
+  'mulailah',
+  'gunakan',
+  'pakailah',
+  'minumlah',
+  'tambahkan',
+  'hentikan',
+  'berhenti',
+  'stop',
+  'kurangi',
+  'naikkan',
+  'turunkan',
+  'ganti',
+];
+
+/** Rujukan ke tenaga medis; kalimat yang memuatnya mengarahkan, bukan menganjurkan. */
+const RUJUKAN_MEDIS = ['dokter', 'apoteker', 'tenaga medis', 'tenaga kesehatan'];
+
+/** Kata kerja yang menyatakan seseorang MENGIDAP sesuatu. */
+const MENGIDAP = ['menderita', 'mengidap', 'terkena', 'kena'];
+
+/** Nama penyakit — bagian daftar DIAGNOSIS yang berupa kata benda, plus kerabatnya. */
+const PENYAKIT = [
+  'diabetes',
+  'prediabetes',
+  'hipertensi',
+  'tiroid',
+  'hipotiroid',
+  'hipertiroid',
+  'pcos',
+  'kanker',
+  'tumor',
+  'anemia',
+  'resistensi insulin',
+  'gagal ginjal',
+];
+
+const SAPAAN = ['anda', 'kamu'];
+
+/**
+ * Kata anjuran yang BEKERJA pada obat: kata kerjanya diikuti nama obat dalam
+ * paling banyak tiga kata ("hentikan metformin", "coba kurangi dosis obat").
+ * Kedekatan itu yang membedakan anjuran dari kalimat yang kebetulan memuat
+ * keduanya — "coba catat juga kapan Anda minum obat" bukan anjuran minum obat.
+ */
+const POLA_ANJURAN_OBAT = new RegExp(
+  `(?<![\\p{L}\\p{N}])(?:${ANJURAN.join('|')})(?:lah)?` +
+    `(?:\\s+[\\p{L}\\p{N}]+){0,3}?\\s+` +
+    `(${OBAT_JAWABAN.map((k) => k.replace(/ /g, '\\s+')).join('|')})${AKHIRAN}(?![\\p{L}\\p{N}])`,
+  'u',
+);
+
+function cariAnjuranObat(teksBerpadding: string): string | null {
+  const m = POLA_ANJURAN_OBAT.exec(teksBerpadding);
+  return m ? m[1] : null;
+}
+
+/**
+ * Periksa JAWABAN coach sebelum sampai ke pengguna.
+ *
+ * Pemeriksaan pertanyaan (`periksaBatasMedis`) hanya menjaga pintu masuk.
+ * Pertanyaan yang sepenuhnya wajar — "kenapa berat saya turun cepat?" — bisa
+ * saja dijawab model dengan menyebut obat dan takarannya, dan tidak ada
+ * pemeriksaan pertanyaan yang bisa menangkap itu. Karena itu jawabannya juga
+ * diperiksa, per kalimat, untuk tiga hal yang dilarang PRD dan tetangganya:
+ *
+ *   • dosis-obat — nama obat bersama takaran farmasi atau frekuensi minum;
+ *   • diagnosis  — "Anda (mungkin) menderita/mengidap <penyakit>";
+ *   • resep      — anjuran memulai/mengubah/menghentikan obat TANPA merujuk
+ *                  ke dokter di kalimat yang sama.
+ *
+ * Yang sengaja LOLOS: menyebut obat tanpa takaran ("obat dari dokter Anda bisa
+ * memengaruhi nafsu makan"), merujuk ke dokter ("tanyakan metformin ke dokter
+ * Anda"), dan takaran suplemen dalam gram ("kreatin 5 g"). Positif palsu di
+ * sini membuang jawaban yang benar dan menggantinya dengan penolakan atas
+ * pertanyaan yang tidak pernah melanggar apa pun.
+ */
+export function periksaJawabanMedis(jawaban: string): PenolakanMedis | null {
+  // Dipecah per kalimat: nama obat di satu kalimat dan "2x sehari" untuk
+  // latihan di kalimat lain bukan takaran obat.
+  const kalimat = jawaban.split(/(?<=[.!?])\s+|\n+/u);
+
+  for (const k of kalimat) {
+    const teks = ` ${k.toLowerCase().replace(/[^\p{L}\p{N}\s.,]/gu, ' ')} `;
+    const obat = cariPemicu(teks, OBAT_JAWABAN);
+
+    if (obat !== null && (POLA_TAKARAN.test(k) || POLA_FREKUENSI.test(k))) {
+      return susun('dosis-obat', obat);
+    }
+
+    const obatDianjurkan = cariAnjuranObat(teks);
+    if (obatDianjurkan !== null && cariPemicu(teks, RUJUKAN_MEDIS) === null) {
+      return susun('resep', obatDianjurkan);
+    }
+
+    const penyakit = cariPemicu(teks, PENYAKIT);
+    if (
+      penyakit !== null &&
+      cariPemicu(teks, SAPAAN) !== null &&
+      cariPemicu(teks, MENGIDAP) !== null
+    ) {
+      return susun('diagnosis', penyakit);
+    }
+  }
+  return null;
+}

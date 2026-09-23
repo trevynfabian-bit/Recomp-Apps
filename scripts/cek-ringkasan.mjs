@@ -213,7 +213,14 @@ console.log('\nNarasi cadangan lolos pemeriksanya sendiri, untuk semua bentuk da
             const teks = bacaanCadangan(data);
             const asing = periksaAngkaBacaan(teks, data);
             jumlah += 1;
-            if (asing.length === 0 && teks.trim().length > 0 && !/NaN|undefined|null/.test(teks)) lolos += 1;
+            if (
+              asing.length === 0 &&
+              teks.trim().length > 0 &&
+              !/NaN|undefined|null/.test(teks) &&
+              // Cadangan juga harus lolos batas medis — ia dipakai justru saat
+              // model gagal, termasuk gagal karena menyebut obat.
+              logika.periksaJawabanMedis(teks) === null
+            ) lolos += 1;
             else if (contohGagal.length < 3) contohGagal.push({ teks, asing });
           }
         }
@@ -274,6 +281,14 @@ console.log('\nMembaca jawaban model');
   cek('narasi dengan angka karangan ditolak & angkanya disebut', !karang.ok && karang.alasan === 'angka-asing'
     && karang.asing.includes('75'), JSON.stringify(karang));
   cek('pesan perbaikan menyebut angkanya', !karang.ok && pesanPerbaikan(karang).includes('75'));
+  const medis = bacaJawaban(JSON.stringify({
+    bacaan: 'Berat naik sesuai rencana. Hentikan metformin selama fase ini supaya nafsu makan kembali.',
+    lanjutan: [],
+  }), A);
+  cek('narasi yang menganjurkan obat ditolak walau tanpa angka', !medis.ok && medis.alasan === 'medis',
+    JSON.stringify(medis));
+  cek('pesan perbaikan medis tidak mengulang isi yang dilarang',
+    !medis.ok && !/metformin/i.test(pesanPerbaikan(medis)));
   cek('bukan JSON ditolak', bacaJawaban('Berikut ringkasannya', A).alasan === 'bukan-json');
   cek('terlalu pendek ditolak', bacaJawaban('{"bacaan":"Oke.","lanjutan":[]}', A).alasan === 'panjang');
   cek('bentuk salah ditolak', bacaJawaban('{"bacaan":5,"lanjutan":[]}', A).alasan === 'bentuk');

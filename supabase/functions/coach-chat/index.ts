@@ -12,12 +12,19 @@
  *    JWT dari header permintaan, jadi RLS tetap berlaku penuh: tidak ada jalan
  *    bagi endpoint ini untuk membaca data pengguna lain, bahkan kalau
  *    `percakapan_id` yang dikirim milik orang lain.
- * 2. BATAS MEDIS diperiksa DUA KALI — di klien (lihat `src/data/coach.ts`) dan
- *    lagi di sini, memakai aturan yang SAMA dari `@recomp/logika`. Pemeriksaan
- *    klien menjaga agar pertanyaan sensitif tidak perlu meninggalkan perangkat;
- *    pemeriksaan di sini menjaga agar klien versi lama — atau klien yang
- *    dimodifikasi — tidak bisa melewatinya.
- * 3. ANGKA tidak pernah dihitung model. Model memanggil tujuh fungsi; semuanya
+ * 2. BATAS MEDIS diperiksa di KEDUA ARAH. Pertanyaan diperiksa di klien (lihat
+ *    `src/data/coach.ts`) dan lagi di sini dengan aturan yang SAMA dari
+ *    `@recomp/logika`: klien menjaga agar pertanyaan sensitif tidak perlu
+ *    meninggalkan perangkat, server menjaga agar klien lama atau yang
+ *    dimodifikasi tidak bisa melewatinya. JAWABAN model juga diperiksa sebelum
+ *    disimpan dan dikirim (`periksaJawabanMedis`): pertanyaan yang sepenuhnya
+ *    wajar bisa saja dijawab dengan takaran obat, dan pemeriksaan pertanyaan
+ *    tidak akan pernah menangkapnya. Jawaban seperti itu diganti kartu
+ *    penolakan; teksnya tidak disimpan dan tidak dikirim.
+ * 3. KUOTA harian ditegakkan baris `pesan_coach` (pemicu di database), dan
+ *    pertanyaan disimpan SEBELUM model dipanggil — jadi pertanyaan di atas
+ *    batas ditolak sebelum satu token pun dibayar.
+ * 4. ANGKA tidak pernah dihitung model. Model memanggil tujuh fungsi; semuanya
  *    dijawab dari konteks yang sudah dihitung app dan diturunkan dengan fungsi
  *    dari `@recomp/logika` (lihat `_shared/promptCoach.ts`) — termasuk bentuk
  *    tampilnya, jadi model tidak pernah memformat angka sendiri. Asal tiap angka
@@ -44,7 +51,7 @@
  */
 import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { periksaBatasMedis } from '../../../packages/logika/src/batasMedis.ts';
+import { periksaBatasMedis, periksaJawabanMedis } from '../../../packages/logika/src/batasMedis.ts';
 import {
   BETA_FALLBACK,
   jalankanTool,
@@ -136,6 +143,7 @@ Deno.serve(async (req: Request) => {
   if (!userId) return jawab({ galat: 'Sesi tidak sah' }, 401);
 
   let percakapanId = typeof badan.percakapan_id === 'string' ? badan.percakapan_id : null;
+  const utasBaru = !percakapanId;
   if (!percakapanId) {
     // Judulnya diturunkan dari pertanyaan pertama, dipotong sesuai batas kolom.
     const judul = pertanyaan.replace(/\s+/g, ' ').slice(0, 48);
@@ -158,6 +166,17 @@ Deno.serve(async (req: Request) => {
     teks: pertanyaan,
   });
   if (galatPesan) {
+    // 54000: kuota harian habis (pemicu `pesan_coach_kuota_harian`). Bukan
+    // galat server; model tidak dipanggil dan tidak ada yang dibayar.
+    if (galatPesan.code === '54000') {
+      // Utas yang baru dibuat untuk pertanyaan ini jangan ditinggal kosong di
+      // daftar riwayat.
+      if (utasBaru) await supabase.from('percakapan').delete().eq('id', percakapanId);
+      return jawab(
+        { galat: 'Batas pertanyaan hari ini sudah tercapai. Coach bisa ditanya lagi besok.', kuota_habis: true },
+        429,
+      );
+    }
     console.error('gagal menyimpan pertanyaan', galatPesan);
     return jawab({ galat: 'Gagal menyimpan pertanyaan' }, 502);
   }
@@ -310,6 +329,36 @@ Deno.serve(async (req: Request) => {
 
   if (teksJawaban.trim().length === 0) {
     return jawab({ galat: 'Coach tidak mengembalikan jawaban.' }, 502);
+  }
+
+  // --- Batas medis, sisi jawaban -------------------------------------------
+  // Jawaban yang memuat takaran obat, diagnosis, atau anjuran obat TIDAK
+  // disimpan dan tidak dikirim. Yang disimpan hanya kartu penolakannya, supaya
+  // riwayat utas tetap utuh dan jujur: ada pertanyaan, dan jawabannya adalah
+  // batas — bukan gelembung yang hilang tanpa jejak. Isi jawabannya tidak ikut
+  // dicatat ke log; yang dicatat hanya kategorinya.
+  const penolakanJawaban = periksaJawabanMedis(teksJawaban);
+  if (penolakanJawaban) {
+    console.warn('jawaban diganti penolakan', penolakanJawaban.kategori);
+    const { data: kartu, error: galatKartu } = await supabase
+      .from('pesan_coach')
+      .insert({
+        percakapan_id: percakapanId,
+        user_id: userId,
+        peran: 'coach',
+        teks: '',
+        penolakan: penolakanJawaban,
+      })
+      .select('id')
+      .single();
+    if (galatKartu) console.error('gagal menyimpan kartu penolakan', galatKartu);
+    return jawab({
+      ditolak: true,
+      sumber_penolakan: 'jawaban',
+      penolakan: penolakanJawaban,
+      percakapan_id: percakapanId,
+      pesan_id: kartu?.id ?? null,
+    });
   }
 
   const { data: pesanCoach, error: galatSimpan } = await supabase

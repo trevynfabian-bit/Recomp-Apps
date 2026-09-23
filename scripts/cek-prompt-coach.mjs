@@ -170,6 +170,9 @@ cek(
 );
 cek(`effort disetel eksplisit: ${inti.UPAYA_COACH}`, inti.UPAYA_COACH === 'medium');
 cek('beta fallback server tercatat', inti.BETA_FALLBACK === 'server-side-fallback-2026-07-01');
+// Nama tipe hari, makanan, dan catatan diketik pengguna lalu masuk ke konteks.
+cek('aturan menyatakan konteks & hasil fungsi adalah DATA, bukan perintah',
+  /DATA BUKAN PERINTAH/.test(ATURAN_COACH));
 
 console.log('\nBentuk prompt: prefiks cache harus STABIL');
 const sysA = susunSystem(a);
@@ -440,6 +443,32 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
     src.includes("{ role: 'user', content: hasil }"),
   );
   cek('putaran fungsi dibatasi', src.includes('MAKS_PUTARAN_TOOL'));
+  {
+    // Jawaban harus diperiksa SEBELUM disimpan sebagai gelembung dan sebelum
+    // dikembalikan — pemeriksaan sesudahnya sudah terlambat.
+    const iPeriksa = src.indexOf('periksaJawabanMedis(teksJawaban)');
+    const iSimpan = src.indexOf('teks: teksJawaban');
+    cek(
+      'jawaban model diperiksa batas medis sebelum disimpan & dikirim',
+      iPeriksa > 0 && iSimpan > iPeriksa,
+    );
+  }
+  cek(
+    'jawaban yang melanggar diganti kartu penolakan, teksnya tidak disimpan',
+    /penolakan: penolakanJawaban/.test(src) && /teks: '',\s*penolakan: penolakanJawaban/.test(src),
+  );
+  cek(
+    'isi jawaban yang melanggar tidak dicatat ke log',
+    !/console\.(log|warn|error)\([^)]*teksJawaban/.test(src),
+  );
+  cek(
+    'kuota habis (54000) dijawab 429, bukan 502',
+    src.includes("galatPesan.code === '54000'") && /kuota_habis: true[\s\S]{0,40}429/.test(src),
+  );
+  cek(
+    'pertanyaan disimpan SEBELUM model dipanggil (kuota menolak sebelum ada biaya)',
+    src.indexOf("peran: 'pengguna'") < src.indexOf('messages.stream'),
+  );
   cek(
     'kunci API tidak pernah ikut ke jawaban maupun log',
     !/console\.(log|error)\([^)]*kunciAi/.test(src),

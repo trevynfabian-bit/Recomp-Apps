@@ -30,7 +30,7 @@ function muatLogika() {
   return require(join(kerja, 'keluar', 'batasMedis.js'));
 }
 
-const { periksaBatasMedis, DISCLAIMER_COACH } = muatLogika();
+const { periksaBatasMedis, periksaJawabanMedis, DISCLAIMER_COACH } = muatLogika();
 
 let gagal = 0;
 function cek(label, lulus, detail = '') {
@@ -128,6 +128,69 @@ cek(
     periksaBatasMedis('berapa dosis metformin') !== null,
 );
 cek('pertanyaan kosong lolos', periksaBatasMedis('') === null);
+
+// ---------------------------------------------------------------------------
+// Pemeriksaan JAWABAN: pertanyaan yang wajar bisa dijawab model dengan takaran
+// obat, dan pemeriksaan pertanyaan tidak akan pernah menangkapnya.
+// ---------------------------------------------------------------------------
+
+/** Jawaban yang harus DIGANTI penolakan, beserta kategorinya. */
+const JAWABAN_DITOLAK = [
+  ['Untuk kasus Anda, metformin 500 mg dua kali sehari biasanya cukup.', 'dosis-obat'],
+  ['Banyak orang memakai orlistat 120 mg setiap makan.', 'dosis-obat'],
+  ['Obat itu bisa diminum 2x sehari setelah makan.', 'dosis-obat'],
+  ['Semaglutide biasanya dimulai 0,25 mg per minggu.', 'dosis-obat'],
+  ['Takarannya 10 unit insulin sebelum tidur.', 'dosis-obat'],
+  ['Hentikan metformin selama fase Cut.', 'resep'],
+  ['Coba kurangi dosis obat diet Anda minggu ini.', 'resep'],
+  ['Mulailah minum orlistat supaya defisit lebih mudah.', 'resep'],
+  ['Dari pola ini, Anda kemungkinan menderita hipotiroid.', 'diagnosis'],
+  ['Sepertinya kamu terkena resistensi insulin.', 'diagnosis'],
+  // Kalimat pertama aman; yang kedua yang melanggar. Pemeriksaan per kalimat
+  // tidak boleh berhenti di kalimat pertama.
+  ['Protein Anda sudah cukup. Tambahkan metformin 850 mg kalau gula darah naik.', 'dosis-obat'],
+];
+
+console.log('\nJawaban yang harus diganti penolakan');
+for (const [jawaban, kategori] of JAWABAN_DITOLAK) {
+  const hasil = periksaJawabanMedis(jawaban);
+  cek(
+    `"${jawaban}" → ${hasil ? hasil.kategori : 'LOLOS'}`,
+    hasil !== null && hasil.kategori === kategori,
+    hasil ? `pemicu: ${hasil.pemicu}` : '',
+  );
+}
+
+/**
+ * Jawaban yang harus LOLOS. Positif palsu di sini membuang jawaban yang benar
+ * dan menggantinya dengan penolakan atas pertanyaan yang tidak melanggar apa
+ * pun — jadi dijaga seketat arah sebaliknya.
+ */
+const JAWABAN_LOLOS = [
+  'Sisa kalori Anda hari ini 850 kcal, dan protein kurang 42 g.',
+  'Dosis kreatin yang umum 5 g sehari; tidak perlu fase loading.',
+  'Kafein sekitar 200 mg sebelum latihan cukup untuk kebanyakan orang.',
+  'Latihan 3x seminggu sudah cukup untuk fase Lean Gain.',
+  'Obat dari dokter Anda bisa memengaruhi nafsu makan; sampaikan perubahan berat ini kepadanya.',
+  'Soal metformin, tanyakan ke dokter yang meresepkannya.',
+  'Jangan berhenti minum obat tanpa bicara dengan dokter Anda.',
+  'Coba catat juga kapan Anda minum obat, supaya polanya terlihat saat kontrol.',
+  'Kalau Anda khawatir soal diabetes, periksakan ke dokter; data asupan ini bisa dibawa.',
+  'Anda sedang mengalami defisit 500 kcal per hari.',
+  'Berat turun 0,6 kg dalam sepekan, sedikit di atas koridor Cut.',
+  'Sobat latihan Anda bisa memakai target yang berbeda.',
+  '',
+];
+
+console.log('\nJawaban yang harus lolos');
+for (const jawaban of JAWABAN_LOLOS) {
+  const hasil = periksaJawabanMedis(jawaban);
+  cek(
+    `"${jawaban}"`,
+    hasil === null,
+    hasil ? `DIGANTI sebagai ${hasil.kategori} (pemicu: ${hasil.pemicu})` : '',
+  );
+}
 
 console.log('\nDisclaimer');
 cek(

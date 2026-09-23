@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { DISCLAIMER_COACH, periksaBatasMedis } from '@recomp/logika';
 import type { PenolakanMedis } from '@recomp/logika';
-import type { AngkaKonteksRow, KonteksCoachRow } from '@/types/database';
+import type { AngkaKonteksRow, KonteksCoachRow, KuotaCoachRow } from '@/types/database';
+import type { RujukanData, WidgetCoach } from '@/types/domain';
 
 /**
  * Konteks data untuk AI Coach.
@@ -124,6 +125,126 @@ export function periksaPertanyaan(pertanyaan: string): PemeriksaanPertanyaan {
   const penolakan = periksaBatasMedis(pertanyaan);
   if (penolakan) return { ditolak: true, penolakan };
   return { ditolak: false, pertanyaan };
+}
+
+/** Jawaban `tanyakanKeCoach`. */
+export type HasilTanya =
+  | {
+      jenis: 'jawaban';
+      percakapanId: string;
+      pesanId: string | null;
+      teks: string;
+      rujukan: RujukanData[];
+      widget: WidgetCoach[];
+    }
+  | {
+      jenis: 'ditolak';
+      penolakan: PenolakanMedis;
+      /**
+       * Di mana batasnya ditegakkan. `pertanyaan`: di perangkat atau server,
+       * sebelum model dipanggil. `jawaban`: model sudah menjawab, tapi
+       * jawabannya melewati batas medis dan diganti kartu ini — teks aslinya
+       * tidak pernah sampai ke perangkat.
+       */
+      sumber: 'pertanyaan' | 'jawaban';
+      percakapanId: string | null;
+      pesanId: string | null;
+    };
+
+/**
+ * Kirim satu pertanyaan ke coach.
+ *
+ * Batas medis diperiksa DI SINI lebih dulu: pertanyaan yang ditolak tidak
+ * meninggalkan perangkat. Server memeriksanya sekali lagi (untuk klien lama),
+ * lalu memeriksa JAWABAN model juga — keduanya pulang sebagai `ditolak`, jadi
+ * layar Coach cukup merender satu jenis kartu penolakan.
+ *
+ * Kuota harian yang habis datang sebagai `KesalahanCoach` yang TIDAK bisa
+ * diulang: mencoba lagi dalam semenit tidak mengubah apa pun sampai besok.
+ */
+export async function tanyakanKeCoach(
+  pertanyaan: string,
+  percakapanId: string | null = null,
+  persenLemak: number | null = null,
+): Promise<HasilTanya> {
+  const periksa = periksaPertanyaan(pertanyaan);
+  if (periksa.ditolak) {
+    return {
+      jenis: 'ditolak',
+      penolakan: periksa.penolakan,
+      sumber: 'pertanyaan',
+      percakapanId,
+      pesanId: null,
+    };
+  }
+
+  const { data, error } = await supabase.functions.invoke('coach-chat', {
+    body: { pertanyaan, percakapan_id: percakapanId, persen_lemak: persenLemak },
+  });
+
+  if (error) {
+    const status = (error as { context?: { status?: number } }).context?.status ?? 0;
+    if (status === 429) {
+      throw new KesalahanCoach(
+        'Batas pertanyaan hari ini sudah tercapai. Coach bisa ditanya lagi besok.',
+        false,
+      );
+    }
+    if (status === 401) {
+      throw new KesalahanCoach('Sesi Anda berakhir. Masuk lagi untuk memakai Coach.', false);
+    }
+    throw new KesalahanCoach(
+      'Coach sedang tidak bisa dihubungi. Coba lagi.',
+      status === 0 || status >= 500,
+    );
+  }
+
+  const h = data as {
+    ditolak?: boolean;
+    sumber_penolakan?: 'jawaban';
+    penolakan?: PenolakanMedis;
+    percakapan_id?: string;
+    pesan_id?: string | null;
+    teks?: string;
+    rujukan?: RujukanData[];
+    widget?: WidgetCoach[];
+    galat?: string;
+  };
+
+  if (h.ditolak && h.penolakan) {
+    return {
+      jenis: 'ditolak',
+      penolakan: h.penolakan,
+      sumber: h.sumber_penolakan === 'jawaban' ? 'jawaban' : 'pertanyaan',
+      percakapanId: h.percakapan_id ?? percakapanId,
+      pesanId: h.pesan_id ?? null,
+    };
+  }
+  if (typeof h.teks !== 'string' || !h.percakapan_id) {
+    // Termasuk penolakan dari model sendiri, yang pulang sebagai 200 + galat.
+    throw new KesalahanCoach(h.galat ?? 'Coach tidak mengembalikan jawaban.', true);
+  }
+  return {
+    jenis: 'jawaban',
+    percakapanId: h.percakapan_id,
+    pesanId: h.pesan_id ?? null,
+    teks: h.teks,
+    rujukan: h.rujukan ?? [],
+    widget: h.widget ?? [],
+  };
+}
+
+/** Sisa kuota pertanyaan hari ini, untuk ditampilkan sebelum pengguna mengetik. */
+export async function kuotaCoach(): Promise<{
+  terpakai: number;
+  batas: number;
+  sisa: number;
+  pulihPada: string;
+}> {
+  const { data, error } = await supabase.rpc('kuota_coach');
+  if (error) throw terjemahkan(error);
+  const k = data as KuotaCoachRow;
+  return { terpakai: k.terpakai, batas: k.batas, sisa: k.sisa, pulihPada: k.pulih_pada };
 }
 
 /**

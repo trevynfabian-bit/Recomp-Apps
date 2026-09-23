@@ -77,7 +77,7 @@ export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFa
 
 export { evaluasi4Mingguan, PEKAN_EVALUASI } from './evaluasi';
 
-export { DISCLAIMER_COACH, periksaBatasMedis } from './batasMedis';
+export { DISCLAIMER_COACH, periksaBatasMedis, periksaJawabanMedis } from './batasMedis';
 
 export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 

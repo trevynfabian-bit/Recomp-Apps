@@ -446,6 +446,15 @@ export type RingkasanMingguanRow = {
   created_at: string;
 };
 
+/** Hasil `kuota_coach`: pertanyaan coach hari ini (Asia/Jakarta). */
+export type KuotaCoachRow = {
+  terpakai: number;
+  batas: number;
+  sisa: number;
+  /** ISO 8601; tengah malam Asia/Jakarta berikutnya. */
+  pulih_pada: string;
+};
+
 /** Hasil `simpan_ringkasan_mingguan`. `baru` false berarti pekan itu sudah diringkas. */
 export type SimpanRingkasanRow = {
   baru: boolean;
@@ -1116,6 +1125,10 @@ export type Database = {
       evaluasi_4_mingguan: {
         Args: { p_sampai: string | null };
         Returns: Evaluasi4MingguanRow;
+      };
+      kuota_coach: {
+        Args: Record<string, never>;
+        Returns: KuotaCoachRow;
       };
       poin_ringkasan_mingguan: {
         Args: { p_minggu_mulai: string | null; p_user_id: string | null };
