@@ -356,5 +356,25 @@ export {
   VERSI_FORMAT_EKSPOR,
 } from './ekspor.ts';
 
-export type { HasilLab, PenandaLab, PosisiPenanda, RingkasanHasilLab } from './hasilLab.ts';
-export { kalimatRingkasanLab, kelompokkanPerTahun, posisiPenanda, ringkasHasilLab } from './hasilLab.ts';
+export type {
+  GalatPenandaLab,
+  HasilLab,
+  HasilPeriksaLab,
+  IsianHasilLab,
+  IsianPenandaLab,
+  PenandaLab,
+  PosisiPenanda,
+  RingkasanHasilLab,
+} from './hasilLab.ts';
+export {
+  kalimatRingkasanLab,
+  kelompokkanPerTahun,
+  PENANDA_KOSONG,
+  penandaDariTemplat,
+  periksaHasilLab,
+  posisiPenanda,
+  ringkasHasilLab,
+  TEMPLAT_PANEL_LAB,
+  uraiNilaiLab,
+  uraiTanggalLab,
+} from './hasilLab.ts';

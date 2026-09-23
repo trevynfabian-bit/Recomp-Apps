@@ -10,9 +10,9 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import { Card, SectionHeader } from '@/components';
+import { Card, SectionHeader, TombolUtama } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { mockRiwayatLab } from '@/mocks/hasilLab';
+import { useHasilLab } from '@/state/hasilLab';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
@@ -28,12 +28,13 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * setahun, dan membandingkan "September lalu" dengan "Desember sebelumnya"
  * adalah cara orang biasanya membacanya.
  *
- * Fase 4 sisi frontend: data tiruan (`@/mocks/hasilLab`).
+ * Fase 4 sisi frontend: riwayat dari `useHasilLab` (tiruan di memori).
  */
 export default function HasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const kelompok = kelompokkanPerTahun(mockRiwayatLab);
+  const { riwayat } = useHasilLab();
+  const kelompok = kelompokkanPerTahun(riwayat);
 
   return (
     <ScrollView
@@ -72,7 +73,7 @@ export default function HasilLabScreen() {
             Hasil lab
           </Text>
           <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
-            {mockRiwayatLab.length > 0 ? `${mockRiwayatLab.length} hasil tersimpan` : 'Belum ada yang tersimpan'}
+            {riwayat.length > 0 ? `${riwayat.length} hasil tersimpan` : 'Belum ada yang tersimpan'}
           </Text>
         </View>
       </View>
@@ -93,6 +94,8 @@ export default function HasilLabScreen() {
           </Text>
         </Card>
       ) : null}
+
+      <TombolUtama label="Tambah hasil lab" onPress={() => router.push('/tambah-hasil-lab')} />
 
       {kelompok.map((k) => (
         <View key={k.tahun}>

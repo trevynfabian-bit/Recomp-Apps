@@ -7,6 +7,7 @@ import { BannerDataMasuk, BannerEksporSiap } from '@/components';
 import { segarkanPengingat } from '@/data/pengingat';
 import { PenyediaEkspor } from '@/state/ekspor';
 import { PenyediaHariIni } from '@/state/hariIni';
+import { PenyediaHasilLab } from '@/state/hasilLab';
 import { PenyediaProfil } from '@/state/profil';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
@@ -56,41 +57,44 @@ function TumpukanAkar() {
 
   // State per akun dimulai dari nol setiap pengguna berganti (termasuk
   // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, target,
-  // tipe hari, koneksi, berkas ekspor, atau kiriman yang belum dibaca.
+  // tipe hari, hasil lab, koneksi, berkas ekspor, atau kiriman yang belum dibaca.
   return (
     <PenyediaProfil key={pengguna?.id ?? 'tamu'}>
       <PenyediaTarget>
         <PenyediaHariIni>
-          <PenyediaEkspor>
-            <PenyediaSinkron>
-              <StatusBar style="light" />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.bg },
-                }}
-              >
-                <Stack.Protected guard={sudahMasuk}>
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
-                  <Stack.Screen name="hasil-lab" options={{ animation: 'slide_from_right' }} />
-                </Stack.Protected>
-                <Stack.Protected guard={!sudahMasuk}>
-                  <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
-                </Stack.Protected>
-              </Stack>
-              {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
-              {sudahMasuk ? <BannerDataMasuk /> : null}
-              {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
-              {sudahMasuk ? <BannerEksporSiap /> : null}
-            </PenyediaSinkron>
-          </PenyediaEkspor>
+          <PenyediaHasilLab>
+            <PenyediaEkspor>
+              <PenyediaSinkron>
+                <StatusBar style="light" />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.bg },
+                  }}
+                >
+                  <Stack.Protected guard={sudahMasuk}>
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="hasil-lab" options={{ animation: 'slide_from_right' }} />
+                    <Stack.Screen name="tambah-hasil-lab" options={{ animation: 'slide_from_bottom' }} />
+                  </Stack.Protected>
+                  <Stack.Protected guard={!sudahMasuk}>
+                    <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
+                  </Stack.Protected>
+                </Stack>
+                {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
+                {sudahMasuk ? <BannerDataMasuk /> : null}
+                {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
+                {sudahMasuk ? <BannerEksporSiap /> : null}
+              </PenyediaSinkron>
+            </PenyediaEkspor>
+          </PenyediaHasilLab>
         </PenyediaHariIni>
       </PenyediaTarget>
     </PenyediaProfil>

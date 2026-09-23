@@ -29,10 +29,10 @@ import {
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
-import { mockRiwayatLab } from '@/mocks/hasilLab';
 import { mockAkun } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
+import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -86,7 +86,8 @@ export default function PengaturanScreen() {
   const ukuranTerurut = [...mockUkuran].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
   const pinggangTerbaru = ukuranTerurut[ukuranTerurut.length - 1]?.pinggang_cm ?? 85;
   const pinggangPertama = ukuranTerurut[0]?.pinggang_cm ?? null;
-  const labTerakhir = [...mockRiwayatLab].sort((a, b) => b.tanggal.localeCompare(a.tanggal))[0];
+  const { riwayat: riwayatLab } = useHasilLab();
+  const labTerakhir = [...riwayatLab].sort((a, b) => b.tanggal.localeCompare(a.tanggal))[0];
 
   const panjang = (cm: number) => `${formatDesimal(tampilkanPanjang(cm, profil.satuan), profil.satuan === 'metrik' ? 0 : 1)} ${labelPanjang(profil.satuan)}`;
 
@@ -227,7 +228,7 @@ export default function PengaturanScreen() {
             judul="Hasil lab"
             nilai={
               labTerakhir
-                ? `${mockRiwayatLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
+                ? `${riwayatLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
                 : 'Belum ada'
             }
             petunjuk="Membuka riwayat hasil lab"

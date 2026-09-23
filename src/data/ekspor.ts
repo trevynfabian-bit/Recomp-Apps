@@ -1,17 +1,16 @@
-import type { PeriodeFase, TabelEkspor } from '@recomp/logika';
+import type { HasilLab, PeriodeFase, TabelEkspor } from '@recomp/logika';
 import { mockRiwayatPercakapan } from '@/mocks/coach';
 import { mockDailyLogHariIni, mockFoodLogsHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockSesiLatihan } from '@/mocks/latihan';
-import { mockRiwayatLab } from '@/mocks/hasilLab';
 import { mockUkuran } from '@/mocks/ukuran';
 import type { DayType, DayTypeTarget, Profile } from '@/types/domain';
 
 /**
  * Tabel-tabel ekspor, dirakit dari keadaan app.
  *
- * Profil, riwayat fase, dan target datang dari penyedia (yang sedang
+ * Profil, riwayat fase, target, dan hasil lab datang dari penyedia (yang sedang
  * berlaku, termasuk suntingan di sesi ini); catatan harian, makanan, ukuran,
- * latihan, percakapan, dan hasil lab dari data tiruan yang sama dengan
+ * latihan, dan percakapan dari data tiruan yang sama dengan
  * layar-layarnya. Satuan disebut di nama kolom; semuanya metrik seperti yang
  * tersimpan, apa pun satuan tampilan yang dipilih.
  *
@@ -23,6 +22,7 @@ export function kumpulkanTabelEkspor(m: {
   riwayatFase: PeriodeFase[];
   tipeHari: DayType[];
   target: DayTypeTarget[];
+  hasilLab: HasilLab[];
 }): TabelEkspor[] {
   const namaTipe = (id: string) => m.tipeHari.find((d) => d.id === id)?.nama ?? id;
   const hariIni = mockDailyLogHariIni;
@@ -97,14 +97,14 @@ export function kumpulkanTabelEkspor(m: {
       nama: 'hasil_lab',
       label: 'hasil lab',
       kolom: ['tanggal', 'nama', 'laboratorium', 'jumlah_penanda'],
-      baris: mockRiwayatLab.map((h) => [h.tanggal, h.nama, h.laboratorium, h.penanda.length]),
+      baris: m.hasilLab.map((h) => [h.tanggal, h.nama, h.laboratorium, h.penanda.length]),
     },
     {
       nama: 'penanda_lab',
       label: 'penanda lab',
       // Rentang rujukan dari laboratorium, dibawa apa adanya.
       kolom: ['tanggal', 'panel', 'penanda', 'nilai', 'satuan', 'rujukan_min', 'rujukan_maks'],
-      baris: mockRiwayatLab.flatMap((h) => h.penanda.map((p) => [h.tanggal, h.nama, p.nama, p.nilai, p.satuan, p.rujukanMin, p.rujukanMaks])),
+      baris: m.hasilLab.flatMap((h) => h.penanda.map((p) => [h.tanggal, h.nama, p.nama, p.nilai, p.satuan, p.rujukanMin, p.rujukanMaks])),
     },
   ];
 }

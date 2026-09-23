@@ -4,6 +4,7 @@ import { namaBerkasEkspor, NOTIF_EKSPOR_SIAP, ringkasIsiEkspor, susunBerkasEkspo
 import { kumpulkanTabelEkspor } from '@/data/ekspor';
 import { buatZip, serahkanZip } from '@/lib/berkas';
 import { kirimNotifikasiSekarang } from '@/lib/notifikasi';
+import { useHasilLab } from '@/state/hasilLab';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
@@ -58,6 +59,7 @@ const Konteks = createContext<KonteksEkspor | null>(null);
 export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
   const { profil, riwayatFase } = useProfil();
   const { tipeHari, target } = useTarget();
+  const { riwayat: hasilLab } = useHasilLab();
   const { pengguna } = useSesi();
   const [status, setStatus] = useState<StatusEkspor>({ jenis: 'diam' });
   const [perluDiberitahu, setPerluDiberitahu] = useState(false);
@@ -65,8 +67,8 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
   const sheetTerbuka = useRef(false);
 
   const tabel = useMemo(
-    () => kumpulkanTabelEkspor({ profil, riwayatFase, tipeHari, target }),
-    [profil, riwayatFase, tipeHari, target],
+    () => kumpulkanTabelEkspor({ profil, riwayatFase, tipeHari, target, hasilLab }),
+    [profil, riwayatFase, tipeHari, target, hasilLab],
   );
   const isi = useMemo(() => ringkasIsiEkspor(tabel), [tabel]);
 

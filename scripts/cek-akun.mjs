@@ -173,7 +173,7 @@ cek('tamu hanya melihat layar masuk', JSON.stringify(tamu) === '["masuk"]', `tam
 // State per akun (profil, target, koneksi, kiriman, berkas ekspor) dimulai ulang tiap pengguna berganti.
 const kunciProfil = tataLetak.indexOf("<PenyediaProfil key={pengguna?.id ?? 'tamu'}>");
 cek('penyedia per akun berkunci id pengguna', kunciProfil >= 0);
-for (const penyedia of ['PenyediaSinkron', 'PenyediaTarget', 'PenyediaEkspor', 'PenyediaHariIni']) {
+for (const penyedia of ['PenyediaSinkron', 'PenyediaTarget', 'PenyediaEkspor', 'PenyediaHariIni', 'PenyediaHasilLab']) {
   const i = tataLetak.indexOf(`<${penyedia}>`);
   cek(`${penyedia} di dalam penyedia berkunci`, kunciProfil >= 0 && i > kunciProfil && i < tataLetak.indexOf('</PenyediaProfil>'));
 }

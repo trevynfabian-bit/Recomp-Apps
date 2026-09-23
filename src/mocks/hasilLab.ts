@@ -51,3 +51,16 @@ export const mockRiwayatLab: HasilLab[] = [
     ],
   },
 ];
+
+/**
+ * Simpan hasil lab tiruan: jeda seperti jaringan, gagal bila perangkat luring
+ * (untuk mencoba jalur gagal simpan di web).
+ */
+export function mockSimpanHasilLab(): Promise<void> {
+  return new Promise((selesai, gagal) =>
+    setTimeout(() => {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return gagal(new Error('Failed to fetch'));
+      selesai();
+    }, 700),
+  );
+}

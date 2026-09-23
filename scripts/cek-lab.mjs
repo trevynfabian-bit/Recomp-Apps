@@ -20,7 +20,10 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['hasilLab.ts', 'pengingat.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { posisiPenanda, ringkasHasilLab, kalimatRingkasanLab, kelompokkanPerTahun } = require(join(kerja, 'keluar', 'hasilLab.js'));
+const {
+  posisiPenanda, ringkasHasilLab, kalimatRingkasanLab, kelompokkanPerTahun,
+  uraiNilaiLab, uraiTanggalLab, periksaHasilLab, penandaDariTemplat, TEMPLAT_PANEL_LAB, PENANDA_KOSONG,
+} = require(join(kerja, 'keluar', 'hasilLab.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -60,6 +63,43 @@ cek('tahun terbaru lebih dulu', k.map((x) => x.tahun).join() === '2026,2025');
 cek('dalam satu tahun: terbaru lebih dulu', k[0].hasil.map((x) => x.id).join() === '3,2');
 cek('kosong → tanpa kelompok', kelompokkanPerTahun([]).length === 0);
 
+console.log('\nForm tambah: membaca angka & tanggal');
+for (const [t, h] of [['5,3', 5.3], ['5.3', 5.3], ['245', 245], ['0,75', 0.75], ['2,345', 2.345], ['1,2345', null], ['-5', null], ['', null], ['abc', null]])
+  cek(`nilai "${t}" → ${h}`, uraiNilaiLab(t) === h, `dapat ${uraiNilaiLab(t)}`);
+for (const [t, h] of [['3/9/2026', '2026-09-03'], ['03-09-2026', '2026-09-03'], ['3.9.2026', '2026-09-03'], ['2026-09-03', '2026-09-03'], ['31/2/2026', null], ['2026/09/03', null], ['9/2026', null]])
+  cek(`tanggal "${t}" → ${h}`, uraiTanggalLab(t) === h, `dapat ${uraiTanggalLab(t)}`);
+
+console.log('\nForm tambah: pemeriksaan');
+const HARI_INI = '2026-09-23';
+const baris = (nama, nilai, satuan, min = '', maks = '') => ({ nama, nilai, satuan, rujukanMin: min, rujukanMaks: maks });
+const sah = periksaHasilLab({ nama: ' Profil lipid ', tanggal: '3/9/2026', laboratorium: '', penanda: [
+  baris('Kolesterol LDL', '138', 'mg/dL', '', '130'), baris('Kolesterol HDL', '48', 'mg/dL', '40', ''), { ...PENANDA_KOSONG },
+] }, HARI_INI);
+cek('isian sah: panel dirapikan, tanggal ISO, lab kosong → null', sah.sah && sah.hasil.nama === 'Profil lipid' && sah.hasil.tanggal === '2026-09-03' && sah.hasil.laboratorium === null);
+cek('baris kosong diabaikan; rentang kosong → null', sah.sah && sah.hasil.penanda.length === 2 && sah.hasil.penanda[0].rujukanMin === null && sah.hasil.penanda[0].rujukanMaks === 130);
+const kosong = periksaHasilLab({ nama: '', tanggal: '', laboratorium: '', penanda: [{ ...PENANDA_KOSONG }] }, HARI_INI);
+cek('semua kosong: nama, tanggal, penanda diminta', !kosong.sah && kosong.galat.nama && kosong.galat.tanggal && kosong.galat.penanda);
+const depan = periksaHasilLab({ nama: 'X', tanggal: '24/9/2026', laboratorium: '', penanda: [baris('A', '1', 'U')] }, HARI_INI);
+cek('tanggal masa depan ditolak', !depan.sah && /masa depan/.test(depan.galat.tanggal));
+cek('hari ini diterima', periksaHasilLab({ nama: 'X', tanggal: '23/9/2026', laboratorium: '', penanda: [baris('A', '1', 'U')] }, HARI_INI).sah);
+const terbalik = periksaHasilLab({ nama: 'X', tanggal: '1/9/2026', laboratorium: '', penanda: [baris('A', '1', 'U', '10', '5')] }, HARI_INI);
+cek('rentang terbalik ditolak di baris itu', !terbalik.sah && /Batas bawah lebih besar/.test(terbalik.galat.perPenanda[0].rentang));
+const ganda = periksaHasilLab({ nama: 'X', tanggal: '1/9/2026', laboratorium: '', penanda: [baris('HbA1c', '5,3', '%'), baris('hba1c', '5,4', '%')] }, HARI_INI);
+cek('penanda ganda (huruf besar-kecil sama) ditolak', !ganda.sah && /sudah ada/.test(ganda.galat.perPenanda[1].nama));
+const tanpaSatuan = periksaHasilLab({ nama: 'X', tanggal: '1/9/2026', laboratorium: '', penanda: [baris('A', '1,5', '')] }, HARI_INI);
+cek('satuan wajib', !tanpaSatuan.sah && tanpaSatuan.galat.perPenanda[0].satuan);
+cek('templat hanya nama & satuan — tanpa rentang rujukan', TEMPLAT_PANEL_LAB.every((t) =>
+  penandaDariTemplat(t.nama).every((p) => p.nama && p.satuan && p.nilai === '' && p.rujukanMin === '' && p.rujukanMaks === '')));
+cek('templat tak dikenal → null', penandaDariTemplat('Tidak ada') === null);
+const format = periksaHasilLab({ nama: 'X'.repeat(61), tanggal: 'kemarin', laboratorium: '', penanda: [baris('A', 'lima', 'U', 'a', 'b')] }, HARI_INI);
+cek('format salah: panel terlalu panjang, tanggal, nilai, dan rentang', !format.sah && format.galat.nama && format.galat.tanggal
+  && format.galat.perPenanda[0].nilai && format.galat.perPenanda[0].rujukanMin && format.galat.perPenanda[0].rujukanMaks);
+const pesanForm = [kosong, depan, terbalik, ganda, tanpaSatuan, format].flatMap((h) => (h.sah ? [] : [
+  h.galat.nama, h.galat.tanggal, h.galat.penanda, ...h.galat.perPenanda.flatMap((g) => (g ? Object.values(g) : [])),
+])).filter(Boolean);
+const pesanBernada = pesanForm.filter((t) => pelanggaranNada(t).length > 0 || /\b(tinggi|rendah|normal|berbahaya)\b/i.test(t));
+cek(`${pesanForm.length} pesan form netral & tanpa tafsiran`, pesanForm.length >= 8 && pesanBernada.length === 0, pesanBernada.join(' | '));
+
 console.log('\nData tiruan masuk akal');
 const mock = readFileSync('src/mocks/hasilLab.ts', 'utf8');
 const penandaMock = [...mock.matchAll(/\{ nama: '([^']+)', nilai: ([\d.]+), satuan: '([^']*)', rujukanMin: (null|[\d.]+), rujukanMaks: (null|[\d.]+) \}/g)];
@@ -73,7 +113,7 @@ const kalimat = [
   ...['dalam rentang', 'di bawah rentang', 'di atas rentang', 'tanpa rujukan'],
   kalimatRingkasanLab(r),
 ];
-const src = ts.createSourceFile('l.tsx', readFileSync('app/hasil-lab.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const src = ts.createSourceFile('l.tsx', readFileSync('app/hasil-lab.tsx', 'utf8') + '\n' + readFileSync('app/tambah-hasil-lab.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 (function jelajah(n) {
   if (ts.isImportDeclaration(n)) return;
   if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isJsxText(n) || ts.isTemplateHead(n) || ts.isTemplateMiddle(n) || ts.isTemplateTail(n)) {
