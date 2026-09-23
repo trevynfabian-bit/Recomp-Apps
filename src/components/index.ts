@@ -25,6 +25,7 @@ export { KartuWidgetCoach } from './KartuWidgetCoach';
 export { KerangkaSheet } from './KerangkaSheet';
 export { LabelSinyalArah } from './LabelSinyalArah';
 export { MacroRow } from './MacroRow';
+export { MatriksTarget } from './MatriksTarget';
 export { MeterBudget } from './MeterBudget';
 export { PanelRedistribusi } from './PanelRedistribusi';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';

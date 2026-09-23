@@ -15,6 +15,7 @@
  * adalah dua ribu empat ratus lima puluh (titik = pemisah ribuan), dan
  * "72,5" di kolom gram adalah tujuh puluh dua koma lima.
  */
+import type { Fase } from './tipe';
 
 /** Nilai satu baris `day_type_targets`. */
 export type NilaiTarget = {
@@ -155,4 +156,67 @@ export function isianBerubah(isian: IsianTarget, tersimpan: NilaiTarget): boolea
     h.nilai.target_lemak_g !== tersimpan.target_lemak_g ||
     h.nilai.batas_sat_fat_g !== tersimpan.batas_sat_fat_g
   );
+}
+
+// ---------------------------------------------------------------------------
+// Matriks target: tipe hari x fase.
+// ---------------------------------------------------------------------------
+
+/** Urutan kolom matriks: dari kalori terendah yang lazim ke tertinggi. */
+export const URUTAN_FASE_MATRIKS: Fase[] = ['Cut', 'Maintenance', 'Lean Gain'];
+
+export type SelMatriks = { fase: Fase; target: NilaiTarget | null };
+export type BarisMatriks = { dayTypeId: string; nama: string; sel: SelMatriks[] };
+
+/**
+ * Susun matriks target absolut. Kombinasi yang belum punya baris target
+ * menjadi sel `null` — ditampilkan sebagai kosong, bukan diisi angka lain,
+ * karena target yang dipinjam dari fase lain adalah angka yang salah yang
+ * tampak benar.
+ */
+export function susunMatriksTarget(
+  tipeHari: { id: string; nama: string }[],
+  target: (NilaiTarget & { day_type_id: string; fase: Fase })[],
+  urutanFase: Fase[] = URUTAN_FASE_MATRIKS,
+): BarisMatriks[] {
+  return tipeHari.map((d) => ({
+    dayTypeId: d.id,
+    nama: d.nama,
+    sel: urutanFase.map((fase) => {
+      const t = target.find((x) => x.day_type_id === d.id && x.fase === fase);
+      return {
+        fase,
+        target: t
+          ? {
+              target_kalori: t.target_kalori,
+              target_protein_g: t.target_protein_g,
+              target_lemak_g: t.target_lemak_g,
+              batas_sat_fat_g: t.batas_sat_fat_g,
+            }
+          : null,
+      };
+    }),
+  }));
+}
+
+/**
+ * Tipe hari yang urutan kalorinya antarfase tidak lazim: Cut di atas
+ * Maintenance, atau Maintenance di atas Lean Gain. Bukan larangan — bisa
+ * disengaja — tetapi paling sering salah ketik saat menyunting satu fase,
+ * dan hanya terlihat bila ketiga fase dibaca berdampingan.
+ */
+export function urutanFaseJanggal(baris: BarisMatriks[]): { nama: string; kalimat: string }[] {
+  const hasil: { nama: string; kalimat: string }[] = [];
+  for (const b of baris) {
+    const kal = (f: Fase) => b.sel.find((s) => s.fase === f)?.target?.target_kalori ?? null;
+    const cut = kal('Cut');
+    const mnt = kal('Maintenance');
+    const lg = kal('Lean Gain');
+    if (cut !== null && mnt !== null && cut > mnt) {
+      hasil.push({ nama: b.nama, kalimat: `${b.nama}: target Cut lebih tinggi dari Maintenance.` });
+    } else if (mnt !== null && lg !== null && mnt > lg) {
+      hasil.push({ nama: b.nama, kalimat: `${b.nama}: target Maintenance lebih tinggi dari Lean Gain.` });
+    }
+  }
+  return hasil;
 }

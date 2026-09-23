@@ -12,9 +12,10 @@ import {
   isianDariTarget,
   karboTersisaG,
   periksaTarget,
+  susunMatriksTarget,
 } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
-import { Card, KerangkaSheet, Pill, TombolBertepi, TombolUtama } from '@/components';
+import { Card, KerangkaSheet, MatriksTarget, Pill, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { mockTipeHariIni } from '@/mocks/dailyLog';
 import { mockWorkoutsHariIni, NAMA_SUMBER } from '@/mocks/workout';
@@ -65,7 +66,7 @@ export default function TargetHarianScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { profil } = useProfil();
-  const { tipeHari, cariTarget, simpanTarget } = useTarget();
+  const { tipeHari, target, cariTarget, simpanTarget } = useTarget();
   const [fase, setFase] = useState<Fase>(profil.fase_aktif);
   /** Isian yang sudah disentuh, per baris; baris lain memakai nilai tersimpan. */
   const [draf, setDraf] = useState<Record<string, IsianTarget>>({});
@@ -79,6 +80,10 @@ export default function TargetHarianScreen() {
   const tipeHariIni = mockTipeHariIni();
   const deteksiHariIni = deteksiTipeHari(mockWorkoutsHariIni, tipeHari);
   const menyunting = mode === 'sunting';
+  /** Mode baca: satu fase dalam kartu, atau ketiga fase berdampingan. */
+  const [tampilan, setTampilan] = useState<'per-fase' | 'matriks'>('per-fase');
+  const matriks = !menyunting && tampilan === 'matriks';
+  const barisMatriks = useMemo(() => susunMatriksTarget(tipeHari, target), [tipeHari, target]);
 
   const isianBaris = (dt: string, f: Fase) => draf[kunciBaris(dt, f)] ?? isianDariTarget(cariTarget(dt, f));
 
@@ -198,7 +203,29 @@ export default function TargetHarianScreen() {
           </View>
         </View>
 
-        <View style={{ gap: spacing.sm }}>
+        {!menyunting ? (
+          <PilihTampilan
+            terpilih={tampilan}
+            onPilih={(t) => {
+              ketukRingan();
+              setTampilan(t);
+            }}
+          />
+        ) : null}
+
+        {matriks ? (
+          <MatriksTarget
+            baris={barisMatriks}
+            faseAktif={profil.fase_aktif}
+            tipeHariIniId={tipeHariIni}
+            onPilihFase={(f) => {
+              setFase(f);
+              setTampilan('per-fase');
+            }}
+          />
+        ) : null}
+
+        <View style={{ gap: spacing.sm, display: matriks ? 'none' : 'flex' }}>
           <PilihFase terpilih={fase} aktif={profil.fase_aktif} diubah={faseDiubah} onPilih={setFase} />
           <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
             {fase === profil.fase_aktif
@@ -213,7 +240,7 @@ export default function TargetHarianScreen() {
           ) : null}
         </View>
 
-        {tipeHari.map((d) =>
+        {(matriks ? [] : tipeHari).map((d) =>
           !menyunting ? (
             <KartuTargetBaca
               key={kunciBaris(d.id, fase)}
@@ -274,6 +301,7 @@ export default function TargetHarianScreen() {
               label="Sunting target"
               onPress={() => {
                 setStatus({ jenis: 'diam' });
+                setTampilan('per-fase');
                 setMode('sunting');
               }}
             />
@@ -333,6 +361,44 @@ function KartuTargetBaca({ dayType, target, hariIni }: { dayType: DayType; targe
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </Card>
+    </View>
+  );
+}
+
+const TAMPILAN: { nilai: 'per-fase' | 'matriks'; label: string }[] = [
+  { nilai: 'per-fase', label: 'Per fase' },
+  { nilai: 'matriks', label: 'Matriks' },
+];
+
+function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'; onPilih: (t: 'per-fase' | 'matriks') => void }) {
+  return (
+    <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: spacing.sm }}>
+      {TAMPILAN.map((t) => {
+        const aktif = t.nilai === terpilih;
+        return (
+          <Pressable
+            key={t.nilai}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: aktif }}
+            accessibilityLabel={`Tampilan ${t.label}`}
+            onPress={() => {
+              if (!aktif) onPilih(t.nilai);
+            }}
+            style={({ pressed }) => ({
+              minHeight: TAP_MIN - 8,
+              paddingHorizontal: spacing.lg,
+              justifyContent: 'center',
+              borderRadius: radius.pill,
+              borderWidth: 1,
+              borderColor: aktif ? colors.amber : colors.borderKuat,
+              backgroundColor: aktif ? colors.amber + '1A' : 'transparent',
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>{t.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

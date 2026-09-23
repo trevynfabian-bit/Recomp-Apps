@@ -21,6 +21,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
+  susunMatriksTarget, urutanFaseJanggal, URUTAN_FASE_MATRIKS,
 } = require(join(kerja, 'keluar', 'targetHarian.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
@@ -110,6 +111,33 @@ const lampauBerubah = minggu.map((h) => (h.tanggal === '2026-09-21' ? { ...h, ta
 cek('hari lampau bukan bagian redistribusi → tidak membuat basi', !redistribusiBasi(redis, lampauBerubah));
 cek('tanpa redistribusi / abaikan → tidak basi', !redistribusiBasi(null, disunting) && !redistribusiBasi({ ...redis, opsi: 'abaikan' }, disunting));
 
+console.log('\nMatriks tipe hari x fase');
+const tMatriks = [
+  { day_type_id: 'r', fase: 'Cut', target_kalori: 2000, target_protein_g: 175, target_lemak_g: 60, batas_sat_fat_g: 18 },
+  { day_type_id: 'r', fase: 'Maintenance', target_kalori: 2300, target_protein_g: 150, target_lemak_g: 72, batas_sat_fat_g: 21 },
+  { day_type_id: 'r', fase: 'Lean Gain', target_kalori: 2450, target_protein_g: 165, target_lemak_g: 75, batas_sat_fat_g: 22 },
+  { day_type_id: 'p', fase: 'Cut', target_kalori: 2800, target_protein_g: 185, target_lemak_g: 68, batas_sat_fat_g: 19 },
+  { day_type_id: 'p', fase: 'Maintenance', target_kalori: 2750, target_protein_g: 160, target_lemak_g: 80, batas_sat_fat_g: 24 },
+];
+const mtx = susunMatriksTarget([{ id: 'r', nama: 'Rest' }, { id: 'p', nama: 'Padel' }], tMatriks);
+cek('kolom berurutan Cut → Maintenance → Lean Gain', JSON.stringify(mtx[0].sel.map((x) => x.fase)) === JSON.stringify(URUTAN_FASE_MATRIKS)
+  && URUTAN_FASE_MATRIKS.join() === 'Cut,Maintenance,Lean Gain');
+cek('sel berisi target absolut', mtx[0].sel[2].target.target_kalori === 2450 && mtx[0].sel[0].target.target_protein_g === 175);
+cek('kombinasi tanpa target → kosong, tidak dipinjam dari fase lain', mtx[1].sel[2].target === null);
+const janggal = urutanFaseJanggal(mtx);
+cek('Cut di atas Maintenance terdeteksi', janggal.length === 1 && janggal[0].nama === 'Padel' && /Cut lebih tinggi dari Maintenance/.test(janggal[0].kalimat));
+cek('urutan lazim tidak ditandai', !janggal.some((x) => x.nama === 'Rest'));
+const mLg = susunMatriksTarget([{ id: 'r', nama: 'Rest' }], tMatriks.map((t) => (t.fase === 'Lean Gain' ? { ...t, target_kalori: 2200 } : t)));
+cek('Maintenance di atas Lean Gain terdeteksi', /Maintenance lebih tinggi dari Lean Gain/.test(urutanFaseJanggal(mLg)[0]?.kalimat ?? ''));
+const mockTeks = readFileSync('src/mocks/dailyLog.ts', 'utf8');
+const semuaMock = [...mockTeks.matchAll(/day_type_id: '([^']+)', fase: '([^']+)', target_kalori: (\d+), target_protein_g: ([\d.]+), target_lemak_g: ([\d.]+), batas_sat_fat_g: ([\d.]+)/g)]
+  .map((x) => ({ day_type_id: x[1], fase: x[2], target_kalori: +x[3], target_protein_g: +x[4], target_lemak_g: +x[5], batas_sat_fat_g: +x[6] }));
+const tipeMock = [...new Set(semuaMock.map((t) => t.day_type_id))].map((id) => ({ id, nama: id }));
+const mMock = susunMatriksTarget(tipeMock, semuaMock);
+cek('target bawaan: matriks penuh 4 x 3', mMock.length === 4 && mMock.every((b) => b.sel.every((x) => x.target !== null)));
+cek('target bawaan: tanpa urutan janggal', urutanFaseJanggal(mMock).length === 0, JSON.stringify(urutanFaseJanggal(mMock)));
+for (const x of [...janggal, ...urutanFaseJanggal(mLg)]) cek(`nada: "${x.kalimat}"`, pelanggaranNada(`${x.kalimat} Periksa lagi bila tidak disengaja.`).length === 0);
+
 console.log('\nKalimat aturan deteksi = perilaku deteksi');
 const tipe = [
   { id: 'r', nama: 'Rest', auto_detect: true, is_default: true },
@@ -150,7 +178,7 @@ for (const b of baris) {
 console.log('\nNada');
 for (const p of new Set(pesanSemua)) cek(`netral: "${p.length > 70 ? `${p.slice(0, 67)}...` : p}"`, pelanggaranNada(p).length === 0, pelanggaranNada(p).join(', '));
 // Kalimat di layar form, dibaca lewat parser TypeScript.
-const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8') + '\n' + readFileSync('src/components/MatriksTarget.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const kalimat = [];
 (function jelajah(n) {
   if (ts.isImportDeclaration(n)) return;

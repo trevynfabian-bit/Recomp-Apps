@@ -321,7 +321,7 @@ export {
   VERSI_SESI_TERSIMPAN,
 } from './akun.ts';
 
-export type { HasilPeriksaTarget, IsianTarget, KolomTarget, NilaiTarget } from './targetHarian.ts';
+export type { BarisMatriks, HasilPeriksaTarget, IsianTarget, KolomTarget, NilaiTarget, SelMatriks } from './targetHarian.ts';
 export {
   isianBerubah,
   isianDariTarget,
@@ -329,8 +329,11 @@ export {
   KKAL_PER_GRAM,
   periksaTarget,
   RENTANG_TARGET,
+  susunMatriksTarget,
   uraiGram,
   uraiKalori,
+  URUTAN_FASE_MATRIKS,
+  urutanFaseJanggal,
 } from './targetHarian.ts';
 
 export type { HasilGantiFase, PeriodeFase } from './periodeFase.ts';
