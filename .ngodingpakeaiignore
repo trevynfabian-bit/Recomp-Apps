@@ -6,3 +6,7 @@
 # docs/internal/
 # *.snap
 # fixtures/
+
+# Salinan turunan mesin dari packages/logika/src untuk Deno (npm run salin:logika).
+# Sumber aslinya sudah diindeks; meringkas salinannya hanya menggandakan hasil.
+supabase/functions/_shared/logika/
