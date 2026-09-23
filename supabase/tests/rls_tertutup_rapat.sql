@@ -19,7 +19,8 @@ insert into tabel_app values
   ('fase_periode'), ('redistribusi_mingguan'), ('redistribusi_hari'), ('body_measurements'), ('alert_pinggang'),
   ('percakapan'), ('pesan_coach'), ('ringkasan_mingguan'), ('evaluasi_periodik'), ('pemakaian_coach_harian'),
   ('health_connections'), ('health_connection_secrets'), ('health_data'), ('source_priority'), ('import_jobs'),
-  ('settings_notifications'), ('daily_summaries'), ('copy_notifikasi');
+  ('settings_notifications'), ('daily_summaries'), ('copy_notifikasi'),
+  ('lab_results'), ('lab_result_markers');
 
 -- ---------------------------------------------------------------------------
 -- A. Katalog

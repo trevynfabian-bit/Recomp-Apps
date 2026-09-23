@@ -43,6 +43,34 @@ export type DayTypeRow = {
   created_at: string;
 };
 
+/** lab_results — hasil lab sebagai data mentah dari kertas hasilnya. */
+export type LabResultRow = {
+  id: string;
+  user_id: string;
+  /** Tanggal pengambilan sampel (YYYY-MM-DD). */
+  tanggal: string;
+  /** Nama panel, mis. "Profil lipid". */
+  nama: string;
+  laboratorium: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** lab_result_markers — satu penanda: nilai, satuan, rentang rujukan milik laboratorium. */
+export type LabResultMarkerRow = {
+  id: string;
+  lab_result_id: string;
+  user_id: string;
+  /** Urutan seperti diisi, mulai 1. */
+  urutan: number;
+  nama: string;
+  nilai: number;
+  satuan: string;
+  rujukan_min: number | null;
+  rujukan_maks: number | null;
+  created_at: string;
+};
+
 /** Hasil `ambil_target`: selalu satu baris; angka NULL bila `diisi` false (tanpa cadangan). */
 export type AmbilTargetRow = {
   day_type_id: string;

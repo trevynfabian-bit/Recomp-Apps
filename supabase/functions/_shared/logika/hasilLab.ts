@@ -170,14 +170,24 @@ export function uraiTanggalLab(teks: string): string | null {
 export type GalatPenandaLab = Partial<Record<keyof IsianPenandaLab | 'rentang', string>>;
 export type HasilPeriksaLab =
   | { sah: true; hasil: Omit<HasilLab, 'id'> }
-  | { sah: false; galat: { nama?: string; tanggal?: string; penanda?: string; perPenanda: GalatPenandaLab[] } };
+  | { sah: false; galat: { nama?: string; tanggal?: string; laboratorium?: string; penanda?: string; perPenanda: GalatPenandaLab[] } };
+
+/**
+ * Panjang teks paling banyak, sama dengan CHECK tabel `lab_results` dan
+ * `lab_result_markers` (dijaga `npm run cek:paritas`).
+ */
+export const BATAS_PANJANG_LAB = { panel: 60, laboratorium: 80, penanda: 60, satuan: 20 } as const;
 
 /** Periksa isian form; `hariIni` (YYYY-MM-DD) untuk menolak tanggal di masa depan. */
 export function periksaHasilLab(isian: IsianHasilLab, hariIni: string): HasilPeriksaLab {
-  const galat: { nama?: string; tanggal?: string; penanda?: string; perPenanda: GalatPenandaLab[] } = { perPenanda: [] };
+  const galat: { nama?: string; tanggal?: string; laboratorium?: string; penanda?: string; perPenanda: GalatPenandaLab[] } = { perPenanda: [] };
   const nama = isian.nama.trim();
   if (nama === '') galat.nama = 'Nama panel belum diisi, mis. Profil lipid.';
-  else if (nama.length > 60) galat.nama = 'Nama panel paling panjang 60 huruf.';
+  else if (nama.length > BATAS_PANJANG_LAB.panel) galat.nama = `Nama panel paling panjang ${BATAS_PANJANG_LAB.panel} huruf.`;
+  const laboratorium = isian.laboratorium.trim();
+  if (laboratorium.length > BATAS_PANJANG_LAB.laboratorium) {
+    galat.laboratorium = `Nama laboratorium paling panjang ${BATAS_PANJANG_LAB.laboratorium} huruf.`;
+  }
 
   const tanggal = uraiTanggalLab(isian.tanggal);
   if (isian.tanggal.trim() === '') galat.tanggal = 'Tanggal pengambilan sampel belum diisi.';
@@ -197,12 +207,14 @@ export function periksaHasilLab(isian: IsianHasilLab, hariIni: string): HasilPer
     const g: GalatPenandaLab = {};
     const n = p.nama.trim();
     if (n === '') g.nama = 'Nama penanda belum diisi.';
+    else if (n.length > BATAS_PANJANG_LAB.penanda) g.nama = `Nama penanda paling panjang ${BATAS_PANJANG_LAB.penanda} huruf.`;
     else if (namaDipakai.has(n.toLowerCase())) g.nama = `${n} sudah ada di hasil ini.`;
     namaDipakai.add(n.toLowerCase());
     const nilai = uraiNilaiLab(p.nilai);
     if (p.nilai.trim() === '') g.nilai = 'Nilai belum diisi.';
     else if (nilai === null) g.nilai = 'Nilai ditulis sebagai angka, mis. 5,3.';
     if (p.satuan.trim() === '') g.satuan = 'Satuan belum diisi, mis. mg/dL.';
+    else if (p.satuan.trim().length > BATAS_PANJANG_LAB.satuan) g.satuan = `Satuan paling panjang ${BATAS_PANJANG_LAB.satuan} huruf.`;
     const min = p.rujukanMin.trim() === '' ? null : uraiNilaiLab(p.rujukanMin);
     const maks = p.rujukanMaks.trim() === '' ? null : uraiNilaiLab(p.rujukanMaks);
     if (p.rujukanMin.trim() !== '' && min === null) g.rujukanMin = 'Batas bawah ditulis sebagai angka.';
@@ -216,11 +228,12 @@ export function periksaHasilLab(isian: IsianHasilLab, hariIni: string): HasilPer
 
   const adaGalat =
     galat.nama !== undefined ||
+    galat.laboratorium !== undefined ||
     galat.tanggal !== undefined ||
     galat.penanda !== undefined ||
     galat.perPenanda.some((g) => g && Object.keys(g).length > 0);
   if (adaGalat || tanggal === null) return { sah: false, galat };
-  return { sah: true, hasil: { nama, tanggal, laboratorium: isian.laboratorium.trim() || null, penanda } };
+  return { sah: true, hasil: { nama, tanggal, laboratorium: laboratorium || null, penanda } };
 }
 
 /** Angka untuk isian: koma desimal, tanpa nol di belakang ("5,3", "1", "0,75"). */

@@ -227,6 +227,7 @@ export default function TambahHasilLabScreen() {
             nilai={isian.laboratorium}
             onUbah={(t) => ubah({ laboratorium: t })}
             placeholder="mis. Lab klinik"
+            galat={tampil ? galat.laboratorium : undefined}
             nonaktif={menyimpan}
           />
         </View>

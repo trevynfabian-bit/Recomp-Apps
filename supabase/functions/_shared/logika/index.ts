@@ -374,6 +374,7 @@ export type {
 } from './hasilLab.ts';
 export {
   barisDataMentahLab,
+  BATAS_PANJANG_LAB,
   hasilLabSama,
   isianDariHasilLab,
   kalimatRingkasanLab,

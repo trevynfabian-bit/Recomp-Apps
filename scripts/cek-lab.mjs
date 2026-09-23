@@ -23,7 +23,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
 const {
   posisiPenanda, ringkasHasilLab, kalimatRingkasanLab, kelompokkanPerTahun,
   uraiNilaiLab, uraiTanggalLab, periksaHasilLab, penandaDariTemplat, TEMPLAT_PANEL_LAB, PENANDA_KOSONG,
-  isianDariHasilLab, hasilLabSama, tulisNilaiLab, tulisRujukanLab, barisDataMentahLab,
+  isianDariHasilLab, hasilLabSama, tulisNilaiLab, tulisRujukanLab, barisDataMentahLab, BATAS_PANJANG_LAB,
 } = require(join(kerja, 'keluar', 'hasilLab.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -132,6 +132,23 @@ const penandaMock = [...mock.matchAll(/\{ nama: '([^']+)', nilai: ([\d.]+), satu
 cek(`${penandaMock.length} penanda terbaca dari data tiruan`, penandaMock.length >= 15);
 const rusak = penandaMock.filter((m) => !m[3] || (m[4] !== 'null' && m[5] !== 'null' && Number(m[4]) > Number(m[5])));
 cek('setiap penanda bersatuan dan rentangnya tidak terbalik', rusak.length === 0, rusak.map((m) => m[1]).join(', '));
+
+console.log('\nPanjang teks (sama dengan tabel lab_results)');
+{
+  const isi = (u = {}, up = {}) => ({ nama: 'Profil lipid', tanggal: '3/9/2026', laboratorium: '', ...u,
+    penanda: [{ nama: 'LDL', nilai: '138', satuan: 'mg/dL', rujukanMin: '', rujukanMaks: '130', ...up }] });
+  const B = BATAS_PANJANG_LAB;
+  const lab81 = periksaHasilLab(isi({ laboratorium: 'x'.repeat(B.laboratorium + 1) }), '2026-09-23');
+  const penanda61 = periksaHasilLab(isi({}, { nama: 'x'.repeat(B.penanda + 1) }), '2026-09-23');
+  const satuan21 = periksaHasilLab(isi({}, { satuan: 'x'.repeat(B.satuan + 1) }), '2026-09-23');
+  cek(`batas: panel ${B.panel}, laboratorium ${B.laboratorium}, penanda ${B.penanda}, satuan ${B.satuan}`,
+    periksaHasilLab(isi({ laboratorium: 'x'.repeat(B.laboratorium) }, { nama: 'x'.repeat(B.penanda), satuan: 'x'.repeat(B.satuan) }), '2026-09-23').sah);
+  cek('laboratorium terlalu panjang → pesan di kolomnya', !lab81.sah && /laboratorium paling panjang/.test(lab81.galat.laboratorium ?? ''));
+  cek('penanda & satuan terlalu panjang → pesan per penanda', !penanda61.sah && !!penanda61.galat.perPenanda[0]?.nama && !satuan21.sah && !!satuan21.galat.perPenanda[0]?.satuan);
+  const pesanPanjang = [lab81.galat.laboratorium, penanda61.galat.perPenanda[0]?.nama, satuan21.galat.perPenanda[0]?.satuan].filter(Boolean);
+  cek('pesan panjang teks netral', pesanPanjang.every((t) => pelanggaranNada(t).length === 0), pesanPanjang.join(' | '));
+  cek('form menampilkan galat laboratorium', /galat=\{tampil \? galat\.laboratorium : undefined\}/.test(readFileSync('app/tambah-hasil-lab.tsx', 'utf8')));
+}
 
 console.log('\nLabel data mentah');
 cek('nilai ditulis apa adanya: 5,3 · 245 · 0,75 · 2,345',

@@ -102,12 +102,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/periodeFase.ts', join(kerja, 'periodeFase.ts'));
   copyFileSync('packages/logika/src/targetHarian.ts', join(kerja, 'targetHarian.ts'));
   copyFileSync('packages/logika/src/targetBerlaku.ts', join(kerja, 'targetBerlaku.ts'));
+  copyFileSync('packages/logika/src/hasilLab.ts', join(kerja, 'hasilLab.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', 'hasilLab.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -126,6 +127,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'periodeFase.js')),
     ...require(join(kerja, 'keluar', 'targetHarian.js')),
     ...require(join(kerja, 'keluar', 'targetBerlaku.js')),
+    ...require(join(kerja, 'keluar', 'hasilLab.js')),
   };
 }
 
@@ -1809,6 +1811,94 @@ try {
   console.log(`✓ Target berlaku: ${Object.keys(D).length} hari (snapshot lama, tipe hari terhapus, pilihan manual, belum tercatat, belum diisi) sama di SQL dan TypeScript.`);
   console.log();
 
+  // --- Hasil lab: tabel lab_results/lab_result_markers (SQL) = periksaHasilLab (TS)
+  // Isian yang lolos form harus diterima tabel, dan yang ditolak form harus
+  // ditolak tabel juga (dengan nilai mentahnya), supaya jalan tulis lain (web,
+  // RPC) tidak menyimpan yang tidak akan pernah lolos form.
+  const { periksaHasilLab, isianDariHasilLab, BATAS_PANJANG_LAB } = muatLogikaTs();
+  const UID_LAB = '99999999-eeee-eeee-eeee-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_LAB}', 'paritas-lab@contoh.test');`);
+  const hariIniLab = sql(`select (now() at time zone 'Asia/Jakarta')::date::text;`);
+  const besokLab = sql(`select ((now() at time zone 'Asia/Jakarta')::date + 1)::text;`);
+  const pn = (nama, nilai, satuan = 'mg/dL', rujukanMin = null, rujukanMaks = null) => ({ nama, nilai, satuan, rujukanMin, rujukanMaks });
+  const dasarLab = { id: 'x', nama: 'Profil lipid', tanggal: '2026-09-03', laboratorium: 'Lab klinik', penanda: [pn('Kolesterol LDL', 138, 'mg/dL', null, 130)] };
+  const ubahLab = (u) => ({ ...dasarLab, ...u });
+  const ubahPenanda = (u) => ubahLab({ penanda: [{ ...dasarLab.penanda[0], ...u }] });
+  const huruf = (n) => 'x'.repeat(n);
+  const KASUS_LAB = [
+    ['dasar', dasarLab],
+    [`panel ${BATAS_PANJANG_LAB.panel} huruf`, ubahLab({ nama: huruf(BATAS_PANJANG_LAB.panel) })],
+    [`panel ${BATAS_PANJANG_LAB.panel + 1} huruf`, ubahLab({ nama: huruf(BATAS_PANJANG_LAB.panel + 1) })],
+    ['tanpa laboratorium', ubahLab({ laboratorium: null })],
+    [`laboratorium ${BATAS_PANJANG_LAB.laboratorium} huruf`, ubahLab({ laboratorium: huruf(BATAS_PANJANG_LAB.laboratorium) })],
+    [`laboratorium ${BATAS_PANJANG_LAB.laboratorium + 1} huruf`, ubahLab({ laboratorium: huruf(BATAS_PANJANG_LAB.laboratorium + 1) })],
+    ['tanggal 1/1/2000', ubahLab({ tanggal: '2000-01-01' })],
+    ['tanggal 31/12/1999', ubahLab({ tanggal: '1999-12-31' })],
+    ['tanggal hari ini', ubahLab({ tanggal: hariIniLab })],
+    ['tanggal besok', ubahLab({ tanggal: besokLab })],
+    ['nilai 0', ubahPenanda({ nilai: 0 })],
+    ['nilai 2,345', ubahPenanda({ nilai: 2.345 })],
+    ['nilai 2,3456', ubahPenanda({ nilai: 2.3456 })],
+    ['nilai 999999,999', ubahPenanda({ nilai: 999999.999 })],
+    ['nilai 1000000', ubahPenanda({ nilai: 1000000 })],
+    ['nilai negatif', ubahPenanda({ nilai: -1 })],
+    ['rentang 2–5', ubahPenanda({ rujukanMin: 2, rujukanMaks: 5 })],
+    ['rentang 5–5', ubahPenanda({ rujukanMin: 5, rujukanMaks: 5 })],
+    ['rentang terbalik 5–2', ubahPenanda({ rujukanMin: 5, rujukanMaks: 2 })],
+    ['rujukan min 2,3456', ubahPenanda({ rujukanMin: 2.3456 })],
+    ['satuan kosong', ubahPenanda({ satuan: '' })],
+    [`satuan ${BATAS_PANJANG_LAB.satuan} huruf`, ubahPenanda({ satuan: huruf(BATAS_PANJANG_LAB.satuan) })],
+    [`satuan ${BATAS_PANJANG_LAB.satuan + 1} huruf`, ubahPenanda({ satuan: huruf(BATAS_PANJANG_LAB.satuan + 1) })],
+    [`penanda ${BATAS_PANJANG_LAB.penanda} huruf`, ubahPenanda({ nama: huruf(BATAS_PANJANG_LAB.penanda) })],
+    [`penanda ${BATAS_PANJANG_LAB.penanda + 1} huruf`, ubahPenanda({ nama: huruf(BATAS_PANJANG_LAB.penanda + 1) })],
+    ['dua penanda berbeda', ubahLab({ penanda: [pn('LDL', 138), pn('HDL', 48)] })],
+    ['dua penanda beda huruf saja', ubahLab({ penanda: [pn('LDL', 138), pn('ldl', 48)] })],
+    ['tanpa penanda', ubahLab({ penanda: [] })],
+  ];
+  const masukanLab = KASUS_LAB.map(([, h]) => {
+    const ts = periksaHasilLab(isianDariHasilLab(h), hariIniLab);
+    const isi = ts.sah ? ts.hasil : h; // yang lolos form: bentuk yang dirapikan form
+    return { ts: ts.sah, isi };
+  });
+  const jsonLab = JSON.stringify(masukanLab.map((m) => m.isi)).replace(/'/g, "''");
+  const sahLabSql = JSON.parse(sql(`
+    set request.jwt.claim.sub = '${UID_LAB}';
+    create temp table hasil_lab_uji (i int primary key, sah boolean);
+    do $$
+    declare r record; v_id uuid; v_p record;
+    begin
+      for r in select (x.o - 1)::int as i, x.v from jsonb_array_elements('${jsonLab}'::jsonb) with ordinality as x(v, o) loop
+        begin
+          insert into public.lab_results (user_id, tanggal, nama, laboratorium)
+          values ('${UID_LAB}', (r.v->>'tanggal')::date, r.v->>'nama', r.v->>'laboratorium') returning id into v_id;
+          for v_p in select (y.o)::int as urutan, y.p from jsonb_array_elements(r.v->'penanda') with ordinality as y(p, o) loop
+            insert into public.lab_result_markers (lab_result_id, user_id, urutan, nama, nilai, satuan, rujukan_min, rujukan_maks)
+            values (v_id, '${UID_LAB}', v_p.urutan, v_p.p->>'nama', (v_p.p->>'nilai')::numeric, v_p.p->>'satuan',
+                    (v_p.p->>'rujukanMin')::numeric, (v_p.p->>'rujukanMaks')::numeric);
+          end loop;
+          set constraints all immediate;
+          raise exception 'batal' using errcode = 'P0001'; -- lolos semua aturan; dibatalkan supaya kasus berikutnya bersih
+        exception
+          when sqlstate 'P0001' then insert into hasil_lab_uji values (r.i, true);
+          when others then insert into hasil_lab_uji values (r.i, false);
+        end;
+      end loop;
+    end $$;
+    select json_agg(sah order by i) from hasil_lab_uji;`).split('\n').pop());
+  let gagalLab = 0;
+  KASUS_LAB.forEach(([nama], i) => {
+    const cocok = sahLabSql[i] === masukanLab[i].ts;
+    if (!cocok) gagalLab += 1;
+    if (!cocok) console.log(`✗ hasil lab "${nama}": form ${masukanLab[i].ts ? 'menerima' : 'menolak'}, tabel ${sahLabSql[i] ? 'menerima' : 'menolak'}`);
+  });
+  const nLabSah = masukanLab.filter((m) => m.ts).length;
+  if (gagalLab > 0 || nLabSah === 0 || nLabSah === KASUS_LAB.length) {
+    console.error(`✗ ${gagalLab} kasus hasil lab: form dan tabel tidak sejalan (atau kasusnya tidak menguji kedua sisi).`);
+    process.exit(1);
+  }
+  console.log(`✓ Hasil lab: ${KASUS_LAB.length} kasus (${nLabSah} sah, ${KASUS_LAB.length - nLabSah} ditolak) sama di form dan tabel.`);
+  console.log();
+
   // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
   // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak
   // membuat typecheck gagal — klien diam-diam membaca `undefined`.
@@ -1821,7 +1911,7 @@ try {
     PesanCoachRow: 'pesan_coach', RingkasanMingguanRow: 'ringkasan_mingguan', EvaluasiPeriodikRow: 'evaluasi_periodik',
     HealthConnectionRow: 'health_connections', HealthDataRow: 'health_data', SourcePriorityRow: 'source_priority',
     ImportJobRow: 'import_jobs', SettingsNotificationsRow: 'settings_notifications', DailySummaryRow: 'daily_summaries',
-    CopyNotifikasiRow: 'copy_notifikasi',
+    CopyNotifikasiRow: 'copy_notifikasi', LabResultRow: 'lab_results', LabResultMarkerRow: 'lab_result_markers',
   };
   // Tabel yang sengaja tanpa tipe baris di klien, dengan alasannya.
   const TANPA_TIPE_KLIEN = {

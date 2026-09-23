@@ -372,6 +372,7 @@ export type {
 } from './hasilLab';
 export {
   barisDataMentahLab,
+  BATAS_PANJANG_LAB,
   hasilLabSama,
   isianDariHasilLab,
   kalimatRingkasanLab,
