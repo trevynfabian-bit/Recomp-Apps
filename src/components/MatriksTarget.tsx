@@ -13,6 +13,8 @@ type Props = {
   tipeHariIniId: string | null;
   /** Mengetuk kepala kolom membuka fase itu dalam tampilan per fase. */
   onPilihFase: (fase: Fase) => void;
+  /** Mengetuk sel membuka penyunting satu target itu. */
+  onPilihSel?: (dayTypeId: string, fase: Fase) => void;
 };
 
 const LEBAR_NAMA = 92;
@@ -26,7 +28,7 @@ const LEBAR_NAMA = 92;
  * ketik yang membalik urutan itu (`urutanFaseJanggal`). Kolom fase aktif dan
  * baris tipe hari ini ditandai dengan kata, bukan warna saja.
  */
-export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase }: Props) {
+export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, onPilihSel }: Props) {
   const fase = baris[0]?.sel.map((s) => s.fase) ?? [];
   const janggal = urutanFaseJanggal(baris);
 
@@ -89,21 +91,30 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase }: 
               {b.sel.map((s) => {
                 const aktif = s.fase === faseAktif;
                 return (
-                  <View
+                  <Pressable
                     key={s.fase}
-                    accessible
+                    disabled={!onPilihSel}
+                    onPress={() => {
+                      ketukRingan();
+                      onPilihSel?.(b.dayTypeId, s.fase);
+                    }}
+                    accessibilityRole={onPilihSel ? 'button' : undefined}
+                    accessibilityHint={onPilihSel ? 'Membuka penyunting target ini' : undefined}
                     accessibilityLabel={
                       s.target
                         ? `${b.nama}, ${s.fase}${aktif ? ' (aktif)' : ''}: ${formatAngka(s.target.target_kalori)} kilokalori, protein ${formatMakro(s.target.target_protein_g)} gram`
                         : `${b.nama}, ${s.fase}: target belum diisi`
                     }
-                    style={{
+                    style={({ pressed }) => ({
                       flex: 1,
                       alignItems: 'center',
+                      minHeight: TAP_MIN,
+                      justifyContent: 'center',
                       paddingVertical: spacing.xs,
                       borderRadius: 8,
                       backgroundColor: aktif ? colors.surfaceSunken : 'transparent',
-                    }}
+                      opacity: pressed ? 0.6 : 1,
+                    })}
                   >
                     {s.target ? (
                       <>
@@ -117,7 +128,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase }: 
                     ) : (
                       <Text style={{ ...typography.label, color: colors.textFaint }}>–</Text>
                     )}
-                  </View>
+                  </Pressable>
                 );
               })}
             </View>
@@ -126,7 +137,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase }: 
       </Card>
 
       <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
-        Angka atas: kalori (kcal). P: protein (g). Ketuk nama fase untuk melihat rinciannya.
+        Angka atas: kalori (kcal). P: protein (g). Ketuk nama fase untuk melihat rinciannya, atau angka untuk menyuntingnya.
         {baris.some((b) => b.sel.some((s) => s.target === null)) ? ' Tanda – berarti target belum diisi.' : ''}
       </Text>
 

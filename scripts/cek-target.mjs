@@ -21,7 +21,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
-  susunMatriksTarget, urutanFaseJanggal, URUTAN_FASE_MATRIKS,
+  susunMatriksTarget, urutanFaseJanggal, URUTAN_FASE_MATRIKS, rincianKaloriMakro,
 } = require(join(kerja, 'keluar', 'targetHarian.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
@@ -111,6 +111,17 @@ const lampauBerubah = minggu.map((h) => (h.tanggal === '2026-09-21' ? { ...h, ta
 cek('hari lampau bukan bagian redistribusi → tidak membuat basi', !redistribusiBasi(redis, lampauBerubah));
 cek('tanpa redistribusi / abaikan → tidak basi', !redistribusiBasi(null, disunting) && !redistribusiBasi({ ...redis, opsi: 'abaikan' }, disunting));
 
+console.log('\nPembagian kalori ke makro');
+const r1 = rincianKaloriMakro({ target_kalori: 2450, target_protein_g: 165, target_lemak_g: 75, batas_sat_fat_g: 22 });
+cek('protein 165 g = 660 kcal, lemak 75 g = 675 kcal, sisa karbo 1.115 kcal',
+  r1.proteinKkal === 660 && r1.lemakKkal === 675 && r1.karboKkal === 1115, JSON.stringify(r1));
+cek('persen menjumlah 100', r1.persen.protein + r1.persen.lemak + r1.persen.karbo === 100, JSON.stringify(r1.persen));
+cek('persen 27 / 28 / 45', r1.persen.protein === 27 && r1.persen.lemak === 28 && r1.persen.karbo === 45, JSON.stringify(r1.persen));
+const r2 = rincianKaloriMakro({ target_kalori: 2450, target_protein_g: 165, target_lemak_g: 85, batas_sat_fat_g: 22 });
+cek('lemak +10 g memakan 90 kcal dari karbo', r1.karboKkal - r2.karboKkal === 90);
+const r3 = rincianKaloriMakro({ target_kalori: 1000, target_protein_g: 200, target_lemak_g: 50, batas_sat_fat_g: 10 });
+cek('protein + lemak melebihi kalori: karbo tidak negatif', r3.karboKkal === 0 && r3.persen.karbo === 0);
+
 console.log('\nMatriks tipe hari x fase');
 const tMatriks = [
   { day_type_id: 'r', fase: 'Cut', target_kalori: 2000, target_protein_g: 175, target_lemak_g: 60, batas_sat_fat_g: 18 },
@@ -178,7 +189,7 @@ for (const b of baris) {
 console.log('\nNada');
 for (const p of new Set(pesanSemua)) cek(`netral: "${p.length > 70 ? `${p.slice(0, 67)}...` : p}"`, pelanggaranNada(p).length === 0, pelanggaranNada(p).join(', '));
 // Kalimat di layar form, dibaca lewat parser TypeScript.
-const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8') + '\n' + readFileSync('src/components/MatriksTarget.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8') + '\n' + readFileSync('src/components/MatriksTarget.tsx', 'utf8') + '\n' + readFileSync('src/components/SheetSuntingTarget.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const kalimat = [];
 (function jelajah(n) {
   if (ts.isImportDeclaration(n)) return;

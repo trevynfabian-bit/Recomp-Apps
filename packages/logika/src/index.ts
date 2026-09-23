@@ -327,6 +327,7 @@ export {
   KKAL_PER_GRAM,
   periksaTarget,
   RENTANG_TARGET,
+  rincianKaloriMakro,
   susunMatriksTarget,
   uraiGram,
   uraiKalori,

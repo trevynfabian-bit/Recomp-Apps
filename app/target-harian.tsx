@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -17,12 +17,14 @@ import {
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import {
   Card,
+  InputTarget,
   KerangkaSheet,
   MatriksTarget,
   PemilihTipeHari,
   Pill,
   SectionHeader,
   SheetGantiFase,
+  SheetSuntingTarget,
   TombolBertepi,
   TombolUtama,
 } from '@/components';
@@ -92,6 +94,8 @@ export default function TargetHarianScreen() {
   const [mode, setMode] = useState<'baca' | 'sunting'>('baca');
   const { dayTypeId: tipeHariIni, override, deteksi: deteksiHariIni, pilihTipeHari, kembalikanAuto } = useHariIni();
   const [sheetFase, setSheetFase] = useState(false);
+  /** Satu target yang sedang disunting lewat sheet (dari kartu atau sel matriks). */
+  const [suntingSatu, setSuntingSatu] = useState<{ dayTypeId: string; fase: Fase } | null>(null);
   const faseMulai = periodeBerjalan(riwayatFase)?.mulai ?? null;
   // Fase diganti dari halaman ini (atau di tempat lain): tab fase ikut fase yang baru aktif.
   useEffect(() => {
@@ -290,6 +294,7 @@ export default function TargetHarianScreen() {
               setFase(f);
               setTampilan('per-fase');
             }}
+            onPilihSel={(dayTypeId, f) => setSuntingSatu({ dayTypeId, fase: f })}
           />
         ) : null}
 
@@ -310,6 +315,7 @@ export default function TargetHarianScreen() {
               dayType={d}
               target={cariTarget(d.id, fase)}
               hariIni={fase === profil.fase_aktif && d.id === tipeHariIni}
+              onSunting={() => setSuntingSatu({ dayTypeId: d.id, fase })}
             />
           ) : (
             <BarisTarget
@@ -376,6 +382,19 @@ export default function TargetHarianScreen() {
       </ScrollView>
 
       <SheetGantiFase terbuka={sheetFase} onTutup={() => setSheetFase(false)} />
+      {suntingSatu ? (
+        <SheetSuntingTarget
+          terbuka
+          onTutup={() => setSuntingSatu(null)}
+          namaTipeHari={tipeHari.find((d) => d.id === suntingSatu.dayTypeId)?.nama ?? ''}
+          fase={suntingSatu.fase}
+          tersimpan={cariTarget(suntingSatu.dayTypeId, suntingSatu.fase)}
+          simpan={async (nilai) => {
+            await simpanTarget([{ day_type_id: suntingSatu.dayTypeId, fase: suntingSatu.fase, nilai }]);
+            setStatus({ jenis: 'tersimpan', jumlah: 1 });
+          }}
+        />
+      ) : null}
 
       <KerangkaSheet terbuka={konfirmasiKeluar} onTutup={() => setKonfirmasiKeluar(false)} label="Perubahan belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>Buang perubahan?</Text>
@@ -400,13 +419,25 @@ export default function TargetHarianScreen() {
 }
 
 /** Satu tipe hari dalam mode baca: target, sisa karbo, dan kapan ia terpilih. */
-function KartuTargetBaca({ dayType, target, hariIni }: { dayType: DayType; target: NilaiTarget; hariIni: boolean }) {
+function KartuTargetBaca({
+  dayType,
+  target,
+  hariIni,
+  onSunting,
+}: {
+  dayType: DayType;
+  target: NilaiTarget;
+  hariIni: boolean;
+  onSunting: () => void;
+}) {
   return (
-    <View
-      accessible
-      accessibilityLabel={`${dayType.nama}${hariIni ? ', hari ini' : ''}: ${formatAngka(target.target_kalori)} kilokalori, protein ${formatMakro(target.target_protein_g)} gram, lemak ${formatMakro(target.target_lemak_g)} gram, sat fat paling banyak ${formatMakro(target.batas_sat_fat_g)} gram. ${aturanDeteksiTipeHari(dayType)}`}
-    >
-      <Card style={{ gap: spacing.md, borderWidth: hariIni ? 1 : 0, borderColor: colors.amber }}>
+    <Card style={{ gap: spacing.md, borderWidth: hariIni ? 1 : 0, borderColor: colors.amber }}>
+      {/* Isinya satu elemen bagi pembaca layar; tombol Sunting tetap terpisah. */}
+      <View
+        accessible
+        accessibilityLabel={`${dayType.nama}${hariIni ? ', hari ini' : ''}: ${formatAngka(target.target_kalori)} kilokalori, protein ${formatMakro(target.target_protein_g)} gram, lemak ${formatMakro(target.target_lemak_g)} gram, sat fat paling banyak ${formatMakro(target.batas_sat_fat_g)} gram. ${aturanDeteksiTipeHari(dayType)}`}
+        style={{ gap: spacing.md }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
           <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
             {dayType.nama}
@@ -425,8 +456,19 @@ function KartuTargetBaca({ dayType, target, hariIni }: { dayType: DayType; targe
         <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
           {aturanDeteksiTipeHari(dayType)}
         </Text>
-      </Card>
-    </View>
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Sunting target ${dayType.nama}`}
+        onPress={() => {
+          ketukRingan();
+          onSunting();
+        }}
+        style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+      >
+        <Text style={{ ...typography.label, color: colors.amber }}>Sunting target ini</Text>
+      </Pressable>
+    </Card>
   );
 }
 
@@ -576,7 +618,7 @@ function BarisTarget({
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
         {KOLOM.map((k) => (
-          <Isian
+          <InputTarget
             key={k.kunci}
             label={k.label}
             unit={k.unit}
@@ -606,59 +648,5 @@ function BarisTarget({
           : 'Sisa untuk karbo muncul setelah isian lengkap.'}
       </Text>
     </Card>
-  );
-}
-
-function Isian({
-  label,
-  unit,
-  nilai,
-  aksesLabel,
-  ditandai,
-  onUbah,
-  onTinggalkan,
-  nonaktif,
-}: {
-  label: string;
-  unit: string;
-  nilai: string;
-  aksesLabel: string;
-  /** Ada galat yang sedang ditampilkan untuk kolom ini. */
-  ditandai: boolean;
-  onUbah: (teks: string) => void;
-  onTinggalkan: () => void;
-  nonaktif: boolean;
-}) {
-  return (
-    // Dua kolom per baris; lebar minimum menjaga label panjang tidak terpotong.
-    <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: 130, gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textMuted }}>{label}</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.xs,
-          backgroundColor: colors.surfaceSunken,
-          borderRadius: radius.md,
-          borderWidth: ditandai ? 2 : 1,
-          borderColor: ditandai ? colors.coral : colors.borderKuat,
-          paddingHorizontal: spacing.md,
-        }}
-      >
-        <TextInput
-          value={nilai}
-          onChangeText={onUbah}
-          onBlur={onTinggalkan}
-          editable={!nonaktif}
-          keyboardType={unit === 'kcal' ? 'number-pad' : 'decimal-pad'}
-          inputMode={unit === 'kcal' ? 'numeric' : 'decimal'}
-          selectTextOnFocus
-          accessibilityLabel={aksesLabel}
-          accessibilityHint={ditandai ? 'Isian ini perlu diperbaiki; keterangannya di bawah kartu' : undefined}
-          style={{ ...typography.body, flex: 1, minWidth: 0, minHeight: TAP_MIN, color: colors.text, paddingVertical: spacing.sm }}
-        />
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
-      </View>
-    </View>
   );
 }

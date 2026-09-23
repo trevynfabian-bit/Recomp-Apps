@@ -220,3 +220,24 @@ export function urutanFaseJanggal(baris: BarisMatriks[]): { nama: string; kalima
   }
   return hasil;
 }
+
+/**
+ * Pembagian kalori target ke makro: berapa kkal dari protein, lemak, dan
+ * sisanya (karbo). Dipakai form sunting untuk memperlihatkan akibat tiap
+ * angka — menaikkan lemak 10 g memakan 90 kcal dari karbo, bukan dari udara.
+ * Persen dibulatkan dan dijumlahkan tepat 100 bila kalori > 0.
+ */
+export function rincianKaloriMakro(t: NilaiTarget): {
+  proteinKkal: number;
+  lemakKkal: number;
+  karboKkal: number;
+  persen: { protein: number; lemak: number; karbo: number };
+} {
+  const proteinKkal = Math.round(t.target_protein_g * KKAL_PER_GRAM.protein);
+  const lemakKkal = Math.round(t.target_lemak_g * KKAL_PER_GRAM.lemak);
+  const karboKkal = Math.max(0, t.target_kalori - proteinKkal - lemakKkal);
+  if (t.target_kalori <= 0) return { proteinKkal, lemakKkal, karboKkal, persen: { protein: 0, lemak: 0, karbo: 0 } };
+  const protein = Math.round((proteinKkal / t.target_kalori) * 100);
+  const lemak = Math.round((lemakKkal / t.target_kalori) * 100);
+  return { proteinKkal, lemakKkal, karboKkal, persen: { protein, lemak, karbo: Math.max(0, 100 - protein - lemak) } };
+}
