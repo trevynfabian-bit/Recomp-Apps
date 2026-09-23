@@ -165,12 +165,14 @@ export {
 } from './ringkasan';
 
 export type {
+  AngkaSnapshot,
   HasilHubungkan,
   JenisOtorisasi,
   KeadaanSinkronApp,
   KesehatanKoneksi,
   KoneksiSumber,
   MekanismeSync,
+  SnapshotHariIni,
   StatusKoneksi,
   SumberData,
   TingkatKesehatan,
@@ -188,6 +190,9 @@ export {
   URUTAN_SUMBER,
   urutkanKoneksi,
   validasiKunciHevy,
+  LABEL_MASUK,
+  masukDariAngka,
+  selisihMasuk,
 } from './sumberData';
 
 export type {

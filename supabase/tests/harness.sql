@@ -66,3 +66,16 @@ alter default privileges in schema public
 alter default privileges in schema public
   grant all on sequences to service_role;
 grant usage on schema auth to service_role;
+
+-- Supabase membuat publikasi `supabase_realtime` (kosong) di setiap proyek;
+-- migrasi Realtime menambahkan tabel ke sana. Ditiru supaya migrasi itu dan
+-- uji katalognya berjalan di sini persis seperti di produksi.
+-- (Postgres uji memakai wal_level=replica; peringatannya tidak relevan di sini.)
+set client_min_messages = error;
+do $$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+end $$;
+reset client_min_messages;

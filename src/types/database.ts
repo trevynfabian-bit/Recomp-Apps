@@ -6,7 +6,7 @@
  * tidak ada lapisan penerjemahan yang bisa salah diam-diam.
  */
 
-import type { DataRingkasanMingguan, PoinRingkasan } from '@recomp/logika';
+import type { DataRingkasanMingguan, PoinRingkasan, SnapshotHariIni } from '@recomp/logika';
 
 export type FaseProgram = 'Maintenance' | 'Lean Gain' | 'Cut';
 export type SumberBeratDb = 'manual' | 'healthkit';
@@ -1475,6 +1475,10 @@ export type Database = {
       impor_terakhir: {
         Args: Record<string, never>;
         Returns: ImportJobRow[];
+      };
+      snapshot_hari_ini: {
+        Args: { p_tanggal?: string | null; p_user_id?: string | null };
+        Returns: SnapshotHariIni;
       };
       sinkron_healthkit: {
         Args: { p_kiriman: KirimanHealthKit };

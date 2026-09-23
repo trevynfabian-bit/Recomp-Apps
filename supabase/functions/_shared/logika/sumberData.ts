@@ -401,3 +401,68 @@ export function statusSinkronApp(
       : 'Tersinkron langsung.',
   };
 }
+
+// ---------------------------------------------------------------------------
+// Snapshot hari ini & "data baru masuk"
+// ---------------------------------------------------------------------------
+
+/**
+ * Angka satu hari seperti dikirim `snapshot_hari_ini`. Angka yang tidak ada
+ * DIHILANGKAN, bukan nol: "0 langkah" dan "belum ada data langkah" berbeda.
+ * `berat` di `dihitung` adalah kg; di `per_sumber` tanda ada (1).
+ */
+export type AngkaSnapshot = Partial<
+  Record<'langkah' | 'kalori_aktif' | 'tidur' | 'latihan' | 'berat' | 'pemulihan', number>
+>;
+
+export type SnapshotHariIni = {
+  tanggal: string;
+  dihitung: AngkaSnapshot;
+  per_sumber: Partial<Record<SumberData, AngkaSnapshot>>;
+};
+
+/** Label "masuk" per angka, dalam urutan tampil. */
+export const LABEL_MASUK: readonly [keyof AngkaSnapshot, string][] = [
+  ['langkah', 'langkah'],
+  ['kalori_aktif', 'kcal energi aktif'],
+  ['tidur', 'menit tidur'],
+  ['latihan', 'sesi latihan'],
+  ['berat', 'berat pagi'],
+  ['pemulihan', 'data pemulihan'],
+];
+
+/** Yang dibawa satu sumber hari ini, untuk kartu sumbernya. */
+export function masukDariAngka(a: AngkaSnapshot | undefined): { label: string; jumlah: number }[] {
+  if (!a) return [];
+  return LABEL_MASUK.filter(([k]) => Number.isFinite(a[k]) && (a[k] as number) > 0).map(([k, label]) => ({
+    label,
+    jumlah: Math.round(a[k] as number),
+  }));
+}
+
+/**
+ * Apa yang BARU masuk dari satu sumber: selisih positif dua snapshot.
+ *
+ * Snapshot datang dari server setelah anti-dobel di dalam sumber (satu
+ * perangkat), jadi total iPhone dan Watch yang sama-sama naik tidak terbaca
+ * dua kali. Snapshot dari HARI yang berbeda tidak dibandingkan: lewat tengah
+ * malam, "sebelumnya" adalah nol, bukan angka kemarin — kalau tidak, langkah
+ * pagi ini akan tampak "berkurang" dan banner tidak pernah muncul.
+ * Angka yang TURUN (sampel dihapus di Health) tidak diumumkan.
+ */
+export function selisihMasuk(
+  sebelum: SnapshotHariIni | null,
+  sesudah: SnapshotHariIni,
+  sumber: SumberData,
+): { label: string; jumlah: number }[] {
+  const lama = sebelum && sebelum.tanggal === sesudah.tanggal ? (sebelum.per_sumber[sumber] ?? {}) : {};
+  const baru = sesudah.per_sumber[sumber] ?? {};
+  const hasil: { label: string; jumlah: number }[] = [];
+  for (const [k, label] of LABEL_MASUK) {
+    const b = baru[k];
+    if (b == null || !Number.isFinite(b)) continue;
+    const selisih = Math.round(b - (lama[k] ?? 0));
+    if (selisih > 0) hasil.push({ label, jumlah: k === 'berat' || k === 'pemulihan' ? 1 : selisih });
+  }
+  return hasil;
+}

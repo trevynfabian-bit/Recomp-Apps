@@ -1,7 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { kesehatanKoneksi } from '@recomp/logika';
-import type { KeadaanSinkronApp, KoneksiSumber, SumberData } from '@recomp/logika';
+import { kesehatanKoneksi, selisihMasuk } from '@recomp/logika';
+import type { KeadaanSinkronApp, KoneksiSumber, SnapshotHariIni, SumberData } from '@recomp/logika';
+import {
+  ambilKoneksi,
+  ambilSnapshotHariIni,
+  koneksiDariBaris,
+  langgananSinkron,
+  susunKoneksi,
+} from '@/data/realtime';
+import { supabase, supabaseSiap } from '@/lib/supabase';
 import { mockKejadianMasuk, mockKoneksiSumber } from '@/mocks/sumberData';
+import type { HealthConnectionRow } from '@/types/database';
 
 /**
  * Keadaan sinkron seluruh app: koneksi tiap sumber, koneksi Realtime, dan
@@ -13,11 +22,12 @@ import { mockKejadianMasuk, mockKoneksiSumber } from '@/mocks/sumberData';
  * indikator masih berkata "1 sumber perlu perhatian", pengguna tidak punya
  * cara tahu mana yang benar.
  *
- * Fase 3 sisi frontend: semuanya tiruan. Realtime "tersambung" sesaat setelah
- * app dibuka, lalu satu kiriman Apple Health masuk beberapa detik kemudian —
- * cukup untuk melihat indikator, banner, dan kartu sumber bergerak bersama.
- * Task backend menukar isinya dengan `health_connections` dan langganan
- * Supabase Realtime tanpa mengubah antarmuka hook ini.
+ * Dengan Supabase terpasang, isinya dari `health_connections` + Supabase
+ * Realtime (`@/data/realtime`): denyut koneksi → snapshot hari ini dari
+ * server → selisihnya menjadi banner "data baru masuk". Tanpa Supabase
+ * (pratinjau web, pengembangan) isinya tiruan: Realtime "tersambung" sesaat
+ * setelah app dibuka, lalu satu kiriman Apple Health masuk beberapa detik
+ * kemudian. Antarmuka hook ini sama untuk keduanya.
  */
 
 /** Satu kiriman data yang baru masuk lewat Realtime. */
@@ -53,19 +63,91 @@ const JEDA_KIRIMAN_MS = 6000;
 const LAMA_MENYINKRON_MS = 1200;
 
 export function PenyediaSinkron({ children }: { children: React.ReactNode }) {
-  const [koneksi, setKoneksi] = useState<KoneksiSumber[]>(() => mockKoneksiSumber());
+  const [koneksi, setKoneksi] = useState<KoneksiSumber[]>(() =>
+    supabaseSiap ? susunKoneksi([], null) : mockKoneksiSumber(),
+  );
   const [realtime, setRealtime] = useState<KeadaanSinkronApp['realtime']>('menyambung');
   const [sedangMenyinkron, setSedangMenyinkron] = useState(false);
   const [terakhirMasuk, setTerakhirMasuk] = useState<string | null>(null);
   const [kejadianTerbaru, setKejadianTerbaru] = useState<KejadianMasuk | null>(null);
   const [sekarang, setSekarang] = useState(() => new Date());
   const pewaktu = useRef<ReturnType<typeof setTimeout>[]>([]);
+  /** Snapshot terakhir dari server, pembanding untuk "yang baru masuk". */
+  const snapshot = useRef<SnapshotHariIni | null>(null);
+  /** sinkron_terakhir yang sudah diumumkan, per sumber. */
+  const sudahDiumumkan = useRef<Partial<Record<SumberData, string | null>>>({});
 
   const ubahKoneksi = useCallback((sumber: SumberData, perubahan: Partial<KoneksiSumber>) => {
     setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? { ...k, ...perubahan } : k)));
   }, []);
 
   useEffect(() => {
+    if (!supabaseSiap) return undefined;
+    let batal = false;
+    let berhenti: (() => void) | null = null;
+
+    /** Denyut satu koneksi: perbarui kartunya; bila ada kiriman baru, umumkan isinya. */
+    async function denyut(baris: HealthConnectionRow) {
+      const sumber = baris.sumber;
+      setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? koneksiDariBaris(sumber, baris, snapshot.current) : k)));
+      const lamaSinkron = sudahDiumumkan.current[sumber] ?? null;
+      if (!baris.sinkron_terakhir || baris.sinkron_terakhir === lamaSinkron) return;
+      sudahDiumumkan.current[sumber] = baris.sinkron_terakhir;
+
+      setSedangMenyinkron(true);
+      try {
+        const baru = await ambilSnapshotHariIni();
+        if (batal) return;
+        const masuk = selisihMasuk(snapshot.current, baru, sumber);
+        snapshot.current = baru;
+        setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? koneksiDariBaris(sumber, baris, baru) : k)));
+        setTerakhirMasuk(baris.sinkron_terakhir);
+        setSekarang(new Date());
+        if (masuk.length > 0) {
+          setKejadianTerbaru({ id: `${sumber}-${baris.sinkron_terakhir}`, sumber, waktu: baris.sinkron_terakhir, masuk });
+        }
+      } catch {
+        // Snapshot gagal dimuat: kartu tetap diperbarui dari denyutnya; banner
+        // menunggu denyut berikutnya.
+      } finally {
+        if (!batal) setSedangMenyinkron(false);
+      }
+    }
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+      if (batal || !userId) return;
+      try {
+        const [baris, snap] = await Promise.all([ambilKoneksi(), ambilSnapshotHariIni()]);
+        if (batal) return;
+        snapshot.current = snap;
+        for (const b of baris) sudahDiumumkan.current[b.sumber] = b.sinkron_terakhir;
+        setKoneksi(susunKoneksi(baris, snap));
+        const terakhir = baris.map((b) => b.sinkron_terakhir).filter((w): w is string => w !== null).sort().pop();
+        setTerakhirMasuk(terakhir ?? null);
+      } catch {
+        // Muat awal gagal: Realtime tetap disambungkan; denyut pertama mengisi kartunya.
+      }
+      if (batal) return;
+      berhenti = langgananSinkron(userId, {
+        onKoneksi: (b) => void denyut(b),
+        onTabelBerubah: () => setSekarang(new Date()),
+        onStatus: setRealtime,
+      });
+    })();
+
+    const detak = setInterval(() => setSekarang(new Date()), 30_000);
+    return () => {
+      batal = true;
+      berhenti?.();
+      clearInterval(detak);
+    };
+  }, []);
+
+  // --- Tiruan: tanpa Supabase ------------------------------------------------
+  useEffect(() => {
+    if (supabaseSiap) return undefined;
     const t = pewaktu.current;
     t.push(setTimeout(() => setRealtime('terhubung'), JEDA_TERSAMBUNG_MS));
     t.push(

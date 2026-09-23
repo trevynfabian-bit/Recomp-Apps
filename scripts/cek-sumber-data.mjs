@@ -39,6 +39,8 @@ const {
   statusSinkronApp,
   urutkanKoneksi,
   validasiKunciHevy,
+  masukDariAngka,
+  selisihMasuk,
 } = muat();
 
 let gagal = 0;
@@ -178,6 +180,34 @@ console.log('\nIndikator sinkron app');
   const semua = [{}, { sumberPerluPerhatian: 1 }, { realtime: 'terputus' }, { sedangMenyinkron: true }, { realtime: 'menyambung' }];
   cek('lima keadaan menghasilkan lima tingkat, masing-masing dengan label pembaca layar',
     new Set(semua.map((k) => st(k).tingkat)).size === 5 && semua.every((k) => st(k).aksesLabel.length > 10));
+}
+
+console.log('\nData baru masuk (selisih snapshot)');
+{
+  const snap = (tanggal, per_sumber) => ({ tanggal, dihitung: {}, per_sumber });
+  const pagi = snap('2026-09-23', { apple_health: { langkah: 3100, kalori_aktif: 200 } });
+  const siang = snap('2026-09-23', { apple_health: { langkah: 4304, kalori_aktif: 200, berat: 1 }, strava: { latihan: 1 } });
+  const m = selisihMasuk(pagi, siang, 'apple_health');
+  cek(`Apple Health: ${m.map((x) => `${x.jumlah} ${x.label}`).join(' · ')}`,
+    JSON.stringify(m) === JSON.stringify([{ label: 'langkah', jumlah: 1204 }, { label: 'berat pagi', jumlah: 1 }]));
+  cek('angka yang tidak berubah tidak diumumkan', !m.some((x) => x.label === 'kcal energi aktif'));
+  cek('sumber lain dihitung terpisah', JSON.stringify(selisihMasuk(pagi, siang, 'strava')) === '[{"label":"sesi latihan","jumlah":1}]');
+  // Lewat tengah malam: pembandingnya nol, bukan angka kemarin.
+  const kemarin = snap('2026-09-22', { apple_health: { langkah: 9800 } });
+  const subuh = snap('2026-09-23', { apple_health: { langkah: 850 } });
+  cek('hari baru: 850 langkah pagi ini masuk (bukan −8.950)',
+    JSON.stringify(selisihMasuk(kemarin, subuh, 'apple_health')) === '[{"label":"langkah","jumlah":850}]');
+  // Kontrol negatif: snapshot kemarin yang diperlakukan sebagai hari ini
+  // (pemeriksaan tanggal dilewati) membuat banner pagi hilang.
+  cek('kontrol: tanpa pemeriksaan tanggal, langkah pagi tidak pernah diumumkan',
+    selisihMasuk({ ...kemarin, tanggal: subuh.tanggal }, subuh, 'apple_health').length === 0);
+  cek('angka turun (sampel dihapus) tidak diumumkan',
+    selisihMasuk(siang, snap('2026-09-23', { apple_health: { langkah: 4000 } }), 'apple_health').length === 0);
+  cek('snapshot pertama (belum ada pembanding) = semua yang ada',
+    selisihMasuk(null, pagi, 'apple_health').length === 2);
+  cek('kartu sumber: urutan tetap, nilai bulat, nol & kosong dihilangkan',
+    JSON.stringify(masukDariAngka({ tidur: 412.5, langkah: 8800, kalori_aktif: 0 }))
+      === '[{"label":"langkah","jumlah":8800},{"label":"menit tidur","jumlah":413}]');
 }
 
 console.log(gagal === 0 ? '\n✓ Status sumber data: jeda dibaca per mekanisme, webhook yang diam tidak dianggap macet' : `\n✗ ${gagal} pemeriksaan gagal`);
