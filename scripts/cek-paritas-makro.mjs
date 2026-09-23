@@ -35,11 +35,12 @@ const KASUS = [
   { label: 'sat fat pecahan lewat', terpakai: 25.1, target: 25, isBatas: true },
 ];
 
-function sql(query) {
+/** `diam`: galat yang MEMANG diharapkan (penolakan) tidak dicetak ke stderr. */
+function sql(query, { diam = false } = {}) {
   const keluaran = execFileSync(
     'psql',
     ['-v', 'ON_ERROR_STOP=1', '-h', PGROOT, '-p', PORT, '-U', 'postgres', '-d', 'postgres', '-tAc', query],
-    { encoding: 'utf8' },
+    { encoding: 'utf8', ...(diam ? { stdio: 'pipe' } : {}) },
   ).trim();
   // Saat query memuat beberapa pernyataan, psql mencetak TAG PERINTAH tiap
   // pernyataan (SET, INSERT 0 1, …) sebelum hasilnya. Tag-nya dibuang, tapi
@@ -98,12 +99,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/evaluasi.ts', join(kerja, 'evaluasi.ts'));
   copyFileSync('packages/logika/src/pengingat.ts', join(kerja, 'pengingat.ts'));
   copyFileSync('packages/logika/src/percakapan.ts', join(kerja, 'percakapan.ts'));
+  copyFileSync('packages/logika/src/periodeFase.ts', join(kerja, 'periodeFase.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -119,6 +121,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'ukuran.js')),
     ...require(join(kerja, 'keluar', 'evaluasi.js')),
     ...require(join(kerja, 'keluar', 'pengingat.js')),
+    ...require(join(kerja, 'keluar', 'periodeFase.js')),
   };
 }
 
@@ -1566,6 +1569,64 @@ try {
     process.exit(1);
   }
   console.log(`✓ Nada notifikasi: ${KALIMAT_NADA.length} kalimat dinilai sama di SQL dan TypeScript; copy awal sejalan.`);
+
+  // --- Riwayat fase: ganti_fase (SQL) = terapkanGantiFase (TS) --------------
+  // Pratinjau di sheet konfirmasi memakai kembaran TS; ia harus menyebut apa
+  // yang BENAR-BENAR dilakukan server — ditutup, diganti, tetap, atau ditolak.
+  console.log();
+  const { terapkanGantiFase, majuHari: majuHariFase } = muatLogikaTs();
+  const UID_FASE = '99999999-aaaa-aaaa-aaaa-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_FASE}', 'paritas-fase@contoh.test');`);
+  const bacaRiwayat = () =>
+    JSON.parse(
+      sql(`select coalesce(json_agg(json_build_object('fase', fase, 'mulai', mulai_tanggal, 'selesai', selesai_tanggal)
+             order by mulai_tanggal), '[]') from public.fase_periode where user_id = '${UID_FASE}';`),
+    );
+  let riwayatFaseTs = bacaRiwayat().map((p) => ({ ...p, beratAwalKg: null }));
+  const d0 = riwayatFaseTs[0]?.mulai;
+  if (!d0 || riwayatFaseTs.length !== 1) {
+    console.error(`✗ Pengguna baru seharusnya punya tepat satu periode fase awal, dapat ${JSON.stringify(riwayatFaseTs)}`);
+    process.exit(1);
+  }
+  const ff = riwayatFaseTs[0].fase;
+  const lain = (f) => ['Maintenance', 'Lean Gain', 'Cut'].find((x) => x !== f);
+  const LANGKAH = [
+    { fase: lain(ff), hari: 10, harap: 'ditutup' },
+    { fase: lain(ff), hari: 12, harap: 'tetap' },
+    { fase: ff, hari: 10, harap: 'diganti' },
+    { fase: 'Maintenance', hari: 5, harap: 'ditolak' },
+    { fase: ff === 'Cut' ? 'Lean Gain' : 'Cut', hari: 20, harap: 'ditutup' },
+    { fase: ff, hari: 20, harap: 'diganti' },
+    { fase: ff, hari: 25, harap: 'tetap' },
+    { fase: lain(ff), hari: 8, harap: 'ditolak' },
+    { fase: lain(ff), hari: 30, harap: 'ditutup' },
+  ];
+  let gagalFase = 0;
+  for (const l of LANGKAH) {
+    const tgl = majuHariFase(d0, l.hari);
+    let ditolakSql = false;
+    try {
+      sql(`set request.jwt.claim.sub = '${UID_FASE}'; select 1 from public.ganti_fase('${l.fase}', date '${tgl}');`, { diam: true });
+    } catch {
+      ditolakSql = true;
+    }
+    const ts = terapkanGantiFase(riwayatFaseTs, l.fase, tgl, null);
+    if (ts.jenis !== 'ditolak') riwayatFaseTs = ts.riwayat;
+    const dariSql = bacaRiwayat().map(({ fase, mulai, selesai }) => `${fase}:${mulai}..${selesai ?? ''}`).join(' | ');
+    const dariTs = riwayatFaseTs.map(({ fase, mulai, selesai }) => `${fase}:${mulai}..${selesai ?? ''}`).join(' | ');
+    const cocok = dariSql === dariTs && ditolakSql === (ts.jenis === 'ditolak') && ts.jenis === l.harap;
+    if (!cocok) gagalFase += 1;
+    console.log(`${cocok ? '✓' : '✗'} ${l.fase} pada D+${l.hari} → ${ts.jenis}${cocok ? '' : ` (harap ${l.harap}; SQL ${ditolakSql ? 'ditolak' : dariSql}; TS ${dariTs})`}`);
+  }
+  const faseProfil = sql(`select fase_aktif from public.profiles where user_id = '${UID_FASE}';`);
+  const faseTs = riwayatFaseTs.find((p) => p.selesai === null)?.fase;
+  if (faseProfil !== faseTs) gagalFase += 1;
+  console.log(`${faseProfil === faseTs ? '✓' : '✗'} profiles.fase_aktif (${faseProfil}) = periode berjalan TS (${faseTs})`);
+  if (gagalFase > 0) {
+    console.error(`✗ ${gagalFase} langkah ganti fase berbeda antara SQL dan TypeScript.`);
+    process.exit(1);
+  }
+  console.log(`✓ Riwayat fase: ${LANGKAH.length} langkah ganti fase sama di SQL dan TypeScript (ditutup, diganti, tetap, ditolak).`);
 } finally {
   hentikanPostgres();
 }

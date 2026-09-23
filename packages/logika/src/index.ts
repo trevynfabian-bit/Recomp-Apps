@@ -329,3 +329,6 @@ export {
   uraiGram,
   uraiKalori,
 } from './targetHarian';
+
+export type { HasilGantiFase, PeriodeFase } from './periodeFase';
+export { periodeBerjalan, terapkanGantiFase } from './periodeFase';

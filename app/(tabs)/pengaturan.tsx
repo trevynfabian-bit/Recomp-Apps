@@ -8,7 +8,10 @@ import {
   formatAngka,
   formatDesimal,
   formatTanggalPanjang,
+  labelBerat,
   labelPanjang,
+  periodeBerjalan,
+  tampilkanBerat,
   tampilkanPanjang,
   tanggalHariIni,
   usiaPada,
@@ -17,17 +20,18 @@ import type { Satuan } from '@recomp/logika';
 import {
   Card,
   KerangkaSheet,
-  PemilihFase,
   SectionHeader,
   SheetBatasPinggang,
   SheetEksporData,
+  SheetGantiFase,
   SheetHapusAkun,
   SheetKeluarAkun,
   SheetLengkapiProfil,
   TombolBertepi,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { mockAkun, mockFaseMulai, mockHasilLab, mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
+import { mockRiwayatBerat } from '@/mocks/dailyLog';
+import { mockAkun, mockHasilLab, mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
@@ -55,7 +59,10 @@ type Sheet = 'profil' | 'fase' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hap
 export default function PengaturanScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { profil, gantiFase, perbaruiProfil } = useProfil();
+  const { profil, riwayatFase, perbaruiProfil } = useProfil();
+  const faseMulai = periodeBerjalan(riwayatFase)?.mulai ?? null;
+  /** Timbangan terakhir, untuk contoh di pemilih satuan. */
+  const contohBeratKg = mockRiwayatBerat[mockRiwayatBerat.length - 1].berat_pagi_kg;
   const { pengguna, keluar } = useSesi();
   const { tipeHari, cariTarget } = useTarget();
   // Rentang kalori fase aktif: sekilas cukup untuk tahu target sudah seperti yang dimaksud.
@@ -146,7 +153,7 @@ export default function PengaturanScreen() {
           <BarisPengaturan
             ikon="flag-outline"
             judul="Fase"
-            nilai={`${profil.fase_aktif} · sejak ${formatTanggalPanjang(mockFaseMulai).split(', ')[1]}`}
+            nilai={faseMulai ? `${profil.fase_aktif} · sejak ${formatTanggalPanjang(faseMulai).split(', ')[1]}` : profil.fase_aktif}
             petunjuk="Membuka pilihan fase program"
             onPress={() => setSheet('fase')}
           />
@@ -183,6 +190,10 @@ export default function PengaturanScreen() {
             </View>
           </View>
           <PilihSatuan terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+            Contoh: berat {formatDesimal(tampilkanBerat(contohBeratKg, profil.satuan), 1)} {labelBerat(profil.satuan)}
+            {profil.tinggi_cm !== null ? ` · tinggi ${panjang(profil.tinggi_cm)}` : ''}
+          </Text>
         </Card>
       </View>
 
@@ -297,16 +308,7 @@ export default function PengaturanScreen() {
         profil={profil}
         onSimpan={perbaruiProfil}
       />
-      <KerangkaSheet terbuka={sheet === 'fase'} onTutup={tutup} label="Fase">
-        <Text style={{ ...typography.title, color: colors.text }}>Fase program</Text>
-        <PemilihFase
-          terpilih={profil.fase_aktif}
-          onPilih={(f) => {
-            gantiFase(f);
-            tutup();
-          }}
-        />
-      </KerangkaSheet>
+      <SheetGantiFase terbuka={sheet === 'fase'} onTutup={tutup} />
       <SheetBatasPinggang
         terbuka={sheet === 'pinggang'}
         onTutup={tutup}

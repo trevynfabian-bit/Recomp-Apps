@@ -39,6 +39,7 @@ export { SheetBatasPinggang } from './SheetBatasPinggang';
 export { SheetCatatFoto, type EntriMakananBaru } from './SheetCatatFoto';
 export { SheetCatatUkuran, type UkuranBaru } from './SheetCatatUkuran';
 export { SheetEksporData } from './SheetEksporData';
+export { SheetGantiFase } from './SheetGantiFase';
 export { SheetHapusAkun } from './SheetHapusAkun';
 export { SheetHubungkanSumber } from './SheetHubungkanSumber';
 export { SheetImporRiwayat, type SumberImpor } from './SheetImporRiwayat';

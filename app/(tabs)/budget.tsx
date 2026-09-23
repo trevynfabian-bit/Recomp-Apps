@@ -13,7 +13,7 @@ import {
   terapkanRedistribusi,
   usiaPada,
 } from '@recomp/logika';
-import type { BarisKumulatif, HasilRedistribusi } from '@recomp/logika';
+import type { BarisKumulatif, Fase, HasilRedistribusi } from '@recomp/logika';
 import {
   Card,
   HeroNumber,
@@ -23,6 +23,7 @@ import {
   PanelRedistribusi,
   StatusRedistribusi,
   PemilihFase,
+  SheetGantiFase,
   Pill,
   SectionHeader,
 } from '@/components';
@@ -48,7 +49,9 @@ const BATAS_BAWAH_KALORI = 1800;
  */
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
-  const { profil, gantiFase } = useProfil();
+  const { profil } = useProfil();
+  // Fase dipilih di sini, dikonfirmasi di sheet yang menyebut angka-angkanya.
+  const [calonFase, setCalonFase] = useState<Fase | null>(null);
   const hariIni = mockDailyLogHariIni.tanggal;
   /*
    * Redistribusi yang sudah diterapkan minggu ini. Disimpan di state pada
@@ -171,7 +174,8 @@ export default function BudgetScreen() {
       {/* Fase program — mengubahnya mengubah target, koridor, dan budget */}
       <View>
         <SectionHeader judul="Fase program" aksi="mengubah semua target" />
-        <PemilihFase terpilih={profil.fase_aktif} onPilih={gantiFase} />
+        <PemilihFase terpilih={profil.fase_aktif} onPilih={setCalonFase} />
+        <SheetGantiFase terbuka={calonFase !== null} calon={calonFase} onTutup={() => setCalonFase(null)} />
       </View>
 
       {/* Rincian tujuh hari */}

@@ -1,3 +1,5 @@
+import type { PeriodeFase } from '@recomp/logika';
+
 /**
  * Data tiruan halaman Pengaturan (Fase 4, sisi frontend).
  *
@@ -12,8 +14,14 @@ export const mockAkun = {
   bergabung: '2026-08-02',
 };
 
-/** Fase aktif berjalan sejak tanggal ini (dari `fase_periode`). */
-export const mockFaseMulai = '2026-09-09';
+/**
+ * Riwayat fase (`fase_periode`), lama → baru. Periode terakhir yang berjalan;
+ * fasenya sama dengan `mockProfile.fase_aktif`, seperti yang dijaga `ganti_fase`.
+ */
+export const mockRiwayatFase: PeriodeFase[] = [
+  { fase: 'Maintenance', mulai: '2026-08-02', selesai: '2026-09-08', beratAwalKg: 74.2 },
+  { fase: 'Lean Gain', mulai: '2026-09-09', selesai: null, beratAwalKg: 74.0 },
+];
 
 /**
  * Isi ekspor, sebagai hitungan per jenis data. Ditampilkan SEBELUM ekspor

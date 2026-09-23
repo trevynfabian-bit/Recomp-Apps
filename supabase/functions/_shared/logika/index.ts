@@ -331,3 +331,6 @@ export {
   uraiGram,
   uraiKalori,
 } from './targetHarian.ts';
+
+export type { HasilGantiFase, PeriodeFase } from './periodeFase.ts';
+export { periodeBerjalan, terapkanGantiFase } from './periodeFase.ts';
