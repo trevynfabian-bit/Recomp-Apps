@@ -19,13 +19,18 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * salah, dan tidak membedakan "email tidak terdaftar" dari "kata sandi salah"
  * (membedakannya membocorkan email mana yang punya akun).
  *
+ * Setelah sesi berakhir, email akunnya sudah terisi dan satu kalimat tenang
+ * menjelaskan kenapa diminta masuk lagi — bukan layar kosong tanpa alasan.
+ *
  * Fase 4 sisi frontend: `useSesi` memakai autentikasi tiruan; lihat
  * `@/mocks/sesi` untuk memicu tiap keadaan gagal.
  */
 export default function MasukScreen() {
   const insets = useSafeAreaInsets();
-  const { masuk, kirimAturUlangSandi } = useSesi();
-  const [email, setEmail] = useState('');
+  const { masuk, kirimAturUlangSandi, pemulihan } = useSesi();
+  // Sesi yang berakhir: email akunnya sudah terisi, cukup kata sandi.
+  const [email, setEmail] = useState(pemulihan.email ?? '');
+  const [info, setInfo] = useState(pemulihan.pesan);
   const [sandi, setSandi] = useState('');
   const [tampilSandi, setTampilSandi] = useState(false);
   const [memproses, setMemproses] = useState(false);
@@ -39,6 +44,7 @@ export default function MasukScreen() {
     if (!isianLengkap || memproses) return;
     setMemproses(true);
     setGalat(null);
+    setInfo(null);
     try {
       // Berhasil: tata letak akar berganti ke app; layar ini dilepas.
       await masuk(email.trim(), sandi);
@@ -87,6 +93,25 @@ export default function MasukScreen() {
           </Text>
         </View>
 
+        {info ? (
+          <View
+            accessibilityLiveRegion="polite"
+            style={{
+              flexDirection: 'row',
+              gap: spacing.sm,
+              alignItems: 'flex-start',
+              padding: spacing.md,
+              borderRadius: radius.md,
+              backgroundColor: colors.surface,
+            }}
+          >
+            <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+            <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+              {info}
+            </Text>
+          </View>
+        ) : null}
+
         <View style={{ gap: spacing.lg }}>
           <Isian label="Email">
             <TextInput
@@ -115,6 +140,7 @@ export default function MasukScreen() {
             <View style={{ justifyContent: 'center' }}>
               <TextInput
                 ref={refSandi}
+                autoFocus={Boolean(pemulihan.email)}
                 value={sandi}
                 onChangeText={(t) => {
                   setSandi(t);

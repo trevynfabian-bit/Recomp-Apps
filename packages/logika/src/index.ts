@@ -306,5 +306,14 @@ export {
   tambahDetik,
 } from './sinkronLuar';
 
-export type { KodeGagalMasuk } from './akun';
-export { emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK } from './akun';
+export type { HasilPulihkanSesi, KodeGagalMasuk, SesiTersimpan } from './akun';
+export {
+  buatSesiTersimpan,
+  emailSah,
+  kodeGagalMasuk,
+  LAMA_SESI_HARI,
+  PESAN_GAGAL_MASUK,
+  pesanPemulihanSesi,
+  pulihkanSesi,
+  VERSI_SESI_TERSIMPAN,
+} from './akun';

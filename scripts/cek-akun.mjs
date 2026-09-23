@@ -1,6 +1,7 @@
 /**
  * Memeriksa masuk akun: validasi email, pemetaan galat Supabase Auth ke pesan,
- * nada pesan, dan bahwa SETIAP layar app terlindung sesi.
+ * nada pesan, pemulihan sesi tersimpan (masuk otomatis), dan bahwa SETIAP
+ * layar app terlindung sesi.
  *
  * Yang terakhir paling mudah rusak diam-diam: expo-router mendaftarkan layar
  * yang tidak disebut di tata letak secara otomatis, di LUAR `Stack.Protected`.
@@ -19,7 +20,10 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['akun.ts', 'pengingat.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK } = require(join(kerja, 'keluar', 'akun.js'));
+const {
+  emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK, buatSesiTersimpan, pulihkanSesi, pesanPemulihanSesi,
+  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN,
+} = require(join(kerja, 'keluar', 'akun.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -53,6 +57,66 @@ for (const [g, harap] of kasus) {
 // Tidak membocorkan keberadaan akun: email tak terdaftar & sandi salah SAMA.
 cek('email tak terdaftar dijawab sama dengan kata sandi salah',
   PESAN_GAGAL_MASUK[kodeGagalMasuk({ code: 'user_not_found' })] === PESAN_GAGAL_MASUK[kodeGagalMasuk({ code: 'invalid_credentials' })]);
+
+console.log('\nSesi tersimpan & masuk otomatis');
+const HARI = 24 * 60 * 60 * 1000;
+const t0 = new Date('2026-09-01T07:00:00Z');
+const pengguna = { id: 'u-1', email: 'trevyn@contoh.id' };
+const sesi0 = buatSesiTersimpan(pengguna, t0);
+cek(`sesi baru berlaku ${LAMA_SESI_HARI} hari`, Date.parse(sesi0.berlakuSampai) - t0.getTime() === LAMA_SESI_HARI * HARI);
+cek('sesi baru berversi terkini', sesi0.versi === VERSI_SESI_TERSIMPAN);
+const teks0 = JSON.stringify(sesi0);
+
+const t1 = new Date(t0.getTime() + 10 * HARI);
+const h1 = pulihkanSesi(teks0, t1);
+cek('masih berlaku → masuk', h1.sesi !== null && h1.sesi.pengguna.email === pengguna.email);
+cek('masa berlaku digeser dari saat dibuka', h1.sesi && Date.parse(h1.sesi.berlakuSampai) === t1.getTime() + LAMA_SESI_HARI * HARI);
+cek('waktu masuk pertama dipertahankan', h1.sesi && h1.sesi.masukPada === sesi0.masukPada);
+// Rutin dibuka: tidak pernah berakhir walau jauh melewati 30 hari sejak masuk.
+let s = sesi0;
+let t = t0;
+for (let i = 0; i < 12; i += 1) {
+  t = new Date(t.getTime() + 20 * HARI);
+  const h = pulihkanSesi(JSON.stringify(s), t);
+  s = h.sesi ?? s;
+  if (!h.sesi) break;
+}
+cek('dibuka tiap 20 hari selama 240 hari → tetap masuk', Date.parse(s.berlakuSampai) > t.getTime());
+
+const batas = new Date(Date.parse(sesi0.berlakuSampai));
+const tepat = pulihkanSesi(teks0, batas);
+cek('tepat di batas → berakhir', tepat.sesi === null && tepat.alasan === 'berakhir');
+cek('sedetik sebelum batas → masih berlaku', pulihkanSesi(teks0, new Date(batas.getTime() - 1000)).sesi !== null);
+const lewat = pulihkanSesi(teks0, new Date(batas.getTime() + 5 * HARI));
+cek('berakhir membawa email untuk diisi lebih dulu', lewat.sesi === null && lewat.email === pengguna.email);
+
+const rusak = [
+  ['bukan JSON', '{sesi'],
+  ['null JSON', 'null'],
+  ['angka', '42'],
+  ['versi lain', JSON.stringify({ ...sesi0, versi: VERSI_SESI_TERSIMPAN + 1 })],
+  ['tanpa versi', JSON.stringify({ ...sesi0, versi: undefined })],
+  ['tanpa pengguna', JSON.stringify({ ...sesi0, pengguna: undefined })],
+  ['id kosong', JSON.stringify({ ...sesi0, pengguna: { id: '', email: pengguna.email } })],
+  ['email tidak sah', JSON.stringify({ ...sesi0, pengguna: { id: 'u-1', email: 'bukan-email' } })],
+  ['tanggal tidak sah', JSON.stringify({ ...sesi0, berlakuSampai: 'besok' })],
+  ['tanggal berupa angka', JSON.stringify({ ...sesi0, berlakuSampai: 1893456000000 })],
+];
+for (const [nama, teks] of rusak) {
+  const h = pulihkanSesi(teks, t1);
+  cek(`${nama} → rusak (belum masuk, tanpa email)`, h.sesi === null && h.alasan === 'rusak' && h.email === undefined,
+    JSON.stringify(h));
+}
+cek('null → kosong', pulihkanSesi(null, t1).alasan === 'kosong');
+cek('string kosong → kosong', pulihkanSesi('', t1).alasan === 'kosong');
+// Isi tambahan dari luar tidak ikut terbawa ke sesi yang dipulihkan.
+const bertambah = pulihkanSesi(JSON.stringify({ ...sesi0, pengguna: { ...pengguna, peran: 'admin' }, token: 'x' }), t1);
+cek('isi tambahan dibuang', bertambah.sesi && JSON.stringify(Object.keys(bertambah.sesi.pengguna)) === '["id","email"]' && !('token' in bertambah.sesi));
+
+cek('pertama kali: tanpa pesan', pesanPemulihanSesi('kosong') === null);
+cek('isi rusak: tanpa pesan (bukan urusan pengguna)', pesanPemulihanSesi('rusak') === null);
+const pesanBerakhir = pesanPemulihanSesi('berakhir');
+cek('berakhir: ada pesan, netral, tanpa angka', !!pesanBerakhir && pelanggaranNada(pesanBerakhir).length === 0 && !/\d/.test(pesanBerakhir));
 
 console.log('\nNada pesan');
 for (const [kode, pesan] of Object.entries(PESAN_GAGAL_MASUK)) {

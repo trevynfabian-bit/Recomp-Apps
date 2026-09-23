@@ -308,5 +308,14 @@ export {
   tambahDetik,
 } from './sinkronLuar.ts';
 
-export type { KodeGagalMasuk } from './akun.ts';
-export { emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK } from './akun.ts';
+export type { HasilPulihkanSesi, KodeGagalMasuk, SesiTersimpan } from './akun.ts';
+export {
+  buatSesiTersimpan,
+  emailSah,
+  kodeGagalMasuk,
+  LAMA_SESI_HARI,
+  PESAN_GAGAL_MASUK,
+  pesanPemulihanSesi,
+  pulihkanSesi,
+  VERSI_SESI_TERSIMPAN,
+} from './akun.ts';
