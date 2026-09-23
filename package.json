@@ -18,9 +18,10 @@
     "cek:percakapan": "node scripts/cek-percakapan.mjs",
     "cek:evaluasi": "node scripts/cek-evaluasi.mjs",
     "cek:medis": "node scripts/cek-batas-medis.mjs",
+    "cek:satuan": "node scripts/cek-satuan.mjs",
     "cek:db": "npm run db:cek && npm run cek:paritas",
     "cek:edge": "bash scripts/cek-edge.sh",
-    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:percakapan && npm run cek:evaluasi && npm run cek:medis && npm run cek:edge && npm run cek:db"
+    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:percakapan && npm run cek:evaluasi && npm run cek:medis && npm run cek:satuan && npm run cek:edge && npm run cek:db"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

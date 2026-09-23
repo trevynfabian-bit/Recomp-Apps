@@ -15,7 +15,8 @@ export type SumberWorkoutDb = 'hevy' | 'strava' | 'whoop' | 'healthkit' | 'manua
 export type ProfileRow = {
   user_id: string;
   nama: string | null;
-  satuan: string;
+  /** Satuan TAMPILAN saja; yang disimpan selalu cm & kg. */
+  satuan: 'metrik' | 'imperial';
   fase_aktif: FaseProgram;
   /** Jangkar koridor target; null sebelum fase pertama dicatat. */
   fase_mulai_tanggal: string | null;

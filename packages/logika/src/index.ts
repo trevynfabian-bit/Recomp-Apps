@@ -103,6 +103,21 @@ export {
 } from './ukuran';
 
 export { awalMinggu, budgetMingguan, hariDalamMinggu, lajuBudget, rincianKumulatif } from './budget';
+export {
+  CM_PER_INCI,
+  KG_PER_LB,
+  labelBerat,
+  labelPanjang,
+  periksaBatasPinggang,
+  periksaTinggi,
+  RENTANG_BATAS_PINGGANG_CM,
+  RENTANG_TINGGI_CM,
+  simpanBerat,
+  simpanPanjang,
+  tampilkanBerat,
+  tampilkanPanjang,
+} from './satuan';
+export type { Satuan } from './satuan';
 
 export {
   hitungRedistribusi,
