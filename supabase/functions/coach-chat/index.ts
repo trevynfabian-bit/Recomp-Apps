@@ -17,9 +17,11 @@
  *    klien menjaga agar pertanyaan sensitif tidak perlu meninggalkan perangkat;
  *    pemeriksaan di sini menjaga agar klien versi lama — atau klien yang
  *    dimodifikasi — tidak bisa melewatinya.
- * 3. ANGKA tidak pernah dihitung model. Model memanggil fungsi; fungsinya
- *    dijawab dari konteks yang sudah dihitung app (lihat `_shared/promptCoach.ts`),
- *    lalu asal tiap angka dicatat ke `pesan_coach.rujukan` sebagai DATA.
+ * 3. ANGKA tidak pernah dihitung model. Model memanggil tujuh fungsi; semuanya
+ *    dijawab dari konteks yang sudah dihitung app dan diturunkan dengan fungsi
+ *    dari `@recomp/logika` (lihat `_shared/promptCoach.ts`) — termasuk bentuk
+ *    tampilnya, jadi model tidak pernah memformat angka sendiri. Asal tiap angka
+ *    dicatat ke `pesan_coach.rujukan` sebagai DATA.
  *
  * Aturan "protein tidak pernah dipotong", "wajib rata-rata 7 hari", dan
  * seterusnya tidak dititipkan ke prompt saja — bentuk datanyalah yang
@@ -179,8 +181,20 @@ Deno.serve(async (req: Request) => {
 
   // Asal tiap angka yang benar-benar dipakai jawaban ini, untuk disimpan
   // sebagai DATA di samping teksnya — bukan dititipkan ke prosa model.
-  const rujukan: unknown[] = [];
-  const widget: { jenis: 'angka'; fungsi: string; hasil: unknown }[] = [];
+  //
+  // Hanya hasil `ambil_angka` yang jadi widget. Bentuk `WidgetCoach` dirender
+  // app, jadi menyimpan bentuk yang tidak bisa dibacanya akan menampilkan kartu
+  // rusak — lebih buruk daripada tidak menampilkan kartu sama sekali. Hasil
+  // fungsi lain memang sudah masuk ke teks jawabannya.
+  const rujukan: { label: string; nilai: string; jenis: string; dasar?: string }[] = [];
+  const widget: {
+    jenis: 'angka';
+    fungsi: string;
+    label: string;
+    nilai: string;
+    unit: string;
+    sumber: string;
+  }[] = [];
   let teksJawaban = '';
 
   try {
@@ -228,10 +242,31 @@ Deno.serve(async (req: Request) => {
           (blok.input ?? {}) as Record<string, unknown>,
           konteks,
         );
-        if (keluaran.ok) {
-          widget.push({ jenis: 'angka', fungsi: blok.name, hasil: keluaran.data });
-          const d = keluaran.data as { kunci?: string; sumber?: string; nilai?: unknown };
-          if (d?.kunci) rujukan.push(d);
+        if (keluaran.ok && blok.name === 'ambil_angka') {
+          const d = keluaran.data as {
+            kunci: string;
+            nilai: number;
+            unit: string;
+            sumber: string;
+            nilai_format: string;
+            dasar?: unknown;
+          };
+          widget.push({
+            jenis: 'angka',
+            fungsi: blok.name,
+            label: d.kunci,
+            // Bentuk tampil dari pemformat BERSAMA; app tidak memformat ulang,
+            // dan model tidak pernah diminta memformat sendiri.
+            nilai: d.nilai_format,
+            unit: d.unit,
+            sumber: d.sumber,
+          });
+          rujukan.push({
+            label: d.kunci,
+            nilai: `${d.nilai_format} ${d.unit}`,
+            jenis: d.sumber,
+            dasar: JSON.stringify(d.dasar ?? {}),
+          });
         }
         hasil.push({
           type: 'tool_result',

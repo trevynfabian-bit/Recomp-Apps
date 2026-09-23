@@ -17,35 +17,61 @@
  *    tidak boleh dipakai pada model yang menolaknya.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdtempSync, readFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
 
+/**
+ * Kompilasi inti prompt BESERTA paket logika bersamanya, dengan struktur
+ * direktori yang sama seperti di repo — impor relatifnya menembus dua tingkat ke
+ * `packages/logika/src`, dan itu bagian dari yang diuji: kalau salinan kedua
+ * aturan muncul di dalam promptCoach.ts, impor itu tidak lagi dibutuhkan dan
+ * pemeriksaan di bawah akan menemukan selisihnya.
+ */
 function muatInti() {
   const kerja = mkdtempSync(join(tmpdir(), 'coach-'));
-  copyFileSync('supabase/functions/_shared/promptCoach.ts', join(kerja, 'promptCoach.ts'));
+  mkdirSync(join(kerja, 'supabase/functions/_shared'), { recursive: true });
+  mkdirSync(join(kerja, 'packages/logika/src'), { recursive: true });
+  copyFileSync(
+    'supabase/functions/_shared/promptCoach.ts',
+    join(kerja, 'supabase/functions/_shared/promptCoach.ts'),
+  );
+  for (const berkas of readdirSync('packages/logika/src')) {
+    copyFileSync(join('packages/logika/src', berkas), join(kerja, 'packages/logika/src', berkas));
+  }
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-    ['promptCoach.ts', '--module', 'commonjs', '--target', 'es2022',
+    ['supabase/functions/_shared/promptCoach.ts',
+     '--module', 'commonjs', '--target', 'es2022',
+     // Impor bergaya Deno memakai akhiran `.ts`; tsc menulis ulang jadi `.js`
+     // saat emit, jadi satu sumber yang sama bisa dijalankan Deno dan Node.
+     '--rewriteRelativeImportExtensions',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
-  return require(join(kerja, 'keluar', 'promptCoach.js'));
+  return {
+    inti: require(join(kerja, 'keluar/supabase/functions/_shared/promptCoach.js')),
+    logika: require(join(kerja, 'keluar/packages/logika/src/index.js')),
+  };
 }
 
+const { inti, logika } = muatInti();
 const {
   ATURAN_COACH,
   MAKS_TOKEN_COACH,
   MODEL_COACH,
   NAMA_TOOLS,
   TOOLS_COACH,
+  formatNilai,
   jalankanTool,
+  keBudgetBersama,
+  makroHariIni,
   susunKonteks,
   susunSystem,
-} = muatInti();
+} = inti;
 
 let gagal = 0;
 function cek(label, lulus, detail = '') {
@@ -56,7 +82,7 @@ function cek(label, lulus, detail = '') {
 /** Dua konteks yang BERBEDA isinya; strukturnya sama dengan `konteks_coach`. */
 function konteksTiruan(n) {
   return {
-    hari_ini: n === 1 ? '2026-09-23' : '2026-10-07',
+    hari_ini: n === 1 ? '2026-09-23' : '2026-09-24',
     fase: n === 1 ? 'Lean Gain' : 'Cut',
     profil: { tinggi_cm: 178, jenis_kelamin: 'pria', usia_tahun: 32 },
     angka: [
@@ -88,10 +114,36 @@ function konteksTiruan(n) {
       kecukupan: { cukup_arah: true },
     },
     budget: {
-      rincian: [{ tanggal: '2026-09-23', target_kalori: 2450, terpakai_kalori: 2600 }],
+      minggu_mulai: '2026-09-21',
+      budget_total: 18200,
+      terpakai: 10000,
+      sisa: 8200,
+      hari_tersisa: 4,
+      target_mendatang: 9800,
+      sisa_per_hari: 2050,
+      rencana_per_hari: 2450,
+      // Sepekan penuh: tiga hari berjalan, empat hari mendatang. Bentuknya sama
+      // dengan `rincian` dari `budget_mingguan`.
+      rincian: [0, 1, 2, 3, 4, 5, 6].map((i) => ({
+        tanggal: `2026-09-${21 + i}`,
+        nama_tipe_hari: 'Rest',
+        target_kalori: i < 3 ? [2850, 3100, 2450][i] : 2450,
+        target_asli_kalori: null,
+        target_protein_g: 165,
+        terpakai_kalori: i < 3 ? [3600, 3800, 2600][i] : 0,
+        terpakai_protein_g: i < 3 ? [180, 190, 150][i] : 0,
+        status: i < 2 ? 'lampau' : i === 2 ? 'hari ini' : 'mendatang',
+        selisih: i < 3 ? [750, 700, 150][i] : null,
+      })),
       laju: { status: 'lebih cepat' },
     },
-    target_hari_ini: { nama_tipe_hari: 'Rest', target_kalori: 2450 },
+    target_hari_ini: {
+      nama_tipe_hari: 'Rest',
+      target_kalori: 2450,
+      target_protein_g: 165,
+      target_lemak_g: 75,
+      batas_sat_fat_g: 22,
+    },
     ukuran: {
       bagian: { pinggang_cm: { titik: [{ tanggal: '2026-09-23', nilai: 85.4 }], laju_terkini: 0.2 } },
       batas_pinggang: { keadaan: 'mendekat', pekan_lagi: 2 },
@@ -169,7 +221,7 @@ for (const t of TOOLS_COACH) {
   );
   cek(`${t.name}: punya deskripsi`, (t.description ?? '').length > 20);
 }
-cek(`empat fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 4);
+cek(`tujuh fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 7);
 
 console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
 {
@@ -200,7 +252,7 @@ console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
   cek('deret berat bersumber manual', deret.ok && deret.data.sumber === 'manual');
 
   const budget = jalankanTool('ambil_rincian_budget', {}, a);
-  cek('rincian budget terbawa apa adanya', budget.ok && budget.data.rincian.length === 1);
+  cek('rincian budget terbawa apa adanya (tujuh hari)', budget.ok && budget.data.rincian.length === 7);
 
   const ukuran = jalankanTool('ambil_riwayat_ukuran', { bagian: 'pinggang_cm' }, a);
   cek('riwayat ukuran membawa laju terkini', ukuran.ok && ukuran.data.laju_terkini === 0.2);
@@ -216,6 +268,105 @@ console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
   const sepi = { ...a, angka: [], tren: {}, budget: {}, ukuran: {} };
   cek('tanpa deret → ok:false', !jalankanTool('ambil_deret_berat', {}, sepi).ok);
   cek('tanpa rincian budget → ok:false', !jalankanTool('ambil_rincian_budget', {}, sepi).ok);
+}
+
+console.log('\nAngkanya datang dari LOGIKA BERSAMA, bukan salinan kedua');
+{
+  const { bandingkanTargetTdee, formatAngka, formatDesimal, hitungMakro, rincianKumulatif } =
+    logika;
+
+  // Pemformatan. Kalau coach memformat sendiri, "2850" akan muncul di tengah
+  // layar yang seluruh angkanya "2.850" — dan tidak ada tes yang menangkapnya
+  // kecuali yang ini.
+  cek('format kcal = formatAngka', formatNilai(2850, 'kcal') === formatAngka(2850));
+  cek('format kg = formatDesimal 1 digit', formatNilai(74.5, 'kg') === formatDesimal(74.5, 1));
+  cek('format cm = formatDesimal 1 digit', formatNilai(85.4, 'cm') === formatDesimal(85.4, 1));
+  cek('format % = formatDesimal 1 digit', formatNilai(16.4, '%') === formatDesimal(16.4, 1));
+  cek('kcal ditulis gaya Indonesia', formatNilai(18200, 'kcal') === '18.200');
+  cek('kg ditulis dengan koma', formatNilai(74.5, 'kg') === '74,5');
+
+  const angka = jalankanTool('ambil_angka', { kunci: 'sisa_budget_pekan' }, a);
+  cek(
+    'ambil_angka menyertakan bentuk tampil dari pemformat bersama',
+    angka.ok && angka.data.nilai_format === formatAngka(8200),
+  );
+
+  // Kumulatif: SQL sengaja TIDAK menghitungnya (lihat migrasi endpoint budget),
+  // jadi ini satu-satunya sumbernya — dan harus persis `rincianKumulatif`.
+  const kum = jalankanTool('ambil_kumulatif_budget', {}, a);
+  const kumLangsung = rincianKumulatif(keBudgetBersama(a));
+  cek('kumulatif punya tujuh baris', kum.ok && kum.data.baris.length === 7);
+  cek(
+    'tiap baris kumulatif sama dengan rincianKumulatif',
+    kum.ok &&
+      kum.data.baris.every(
+        (b, i) =>
+          b.kumulatif === kumLangsung[i].kumulatif &&
+          b.sisa_berjalan === kumLangsung[i].sisaBerjalan &&
+          b.terpakai_sampai_sini === kumLangsung[i].terpakaiSampaiSini &&
+          b.proyeksi === kumLangsung[i].proyeksi,
+      ),
+  );
+  cek(
+    'hari mendatang ditandai proyeksi, hari berjalan tidak',
+    kum.ok && kum.data.baris[6].proyeksi === true && kum.data.baris[0].proyeksi === false,
+  );
+  cek(
+    'sisa berjalan ikut diformat',
+    kum.ok && kum.data.baris[0].sisa_berjalan_format === formatAngka(kumLangsung[0].sisaBerjalan),
+  );
+
+  // Perbandingan target vs TDEE: kalimatnya milik paket bersama, bukan disusun
+  // ulang di sini — dua penyusun kalimat pasti berbeda tanda bacanya.
+  const banding = jalankanTool('bandingkan_target_tdee', {}, a);
+  cek(
+    'bacaan target vs TDEE sama dengan bandingkanTargetTdee',
+    banding.ok && banding.data.bacaan === bandingkanTargetTdee(2450, 2680, 'Lean Gain'),
+  );
+  cek('perbandingan TDEE ditandai estimasi', banding.ok && banding.data.sumber === 'estimasi');
+  cek(
+    'bacaannya menyebut fase yang sedang dijalani',
+    banding.ok && /Lean Gain/.test(banding.data.bacaan),
+  );
+
+  // Sisa makro: aturan "sisa vs terpakai" dan pembulatannya milik hitungMakro.
+  const makro = jalankanTool('ambil_sisa_makro_hari_ini', {}, a);
+  const makroLangsung = makroHariIni(a).map((m) => hitungMakro(m, 'sisa'));
+  cek('dua makro dilaporkan (kalori & protein)', makro.ok && makro.data.makro.length === 2);
+  cek(
+    'tiap makro sama dengan hitungMakro',
+    makro.ok &&
+      makro.data.makro.every(
+        (m, i) =>
+          m.sisa === makroLangsung[i].nilaiUtama && m.terlampaui === makroLangsung[i].terlampaui,
+      ),
+  );
+  // Hari ini terpakai 2.600 dari target 2.450 → terlampaui, dan sisanya
+  // dilaporkan sebagai 150 (mutlak) dengan penanda terlampaui — bukan −150 yang
+  // bisa terbaca sebagai "masih ada".
+  cek(
+    'target yang terlampaui ditandai, bukan dilaporkan negatif',
+    makro.ok && makro.data.makro[0].terlampaui === true && makro.data.makro[0].sisa === 150,
+  );
+  cek(
+    'sisa makro ikut diformat',
+    makro.ok && makro.data.makro[0].sisa_format === formatAngka(150),
+  );
+
+  // Lemak & lemak jenuh TIDAK dilaporkan: targetnya ada di konteks tapi
+  // konsumsinya tidak, dan mengirim 0 akan jadi kesimpulan dari kekosongan data.
+  cek(
+    'makro tanpa data konsumsi tidak dilaporkan',
+    makro.ok && !makro.data.makro.some((m) => m.key === 'satFat' || m.key === 'lemak'),
+  );
+
+  // Pemetaan budget adalah PEMETAAN, bukan perhitungan ulang.
+  const b = keBudgetBersama(a);
+  cek('total & sisa diambil apa adanya dari SQL', b.budgetTotal === 18200 && b.sisa === 8200);
+  cek(
+    'sisa per hari tidak dihitung ulang di klien',
+    b.sisaPerHari === a.budget.sisa_per_hari,
+  );
 }
 
 console.log('\nSifat endpoint yang dibaca dari sumbernya');

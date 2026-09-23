@@ -14,8 +14,30 @@
  *   • coach tidak menghitung sendiri. Ia memanggil fungsi, dan angkanya datang
  *     dari konteks yang app sudah hitung — jadi angka di chat dijamin sama
  *     dengan angka di layar lain;
- *   • setiap angka yang dikembalikan fungsi membawa `sumber`-nya.
+ *   • setiap angka yang dikembalikan fungsi membawa `sumber`-nya;
+ *   • angkanya datang dari LOGIKA BERSAMA `@recomp/logika`, bukan dari kode
+ *     kedua yang ditulis khusus untuk coach. Dua implementasi aturan yang sama
+ *     pasti menyimpang, dan yang paling mahal bukan selisih angkanya melainkan
+ *     hilangnya kepercayaan: chat mengatakan satu hal, layar mengatakan hal
+ *     lain, dan pengguna tidak punya cara menentukan mana yang benar.
+ *
+ * Termasuk PEMFORMATANNYA. Setiap angka dikirim ke model beserta bentuk
+ * tampilnya (`nilai_format`) yang dibuat `formatAngka`/`formatDesimal` — jadi
+ * model tidak pernah perlu memformat sendiri, dan "2850" tidak akan muncul di
+ * tengah layar yang seluruh angkanya "2.850".
  */
+import {
+  bandingkanTargetTdee,
+  formatAngka,
+  formatDesimal,
+  hitungMakro,
+  rincianKumulatif,
+} from '../../../packages/logika/src/index.ts';
+import type {
+  BudgetMingguan,
+  Fase,
+  MacroProgress,
+} from '../../../packages/logika/src/tipe.ts';
 
 /**
  * Model dan batasnya. Opus 5 memakai adaptive thinking (bawaan, tidak perlu
@@ -132,6 +154,119 @@ export function susunKonteks(konteks: KonteksCoach): string {
 }
 
 /**
+ * Bentuk tampil sebuah angka, dibuat pemformat BERSAMA.
+ *
+ * Satuan menentukan ketelitiannya: kalori & gram ditulis bulat, kilogram dan
+ * sentimeter satu desimal, persen satu desimal. Itu bukan selera — itu
+ * ketelitian alat ukurnya, dan menulis "74,53 kg" mengaku punya presisi yang
+ * timbangannya tidak punya.
+ */
+export function formatNilai(nilai: number, unit: string): string {
+  if (unit === 'kg' || unit === 'cm' || unit === '%') return formatDesimal(nilai, 1);
+  return formatAngka(nilai);
+}
+
+/**
+ * Petakan blok budget dari SQL ke bentuk yang dipakai @recomp/logika.
+ *
+ * Ini PEMETAAN, bukan perhitungan ulang: angkanya diambil apa adanya dari
+ * jawaban `budget_mingguan`, lalu diserahkan ke fungsi bersama untuk turunannya.
+ * `npm run cek:paritas` sudah membuktikan kedua sisi menghasilkan angka yang
+ * sama, jadi menurunkan sisanya di sini tidak menambah sumber kebenaran baru.
+ */
+export function keBudgetBersama(konteks: KonteksCoach): BudgetMingguan | null {
+  const b = konteks.budget as {
+    minggu_mulai?: string;
+    budget_total?: number;
+    terpakai?: number;
+    sisa?: number;
+    hari_tersisa?: number;
+    target_mendatang?: number;
+    sisa_per_hari?: number | null;
+    rencana_per_hari?: number | null;
+    rincian?: {
+      tanggal: string;
+      nama_tipe_hari: string | null;
+      target_kalori: number;
+      target_asli_kalori: number | null;
+      target_protein_g: number;
+      terpakai_kalori: number;
+      status: 'lampau' | 'hari ini' | 'mendatang';
+      selisih: number | null;
+    }[];
+  };
+  if (!Array.isArray(b.rincian) || b.rincian.length === 0) return null;
+
+  const rincian = b.rincian.map((h) => ({
+    tanggal: h.tanggal,
+    namaTipeHari: h.nama_tipe_hari ?? 'Tanpa tipe hari',
+    targetKalori: h.target_kalori,
+    targetAsliKalori: h.target_asli_kalori ?? undefined,
+    terpakaiKalori: h.terpakai_kalori,
+    targetProteinG: h.target_protein_g,
+    status: h.status,
+    selisih: h.selisih,
+  }));
+
+  return {
+    mingguMulai: b.minggu_mulai ?? rincian[0].tanggal,
+    budgetTotal: b.budget_total ?? 0,
+    terpakai: b.terpakai ?? 0,
+    sisa: b.sisa ?? 0,
+    hariTersisa: b.hari_tersisa ?? 0,
+    targetMendatang: b.target_mendatang ?? 0,
+    sisaPerHari: b.sisa_per_hari ?? null,
+    rencanaPerHari: b.rencana_per_hari ?? null,
+    rincian,
+  };
+}
+
+/**
+ * Susun makro hari ini dari target & konsumsi yang ada di konteks.
+ *
+ * HANYA kalori dan protein. Lemak dan lemak jenuh punya targetnya di konteks,
+ * tapi KONSUMSI-nya tidak — dan mengirimnya dengan `terpakai: 0` akan membuat
+ * coach berkata "lemak jenuhmu masih 0 g hari ini", yang bukan kesimpulan dari
+ * data melainkan dari kekosongan data. Karbo memang tidak ditargetkan
+ * (`MacroProgress.target` boleh null), jadi ia juga tidak ikut.
+ */
+export function makroHariIni(konteks: KonteksCoach): MacroProgress[] {
+  const t = konteks.target_hari_ini as {
+    target_kalori?: number;
+    target_protein_g?: number;
+  } | null;
+  if (!t) return [];
+
+  const hari = (
+    konteks.budget as {
+      rincian?: { tanggal: string; terpakai_kalori: number; terpakai_protein_g: number }[];
+    }
+  ).rincian?.find((h) => h.tanggal === konteks.hari_ini);
+  if (!hari) return [];
+
+  const makro: MacroProgress[] = [];
+  if (typeof t.target_kalori === 'number') {
+    makro.push({
+      key: 'kalori',
+      label: 'Kalori',
+      terpakai: hari.terpakai_kalori,
+      target: t.target_kalori,
+      unit: 'kcal',
+    });
+  }
+  if (typeof t.target_protein_g === 'number') {
+    makro.push({
+      key: 'protein',
+      label: 'Protein',
+      terpakai: hari.terpakai_protein_g,
+      target: t.target_protein_g,
+      unit: 'g',
+    });
+  }
+  return makro;
+}
+
+/**
  * Fungsi yang bisa dipanggil coach.
  *
  * Semuanya dijawab dari KONTEKS yang sudah diambil, bukan dari query baru.
@@ -189,6 +324,46 @@ export const TOOLS_COACH = [
     },
   },
   {
+    name: 'ambil_sisa_makro_hari_ini',
+    description:
+      'Sisa kalori & protein hari ini, dihitung dengan aturan yang sama dengan ' +
+      'panel di layar Hari Ini. Menyebut juga bila targetnya sudah terlampaui.',
+    strict: true,
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'ambil_kumulatif_budget',
+    description:
+      'Sisa jatah pekan ini hari demi hari (kumulatif). Pakai ini untuk menjawab ' +
+      '"setelah hari ini tinggal berapa"; hari yang belum berjalan diproyeksikan ' +
+      'dari targetnya dan ditandai proyeksi.',
+    strict: true,
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'bandingkan_target_tdee',
+    description:
+      'Bandingkan target kalori hari ini dengan perkiraan TDEE menurut fase yang ' +
+      'sedang dijalani. Deskriptif — menyebut arah dan besarnya, bukan menyuruh.',
+    strict: true,
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+  },
+  {
     name: 'ambil_riwayat_ukuran',
     description:
       'Riwayat satu bagian tubuh beserta perubahan & laju per pekannya.',
@@ -237,7 +412,11 @@ export function jalankanTool(
             .join(', ')}.`,
         };
       }
-      return { ok: true, data: angka };
+      // Bentuk tampilnya ikut dikirim, jadi model tidak pernah memformat sendiri.
+      return {
+        ok: true,
+        data: { ...angka, nilai_format: formatNilai(angka.nilai, angka.unit) },
+      };
     }
 
     case 'ambil_rincian_budget': {
@@ -265,6 +444,80 @@ export function jalankanTool(
           deret,
           arah: (konteks.tren as { arah?: unknown }).arah,
           kecukupan: (konteks.tren as { kecukupan?: unknown }).kecukupan,
+        },
+      };
+    }
+
+    case 'ambil_sisa_makro_hari_ini': {
+      const makro = makroHariIni(konteks);
+      if (makro.length === 0) {
+        return { ok: false, alasan: 'Target atau catatan hari ini belum ada.' };
+      }
+      // `hitungMakro` memutlakkan angkanya dan membawa tandanya di
+      // `terlampaui`; itu dipertahankan apa adanya supaya coach tidak
+      // menafsirkan "sisa 150" sebagai kurang padahal artinya lebih.
+      return {
+        ok: true,
+        data: {
+          sumber: 'manual',
+          makro: makro.map((m) => {
+            const h = hitungMakro(m, 'sisa');
+            return {
+              key: m.key,
+              label: m.label,
+              unit: m.unit,
+              target: m.target,
+              terpakai: m.terpakai,
+              sisa: h.nilaiUtama,
+              sisa_format: formatNilai(h.nilaiUtama, m.unit),
+              terlampaui: h.terlampaui,
+              progres: h.progres,
+            };
+          }),
+        },
+      };
+    }
+
+    case 'ambil_kumulatif_budget': {
+      const budget = keBudgetBersama(konteks);
+      if (!budget) return { ok: false, alasan: 'Rincian budget pekan ini belum ada.' };
+      return {
+        ok: true,
+        data: {
+          sumber: 'manual',
+          baris: rincianKumulatif(budget).map((b) => ({
+            tanggal: b.tanggal,
+            nama_tipe_hari: b.namaTipeHari,
+            proyeksi: b.proyeksi,
+            nilai_kalori: b.nilaiKalori,
+            kumulatif: b.kumulatif,
+            sisa_berjalan: b.sisaBerjalan,
+            sisa_berjalan_format: formatNilai(b.sisaBerjalan, 'kcal'),
+            terpakai_sampai_sini: b.terpakaiSampaiSini,
+          })),
+        },
+      };
+    }
+
+    case 'bandingkan_target_tdee': {
+      const target = (konteks.target_hari_ini as { target_kalori?: number } | null)
+        ?.target_kalori;
+      const tengah = (konteks.tdee as { tengah?: number | null }).tengah ?? null;
+      if (typeof target !== 'number') {
+        return { ok: false, alasan: 'Target kalori hari ini belum ada.' };
+      }
+      if (tengah === null) {
+        return { ok: false, alasan: 'Perkiraan TDEE belum bisa dihitung.' };
+      }
+      return {
+        ok: true,
+        data: {
+          // TDEE adalah estimasi, jadi perbandingannya juga estimasi — dan itu
+          // ditandai di sini, bukan diserahkan ke kalimat model.
+          sumber: 'estimasi',
+          target_kalori: target,
+          tdee_tengah: tengah,
+          bacaan: bandingkanTargetTdee(target, tengah, konteks.fase as Fase),
         },
       };
     }
