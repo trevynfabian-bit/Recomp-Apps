@@ -248,3 +248,29 @@ export {
   teksWidget,
   teksWidgetSebaris,
 } from './pengingat.ts';
+
+export type {
+  AktivitasStrava,
+  DataLuar,
+  KirimanLuar,
+  LatihanLuar,
+  RecoveryWhoop,
+  TidurWhoop,
+  WorkoutWhoop,
+} from './sinkronLuar.ts';
+
+export {
+  jenisOlahragaStrava,
+  jenisOlahragaWhoop,
+  KJ_PER_KCAL,
+  kcalDariKj,
+  kirimanAktivitasStrava,
+  kirimanHapusRecoveryWhoop,
+  kirimanHapusStrava,
+  kirimanHapusTidurWhoop,
+  kirimanHapusWorkoutWhoop,
+  kirimanRecoveryWhoop,
+  kirimanTidurWhoop,
+  kirimanWorkoutWhoop,
+  tambahDetik,
+} from './sinkronLuar.ts';

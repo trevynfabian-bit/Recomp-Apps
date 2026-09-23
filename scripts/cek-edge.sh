@@ -31,14 +31,23 @@ declare namespace Deno {
 }
 TS
 
+# Penentu impor gaya Deno ditulis ulang di SEMUA berkas salinan, bukan hanya
+# index.ts: modul _shared juga boleh mengimpor tipe SDK.
+find "$KERJA/supabase/functions" -name '*.ts' -exec sed -i -E \
+  -e "s#npm:@anthropic-ai/sdk(@[0-9.]+)?#@anthropic-ai/sdk#g" \
+  -e "s#npm:@supabase/supabase-js(@[0-9.]+)?#@supabase/supabase-js#g" \
+  {} +
+
 GAGAL=0
 for f in "$KERJA"/supabase/functions/*/index.ts; do
   nama="$(basename "$(dirname "$f")")"
+  # Versi yang dipatok dibaca dari berkas ASLI: salinannya sudah ditulis ulang.
+  asli="$REPO/supabase/functions/$nama/index.ts"
 
   # `|| true` wajib: dengan `pipefail`, grep yang tidak menemukan versi akan
   # menghentikan skrip DIAM-DIAM tanpa pesan — tepat kasus yang ingin dilaporkan.
-  dipatok="$( (grep -o "npm:@anthropic-ai/sdk@[0-9.]*" "$f" || true) | head -1 | sed 's/.*@//')"
-  if grep -q "npm:@anthropic-ai/sdk" "$f"; then
+  dipatok="$( (grep -o "npm:@anthropic-ai/sdk@[0-9.]*" "$asli" || true) | head -1 | sed 's/.*@//')"
+  if grep -q "npm:@anthropic-ai/sdk" "$asli"; then
     if [ -z "$dipatok" ]; then
       echo "✗ $nama: versi SDK tidak dipatok"
       GAGAL=1
@@ -50,11 +59,6 @@ for f in "$KERJA"/supabase/functions/*/index.ts; do
       continue
     fi
   fi
-
-  sed -i -E \
-    -e "s#npm:@anthropic-ai/sdk(@[0-9.]+)?#@anthropic-ai/sdk#g" \
-    -e "s#npm:@supabase/supabase-js(@[0-9.]+)?#@supabase/supabase-js#g" \
-    "$f"
 
   if (cd "$KERJA" && npx tsc --ignoreConfig --noEmit --strict --skipLibCheck \
         --moduleResolution bundler --module esnext --target es2022 \
