@@ -33,23 +33,26 @@
  *   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
  *   supabase functions deploy coach-chat
  * `SUPABASE_URL` dan `SUPABASE_ANON_KEY` sudah disediakan runtime-nya. Versi SDK
- * dipatok di impor di bawah: fungsi yang tidak dipatok akan ikut berubah
- * perilakunya pada penyebaran berikutnya tanpa satu baris kode pun berubah.
+ * dipatok di impor di bawah dan SAMA dengan devDependency proyek: `npm run
+ * cek:edge` memeriksa berkas ini terhadap tipe SDK yang terpasang, jadi
+ * keduanya harus versi yang sama agar pemeriksaannya berarti.
  *
  * Bagian yang bisa diuji tanpa kunci API hidup di `_shared/promptCoach.ts` dan
  * diperiksa `npm run cek:prompt`; sifat-sifat berkas ini yang tidak bisa diuji
  * tanpa kunci (kunci tidak di bundel, JWT diteruskan, batas medis diperiksa
  * ulang) dibaca dari sumbernya oleh skrip yang sama.
  */
-import Anthropic from 'npm:@anthropic-ai/sdk@0.128.0';
+import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { periksaBatasMedis } from '../../../packages/logika/src/batasMedis.ts';
 import {
+  BETA_FALLBACK,
   jalankanTool,
   MAKS_TOKEN_COACH,
   MODEL_COACH,
   susunSystem,
   TOOLS_COACH,
+  UPAYA_COACH,
   type KonteksCoach,
 } from '../_shared/promptCoach.ts';
 
@@ -168,7 +171,14 @@ Deno.serve(async (req: Request) => {
     .order('urutan', { ascending: true })
     .limit(40);
 
-  const pesan: Anthropic.MessageParam[] = (riwayat ?? [])
+  // Riwayat dari percakapan SEBELUMNYA dikirim sebagai teks saja, tanpa blok
+  // thinking. Itu disengaja: blok thinking terikat pada model dan pada prefiks
+  // percakapan tempat ia dibuat, sementara blok system di sini memuat konteks
+  // data yang berubah tiap permintaan. Memutar ulang blok lama di atas prefiks
+  // yang sudah berubah akan ditolak (akun baru) atau dibuang diam-diam (akun
+  // lama). Di DALAM satu permintaan, putaran fungsi hanya MENAMBAH pesan dan
+  // system/tools tidak berubah, jadi blok thinking-nya tetap sah.
+  const pesan: Anthropic.Beta.BetaMessageParam[] = (riwayat ?? [])
     .filter((p) => (p.teks as string).trim().length > 0)
     .map((p) => ({
       role: (p.peran as string) === 'coach' ? 'assistant' : 'user',
@@ -201,9 +211,18 @@ Deno.serve(async (req: Request) => {
     for (let putaran = 0; putaran < MAKS_PUTARAN_TOOL; putaran += 1) {
       // Streaming dipakai supaya permintaan panjang tidak menabrak timeout HTTP;
       // `finalMessage()` menunggu sampai balasannya utuh.
-      const aliran = anthropic.messages.stream({
+      const aliran = anthropic.beta.messages.stream({
         model: MODEL_COACH,
         max_tokens: MAKS_TOKEN_COACH,
+        // Effort disetel eksplisit; lihat UPAYA_COACH. `thinking` sengaja tidak
+        // dikirim: pada model ini ia selalu menyala dan hanya effort yang
+        // mengaturnya.
+        output_config: { effort: UPAYA_COACH },
+        // Penolakan salah dari pengaman dialihkan ke model pengganti di sisi
+        // server, bukan jadi layar kosong. Model pengganti berjalan tanpa blok
+        // thinking model utama — itu bisa diterima untuk jawaban sependek ini.
+        betas: [BETA_FALLBACK],
+        fallbacks: 'default',
         system,
         messages: pesan,
         tools: TOOLS_COACH,
@@ -215,7 +234,8 @@ Deno.serve(async (req: Request) => {
       const balasan = await aliran.finalMessage();
 
       // Penolakan keamanan datang sebagai HTTP 200; memeriksanya lebih dulu
-      // adalah satu-satunya cara membedakannya dari jawaban kosong.
+      // adalah satu-satunya cara membedakannya dari jawaban kosong. Sampai di
+      // sini berarti SELURUH rantai fallback ikut menolak.
       if (balasan.stop_reason === 'refusal') {
         return jawab(
           { galat: 'Model menolak menjawab pertanyaan ini.', kategori: balasan.stop_details },
@@ -223,6 +243,10 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      // Dibaca menurut `type`, bukan posisi: balasan bisa diawali blok
+      // thinking (teksnya kosong pada tampilan bawaan), dan catatan di antara
+      // pemanggilan fungsi juga datang sebagai blok thinking, bukan teks. Yang
+      // dikumpulkan hanya teks jawaban sebenarnya.
       for (const blok of balasan.content) {
         if (blok.type === 'text') teksJawaban += blok.text;
       }
@@ -234,7 +258,7 @@ Deno.serve(async (req: Request) => {
 
       // Semua hasil fungsi dikembalikan dalam SATU pesan user. Memecahnya ke
       // beberapa pesan membuat model berhenti memanggil fungsi secara paralel.
-      const hasil: Anthropic.ToolResultBlockParam[] = [];
+      const hasil: Anthropic.Beta.BetaToolResultBlockParam[] = [];
       for (const blok of balasan.content) {
         if (blok.type !== 'tool_use') continue;
         const keluaran = jalankanTool(

@@ -40,13 +40,44 @@ import type {
 } from '../../../packages/logika/src/tipe.ts';
 
 /**
- * Model dan batasnya. Opus 5 memakai adaptive thinking (bawaan, tidak perlu
- * disetel) dan `budget_tokens` sudah dihapus — mengirimnya akan ditolak 400.
+ * Model coach.
+ *
+ * Pada model ini thinking SELALU menyala: `thinking: {type: "disabled"}` dan
+ * bentuk `budget_tokens` sama-sama ditolak 400 di tingkat effort mana pun, dan
+ * `tool_choice` bertipe `any`/`tool` juga ditolak. Karena itu endpoint tidak
+ * pernah mengirim `thinking` maupun `tool_choice`; kedalaman berpikir diatur
+ * lewat `UPAYA_COACH` saja.
  */
-export const MODEL_COACH = 'claude-opus-5';
+export const MODEL_COACH = 'claude-opus-5-5';
 
-/** Streaming dipakai, jadi max_tokens boleh longgar tanpa risiko timeout HTTP. */
-export const MAKS_TOKEN_COACH = 8000;
+/**
+ * Tingkat effort, disetel EKSPLISIT.
+ *
+ * Nilai bawaan API untuk model ini sudah `medium`, tapi mengandalkan nilai
+ * bawaan berarti pergantian model berikutnya bisa diam-diam mengubah seberapa
+ * lama dan seberapa mahal tiap jawaban — tanpa satu baris kode pun berubah.
+ * `medium` dipilih karena jawaban coach pendek dan berbasis data yang sudah
+ * dihitung app; tingkat yang lebih tinggi hanya layak setelah terukur memberi
+ * jawaban yang lebih baik.
+ */
+export const UPAYA_COACH = 'medium' as const;
+
+/**
+ * Batas token keluaran. Thinking IKUT dihitung di sini walaupun teksnya tidak
+ * dikembalikan, jadi batas yang pas untuk jawaban saja akan memotong jawaban
+ * di tengah kalimat. Streaming dipakai, jadi batas longgar tidak berisiko
+ * menabrak timeout HTTP.
+ */
+export const MAKS_TOKEN_COACH = 16000;
+
+/**
+ * Fallback server saat pengaman menolak permintaan (`stop_reason: "refusal"`).
+ * `default` membiarkan server memilih model pengganti menurut kategori
+ * penolakannya, jadi tidak ada daftar model yang harus dirawat di sini. Tanpa
+ * fallback, satu penolakan salah (false positive) atas pertanyaan gizi yang
+ * wajar langsung jadi layar kosong bagi pengguna.
+ */
+export const BETA_FALLBACK = 'server-side-fallback-2026-07-01';
 
 /**
  * Aturan coach — bagian system yang TIDAK BOLEH berubah antar permintaan.

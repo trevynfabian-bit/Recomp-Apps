@@ -10,8 +10,16 @@
  *   1. Wajib sesi login yang sah — bukan endpoint terbuka.
  *   2. Ukuran gambar dibatasi sebelum dikirim ke model.
  *   3. `effort` dapat disetel lewat environment; bawaannya `medium`, bukan `max`.
+ *
+ * Bentuk permintaannya diperiksa terhadap tipe SDK resmi oleh `npm run
+ * cek:edge` — langsung pada berkas ini, bukan pada salinannya.
  */
-import Anthropic from 'npm:@anthropic-ai/sdk';
+// Versi SDK DIPATOK, dan sama dengan devDependency proyek: `npm run cek:edge`
+// memeriksa berkas ini terhadap tipe SDK yang terpasang, jadi keduanya harus
+// versi yang sama agar pemeriksaannya berarti. Impor tanpa versi akan ikut
+// berubah perilakunya pada penyebaran berikutnya tanpa satu baris kode pun
+// berubah.
+import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 /** Batas ukuran gambar setelah di-decode. Lebih besar dari ini ditolak. */
@@ -149,11 +157,23 @@ Deno.serve(async (req: Request) => {
     | 'high';
 
   try {
-    const respons = await anthropic.messages.create({
-      model: Deno.env.get('ESTIMASI_MODEL') ?? 'claude-opus-5',
+    const respons = await anthropic.beta.messages.create({
+      // Model bawaan dipilih karena membaca foto jauh lebih teliti pada effort
+      // yang sama; tetap bisa ditimpa lewat environment tanpa menyebar ulang.
+      model: Deno.env.get('ESTIMASI_MODEL') ?? 'claude-opus-5-5',
+      // Thinking ikut dihitung dalam batas ini walau teksnya tidak dikembalikan.
       max_tokens: 16000,
+      // Pada model bawaan thinking selalu menyala; `adaptive` setara dengan
+      // tidak mengirimnya, dan bentuk `disabled`/`budget_tokens` ditolak 400.
       thinking: { type: 'adaptive' },
+      // Effort disetel eksplisit: nilai bawaan API berbeda antar model, dan
+      // mengandalkannya berarti pergantian model diam-diam mengubah biaya.
       output_config: { effort },
+      // Penolakan salah dari pengaman (mis. foto makanan yang terbaca keliru
+      // sebagai hal lain) dialihkan ke model pengganti di sisi server, bukan
+      // langsung jadi pesan "tidak bisa dianalisis".
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
       system: INSTRUKSI,
       tools: [
         {
@@ -165,8 +185,9 @@ Deno.serve(async (req: Request) => {
           strict: true,
         },
       ],
-      // `auto` + instruksi eksplisit, bukan tool_choice paksa: sebagian model
-      // terbaru menolak tool_choice paksa, dan ini tetap bekerja di semuanya.
+      // `auto` + instruksi eksplisit, bukan tool_choice paksa: model bawaan
+      // menolak tool_choice `any`/`tool` dengan 400. Karena `auto` tidak
+      // menjamin panggilan, kasus tanpa tool_use ditangani di bawah.
       tool_choice: { type: 'auto' },
       messages: [
         {
@@ -183,6 +204,7 @@ Deno.serve(async (req: Request) => {
     });
 
     // Model bisa menolak karena alasan keamanan; itu bukan kegagalan server.
+    // Sampai di sini berarti seluruh rantai fallback ikut menolak.
     if (respons.stop_reason === 'refusal') {
       return balas(
         { pesan: 'Foto ini tidak bisa dianalisis. Coba foto lain atau catat manual.' },

@@ -160,8 +160,16 @@ const a = konteksTiruan(1);
 const b = konteksTiruan(2);
 
 console.log('\nModel & batas');
-cek(`model ${MODEL_COACH}`, MODEL_COACH === 'claude-opus-5');
-cek(`max_tokens ${MAKS_TOKEN_COACH} longgar tapi tidak nol`, MAKS_TOKEN_COACH >= 2000);
+cek(`model ${MODEL_COACH}`, MODEL_COACH === 'claude-opus-5-5');
+// Thinking selalu menyala pada model ini dan IKUT dihitung dalam max_tokens,
+// walaupun teksnya tidak dikembalikan. Batas yang pas untuk jawaban saja akan
+// memotong jawaban di tengah kalimat.
+cek(
+  `max_tokens ${MAKS_TOKEN_COACH} menyisakan ruang untuk thinking`,
+  MAKS_TOKEN_COACH >= 16000,
+);
+cek(`effort disetel eksplisit: ${inti.UPAYA_COACH}`, inti.UPAYA_COACH === 'medium');
+cek('beta fallback server tercatat', inti.BETA_FALLBACK === 'server-side-fallback-2026-07-01');
 
 console.log('\nBentuk prompt: prefiks cache harus STABIL');
 const sysA = susunSystem(a);
@@ -396,6 +404,32 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
     'budget_tokens tidak dipakai (ditolak 400 pada model ini)',
     !src.includes('budget_tokens'),
   );
+  cek(
+    'thinking tidak dimatikan (ditolak 400 pada model ini)',
+    !/type:\s*'disabled'/.test(src),
+  );
+  cek(
+    'tool_choice paksa tidak dipakai (any/tool ditolak 400 pada model ini)',
+    !/tool_choice:\s*\{\s*type:\s*'(any|tool)'/.test(src),
+  );
+  cek(
+    'effort dikirim eksplisit, bukan mengandalkan nilai bawaan',
+    src.includes('output_config: { effort: UPAYA_COACH }'),
+  );
+  cek(
+    'fallback server dinyalakan lewat endpoint beta',
+    src.includes('beta.messages.stream') &&
+      src.includes("fallbacks: 'default'") &&
+      src.includes('betas: [BETA_FALLBACK]'),
+  );
+  cek(
+    'teks dibaca menurut jenis blok, bukan posisi',
+    src.includes("blok.type === 'text'") && !/content\[0\]/.test(src),
+  );
+  cek(
+    'blok balasan dikembalikan UTUH ke riwayat dalam satu permintaan',
+    src.includes("pesan.push({ role: 'assistant', content: balasan.content })"),
+  );
   cek('penolakan keamanan diperiksa sebelum membaca isi balasan', src.includes("'refusal'"));
   cek(
     'streaming dipakai supaya tidak menabrak timeout HTTP',
@@ -409,6 +443,35 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
   cek(
     'kunci API tidak pernah ikut ke jawaban maupun log',
     !/console\.(log|error)\([^)]*kunciAi/.test(src),
+  );
+}
+
+console.log('\nKebijakan model sama di SEMUA Edge Function');
+{
+  // Fungsi foto makanan juga membaca lewat model. Dua fungsi dengan kebijakan
+  // model berbeda berarti satu bagian app diam-diam berjalan di model lama
+  // sementara yang lain sudah pindah — dan tidak ada yang akan menyadarinya.
+  const foto = readFileSync('supabase/functions/estimasi-makanan-foto/index.ts', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
+  cek(
+    `fungsi foto memakai model bawaan yang sama (${MODEL_COACH})`,
+    foto.includes(`?? '${MODEL_COACH}'`),
+  );
+  cek(
+    'fungsi foto menyalakan fallback server',
+    foto.includes('beta.messages.create') &&
+      foto.includes("fallbacks: 'default'") &&
+      foto.includes("betas: ['server-side-fallback-2026-07-01']"),
+  );
+  cek('fungsi foto menyetel effort eksplisit', foto.includes('output_config: { effort }'));
+  cek(
+    'fungsi foto tidak mematikan thinking maupun memaksa tool',
+    !/type:\s*'disabled'/.test(foto) && !/tool_choice:\s*\{\s*type:\s*'(any|tool)'/.test(foto),
+  );
+  cek(
+    'fungsi foto menangani balasan tanpa panggilan tool',
+    foto.includes("b.type === 'tool_use'") && foto.includes('!blokTool'),
   );
 }
 
