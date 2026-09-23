@@ -741,6 +741,35 @@ export type BodyMeasurementRow = {
 };
 
 /**
+ * Baris `health_connections` — STATUS koneksi sumber data.
+ *
+ * Token OAuth dan kunci API ada di `health_connection_secrets`, yang sengaja
+ * tidak punya tipe di sini: klien tidak punya hak apa pun atas tabel itu, dan
+ * tipe yang ada akan mengundang kode yang mencoba membacanya.
+ *
+ * Klien hanya boleh MENULIS baris `apple_health` miliknya sendiri (izin
+ * HealthKit hanya ada di perangkat); sumber lain ditulis Edge Function.
+ */
+export type HealthConnectionRow = {
+  id: string;
+  user_id: string;
+  sumber: 'apple_health' | 'whoop' | 'strava' | 'hevy';
+  /** Diturunkan dari `sumber` oleh database; tidak bisa ditulis. */
+  mekanisme: 'healthkit' | 'webhook' | 'cron';
+  status: 'terhubung' | 'terputus';
+  /** Id akun Strava/WHOOP untuk mengarahkan webhook; `null` untuk sumber lain. */
+  akun_eksternal: string | null;
+  terhubung_pada: string;
+  /** Diisi database saat status menjadi `terputus`. */
+  diputus_pada: string | null;
+  sinkron_terakhir: string | null;
+  galat_terakhir: string | null;
+  galat_pada: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
  * Hasil `endpoint_budget_mingguan` — satu snapshot untuk seluruh layar Budget.
  *
  * Tidak memuat rincian kumulatif: ia turunan MURNI dari `budget.rincian`, jadi
@@ -951,6 +980,16 @@ export type Database = {
         Row: BodyMeasurementRow;
         Insert: Omit<BodyMeasurementRow, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<BodyMeasurementRow>;
+        Relationships: [];
+      };
+      health_connections: {
+        Row: HealthConnectionRow;
+        /** Klien: hanya `sumber: 'apple_health'` (RLS menolak yang lain). */
+        Insert: Pick<HealthConnectionRow, 'user_id' | 'sumber'> &
+          Partial<Pick<HealthConnectionRow, 'status' | 'sinkron_terakhir' | 'galat_terakhir' | 'galat_pada'>>;
+        Update: Partial<
+          Pick<HealthConnectionRow, 'status' | 'sinkron_terakhir' | 'galat_terakhir' | 'galat_pada'>
+        >;
         Relationships: [];
       };
       food_logs: {
