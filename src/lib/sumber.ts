@@ -42,3 +42,16 @@ export function sumberMakanan(sumber: FoodLog['sumber']): JenisSumber {
 export function hitungEstimasi(foodLogs: FoodLog[]): number {
   return foodLogs.filter((f) => sumberMakanan(f.sumber) === 'estimasi').length;
 }
+
+/**
+ * Asal angka hasil lab: selalu data mentah yang dicatat sendiri.
+ *
+ * Setiap nilai dan rentang rujukan disalin pengguna dari kertas hasil lab;
+ * app tidak memperkirakan, membulatkan, atau melengkapinya. Posisi "di luar
+ * rentang" hanya membandingkan angka itu dengan rentang milik lab, jadi
+ * juga bukan estimasi.
+ */
+export const SUMBER_HASIL_LAB: { jenis: JenisSumber; detail: string } = {
+  jenis: 'manual',
+  detail: 'disalin dari hasil lab',
+};

@@ -270,3 +270,60 @@ export function hasilLabSama(a: Omit<HasilLab, 'id'>, b: HasilLab): boolean {
     })
   );
 }
+
+/**
+ * Nilai hasil lab seperti tertulis di kertasnya: koma desimal, semua desimal
+ * dipertahankan ("5,3", "245", "0,75", "2,345"). Tidak dibulatkan — ini data
+ * mentah, dan membulatkannya berarti app mengubah angka milik laboratorium.
+ */
+export function tulisNilaiLab(n: number): string {
+  return angkaIsian(n);
+}
+
+/** Rentang rujukan lab dalam kata: "13–17", "maks 200", "min 40"; `null` bila lab tidak mencetaknya. */
+export function tulisRujukanLab(p: PenandaLab): string | null {
+  const min = p.rujukanMin === null ? null : tulisNilaiLab(p.rujukanMin);
+  const maks = p.rujukanMaks === null ? null : tulisNilaiLab(p.rujukanMaks);
+  if (min !== null && maks !== null) return `${min}–${maks}`;
+  if (maks !== null) return `maks ${maks}`;
+  if (min !== null) return `min ${min}`;
+  return null;
+}
+
+/** Satu penanda sebagai data mentah yang siap dibaca. */
+export type BarisDataMentahLab = {
+  nama: string;
+  /** Nilai + satuan persis seperti disalin, mis. "138 mg/dL", "45%". */
+  nilai: string;
+  /** "Rujukan lab maks 130" atau "Tanpa rujukan dari lab". */
+  rujukan: string;
+  posisi: PosisiPenanda;
+  /** Satu kalimat utuh untuk pembaca layar; rentang ditulis "13 sampai 17". */
+  aksesLabel: string;
+};
+
+/**
+ * Semua penanda satu hasil lab sebagai DATA MENTAH, urutannya seperti diisi.
+ *
+ * Yang ditampilkan hanya yang tercetak di kertas hasil (nilai, satuan,
+ * rentang rujukan) ditambah posisi nilai terhadap rentang itu. Tidak ada
+ * angka turunan: app tidak menghitung, memperkirakan, atau melengkapi apa pun
+ * di sini, jadi seluruh isinya berlabel data mentah.
+ */
+export function barisDataMentahLab(h: HasilLab): BarisDataMentahLab[] {
+  return h.penanda.map((p) => {
+    const nilai = `${tulisNilaiLab(p.nilai)}${p.satuan === '%' ? '%' : ` ${p.satuan}`}`;
+    const rentang = tulisRujukanLab(p);
+    const posisi = posisiPenanda(p);
+    const rentangDibaca = rentang?.replace('–', ' sampai ');
+    return {
+      nama: p.nama,
+      nilai,
+      rujukan: rentang ? `Rujukan lab ${rentang}` : 'Tanpa rujukan dari lab',
+      posisi,
+      aksesLabel: rentang
+        ? `${p.nama}: ${nilai}, rujukan lab ${rentangDibaca}, ${posisi}`
+        : `${p.nama}: ${nilai}, tanpa rujukan dari lab`,
+    };
+  });
+}

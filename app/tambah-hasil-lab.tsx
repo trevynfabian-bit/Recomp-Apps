@@ -13,8 +13,9 @@ import {
   TEMPLAT_PANEL_LAB,
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
-import { Card, KerangkaSheet, TombolBertepi, TombolUtama } from '@/components';
+import { Card, KerangkaSheet, PenandaSumber, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
@@ -160,10 +161,13 @@ export default function TambahHasilLabScreen() {
           </View>
         </View>
 
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
-          Tulis angka dan rentang rujukan persis seperti tercetak. Rentang rujukan boleh dikosongkan bila tidak ada di
-          kertasnya; app tidak mengisinya sendiri.
-        </Text>
+        <View style={{ gap: spacing.sm }}>
+          <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} tampilan="pill" />
+          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            Tulis angka dan rentang rujukan persis seperti tercetak; tersimpan sebagai data mentah, tanpa dibulatkan.
+            Rentang rujukan boleh dikosongkan bila tidak ada di kertasnya; app tidak mengisinya sendiri.
+          </Text>
+        </View>
 
         <View style={{ gap: spacing.md }}>
           <Kolom

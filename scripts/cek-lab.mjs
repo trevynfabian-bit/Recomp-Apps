@@ -23,7 +23,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
 const {
   posisiPenanda, ringkasHasilLab, kalimatRingkasanLab, kelompokkanPerTahun,
   uraiNilaiLab, uraiTanggalLab, periksaHasilLab, penandaDariTemplat, TEMPLAT_PANEL_LAB, PENANDA_KOSONG,
-  isianDariHasilLab, hasilLabSama,
+  isianDariHasilLab, hasilLabSama, tulisNilaiLab, tulisRujukanLab, barisDataMentahLab,
 } = require(join(kerja, 'keluar', 'hasilLab.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -133,11 +133,34 @@ cek(`${penandaMock.length} penanda terbaca dari data tiruan`, penandaMock.length
 const rusak = penandaMock.filter((m) => !m[3] || (m[4] !== 'null' && m[5] !== 'null' && Number(m[4]) > Number(m[5])));
 cek('setiap penanda bersatuan dan rentangnya tidak terbalik', rusak.length === 0, rusak.map((m) => m[1]).join(', '));
 
+console.log('\nLabel data mentah');
+cek('nilai ditulis apa adanya: 5,3 · 245 · 0,75 · 2,345',
+  [[5.3, '5,3'], [245, '245'], [0.75, '0,75'], [2.345, '2,345']].every(([n, t]) => tulisNilaiLab(n) === t));
+const tidakUtuh = penandaMock.filter((m) => uraiNilaiLab(tulisNilaiLab(Number(m[2]))) !== Number(m[2]));
+cek('setiap nilai tiruan tidak dibulatkan saat ditampilkan', tidakUtuh.length === 0, tidakUtuh.map((m) => m[1]).join(', '));
+cek('rujukan: "13–17", "maks 200", "min 40", tanpa → null',
+  tulisRujukanLab(p(1, 13, 17)) === '13–17' && tulisRujukanLab(p(1, null, 200)) === 'maks 200' &&
+  tulisRujukanLab(p(1, 40, null)) === 'min 40' && tulisRujukanLab(p(1, null, null)) === null);
+const mentah = barisDataMentahLab({ ...contoh, penanda: [...contoh.penanda, { nama: 'Hematokrit', nilai: 45, satuan: '%', rujukanMin: 40, rujukanMaks: 50 }] });
+cek('satu baris per penanda, urutan seperti diisi', mentah.length === contoh.penanda.length + 1 && mentah.every((b, i) => b.nama === [...contoh.penanda.map((x) => x.nama), 'Hematokrit'][i]));
+cek('nilai + satuan: "5,3%", "45%", "2,345 mIU/L"', mentah[0].nilai === '5,3%' && mentah[4].nilai === '45%' && mentah[2].nilai === '2,345 mIU/L', `${mentah[0].nilai} | ${mentah[4].nilai} | ${mentah[2].nilai}`);
+cek('rujukan dan tanpa rujukan ditulis', mentah[2].rujukan === 'Rujukan lab 0,4–4' && mentah[3].rujukan === 'Tanpa rujukan dari lab', `${mentah[2].rujukan} | ${mentah[3].rujukan}`);
+cek('pembaca layar: rentang dibaca "sampai", posisi disebut',
+  mentah[2].aksesLabel === 'TSH: 2,345 mIU/L, rujukan lab 0,4 sampai 4, dalam rentang' && mentah[3].aksesLabel === 'Feritin: 0,75 µg/L, tanpa rujukan dari lab',
+  `${mentah[2].aksesLabel} | ${mentah[3].aksesLabel}`);
+const sumber = readFileSync('src/lib/sumber.ts', 'utf8');
+cek('asal hasil lab: manual (data mentah), bukan estimasi', /SUMBER_HASIL_LAB[^=]*=\s*\{\s*jenis: 'manual'/.test(sumber));
+for (const layar of ['app/hasil-lab.tsx', 'app/tambah-hasil-lab.tsx']) {
+  const isi = readFileSync(layar, 'utf8');
+  cek(`${layar}: penanda sumber memakai SUMBER_HASIL_LAB`, /<PenandaSumber jenis=\{SUMBER_HASIL_LAB\.jenis\} detail=\{SUMBER_HASIL_LAB\.detail\}/.test(isi) && !/jenis="estimasi"/.test(isi));
+}
+
 console.log('\nTanpa tafsiran');
 const TAFSIRAN = /\b(tinggi|rendah|normal|abnormal|buruk|baik|bahaya|berbahaya|sehat|risiko|waspada)\b/i;
 const kalimat = [
   ...['dalam rentang', 'di bawah rentang', 'di atas rentang', 'tanpa rujukan'],
   kalimatRingkasanLab(r),
+  ...barisDataMentahLab(contoh).flatMap((b) => [b.rujukan, b.aksesLabel]),
 ];
 const src = ts.createSourceFile('l.tsx', readFileSync('app/hasil-lab.tsx', 'utf8') + '\n' + readFileSync('app/tambah-hasil-lab.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 (function jelajah(n) {

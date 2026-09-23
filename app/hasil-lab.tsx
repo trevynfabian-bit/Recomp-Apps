@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  barisDataMentahLab,
   formatTanggalPanjang,
   kalimatRingkasanLab,
   kelompokkanPerTahun,
@@ -11,8 +12,9 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import { Card, KerangkaSheet, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import { Card, KerangkaSheet, PenandaSumber, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
@@ -28,6 +30,10 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * Dikelompokkan per tahun, terbaru lebih dulu: hasil lab datang beberapa kali
  * setahun, dan membandingkan "September lalu" dengan "Desember sebelumnya"
  * adalah cara orang biasanya membacanya.
+ *
+ * Setiap entri berlabel data mentah (`SUMBER_HASIL_LAB`): angkanya disalin
+ * dari kertas hasil, tidak diperkirakan app. Nilai lengkapnya bisa dibuka per
+ * kartu, persis seperti tertulis, supaya yang dibaca coach bisa diperiksa.
  *
  * Fase 4 sisi frontend: riwayat dari `useHasilLab` (tiruan di memori).
  */
@@ -98,8 +104,9 @@ export default function HasilLabScreen() {
       <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
         <Ionicons name="flask-outline" size={20} color={colors.textMuted} />
         <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
-          Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis. Rentang rujukan adalah milik
-          laboratorium yang memeriksa; artinya dibicarakan dengan dokter.
+          Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis. Semua angka di sini data mentah yang
+          Anda salin; app tidak memperkirakan atau membulatkannya. Rentang rujukan adalah milik laboratorium yang
+          memeriksa; artinya dibicarakan dengan dokter.
         </Text>
       </View>
 
@@ -169,6 +176,7 @@ export default function HasilLabScreen() {
 }
 
 function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: () => void; onHapus: () => void }) {
+  const [nilaiTerbuka, setNilaiTerbuka] = useState(false);
   const r = ringkasHasilLab(hasil);
   const tanggal = formatTanggalPanjang(hasil.tanggal).split(', ')[1];
   const ringkasan = kalimatRingkasanLab(r);
@@ -177,7 +185,7 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
     <Card style={{ gap: spacing.sm }}>
       <View
         accessible
-        accessibilityLabel={`${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}${hasil.laboratorium ? `, ${hasil.laboratorium}` : ''}. ${ringkasan}.${luar.length ? ` ${luar.join('; ')}.` : ''}`}
+        accessibilityLabel={`${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}${hasil.laboratorium ? `, ${hasil.laboratorium}` : ''}. Data mentah, ${SUMBER_HASIL_LAB.detail}. ${ringkasan}.${luar.length ? ` ${luar.join('; ')}.` : ''}`}
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
@@ -187,6 +195,7 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
         {hasil.laboratorium ? (
           <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{hasil.laboratorium}</Text>
         ) : null}
+        <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} />
         <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{ringkasan}</Text>
         {r.diLuarRentang.length > 0 ? (
           <View style={{ gap: 2 }}>
@@ -198,8 +207,23 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
           </View>
         ) : null}
       </View>
+      {nilaiTerbuka ? <DataMentahLab hasil={hasil} /> : null}
       {/* Tindakan terpisah dari isi kartu: tetap terjangkau pembaca layar. */}
       <View style={{ flexDirection: 'row', gap: spacing.lg }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${nilaiTerbuka ? 'Sembunyikan' : 'Lihat'} ${hasil.penanda.length} nilai ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          accessibilityState={{ expanded: nilaiTerbuka }}
+          onPress={() => {
+            ketukRingan();
+            setNilaiTerbuka((t) => !t);
+          }}
+          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+        >
+          <Text style={{ ...typography.label, color: colors.text }}>
+            {nilaiTerbuka ? 'Sembunyikan nilai' : `Lihat ${hasil.penanda.length} nilai`}
+          </Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Ubah ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
@@ -224,5 +248,32 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
         </Pressable>
       </View>
     </Card>
+  );
+}
+
+/**
+ * Nilai tiap penanda persis seperti disalin: nilai, satuan, rentang rujukan
+ * lab, dan posisinya. Semua data mentah, jadi warnanya netral — posisi di
+ * luar rentang ditulis dengan kata, bukan diberi warna alarm.
+ */
+function DataMentahLab({ hasil }: { hasil: HasilLab }) {
+  return (
+    <View style={{ gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>DATA MENTAH · SEPERTI TERTULIS DI HASIL LAB</Text>
+      <View accessibilityRole="list" style={{ gap: spacing.sm }}>
+        {barisDataMentahLab(hasil).map((b) => (
+          <View key={b.nama} accessible accessibilityLabel={b.aksesLabel} style={{ gap: 2 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
+              <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted }}>{b.nama}</Text>
+              <Text style={{ ...typography.label, color: colors.text }}>{b.nilai}</Text>
+            </View>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              {b.rujukan}
+              {b.posisi === 'di atas rentang' || b.posisi === 'di bawah rentang' ? ` · ${b.posisi}` : ''}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }

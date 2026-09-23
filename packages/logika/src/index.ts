@@ -355,6 +355,7 @@ export {
 } from './ekspor';
 
 export type {
+  BarisDataMentahLab,
   GalatPenandaLab,
   HasilLab,
   HasilPeriksaLab,
@@ -365,6 +366,7 @@ export type {
   RingkasanHasilLab,
 } from './hasilLab';
 export {
+  barisDataMentahLab,
   hasilLabSama,
   isianDariHasilLab,
   kalimatRingkasanLab,
@@ -375,6 +377,8 @@ export {
   posisiPenanda,
   ringkasHasilLab,
   TEMPLAT_PANEL_LAB,
+  tulisNilaiLab,
+  tulisRujukanLab,
   uraiNilaiLab,
   uraiTanggalLab,
 } from './hasilLab';

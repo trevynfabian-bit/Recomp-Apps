@@ -357,6 +357,7 @@ export {
 } from './ekspor.ts';
 
 export type {
+  BarisDataMentahLab,
   GalatPenandaLab,
   HasilLab,
   HasilPeriksaLab,
@@ -367,6 +368,7 @@ export type {
   RingkasanHasilLab,
 } from './hasilLab.ts';
 export {
+  barisDataMentahLab,
   hasilLabSama,
   isianDariHasilLab,
   kalimatRingkasanLab,
@@ -377,6 +379,8 @@ export {
   posisiPenanda,
   ringkasHasilLab,
   TEMPLAT_PANEL_LAB,
+  tulisNilaiLab,
+  tulisRujukanLab,
   uraiNilaiLab,
   uraiTanggalLab,
 } from './hasilLab.ts';
