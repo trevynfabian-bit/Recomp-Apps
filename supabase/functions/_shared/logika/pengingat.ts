@@ -63,6 +63,100 @@ export const NOTIF_RINGKASAN = {
   isi: 'Angka pekan kemarin sudah dirangkum. Buka untuk membacanya.',
 } as const;
 
+/** Jenis notifikasi yang bisa dinyalakan/dimatikan satu per satu. */
+export type JenisNotifikasi = 'timbang' | 'ukuran' | 'ringkasan' | 'evaluasi' | 'sumber';
+
+/** Satu jenis notifikasi: sakelarnya, kapan dikirim, dan isinya apa adanya. */
+export type NotifikasiKatalog = {
+  jenis: JenisNotifikasi;
+  /** Nama sakelar di pengaturan. */
+  nama: string;
+  /** Kapan dikirim — dan kapan TIDAK. Ditulis di bawah sakelar. */
+  kapan: string;
+  judul: string;
+  isi: string;
+  /** Label waktu di pratinjau; `null` = jam pengingat timbang yang berlaku. */
+  waktuPratinjau: string | null;
+  /** Nyala saat pertama kali dipasang. */
+  bawaan: boolean;
+};
+
+/**
+ * Semua notifikasi yang bisa dikirim app, satu tempat.
+ *
+ * Dua aturan berlaku untuk SETIAP isi, dan diperiksa `npm run cek:widget`:
+ *   • nada netral (`pelanggaranNada`);
+ *   • TANPA ANGKA. Notifikasi tampil di layar kunci tanpa kunci dibuka —
+ *     berat, kalori, atau lingkar pinggang tidak pernah ikut di dalamnya,
+ *     bahkan saat angka widget dinyalakan. Angka dibaca di app.
+ * Pengingat kebiasaan hanya dikirim bila TERLEWAT; pemberitahuan hasil hanya
+ * saat hasilnya benar-benar siap.
+ */
+export const KATALOG_NOTIFIKASI: readonly NotifikasiKatalog[] = [
+  {
+    jenis: 'timbang',
+    nama: 'Timbang pagi',
+    kapan: 'Hanya dikirim bila berat pagi belum tercatat — dari app atau Apple Health.',
+    judul: NOTIF_TIMBANG.judul,
+    isi: NOTIF_TIMBANG.isi,
+    waktuPratinjau: null,
+    bawaan: true,
+  },
+  {
+    jenis: 'ukuran',
+    nama: 'Ukur pekanan',
+    kapan: 'Minggu pagi, hanya bila pinggang belum diukur pekan ini.',
+    judul: 'Ukur pekanan',
+    isi: 'Pinggang dan lainnya, dengan meteran yang biasa. Cukup dua menit.',
+    waktuPratinjau: 'Min',
+    bawaan: true,
+  },
+  {
+    jenis: 'ringkasan',
+    nama: 'Ringkasan mingguan siap',
+    kapan: 'Senin pagi, saat ringkasan pekan lalu selesai dibuat.',
+    judul: NOTIF_RINGKASAN.judul,
+    isi: NOTIF_RINGKASAN.isi,
+    waktuPratinjau: 'Sen',
+    bawaan: true,
+  },
+  {
+    jenis: 'evaluasi',
+    nama: 'Evaluasi empat pekan siap',
+    kapan: 'Setiap empat pekan, saat arah berat, pinggang, dan kekuatan selesai dibaca.',
+    judul: 'Evaluasi empat pekan',
+    isi: 'Arah berat, pinggang, dan kekuatan sudah dibaca bersama. Buka untuk melihat rekomendasinya.',
+    waktuPratinjau: 'Sen',
+    bawaan: true,
+  },
+  {
+    jenis: 'sumber',
+    nama: 'Sumber data terputus',
+    kapan: 'Bila sebuah sumber berhenti mengirim data lebih dari sehari. Paling sering sekali sehari.',
+    judul: 'Sumber data perlu disambungkan',
+    isi: 'Satu sumber berhenti mengirim data. Ketuk untuk melihat yang mana.',
+    waktuPratinjau: 'kemarin',
+    bawaan: true,
+  },
+];
+
+/** Pengaturan awal: tiap jenis memakai nilai `bawaan`-nya. */
+export function jenisNotifikasiBawaan(): Record<JenisNotifikasi, boolean> {
+  return Object.fromEntries(KATALOG_NOTIFIKASI.map((n) => [n.jenis, n.bawaan])) as Record<
+    JenisNotifikasi,
+    boolean
+  >;
+}
+
+/** "3 dari 5 jenis aktif", "Semua aktif", atau "Semua dimatikan". */
+export function ringkasJenisAktif(aktif: Record<JenisNotifikasi, boolean>): string {
+  const total = KATALOG_NOTIFIKASI.length;
+  const nyala = KATALOG_NOTIFIKASI.filter((n) => aktif[n.jenis]).length;
+  if (nyala === 0) return 'Semua dimatikan';
+  if (nyala === total) return 'Semua aktif';
+  return `${nyala} dari ${total} jenis aktif`;
+}
+
 /**
  * Kata & tanda yang membuat notifikasi terbaca menegur. Daftarnya sengaja
  * ketat: "jangan" dan tanda seru pun tidak, karena notifikasi dibaca sekilas

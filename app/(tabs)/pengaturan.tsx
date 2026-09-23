@@ -50,7 +50,7 @@ export default function PengaturanScreen() {
           <BarisTautan
             ikon="notifications-outline"
             judul="Widget & pengingat"
-            keterangan="Timbang pagi, ringkasan mingguan, layar kunci"
+            keterangan="Notifikasi per jenis, widget layar kunci"
             petunjuk="Membuka pengaturan pengingat dan widget"
             onPress={() => router.push('/widget-pengingat')}
           />

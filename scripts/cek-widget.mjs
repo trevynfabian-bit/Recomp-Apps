@@ -22,7 +22,7 @@ const {
   formatJamMenit, geserJamTimbang, JAM_TIMBANG_BAWAAN, NOTIF_RINGKASAN, NOTIF_TIMBANG,
   isiWidgetLingkar, jamPengingatUntuk, MIN_TIMBANGAN_SARAN, pelanggaranNada, perluPengingatTimbang,
   RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
-  siapkanWidget, BATAS_SEGAR_MS,
+  siapkanWidget, BATAS_SEGAR_MS, KATALOG_NOTIFIKASI, jenisNotifikasiBawaan, ringkasJenisAktif,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -92,6 +92,29 @@ console.log('\nNada netral');
     }
   }
   cek('semua teks widget netral, tanpa angka negatif, untuk seluruh rentang', kasar.length === 0, kasar.slice(0, 2).join(' | '));
+}
+
+console.log('\nKatalog notifikasi per jenis');
+{
+  const jenis = KATALOG_NOTIFIKASI.map((n) => n.jenis);
+  cek(`${jenis.length} jenis, masing-masing sekali: ${jenis.join(', ')}`, new Set(jenis).size === jenis.length && jenis.length === 5);
+  const menegur = KATALOG_NOTIFIKASI.filter((n) => pelanggaranNada(`${n.nama} ${n.kapan} ${n.judul} ${n.isi}`).length > 0);
+  cek('nama, keterangan, judul, dan isi setiap jenis netral', menegur.length === 0, menegur.map((n) => n.jenis).join(', '));
+  // Layar kunci terbaca tanpa kunci dibuka: isi notifikasi tidak membawa angka apa pun.
+  const berangka = (n) => /\d/.test(`${n.judul} ${n.isi}`);
+  const bocor = KATALOG_NOTIFIKASI.filter(berangka);
+  cek('tidak ada angka di judul & isi notifikasi mana pun', bocor.length === 0, bocor.map((n) => `${n.jenis}: ${n.isi}`).join(' | '));
+  cek('kontrol: isi yang membawa berat tertangkap', berangka({ judul: 'Timbang pagi', isi: 'Kemarin 74,5 kg.' }));
+  cek('isi timbang & ringkasan diambil dari konstanta yang sama (satu sumber)',
+    KATALOG_NOTIFIKASI.find((n) => n.jenis === 'timbang')?.isi === NOTIF_TIMBANG.isi &&
+      KATALOG_NOTIFIKASI.find((n) => n.jenis === 'ringkasan')?.isi === NOTIF_RINGKASAN.isi);
+  cek('hanya timbang yang memakai jam pengingat di pratinjau',
+    KATALOG_NOTIFIKASI.every((n) => (n.waktuPratinjau === null) === (n.jenis === 'timbang')));
+  const bawaan = jenisNotifikasiBawaan();
+  cek('pengaturan awal mengikuti katalog', KATALOG_NOTIFIKASI.every((n) => bawaan[n.jenis] === n.bawaan));
+  cek(`semua nyala: "${ringkasJenisAktif(bawaan)}"`, ringkasJenisAktif(bawaan) === 'Semua aktif');
+  cek('dua dimatikan: "3 dari 5 jenis aktif"', ringkasJenisAktif({ ...bawaan, ukuran: false, sumber: false }) === '3 dari 5 jenis aktif');
+  cek('semua dimatikan', ringkasJenisAktif(Object.fromEntries(jenis.map((j) => [j, false]))) === 'Semua dimatikan');
 }
 
 console.log('\nTeks widget');

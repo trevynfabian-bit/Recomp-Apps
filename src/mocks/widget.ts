@@ -1,4 +1,4 @@
-import { tanggalDariWaktu } from '@recomp/logika';
+import { JAM_TIMBANG_BAWAAN, jenisNotifikasiBawaan, tanggalDariWaktu } from '@recomp/logika';
 import type { RingkasanWidget } from '@recomp/logika';
 import { mockSnapshotHariIni } from './dailyLog';
 
@@ -19,14 +19,16 @@ export function mockRingkasanWidget(sekarang: Date = new Date()): RingkasanWidge
 }
 
 /** Pengaturan pengingat awal, seperti baris baru `settings_notifications`. */
-export const mockPengaturanPengingat = {
-  timbangAktif: true,
-  jamTimbangMenit: 6 * 60 + 30,
-  /** `null`: akhir pekan memakai jam yang sama. */
-  jamAkhirPekanMenit: null as number | null,
-  ringkasanAktif: true,
-  widgetTampilkanAngka: true,
-};
+export function mockPengaturanPengingat() {
+  return {
+    /** Sakelar per jenis notifikasi, dari `KATALOG_NOTIFIKASI`. */
+    jenis: jenisNotifikasiBawaan(),
+    jamTimbangMenit: JAM_TIMBANG_BAWAAN,
+    /** `null`: akhir pekan memakai jam yang sama. */
+    jamAkhirPekanMenit: null as number | null,
+    widgetTampilkanAngka: true,
+  };
+}
 
 /**
  * Waktu timbang 14 pagi terakhir (dari `daily_logs`), untuk saran jam

@@ -5,12 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   formatJamMenit,
   jamPengingatUntuk,
-  NOTIF_RINGKASAN,
-  NOTIF_TIMBANG,
+  KATALOG_NOTIFIKASI,
   ringkasJadwal,
+  ringkasJenisAktif,
   siapkanWidget,
   tanggalHariIni,
 } from '@recomp/logika';
+import type { JenisNotifikasi } from '@recomp/logika';
 import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import {
@@ -28,6 +29,10 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * Satu hal yang SENGAJA bukan pengaturan: nada. PRD mewajibkan notifikasi
  * netral, jadi layar ini menyatakannya sebagai janji, bukan sakelar — sakelar
  * "nada tegas" hanya akan menjadi jalan masuk bagi notifikasi yang menegur.
+ *
+ * Setiap jenis notifikasi punya sakelarnya sendiri (`KATALOG_NOTIFIKASI`):
+ * orang yang terganggu pengingat ukur pekanan tidak perlu kehilangan
+ * ringkasan mingguan untuk mematikannya.
  *
  * Fase 3 sisi frontend: pengaturan hidup di state layar ini. Task backend
  * menyimpannya ke `settings_notifications` dan menjadwalkan notifikasi lokal
@@ -49,6 +54,9 @@ export default function WidgetPengingatScreen() {
   const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);
 
   const ubah = (p: Partial<typeof atur>) => setAtur((lama) => ({ ...lama, ...p }));
+  const ubahJenis = (jenis: JenisNotifikasi, v: boolean) =>
+    setAtur((lama) => ({ ...lama, jenis: { ...lama.jenis, [jenis]: v } }));
+  const aktif = KATALOG_NOTIFIKASI.filter((n) => atur.jenis[n.jenis]);
   const jadwal = useMemo(
     () => ({ hariKerjaMenit: atur.jamTimbangMenit, akhirPekanMenit: atur.jamAkhirPekanMenit }),
     [atur.jamTimbangMenit, atur.jamAkhirPekanMenit],
@@ -91,66 +99,72 @@ export default function WidgetPengingatScreen() {
         <Text style={{ ...typography.title, color: colors.text }}>Widget & pengingat</Text>
       </View>
 
-      {/* --- Pengingat timbang pagi --------------------------------------- */}
+      {/* --- Notifikasi per jenis ------------------------------------------ */}
       <View>
-        <SectionHeader judul="Pengingat" />
+        <SectionHeader judul="Notifikasi" aksi={ringkasJenisAktif(atur.jenis)} />
         <Card flat>
-          <BarisSakelar
-            judul="Timbang pagi"
-            keterangan="Hanya dikirim bila berat pagi belum tercatat — dari app atau Apple Health."
-            nilai={atur.timbangAktif}
-            onUbah={(v) => ubah({ timbangAktif: v })}
-          />
-          {atur.timbangAktif ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Jam pengingat: ${ringkasJadwal(jadwal)}`}
-              accessibilityHint="Membuka pengaturan jam"
-              onPress={() => {
-                ketukRingan();
-                setSheetJamTerbuka(true);
-              }}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                minHeight: TAP_MIN,
-                paddingHorizontal: spacing.lg,
-                paddingBottom: spacing.lg,
-                opacity: pressed ? 0.6 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.textMuted }}>Jam</Text>
-              <Text style={{ ...typography.label, color: colors.text }}>{ringkasJadwal(jadwal)} ›</Text>
-            </Pressable>
-          ) : null}
-          <Pemisah />
-          <BarisSakelar
-            judul="Ringkasan mingguan siap"
-            keterangan="Senin pagi, saat ringkasan pekan lalu selesai dibuat."
-            nilai={atur.ringkasanAktif}
-            onUbah={(v) => ubah({ ringkasanAktif: v })}
-          />
+          {KATALOG_NOTIFIKASI.map((n, i) => (
+            <View key={n.jenis}>
+              {i > 0 ? <Pemisah /> : null}
+              <BarisSakelar
+                judul={n.nama}
+                keterangan={n.kapan}
+                nilai={atur.jenis[n.jenis]}
+                onUbah={(v) => ubahJenis(n.jenis, v)}
+              />
+              {n.jenis === 'timbang' && atur.jenis.timbang ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Jam pengingat: ${ringkasJadwal(jadwal)}`}
+                  accessibilityHint="Membuka pengaturan jam"
+                  onPress={() => {
+                    ketukRingan();
+                    setSheetJamTerbuka(true);
+                  }}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: TAP_MIN,
+                    paddingHorizontal: spacing.lg,
+                    paddingBottom: spacing.lg,
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <Text style={{ ...typography.label, color: colors.textMuted }}>Jam</Text>
+                  <Text style={{ ...typography.label, color: colors.text }}>{ringkasJadwal(jadwal)} ›</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ))}
         </Card>
       </View>
 
-      {/* Pratinjau notifikasi: janji "netral" ditunjukkan, bukan hanya dikatakan. */}
-      {atur.timbangAktif || atur.ringkasanAktif ? (
-        <View style={{ gap: spacing.sm }}>
-          {atur.timbangAktif ? (
-            <PratinjauNotif waktu={jam} judul={NOTIF_TIMBANG.judul} isi={NOTIF_TIMBANG.isi} />
-          ) : null}
-          {atur.ringkasanAktif ? (
-            <PratinjauNotif waktu="Sen" judul={NOTIF_RINGKASAN.judul} isi={NOTIF_RINGKASAN.isi} />
-          ) : null}
-        </View>
-      ) : null}
+      {/* Pratinjau: janji "netral" ditunjukkan, bukan hanya dikatakan — isi
+          yang tampil di sini adalah isi yang dikirim, dari katalog yang sama. */}
+      <View>
+        <SectionHeader judul="Seperti ini di layar kunci" />
+        {aktif.length > 0 ? (
+          <View style={{ gap: spacing.sm }}>
+            {aktif.map((n) => (
+              <PratinjauNotif key={n.jenis} waktu={n.waktuPratinjau ?? jam} judul={n.judul} isi={n.isi} />
+            ))}
+          </View>
+        ) : (
+          <Card>
+            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+              Tidak ada notifikasi yang dikirim. Widget layar kunci tetap diperbarui seperti biasa.
+            </Text>
+          </Card>
+        )}
+      </View>
 
       <Card style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.label, color: colors.text }}>Nada selalu netral</Text>
+        <Text style={{ ...typography.label, color: colors.text }}>Nada selalu netral, tanpa angka</Text>
         <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
-          Tidak ada notifikasi &ldquo;melebihi target&rdquo; atau peringatan berwarna. Pengingat membantu
-          kebiasaan; angkanya dibaca di app, tanpa penilaian.
+          Tidak ada notifikasi &ldquo;melebihi target&rdquo; atau peringatan berwarna. Berat, kalori, dan
+          ukuran tubuh juga tidak pernah ikut di notifikasi — layar kunci bisa dibaca orang lain. Angkanya
+          dibaca di app, tanpa penilaian.
         </Text>
       </Card>
 

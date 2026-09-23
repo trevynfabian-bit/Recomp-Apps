@@ -218,12 +218,20 @@ export type {
 
 export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor.ts';
 
-export type { JamPengingat, KeadaanKosongWidget, RingkasanWidget } from './pengingat.ts';
+export type {
+  JamPengingat,
+  JenisNotifikasi,
+  KeadaanKosongWidget,
+  NotifikasiKatalog,
+  RingkasanWidget,
+} from './pengingat.ts';
 
 export {
   formatJamMenit,
   geserJamTimbang,
   JAM_TIMBANG_BAWAAN,
+  jenisNotifikasiBawaan,
+  KATALOG_NOTIFIKASI,
   LANGKAH_JAM_MENIT,
   NOTIF_RINGKASAN,
   NOTIF_TIMBANG,
@@ -234,6 +242,7 @@ export {
   MIN_TIMBANGAN_SARAN,
   RENTANG_JAM_TIMBANG,
   ringkasJadwal,
+  ringkasJenisAktif,
   saranJamTimbang,
   siapkanWidget,
   teksWidget,
