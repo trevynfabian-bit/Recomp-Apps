@@ -769,6 +769,41 @@ export type HealthConnectionRow = {
   updated_at: string;
 };
 
+/** Jenis angka di `health_data`; satuannya tetap per jenis (lihat `satuan`). */
+export type JenisDataKesehatan =
+  | 'kalori_aktif'
+  | 'langkah'
+  | 'tidur'
+  | 'hr_istirahat'
+  | 'hrv'
+  | 'recovery'
+  | 'strain';
+
+/**
+ * Baris `health_data` — satu angka dari satu sumber.
+ *
+ * Kunci dedup: (user_id, sumber, asal, jenis, id_eksternal). Penulis memakai
+ * upsert pada kunci itu, jadi sinkron ulang memperbarui, tidak menambah.
+ * `tanggal` dan `satuan` diturunkan database dan tidak bisa ditulis.
+ */
+export type HealthDataRow = {
+  id: string;
+  user_id: string;
+  sumber: HealthConnectionRow['sumber'];
+  /** Bundle id HKSource untuk Apple Health; `null` untuk API langsung. */
+  asal: string | null;
+  id_eksternal: string;
+  jenis: JenisDataKesehatan;
+  satuan: 'kcal' | 'langkah' | 'menit' | 'bpm' | 'ms' | 'persen' | 'skor';
+  nilai: number;
+  waktu_mulai: string;
+  waktu_selesai: string | null;
+  /** Asia/Jakarta, dari waktu_mulai (tidur: waktu_selesai). */
+  tanggal: string;
+  created_at: string;
+  updated_at: string;
+};
+
 /**
  * Hasil `endpoint_budget_mingguan` — satu snapshot untuk seluruh layar Budget.
  *
@@ -990,6 +1025,13 @@ export type Database = {
         Update: Partial<
           Pick<HealthConnectionRow, 'status' | 'sinkron_terakhir' | 'galat_terakhir' | 'galat_pada'>
         >;
+        Relationships: [];
+      };
+      health_data: {
+        Row: HealthDataRow;
+        /** Klien: hanya `sumber: 'apple_health'`, selama koneksinya terhubung. */
+        Insert: Omit<HealthDataRow, 'id' | 'satuan' | 'tanggal' | 'created_at' | 'updated_at'>;
+        Update: Partial<Pick<HealthDataRow, 'nilai' | 'waktu_mulai' | 'waktu_selesai'>>;
         Relationships: [];
       };
       food_logs: {
