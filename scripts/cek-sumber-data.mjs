@@ -29,7 +29,16 @@ function muat() {
   return require(join(kerja, 'keluar', 'sumberData.js'));
 }
 
-const { formatWaktuRelatif, kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } = muat();
+const {
+  formatWaktuRelatif,
+  kesehatanKoneksi,
+  pesanGagalHubungkan,
+  PROFIL_SUMBER,
+  ringkasanKoneksi,
+  samarkanKunci,
+  urutkanKoneksi,
+  validasiKunciHevy,
+} = muat();
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -115,6 +124,38 @@ console.log('\nUrutan & angka utama');
       'apple_health,whoop,strava,hevy');
   const r = ringkasanKoneksi(daftar, SEKARANG);
   cek(`ringkasan: ${JSON.stringify(r)}`, r.aktif === 1 && r.perluPerhatian === 2 && r.belum === 1 && r.total === 4);
+}
+
+console.log('\nMenghubungkan & memutuskan');
+{
+  const KUNCI = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
+  const ok = validasiKunciHevy(KUNCI);
+  cek('kunci Hevy yang sah diterima', ok.ok && ok.kunci === KUNCI);
+  const tempel = validasiKunciHevy(`  ${KUNCI.toUpperCase().slice(0, 18)}\n${KUNCI.toUpperCase().slice(18)} `);
+  cek('spasi, baris baru, dan huruf besar dari hasil tempel dirapikan', tempel.ok && tempel.kunci === KUNCI,
+    JSON.stringify(tempel));
+  cek('kunci kosong ditolak dengan alasan', !validasiKunciHevy('   ').ok);
+  for (const salah of ['1a2b3c4d5e6f4a7b8c9d0e1f2a3b4c5d', 'bukan-kunci', `${KUNCI}0`, KUNCI.replace('1a', 'zz')]) {
+    cek(`bentuk salah ditolak: "${salah}"`, !validasiKunciHevy(salah).ok);
+  }
+  cek('kunci disamarkan, hanya 4 karakter terakhir terlihat',
+    samarkanKunci(KUNCI) === '••••4c5d' && !samarkanKunci(KUNCI).includes('1a2b'));
+  cek('kunci pendek tidak bocor utuh lewat penyamaran', samarkanKunci('abc') === '••••');
+
+  const alasan = ['dibatalkan', 'izin-kurang', 'kunci-ditolak', 'jaringan'];
+  const pesan = alasan.map((a) => pesanGagalHubungkan('strava', a));
+  cek('setiap alasan gagal punya judul & keterangan sendiri',
+    new Set(pesan.map((p) => p.judul)).size === alasan.length &&
+      pesan.every((p) => p.judul.length > 0 && p.keterangan.length > 20));
+  cek('pesan menyebut nama layanannya', pesanGagalHubungkan('whoop', 'jaringan').judul.includes('WHOOP'));
+  cek('dibatalkan dinyatakan tanpa menyalahkan: "Tidak ada yang berubah"',
+    /Tidak ada yang berubah/.test(pesanGagalHubungkan('strava', 'dibatalkan').keterangan));
+
+  const jenis = Object.values(PROFIL_SUMBER).map((p) => p.otorisasi);
+  cek('otorisasi: Apple Health lewat HealthKit, Hevy lewat kunci, sisanya OAuth',
+    PROFIL_SUMBER.apple_health.otorisasi === 'healthkit' && PROFIL_SUMBER.hevy.otorisasi === 'kunci_api' &&
+      PROFIL_SUMBER.strava.otorisasi === 'oauth' && PROFIL_SUMBER.whoop.otorisasi === 'oauth' && jenis.length === 4);
+  cek('Apple Health menyatakan app hanya membaca', /hanya membaca/.test(PROFIL_SUMBER.apple_health.caraHubungkan));
 }
 
 console.log(gagal === 0 ? '\n✓ Status sumber data: jeda dibaca per mekanisme, webhook yang diam tidak dianggap macet' : `\n✗ ${gagal} pemeriksaan gagal`);

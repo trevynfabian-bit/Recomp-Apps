@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import { formatAngka, PROFIL_SUMBER } from '@recomp/logika';
 import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/logika';
 import { Card } from './Card';
+import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
@@ -144,53 +145,6 @@ function AksiKartu({
       })}
     >
       <Text style={{ ...typography.label, color: colors.textFaint }}>Putuskan</Text>
-    </Pressable>
-  );
-}
-
-function TombolUtama({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        minHeight: TAP_MIN,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.md,
-        backgroundColor: colors.amber,
-        opacity: pressed ? 0.8 : 1,
-      })}
-    >
-      <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function TombolBertepi({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        minHeight: TAP_MIN,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: colors.borderKuat,
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{label}</Text>
     </Pressable>
   );
 }

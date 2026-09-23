@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  kesehatanKoneksi,
-  PROFIL_SUMBER,
-  ringkasanKoneksi,
-  urutkanKoneksi,
-} from '@recomp/logika';
+import { kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logika';
 import type { KoneksiSumber, SumberData } from '@recomp/logika';
-import { Card, HeroNumber, KartuSumberData, SectionHeader } from '@/components';
+import {
+  Card,
+  HeroNumber,
+  KartuSumberData,
+  SectionHeader,
+  SheetHubungkanSumber,
+  SheetPutuskanSumber,
+} from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { mockKoneksiSumber } from '@/mocks/sumberData';
+import { mockHubungkan, mockKoneksiSumber, mockPutuskan } from '@/mocks/sumberData';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Seberapa sering "12 menit lalu" disegarkan selama layar terbuka. */
@@ -27,9 +29,10 @@ const SEGARKAN_MS = 60_000;
  * kartu hanya menawarkan satu tindakan yang relevan untuk keadaannya.
  *
  * Fase 3 sisi frontend: koneksi berasal dari data tiruan yang disimpan di state
- * layar ini, jadi menghubungkan dan memutuskan langsung terlihat tanpa backend.
- * Task backend menukarnya dengan `health_connections` dan alur OAuth/izin
- * HealthKit yang sebenarnya.
+ * layar ini, dan alur menghubungkan/memutuskan memakai fungsi tiruan yang
+ * DISUNTIKKAN ke sheet-nya (`mockHubungkan`, `mockPutuskan`). Task backend cukup
+ * menukar kedua fungsi itu dan sumber daftar koneksinya dengan
+ * `health_connections`, izin HealthKit, dan OAuth yang sebenarnya.
  */
 export default function SumberDataScreen() {
   const insets = useSafeAreaInsets();
@@ -65,8 +68,11 @@ export default function SumberDataScreen() {
     setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? { ...k, ...perubahan } : k)));
   }
 
-  function hubungkan(sumber: SumberData) {
-    // Tiruan: di backend, ini membuka alur izin HealthKit atau OAuth layanannya.
+  // Sheet yang sedang terbuka; `null` berarti tertutup.
+  const [akanDihubungkan, setAkanDihubungkan] = useState<SumberData | null>(null);
+  const [akanDiputuskan, setAkanDiputuskan] = useState<SumberData | null>(null);
+
+  function terhubung(sumber: SumberData) {
     ubah(sumber, {
       status: 'terhubung',
       terhubungPada: new Date().toISOString(),
@@ -74,7 +80,6 @@ export default function SumberDataScreen() {
       galatTerakhir: null,
       masukHariIni: [],
     });
-    ketukBerhasil();
   }
 
   function sinkronSekarang(sumber: SumberData) {
@@ -83,29 +88,15 @@ export default function SumberDataScreen() {
     ketukBerhasil();
   }
 
-  function putuskan(sumber: SumberData) {
-    const { nama, membawa } = PROFIL_SUMBER[sumber];
-    // Konfirmasi karena akibatnya tidak langsung terlihat: data lama tetap ada,
-    // tapi data BARU berhenti masuk — dan itu baru terasa berhari-hari kemudian.
-    Alert.alert(
-      `Putuskan ${nama}?`,
-      `Data yang sudah masuk tetap tersimpan, tapi ${membawa.join(', ')} yang baru tidak akan masuk lagi.`,
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Putuskan',
-          style: 'destructive',
-          onPress: () =>
-            ubah(sumber, {
-              status: 'belum',
-              terhubungPada: null,
-              sinkronTerakhir: null,
-              galatTerakhir: null,
-              masukHariIni: [],
-            }),
-        },
-      ],
-    );
+  async function putuskan(sumber: SumberData, hapusData: boolean) {
+    await mockPutuskan(sumber, hapusData);
+    ubah(sumber, {
+      status: 'belum',
+      terhubungPada: null,
+      sinkronTerakhir: null,
+      galatTerakhir: null,
+      masukHariIni: [],
+    });
   }
 
   const keteranganHero =
@@ -169,9 +160,9 @@ export default function SumberDataScreen() {
             key={k.sumber}
             koneksi={k}
             kesehatan={kesehatanKoneksi(k, sekarang)}
-            onHubungkan={() => hubungkan(k.sumber)}
+            onHubungkan={() => setAkanDihubungkan(k.sumber)}
             onSinkronSekarang={() => sinkronSekarang(k.sumber)}
-            onPutuskan={() => putuskan(k.sumber)}
+            onPutuskan={() => setAkanDiputuskan(k.sumber)}
           />
         ))}
       </View>
@@ -192,6 +183,18 @@ export default function SumberDataScreen() {
           </Text>
         </Card>
       </View>
+
+      <SheetHubungkanSumber
+        sumber={akanDihubungkan}
+        onTutup={() => setAkanDihubungkan(null)}
+        hubungkan={mockHubungkan}
+        onTerhubung={terhubung}
+      />
+      <SheetPutuskanSumber
+        sumber={akanDiputuskan}
+        onTutup={() => setAkanDiputuskan(null)}
+        putuskan={putuskan}
+      />
     </ScrollView>
   );
 }

@@ -162,6 +162,8 @@ export {
 } from './ringkasan';
 
 export type {
+  HasilHubungkan,
+  JenisOtorisasi,
   KesehatanKoneksi,
   KoneksiSumber,
   MekanismeSync,
@@ -173,8 +175,11 @@ export type {
 export {
   formatWaktuRelatif,
   kesehatanKoneksi,
+  pesanGagalHubungkan,
   PROFIL_SUMBER,
   ringkasanKoneksi,
+  samarkanKunci,
   URUTAN_SUMBER,
   urutkanKoneksi,
+  validasiKunciHevy,
 } from './sumberData';
