@@ -372,6 +372,32 @@ export type ProteksiProteinRow = {
 };
 
 /**
+ * body_measurements — satu pencatatan ukuran tubuh per tanggal.
+ *
+ * Semua kolom ukuran NULLABLE: orang yang pekan ini cuma mengukur pinggang
+ * tidak terhalang, dan database hanya menuntut barisnya berisi setidaknya satu
+ * ukuran. Perhatikan bedanya dengan `UkuranTubuh` di `@/types/domain`, yang
+ * dibangun lebih dulu untuk UI dan menuntut ketujuhnya terisi — service yang
+ * menjembatani keduanya yang harus memutuskan apa yang ditampilkan untuk
+ * bagian tubuh yang tidak diukur, dan "0 cm" bukan jawabannya.
+ */
+export type BodyMeasurementRow = {
+  id: string;
+  user_id: string;
+  tanggal: string;
+  pinggang_cm: number | null;
+  dada_cm: number | null;
+  leher_cm: number | null;
+  lengan_kiri_cm: number | null;
+  lengan_kanan_cm: number | null;
+  paha_kiri_cm: number | null;
+  paha_kanan_cm: number | null;
+  catatan: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
  * Hasil `endpoint_budget_mingguan` — satu snapshot untuk seluruh layar Budget.
  *
  * Tidak memuat rincian kumulatif: ia turunan MURNI dari `budget.rincian`, jadi
@@ -542,6 +568,12 @@ export type Database = {
         Row: RedistribusiHariRow;
         Insert: Omit<RedistribusiHariRow, 'id'>;
         Update: Partial<RedistribusiHariRow>;
+        Relationships: [];
+      };
+      body_measurements: {
+        Row: BodyMeasurementRow;
+        Insert: Omit<BodyMeasurementRow, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<BodyMeasurementRow>;
         Relationships: [];
       };
       food_logs: {
