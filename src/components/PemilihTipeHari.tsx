@@ -20,6 +20,11 @@ type Props = {
   onPilih: (dayTypeId: string) => void;
   /** Buang override dan kembali mengikuti auto-deteksi. */
   onKembalikanAuto: () => void;
+  /**
+   * Tampilkan baris target di bawah pilihan. Dimatikan di layar yang sudah
+   * menampilkan target itu sebagai angka utama — satu angka utama per layar.
+   */
+  tampilkanTarget?: boolean;
 };
 
 /**
@@ -36,6 +41,7 @@ export function PemilihTipeHari({
   deteksi,
   onPilih,
   onKembalikanAuto,
+  tampilkanTarget = true,
 }: Props) {
   const alasan = alasanDeteksi(deteksi, NAMA_SUMBER);
   return (
@@ -86,7 +92,7 @@ export function PemilihTipeHari({
         </ScrollView>
 
         {/* Pratinjau target yang berlaku untuk pilihan saat ini */}
-        {target ? (
+        {!tampilkanTarget ? null : target ? (
           <View
             style={{
               flexDirection: 'row',

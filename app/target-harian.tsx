@@ -18,6 +18,7 @@ import {
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import {
   Card,
+  HeroNumber,
   InputTarget,
   KerangkaSheet,
   MatriksTarget,
@@ -105,6 +106,8 @@ export default function TargetHarianScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isi]);
   const faseMulai = periodeBerjalan(riwayatFase)?.mulai ?? null;
+  const targetHariIni = cariTarget(tipeHariIni, profil.fase_aktif);
+  const namaTipeHariIni = tipeHari.find((d) => d.id === tipeHariIni)?.nama ?? '';
   // Fase diganti dari halaman ini (atau di tempat lain): tab fase ikut fase yang baru aktif.
   useEffect(() => {
     if (mode === 'baca') setFase(profil.fase_aktif);
@@ -244,7 +247,31 @@ export default function TargetHarianScreen() {
           <View>
             <SectionHeader judul="Berlaku hari ini" aksi={override ? 'tipe hari diubah manual' : 'tipe hari otomatis'} />
             <View style={{ gap: spacing.md }}>
+              {/* Satu angka utama di layar ini: target kalori yang berlaku hari ini. */}
+              <Card style={{ paddingVertical: spacing.xl }}>
+                {targetHariIni ? (
+                  <HeroNumber
+                    label="Target kalori hari ini"
+                    nilai={formatAngka(targetHariIni.target_kalori)}
+                    unit="kcal"
+                    keterangan={`${namaTipeHariIni} · ${profil.fase_aktif} · protein ${formatMakro(targetHariIni.target_protein_g)} g · lemak ${formatMakro(targetHariIni.target_lemak_g)} g · sat fat ≤${formatMakro(targetHariIni.batas_sat_fat_g)} g`}
+                  />
+                ) : (
+                  <View style={{ gap: spacing.md }}>
+                    <Text style={{ ...typography.caption, color: colors.textMuted }}>TARGET KALORI HARI INI</Text>
+                    <Text style={{ ...typography.title, color: colors.text }}>
+                      {namaTipeHariIni} · {profil.fase_aktif} belum diisi
+                    </Text>
+                    <TombolUtama
+                      label="Isi target"
+                      aksesLabel={`Isi target ${namaTipeHariIni} untuk fase ${profil.fase_aktif}`}
+                      onPress={() => setSuntingSatu({ dayTypeId: tipeHariIni, fase: profil.fase_aktif })}
+                    />
+                  </View>
+                )}
+              </Card>
               <PemilihTipeHari
+                tampilkanTarget={false}
                 daftar={tipeHari}
                 terpilihId={tipeHariIni}
                 target={cariTarget(tipeHariIni, profil.fase_aktif)}
@@ -461,8 +488,9 @@ function KartuTargetBaca({
           </Text>
           {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
         </View>
+        {/* Angka kartu sengaja sekunder: angka utama layar ini ada di atas. */}
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
-          <Text style={{ ...typography.title, color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
+          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
           <Text style={{ ...typography.label, color: colors.textFaint }}>kcal</Text>
         </View>
         <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
@@ -516,7 +544,7 @@ function KartuTargetKosong({
           <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{dayType.nama}</Text>
           {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
         </View>
-        <Text style={{ ...typography.title, color: colors.textMuted }}>Belum diisi</Text>
+        <Text style={{ ...typography.body, fontWeight: '700', color: colors.textMuted }}>Belum diisi</Text>
         <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
           Hari bertipe {dayType.nama} di fase {fase} belum punya target, jadi Hari Ini belum bisa menghitung sisanya.
         </Text>

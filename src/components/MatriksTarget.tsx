@@ -4,7 +4,7 @@ import { formatAngka, formatMakro, urutanFaseJanggal } from '@recomp/logika';
 import type { BarisMatriks, Fase } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Props = {
   baris: BarisMatriks[];
@@ -111,7 +111,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
                       minHeight: TAP_MIN,
                       justifyContent: 'center',
                       paddingVertical: spacing.xs,
-                      borderRadius: 8,
+                      borderRadius: radius.sm,
                       backgroundColor: aktif ? colors.surfaceSunken : 'transparent',
                       opacity: pressed ? 0.6 : 1,
                     })}
