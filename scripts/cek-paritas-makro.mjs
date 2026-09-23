@@ -1647,7 +1647,7 @@ try {
   // Form menolak dan server menerima (atau sebaliknya) adalah dua cara target
   // yang sama menjadi "sah" di satu tempat dan "salah" di tempat lain.
   console.log();
-  const { periksaTarget, isianDariTarget, RENTANG_TARGET } = muatLogikaTs();
+  const { periksaTarget, isianDariTarget, RENTANG_TARGET, karboTersisaG } = muatLogikaTs();
   const UID_TARGET = '99999999-bbbb-bbbb-bbbb-999999999999';
   sql(`insert into auth.users (id, email) values ('${UID_TARGET}', 'paritas-target@contoh.test');
        insert into public.day_types (user_id, nama, auto_detect) values ('${UID_TARGET}', 'Paritas', false);`);
@@ -1660,27 +1660,43 @@ try {
   for (const k of nilaiKalori) for (const p of nilaiProtein) for (const l of nilaiLemak) for (const f of nilaiSatFat) {
     KASUS_TARGET.push({ target_kalori: k, target_protein_g: p, target_lemak_g: l, batas_sat_fat_g: f });
   }
+  // Batas pecahan: protein×4 + lemak×9 TEPAT sama dengan kalori, dan satu di
+  // bawahnya — yang dulu salah dihitung pecahan biner di TypeScript.
+  for (const [k, p, l] of [[1084, 0.1, 120.4], [1083, 0.1, 120.4], [800, 7.4, 41.6], [803, 14.8, 82.6], [2462, 150.1, 70.4], [2461, 150.1, 70.4]]) {
+    KASUS_TARGET.push({ target_kalori: k, target_protein_g: p, target_lemak_g: l, batas_sat_fat_g: 5 });
+  }
   const barisNilai = KASUS_TARGET.map((n, i) =>
     `(${i}, ${n.target_kalori}, ${n.target_protein_g}, ${n.target_lemak_g}, ${n.batas_sat_fat_g})`).join(',');
   // Hanya baris terakhir: tag CREATE TABLE/DO ikut tercetak di depannya.
-  const sahSql = JSON.parse(sql(`
-    create temp table hasil_target (i int primary key, sah boolean);
+  const hasilSql = JSON.parse(sql(`
+    set request.jwt.claim.sub = '${UID_TARGET}';
+    create temp table hasil_target (i int primary key, sah boolean, karbo int);
     do $$
-    declare r record; v_dt uuid := (select id from public.day_types where user_id = '${UID_TARGET}' and nama = 'Paritas');
+    declare r record; v_karbo int; v_dt uuid := (select id from public.day_types where user_id = '${UID_TARGET}' and nama = 'Paritas');
     begin
       for r in select * from (values ${barisNilai}) as t(i, k, p, l, f) loop
         begin
           insert into public.day_type_targets (user_id, day_type_id, fase, target_kalori, target_protein_g, target_lemak_g, batas_sat_fat_g)
           values ('${UID_TARGET}', v_dt, 'Cut', r.k, r.p, r.l, r.f);
+          select karbo_g into v_karbo from public.ambil_target(v_dt, 'Cut');
           delete from public.day_type_targets where day_type_id = v_dt;
-          insert into hasil_target values (r.i, true);
+          insert into hasil_target values (r.i, true, v_karbo);
         exception when check_violation then
-          insert into hasil_target values (r.i, false);
+          insert into hasil_target values (r.i, false, null);
         end;
       end loop;
     end $$;
-    select json_agg(sah order by i) from hasil_target;`).split('\n').pop());
+    select json_agg(json_build_array(sah, karbo) order by i) from hasil_target;`).split('\n').pop());
+  const sahSql = hasilSql.map((x) => x[0]);
   const bedaTarget = KASUS_TARGET.filter((n, i) => sahSql[i] !== periksaTarget(isianDariTarget(n)).sah);
+  // Sisa karbo: ambil_target (SQL) = karboTersisaG (TS) untuk setiap target sah.
+  const bedaKarbo = KASUS_TARGET.filter((n, i) => sahSql[i] && hasilSql[i][1] !== karboTersisaG(n));
+  console.log(`${bedaKarbo.length === 0 ? '✓' : '✗'} sisa karbo ambil_target = karboTersisaG untuk ${sahSql.filter(Boolean).length} target sah` +
+    (bedaKarbo.length ? ` — beda: ${bedaKarbo.slice(0, 3).map((n) => JSON.stringify(n)).join('; ')}` : ''));
+  if (bedaKarbo.length > 0) {
+    console.error('✗ Sisa karbo di SQL dan TypeScript tidak sejalan.');
+    process.exit(1);
+  }
   const nSah = sahSql.filter(Boolean).length;
   console.log(`${bedaTarget.length === 0 ? '✓' : '✗'} ${KASUS_TARGET.length} kombinasi target: ${nSah} sah, ${KASUS_TARGET.length - nSah} ditolak — ${bedaTarget.length === 0 ? 'sama' : 'BERBEDA'} di SQL dan TypeScript` +
     (bedaTarget.length ? ` — beda: ${bedaTarget.slice(0, 3).map((n) => JSON.stringify(n)).join('; ')}` : ''));

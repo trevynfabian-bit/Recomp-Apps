@@ -43,6 +43,22 @@ export type DayTypeRow = {
   created_at: string;
 };
 
+/** Hasil `ambil_target`: selalu satu baris; angka NULL bila `diisi` false (tanpa cadangan). */
+export type AmbilTargetRow = {
+  day_type_id: string;
+  nama_tipe_hari: string;
+  fase: FaseProgram;
+  diisi: boolean;
+  target_id: string | null;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  target_lemak_g: number | null;
+  batas_sat_fat_g: number | null;
+  /** (kalori − protein×4 − lemak×9) / 4, dibulatkan ke bawah; sama dengan `karboTersisaG`. */
+  karbo_g: number | null;
+  diperbarui_pada: string | null;
+};
+
 /** Satu target di balasan `muat_target` / `simpan_target`. */
 export type TargetApiRow = Omit<DayTypeTargetRow, 'user_id' | 'created_at'>;
 
@@ -1602,6 +1618,10 @@ export type Database = {
       ringkas_ekspor_data_saya: {
         Args: Record<string, never>;
         Returns: { nama: string; label: string; jumlah: number }[];
+      };
+      ambil_target: {
+        Args: { p_day_type_id: string; p_fase?: FaseProgram | null };
+        Returns: AmbilTargetRow[];
       };
       muat_target: {
         Args: Record<string, never>;

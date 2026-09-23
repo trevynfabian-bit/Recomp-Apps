@@ -214,6 +214,25 @@ for (const berkas of ['app/(tabs)/budget.tsx', 'app/(tabs)/tren.tsx']) {
 }
 for (const t of kalimat) cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, pelanggaranNada(t).length === 0, pelanggaranNada(t).join(', '));
 
+console.log('\nAritmetika pasti (gram satu desimal)');
+// Pecahan biner membuat 7,4 × 4 + 41,6 × 9 = 403,99999999999994: sisa karbo
+// yang tepat 99 g terbaca 98 g, dan target yang TEPAT di batas ditolak form
+// padahal diterima database (numeric).
+cek('sisa karbo pasti: 800 kcal, P 7,4, L 41,6 → 99 g', karboTersisaG({ target_kalori: 800, target_protein_g: 7.4, target_lemak_g: 41.6, batas_sat_fat_g: 0 }) === 99,
+  String(karboTersisaG({ target_kalori: 800, target_protein_g: 7.4, target_lemak_g: 41.6, batas_sat_fat_g: 0 })));
+cek('sisa karbo pasti negatif: 800 kcal, P 14,8, L 83,2 → −2 g', karboTersisaG({ target_kalori: 800, target_protein_g: 14.8, target_lemak_g: 83.2, batas_sat_fat_g: 0 }) === -2);
+cek('tepat di batas diterima: 1.084 kcal = P 0,1 × 4 + L 120,4 × 9', periksa({ kalori: '1084', protein: '0,1', lemak: '120,4', satFat: '10' }).sah);
+cek('satu kcal di bawahnya ditolak', !periksa({ kalori: '1083', protein: '0,1', lemak: '120,4', satFat: '10' }).sah);
+{
+  // Sapuan: sisa karbo = hitungan bilangan bulat persepuluh untuk ribuan kombinasi.
+  let beda = 0;
+  for (let k = 800; k <= 3200; k += 7) for (let p = 0; p <= 2500; p += 37) for (let l = 0; l <= 1500; l += 23) {
+    const pasti = Math.floor((k * 10 - p * 4 - l * 9) / 40);
+    if (karboTersisaG({ target_kalori: k, target_protein_g: p / 10, target_lemak_g: l / 10, batas_sat_fat_g: 0 }) !== pasti) beda += 1;
+  }
+  cek('sapuan sisa karbo: sama dengan hitungan pasti', beda === 0, `${beda} beda`);
+}
+
 console.log('\nAPI target (muat_target / simpan_target)');
 {
   const skema = readFileSync('supabase/migrations/20260922004600_skema_target_preferensi.sql', 'utf8');

@@ -64,6 +64,35 @@ export async function muatTarget(): Promise<DataTarget> {
   };
 }
 
+/**
+ * Target satu (tipe hari x fase) langsung dari server, tanpa memuat semuanya.
+ * `null` bila belum diisi — tanpa cadangan dari tipe hari atau fase lain.
+ * Tanpa `fase`, fase yang berlaku hari ini.
+ */
+export async function ambilTarget(
+  dayTypeId: string,
+  fase?: Fase,
+): Promise<{ fase: Fase; target: DayTypeTarget | null; karboG: number | null }> {
+  const { data, error } = await supabase.rpc('ambil_target', { p_day_type_id: dayTypeId, p_fase: fase ?? null });
+  if (error) throw terjemahkan(error, 'muat');
+  const b = data[0];
+  if (!b) throw new KesalahanTarget('Target belum bisa dimuat. Coba lagi sebentar lagi.', true);
+  if (!b.diisi || !b.target_id) return { fase: b.fase, target: null, karboG: null };
+  return {
+    fase: b.fase,
+    target: {
+      id: b.target_id,
+      day_type_id: b.day_type_id,
+      fase: b.fase,
+      target_kalori: Number(b.target_kalori),
+      target_protein_g: Number(b.target_protein_g),
+      target_lemak_g: Number(b.target_lemak_g),
+      batas_sat_fat_g: Number(b.batas_sat_fat_g),
+    },
+    karboG: b.karbo_g,
+  };
+}
+
 export async function simpanTargetServer(perubahan: PerubahanTarget[]): Promise<HasilSimpanTarget> {
   const { data, error } = await supabase.rpc('simpan_target', {
     p_perubahan: perubahan.map((p) => ({ day_type_id: p.day_type_id, fase: p.fase, ...p.nilai })),

@@ -83,9 +83,20 @@ export function isianDariTarget(t: NilaiTarget): IsianTarget {
 
 /** Karbo yang tersisa dari target kalori setelah protein & lemak, dalam gram (dibulatkan ke bawah). */
 export function karboTersisaG(t: NilaiTarget): number {
-  const sisaKkal =
-    t.target_kalori - t.target_protein_g * KKAL_PER_GRAM.protein - t.target_lemak_g * KKAL_PER_GRAM.lemak;
-  return Math.floor(sisaKkal / KKAL_PER_GRAM.karbo);
+  const sisaPersepuluh = t.target_kalori * 10 - kkalProteinLemakPersepuluh(t.target_protein_g, t.target_lemak_g);
+  return Math.floor(sisaPersepuluh / (KKAL_PER_GRAM.karbo * 10));
+}
+
+/**
+ * Kalori protein + lemak dalam PERSEPULUH kcal, dihitung dengan bilangan
+ * bulat. Gram tersimpan paling banyak satu desimal, jadi ×10 lalu dibulatkan
+ * memberi angka pastinya. Menghitung langsung dengan pecahan biner membuat
+ * 0,1 × 4 + 120,4 × 9 menjadi 1084,0000000000002 — target yang tepat di batas
+ * ditolak, dan sisa karbo yang tepat 99 g terbaca 98 g. Database menghitung
+ * dengan `numeric` (pasti); dengan ini keduanya sama.
+ */
+function kkalProteinLemakPersepuluh(proteinG: number, lemakG: number): number {
+  return Math.round(proteinG * 10) * KKAL_PER_GRAM.protein + Math.round(lemakG * 10) * KKAL_PER_GRAM.lemak;
 }
 
 function ribuan(n: number): string {
@@ -128,9 +139,9 @@ export function periksaTarget(isian: IsianTarget): HasilPeriksaTarget {
     galat.satFat = 'Batas sat fat paling tinggi sama dengan target lemak, karena sat fat bagian dari lemak.';
   }
   if (angka.kalori !== undefined && angka.protein !== undefined && angka.lemak !== undefined) {
-    const kkalProteinLemak = angka.protein * KKAL_PER_GRAM.protein + angka.lemak * KKAL_PER_GRAM.lemak;
-    if (kkalProteinLemak > angka.kalori) {
-      galat.kalori = `Protein dan lemak saja sudah ${ribuan(kkalProteinLemak)} kcal; target kalori perlu setidaknya sebesar itu.`;
+    const persepuluh = kkalProteinLemakPersepuluh(angka.protein, angka.lemak);
+    if (persepuluh > angka.kalori * 10) {
+      galat.kalori = `Protein dan lemak saja sudah ${ribuan(persepuluh / 10)} kcal; target kalori perlu setidaknya sebesar itu.`;
     }
   }
 
