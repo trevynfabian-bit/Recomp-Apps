@@ -1688,6 +1688,54 @@ try {
     console.error('✗ Aturan target di tabel dan di form tidak sejalan (atau kasusnya tidak menguji kedua sisi).');
     process.exit(1);
   }
+
+  // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
+  // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak
+  // membuat typecheck gagal — klien diam-diam membaca `undefined`.
+  console.log();
+  const TIPE_TABEL = {
+    ProfileRow: 'profiles', DayTypeRow: 'day_types', DayTypeTargetRow: 'day_type_targets', TipeHariAktifRow: 'v_tipe_hari_aktif',
+    DailyLogRow: 'daily_logs', FoodLogRow: 'food_logs', WorkoutRow: 'workouts', WorkoutSetRow: 'workout_sets',
+    FasePeriodeRow: 'fase_periode', RedistribusiMingguanRow: 'redistribusi_mingguan', RedistribusiHariRow: 'redistribusi_hari',
+    BodyMeasurementRow: 'body_measurements', AlertPinggangRow: 'alert_pinggang', PercakapanRow: 'percakapan',
+    PesanCoachRow: 'pesan_coach', RingkasanMingguanRow: 'ringkasan_mingguan', EvaluasiPeriodikRow: 'evaluasi_periodik',
+    HealthConnectionRow: 'health_connections', HealthDataRow: 'health_data', SourcePriorityRow: 'source_priority',
+    ImportJobRow: 'import_jobs', SettingsNotificationsRow: 'settings_notifications', DailySummaryRow: 'daily_summaries',
+    CopyNotifikasiRow: 'copy_notifikasi',
+  };
+  // Tabel yang sengaja tanpa tipe baris di klien, dengan alasannya.
+  const TANPA_TIPE_KLIEN = {
+    health_connection_secrets: 'token sumber data; hanya fungsi server yang membacanya',
+    pemakaian_coach_harian: 'penghitung kuota; klien membacanya lewat RPC (KuotaCoachRow)',
+  };
+  const kolomDb = Object.fromEntries(
+    sql(`select table_name || '=' || string_agg(column_name, ',' order by column_name)
+           from information_schema.columns where table_schema = 'public' group by table_name;`)
+      .split('\n').filter(Boolean).map((b) => { const [t, k] = b.split('='); return [t, k.split(',')]; }),
+  );
+  const tipeTs = readFileSync('src/types/database.ts', 'utf8');
+  let gagalTipe = 0;
+  for (const [tipe, tabel] of Object.entries(TIPE_TABEL)) {
+    const m = tipeTs.match(new RegExp(`export type ${tipe} = \\{([\\s\\S]*?)\\n\\};`));
+    const kunci = m ? [...m[1].matchAll(/^  ([a-z_0-9]+)\??:/gm)].map((x) => x[1]) : [];
+    const db = kolomDb[tabel] ?? [];
+    const tanpaDiTs = db.filter((k) => !kunci.includes(k));
+    const tanpaDiDb = kunci.filter((k) => !db.includes(k));
+    if (!m || db.length === 0 || tanpaDiTs.length || tanpaDiDb.length) {
+      gagalTipe += 1;
+      console.log(`✗ ${tipe} ≠ ${tabel}${!m ? ' (tipe tidak ditemukan)' : ''}${tanpaDiTs.length ? ` — belum di TS: ${tanpaDiTs.join(', ')}` : ''}${tanpaDiDb.length ? ` — tidak ada di tabel: ${tanpaDiDb.join(', ')}` : ''}`);
+    }
+  }
+  const tanpaPeta = Object.keys(kolomDb).filter((t) => !Object.values(TIPE_TABEL).includes(t) && !(t in TANPA_TIPE_KLIEN));
+  if (tanpaPeta.length) {
+    gagalTipe += 1;
+    console.log(`✗ tabel/view publik tanpa tipe baris di src/types/database.ts: ${tanpaPeta.join(', ')}`);
+  }
+  if (gagalTipe > 0) {
+    console.error(`✗ ${gagalTipe} tipe baris TS tidak sama dengan skema.`);
+    process.exit(1);
+  }
+  console.log(`✓ ${Object.keys(TIPE_TABEL).length} tipe baris TS sama persis dengan kolom tabelnya; ${Object.keys(TANPA_TIPE_KLIEN).length} tabel sengaja tanpa tipe klien.`);
 } finally {
   hentikanPostgres();
 }
