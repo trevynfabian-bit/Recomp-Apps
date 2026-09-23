@@ -474,6 +474,43 @@ export type EvaluasiPeriodikRow = {
   created_at: string;
 };
 
+/**
+ * Hasil `evaluasi_4_mingguan` — verdict beserta sumbu yang diturunkan dari data.
+ *
+ * Tidak memuat kalimat (judul, ringkas, rekomendasi): kalimatnya disusun
+ * `evaluasi4Mingguan` di @recomp/logika dari sumbu yang SAMA, dan
+ * `npm run cek:paritas` membuktikan kode & keyakinannya identik untuk seluruh
+ * 960 kombinasi masukan.
+ */
+export type Evaluasi4MingguanRow = {
+  periode_dari: string;
+  periode_sampai: string;
+  fase: FaseProgram;
+  pekan_data: number;
+  sumbu: {
+    berat: {
+      arah: ArahMetrikDb;
+      awal_kg: number | null;
+      akhir_kg: number | null;
+      selisih_kg: number | null;
+      ambang_kg: number;
+      jumlah_timbangan: [number | null, number | null];
+    };
+    pinggang: {
+      arah: ArahMetrikDb;
+      awal_cm: number | null;
+      akhir_cm: number | null;
+      selisih_cm: number | null;
+      ambang_cm: number;
+      jumlah_pencatatan: number;
+    };
+    kekuatan: { arah: ArahMetrikDb; sebab: string };
+  };
+  kode: string;
+  penentu: string;
+  keyakinan: 'rendah' | 'sedang' | 'tinggi';
+};
+
 /** percakapan — satu utas AI Coach. */
 export type PercakapanRow = {
   id: string;
@@ -1060,6 +1097,10 @@ export type Database = {
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
         Returns: RiwayatUkuranRow;
+      };
+      evaluasi_4_mingguan: {
+        Args: { p_sampai: string | null };
+        Returns: Evaluasi4MingguanRow;
       };
       estimasi_body_fat: {
         Args: { p_tanggal: string | null };

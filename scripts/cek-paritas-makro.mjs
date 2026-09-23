@@ -95,11 +95,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/tdee.ts', join(kerja, 'tdee.ts'));
   copyFileSync('packages/logika/src/bodyFat.ts', join(kerja, 'bodyFat.ts'));
   copyFileSync('packages/logika/src/ukuran.ts', join(kerja, 'ukuran.ts'));
+  copyFileSync('packages/logika/src/evaluasi.ts', join(kerja, 'evaluasi.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts',
+     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -114,6 +115,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'tdee.js')),
     ...require(join(kerja, 'keluar', 'bodyFat.js')),
     ...require(join(kerja, 'keluar', 'ukuran.js')),
+    ...require(join(kerja, 'keluar', 'evaluasi.js')),
   };
 }
 
@@ -1453,6 +1455,80 @@ try {
   console.log(
     `✓ ${BAGIAN.length} bagian tubuh & ${KASUS_BATAS.length} keadaan batas cocok — ` +
       'riwayat & delta ukuran di SQL dan TypeScript sejalan.',
+  );
+
+  // === Bagian 13: pohon keputusan evaluasi 4 mingguan ======================
+  //
+  // Delapan belas verdict dari tiga fase, empat arah per sumbu, dan lima
+  // kemungkinan jumlah pekan data. Menukar dua cabang saja sudah cukup mengubah
+  // verdict untuk sebagian kombinasi — dan tidak ada kasus uji pilihan tangan
+  // yang bisa menjamin semua kombinasi itu tersentuh. Karena itu SELURUH
+  // 960 kombinasi dijalankan lewat kedua sisi, sekali jalan, lalu dibandingkan
+  // satu per satu: kode, penentu, dan keyakinan.
+  console.log();
+  const { evaluasi4Mingguan, PEKAN_EVALUASI } = muatLogikaTs();
+
+  const pekanSqlEval = Number(sql('select public.pekan_evaluasi();'));
+  if (pekanSqlEval !== PEKAN_EVALUASI) {
+    console.error(`✗ Pekan evaluasi BERBEDA: SQL ${pekanSqlEval} vs TS ${PEKAN_EVALUASI}.`);
+    process.exit(1);
+  }
+
+  const semuaSql = JSON.parse(
+    sql(`
+      select jsonb_agg(
+               jsonb_build_object(
+                 'fase', f.fase, 'berat', b.a, 'pinggang', p.a, 'kekuatan', k.a, 'pekan', n.n,
+                 'hasil', public.kode_evaluasi(f.fase::public.fase_program, b.a, p.a, k.a, n.n)
+               ))::text
+        from (values ('Lean Gain'), ('Cut'), ('Maintenance')) as f(fase)
+        cross join (values ('naik'), ('datar'), ('turun'), ('belum jelas')) as b(a)
+        cross join (values ('naik'), ('datar'), ('turun'), ('belum jelas')) as p(a)
+        cross join (values ('naik'), ('datar'), ('turun'), ('belum jelas')) as k(a)
+        cross join generate_series(0, 4) as n(n);`),
+  );
+
+  let gagalEval = 0;
+  const contohBeda = [];
+  const perKode = new Map();
+  for (const baris of semuaSql) {
+    const ts = evaluasi4Mingguan({
+      fase: baris.fase,
+      arahBerat: baris.berat,
+      arahPinggang: baris.pinggang,
+      arahKekuatan: baris.kekuatan,
+      pekanData: baris.pekan,
+    });
+    const h = baris.hasil;
+    const sama = h.kode === ts.kode && h.penentu === ts.penentu && h.keyakinan === ts.keyakinan;
+    if (!sama) {
+      gagalEval += 1;
+      if (contohBeda.length < 5) {
+        contohBeda.push(
+          `${baris.fase}/${baris.berat}/${baris.pinggang}/${baris.kekuatan}/${baris.pekan}: ` +
+            `SQL ${h.kode}·${h.keyakinan} vs TS ${ts.kode}·${ts.keyakinan}`,
+        );
+      }
+    }
+    perKode.set(ts.kode, (perKode.get(ts.kode) ?? 0) + 1);
+  }
+
+  console.log(
+    `${gagalEval === 0 ? '✓' : '✗'} ${semuaSql.length} kombinasi, ${perKode.size} kode verdict tersentuh`,
+  );
+  for (const d of contohBeda) console.log(`    ↳ ${d}`);
+
+  console.log();
+  if (semuaSql.length !== 960) {
+    console.error(`✗ Kombinasi yang dijalankan ${semuaSql.length}, seharusnya 960.`);
+    process.exit(1);
+  }
+  if (gagalEval > 0) {
+    console.error(`✗ ${gagalEval} kombinasi BERBEDA (pohon keputusan evaluasi).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ 960 kombinasi cocok — kode, penentu, dan keyakinan evaluasi di SQL dan TypeScript sejalan.`,
   );
 } finally {
   hentikanPostgres();
