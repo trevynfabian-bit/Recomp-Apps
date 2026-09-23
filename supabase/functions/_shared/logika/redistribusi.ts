@@ -210,3 +210,18 @@ export function periksaProteksiProtein(
     hari,
   };
 }
+
+/**
+ * Redistribusi yang dihitung dari target LAMA.
+ *
+ * Hasil redistribusi menyimpan target baru sebagai angka absolut per hari.
+ * Setelah target tipe hari disunting atau fase diganti, angka itu tidak lagi
+ * berangkat dari rencana yang berlaku — menerapkannya akan diam-diam menimpa
+ * target baru. Basi berarti: ada hari mendatang yang rencana semulanya
+ * (`targetLama`) berbeda dari target dasarnya sekarang.
+ */
+export function redistribusiBasi(hasil: HasilRedistribusi | null, hariDasar: HariBudget[]): boolean {
+  if (!hasil || hasil.opsi === 'abaikan') return false;
+  const dasar = new Map(hariDasar.map((h) => [h.tanggal, h.targetKalori]));
+  return hasil.hari.some((h) => dasar.has(h.tanggal) && dasar.get(h.tanggal) !== h.targetLama);
+}

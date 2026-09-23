@@ -1,6 +1,5 @@
 import type {
   DailyLog,
-  DailySnapshot,
   DayType,
   DayTypeTarget,
   Fase,
@@ -9,6 +8,8 @@ import type {
   MacroProgress,
   Profile,
 } from '@/types/domain';
+import { deteksiTipeHari } from '@recomp/logika';
+import { mockWorkoutsHariIni } from './workout';
 
 /**
  * DATA TIRUAN (stub) untuk Fase 1 frontend.
@@ -146,13 +147,15 @@ export function susunMacros(log: DailyLog, target: DayTypeTarget): MacroProgress
   ];
 }
 
-/** Snapshot siap-tampil untuk layar Log Harian, dirakit dari data tiruan. */
-export function mockSnapshotHariIni(): DailySnapshot {
+/**
+ * Tipe hari yang dipakai Hari Ini saat dibuka: pilihan pengguna bila ia
+ * meng-override, selain itu hasil deteksi dari workout hari ini — aturan yang
+ * sama dengan layar Hari Ini, supaya pratinjau widget memakai tipe hari yang sama.
+ */
+export function mockTipeHariIni(): string {
   const log = mockDailyLogHariIni;
-  const dayType = mockDayTypes.find((d) => d.id === log.day_type_id) ?? mockDayTypes[0];
-  const fase = mockProfile.fase_aktif;
-  const target = cariTarget(log.day_type_id, fase);
-  return { log, dayType, target, fase, macros: susunMacros(log, target) };
+  const deteksi = deteksiTipeHari(mockWorkoutsHariIni, mockDayTypes);
+  return log.day_type_override || deteksi.dayTypeId === null ? log.day_type_id : deteksi.dayTypeId;
 }
 
 /**
@@ -191,14 +194,3 @@ export function riwayatBeratTerakhir(tanggal: string, jumlah = 3): EntriBerat[] 
 export function simpanBeratStub(_beratKg: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 700));
 }
-
-/**
- * Jangkar fase aktif untuk koridor target.
- * Fase 2 mengisinya dari `program_phases`; di Fase 1 ini tiruan yang masuk akal:
- * fase Lean Gain dimulai di awal rentang riwayat yang ada.
- */
-export const mockJangkarFase = {
-  // Riwayat bisa kosong untuk pengguna baru; jangkar tetap harus ada nilainya.
-  tanggal_mulai: mockRiwayatBerat[0]?.tanggal ?? '2026-09-09',
-  berat_awal_kg: mockRiwayatBerat[0]?.berat_pagi_kg ?? 70,
-};

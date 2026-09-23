@@ -130,6 +130,7 @@ export {
   KELIPATAN_KCAL,
   periksaProteksiProtein,
   selisihPerluDipindah,
+  redistribusiBasi,
   terapkanRedistribusi,
 } from './redistribusi.ts';
 
@@ -333,4 +334,4 @@ export {
 } from './targetHarian.ts';
 
 export type { HasilGantiFase, PeriodeFase } from './periodeFase.ts';
-export { periodeBerjalan, terapkanGantiFase } from './periodeFase.ts';
+export { faseSaat, jangkarKoridor, periodeBerjalan, terapkanGantiFase } from './periodeFase.ts';

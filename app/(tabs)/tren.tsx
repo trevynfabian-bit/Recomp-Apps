@@ -9,6 +9,7 @@ import {
   formatTanggalPanjang,
   JENDELA_HARI,
   kecukupanTren,
+  jangkarKoridor,
   koridorTarget,
   LAJU_PER_MINGGU,
   mundurHari,
@@ -17,7 +18,7 @@ import {
   statusKoridor,
   tanggalHariIni,
 } from '@recomp/logika';
-import type { Fase } from '@recomp/logika';
+import type { Fase, StatusKoridor } from '@recomp/logika';
 import {
   Card,
   CatatanKecukupan,
@@ -28,7 +29,7 @@ import {
   Pill,
   SectionHeader,
 } from '@/components';
-import { mockJangkarFase, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -46,7 +47,7 @@ import { colors, radius, spacing, typography } from '@/theme';
  */
 export default function TrenScreen() {
   const insets = useSafeAreaInsets();
-  const { profil } = useProfil();
+  const { profil, riwayatFase } = useProfil();
   const router = useRouter();
   const [tampilkanHarian, setTampilkanHarian] = useState(true);
 
@@ -63,14 +64,17 @@ export default function TrenScreen() {
   const sepekanLalu = rataRata7Hari(riwayat, mundurHari(hariIni, JENDELA_HARI));
   const deret = deretTren(riwayat, mundurHari(hariIni, 13), hariIni);
 
-  // Koridor digambar sejak fase dimulai, cukup panjang untuk menutupi grafik.
-  const koridor = koridorTarget(
-    mockJangkarFase.berat_awal_kg,
-    mockJangkarFase.tanggal_mulai,
-    profil.fase_aktif,
-    60,
-  );
-  const posisi = statusKoridor(koridor, hariIni, rata.rataRataKg);
+  // Koridor digambar sejak periode fase BERJALAN dimulai, cukup panjang untuk
+  // menutupi grafik. Mengganti fase memulai koridor baru dari jangkar baru —
+  // bukan laju fase baru yang ditempel ke jangkar fase lama.
+  const jangkar = jangkarKoridor(riwayatFase, riwayat);
+  const koridor =
+    jangkar && jangkar.beratKg !== null ? koridorTarget(jangkar.beratKg, jangkar.tanggal, profil.fase_aktif, 60) : null;
+  const posisi: StatusKoridor = koridor
+    ? statusKoridor(koridor, hariIni, rata.rataRataKg)
+    : { posisi: 'belum bisa dinilai', selisihKg: null, bawahKg: null, atasKg: null };
+  /** Fase baru dimulai setelah timbangan terakhir: belum ada titik untuk dinilai. */
+  const faseBaruDimulai = jangkar !== null && jangkar.tanggal > hariIni;
   const kecukupan = kecukupanTren(riwayat, hariIni);
 
   // Warna mengikuti KECOCOKAN dengan fase, bukan arah — aturan yang sama
@@ -190,13 +194,15 @@ export default function TrenScreen() {
               </Text>
             ) : (
               <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
-                Belum cukup data untuk menilai posisi terhadap koridor.
+                {faseBaruDimulai && jangkar
+                  ? `Fase ${profil.fase_aktif} dimulai ${formatTanggalPanjang(jangkar.tanggal)}; posisinya terbaca mulai timbangan berikutnya.`
+                  : 'Belum cukup data untuk menilai posisi terhadap koridor.'}
               </Text>
             )}
             <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
-              Koridor memakai laju {persenLaju(profil.fase_aktif)} berat badan per minggu sejak
-              fase dimulai ({formatTanggalPanjang(mockJangkarFase.tanggal_mulai)}, {formatDesimal(mockJangkarFase.berat_awal_kg)} kg).
-              Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.
+              {jangkar && jangkar.beratKg !== null
+                ? `Koridor memakai laju ${persenLaju(profil.fase_aktif)} berat badan per minggu sejak fase dimulai (${formatTanggalPanjang(jangkar.tanggal)}, ${formatDesimal(jangkar.beratKg)} kg). Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.`
+                : `Koridor fase ${profil.fase_aktif} digambar setelah timbangan pertama di fase ini.`}
             </Text>
           </View>
         </Card>

@@ -1,15 +1,17 @@
 import { JAM_TIMBANG_BAWAAN, jenisNotifikasiBawaan, tanggalDariWaktu } from '@recomp/logika';
 import type { RingkasanWidget } from '@recomp/logika';
-import { mockSnapshotHariIni } from './dailyLog';
+import type { DayTypeTarget } from '@/types/domain';
+import { mockDailyLogHariIni } from './dailyLog';
 
 /**
- * Ringkasan hari ini untuk pratinjau widget, diturunkan dari snapshot tiruan
- * yang SAMA dengan layar Hari Ini — supaya pratinjau widget dan layar utama
- * tidak menampilkan dua "sisa" yang berbeda. Task backend menukarnya dengan
- * `daily_summaries` yang dihitung server.
+ * Ringkasan hari ini untuk pratinjau widget, dari konsumsi tiruan yang SAMA
+ * dengan layar Hari Ini dan target TERKINI (penyedia target + fase aktif) —
+ * supaya pratinjau widget dan layar utama tidak menampilkan dua "sisa" yang
+ * berbeda, termasuk setelah target disunting atau fase diganti. Task backend
+ * menukarnya dengan `daily_summaries` yang dihitung server.
  */
-export function mockRingkasanWidget(sekarang: Date = new Date()): RingkasanWidget {
-  const { log, target } = mockSnapshotHariIni();
+export function mockRingkasanWidget(target: DayTypeTarget, sekarang: Date = new Date()): RingkasanWidget {
+  const log = mockDailyLogHariIni;
   return {
     sisaKalori: target.target_kalori - log.kalori,
     sisaProteinG: target.target_protein_g - log.protein_g,
@@ -57,10 +59,9 @@ export const LABEL_SKENARIO_WIDGET: Record<SkenarioWidget, string> = {
  * `siapkanWidget`. "Hari baru" sengaja MENYIMPAN ringkasan kemarin lengkap
  * dengan angkanya — pratinjau harus membuktikan angka itu tidak muncul.
  */
-export function mockMasukanWidget(skenario: SkenarioWidget, sekarang: Date = new Date()) {
-  const { target } = mockSnapshotHariIni();
+export function mockMasukanWidget(skenario: SkenarioWidget, target: DayTypeTarget, sekarang: Date = new Date()) {
   const hariIni = tanggalDariWaktu(sekarang.toISOString());
-  const ringkasan = mockRingkasanWidget(sekarang);
+  const ringkasan = mockRingkasanWidget(target, sekarang);
   const targetHari = { kalori: target.target_kalori, proteinG: target.target_protein_g };
   switch (skenario) {
     case 'angka-lama':

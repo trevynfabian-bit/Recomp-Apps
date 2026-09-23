@@ -16,7 +16,7 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['periodeFase.ts', 'pengingat.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { terapkanGantiFase, periodeBerjalan } = require(join(kerja, 'keluar', 'periodeFase.js'));
+const { terapkanGantiFase, periodeBerjalan, jangkarKoridor } = require(join(kerja, 'keluar', 'periodeFase.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -50,6 +50,21 @@ cek('pesan penolakan netral', tabrak.jenis === 'ditolak' && pelanggaranNada(tabr
 const pertama = terapkanGantiFase([], 'Cut', '2026-09-23', null);
 cek('tanpa riwayat → periode pertama', pertama.jenis === 'ditutup' && pertama.ditutup === null && pertama.riwayat.length === 1);
 cek('tanpa jangkar (belum timbang) tetap bisa', pertama.jenis === 'ditutup' && pertama.baru.beratAwalKg === null);
+
+console.log('\nJangkar koridor');
+const timbangan = [
+  { tanggal: '2026-09-20', berat_pagi_kg: 74.4 },
+  { tanggal: '2026-09-24', berat_pagi_kg: 74.9 },
+  { tanggal: '2026-09-25', berat_pagi_kg: 75.1 },
+];
+const j1 = jangkarKoridor(tutup.riwayat, timbangan);
+cek('jangkar = periode berjalan & berat awalnya', j1 && j1.tanggal === '2026-09-23' && j1.beratKg === 74.4);
+const tanpaBerat = terapkanGantiFase(awal, 'Cut', '2026-09-23', null);
+const j2 = jangkarKoridor(tanpaBerat.riwayat, timbangan);
+cek('tanpa berat awal → timbangan pertama SEJAK fase dimulai (bukan sebelumnya)', j2 && j2.beratKg === 74.9);
+const j3 = jangkarKoridor(tanpaBerat.riwayat, timbangan.slice(0, 1));
+cek('belum ada timbangan di fase ini → berat null, tanggal tetap', j3 && j3.tanggal === '2026-09-23' && j3.beratKg === null);
+cek('tanpa periode berjalan → null', jangkarKoridor([], timbangan) === null);
 
 console.log('\nNada sheet konfirmasi');
 const sumber = ts.createSourceFile('s.tsx', readFileSync('src/components/SheetGantiFase.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

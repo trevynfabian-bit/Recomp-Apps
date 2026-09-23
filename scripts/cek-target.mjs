@@ -17,12 +17,13 @@ const ts = require('typescript');
 const kerja = mkdtempSync(join(tmpdir(), 'target-'));
 for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-  ['targetHarian.ts', 'pengingat.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+  ['targetHarian.ts', 'pengingat.ts', 'redistribusi.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
 } = require(join(kerja, 'keluar', 'targetHarian.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
+const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -86,6 +87,28 @@ cek('"72.5" sama dengan 72,5 (bukan perubahan)', !isianBerubah({ ...isianAwal, p
 cek('angka lain = perubahan', isianBerubah({ ...isianAwal, kalori: '2500' }, tersimpan));
 cek('isian belum sah tetap dihitung berubah', isianBerubah({ ...isianAwal, kalori: '' }, tersimpan));
 
+console.log('\nRedistribusi setelah target berubah');
+const minggu = [
+  { tanggal: '2026-09-21', namaTipeHari: 'Angkat Beban', targetKalori: 2850, targetProteinG: 180, terpakaiKalori: 2910 },
+  { tanggal: '2026-09-24', namaTipeHari: 'Padel', targetKalori: 2950, targetProteinG: 175, terpakaiKalori: 0 },
+  { tanggal: '2026-09-25', namaTipeHari: 'Beban+Lari', targetKalori: 3100, targetProteinG: 185, terpakaiKalori: 0 },
+];
+const redis = {
+  opsi: 'sebar_rata', perluDipindah: 300, terserap: 300, tersisa: 0, dibatasiLantai: false, alasan: null,
+  hari: [
+    { tanggal: '2026-09-24', namaTipeHari: 'Padel', targetLama: 2950, targetBaru: 2800, selisih: -150, kenaLantai: false },
+    { tanggal: '2026-09-25', namaTipeHari: 'Beban+Lari', targetLama: 3100, targetBaru: 2950, selisih: -150, kenaLantai: false },
+  ],
+};
+cek('target tidak berubah → redistribusi tetap berlaku', !redistribusiBasi(redis, minggu));
+const disunting = minggu.map((h) => (h.tanggal === '2026-09-25' ? { ...h, targetKalori: 3200 } : h));
+cek('target hari mendatang disunting → redistribusi basi', redistribusiBasi(redis, disunting));
+cek('tanpa pelepasan, target baru tertimpa angka lama (alasan aturan ini)',
+  terapkanRedistribusi(disunting, redis).find((h) => h.tanggal === '2026-09-25').targetKalori === 2950);
+const lampauBerubah = minggu.map((h) => (h.tanggal === '2026-09-21' ? { ...h, targetKalori: 2000 } : h));
+cek('hari lampau bukan bagian redistribusi → tidak membuat basi', !redistribusiBasi(redis, lampauBerubah));
+cek('tanpa redistribusi / abaikan → tidak basi', !redistribusiBasi(null, disunting) && !redistribusiBasi({ ...redis, opsi: 'abaikan' }, disunting));
+
 console.log('\nTarget bawaan lolos aturan yang sama');
 const mock = readFileSync('src/mocks/dailyLog.ts', 'utf8');
 const baris = [...mock.matchAll(/\{ id: '(tgt-[^']+)', day_type_id: '[^']+', fase: '[^']+', target_kalori: (\d+), target_protein_g: ([\d.]+), target_lemak_g: ([\d.]+), batas_sat_fat_g: ([\d.]+) \}/g)];
@@ -110,6 +133,14 @@ const kalimat = [];
   ts.forEachChild(n, jelajah);
 })(sumber);
 cek('layar form punya kalimat untuk diperiksa', kalimat.length >= 10, `hanya ${kalimat.length}`);
+// Kalimat yang lahir dari perubahan target/fase di layar lain (Budget, Tren).
+for (const berkas of ['app/(tabs)/budget.tsx', 'app/(tabs)/tren.tsx']) {
+  const src = readFileSync(berkas, 'utf8');
+  const temuan = [...src.matchAll(/'([^'\n]*(?:Target berubah|posisinya terbaca|digambar setelah)[^'\n]*)'|`([^`\n]*(?:Target berubah|posisinya terbaca|digambar setelah)[^`\n]*)`/g)]
+    .map((m) => (m[1] ?? m[2]).replace(/\$\{[^}]*\}/g, 'X'));
+  cek(`${berkas}: kalimat perubahan ditemukan`, temuan.length >= 1, 'tidak ada');
+  kalimat.push(...temuan);
+}
 for (const t of kalimat) cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, pelanggaranNada(t).length === 0, pelanggaranNada(t).join(', '));
 
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan target lulus');

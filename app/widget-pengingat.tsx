@@ -36,6 +36,9 @@ import {
   mockWaktuTimbang,
   type SkenarioWidget,
 } from '@/mocks/widget';
+import { mockTipeHariIni } from '@/mocks/dailyLog';
+import { useProfil } from '@/state/profil';
+import { useTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
@@ -58,6 +61,11 @@ export default function WidgetPengingatScreen() {
   const router = useRouter();
   const [atur, setAtur] = useState(mockPengaturanPengingat);
   const [skenario, setSkenario] = useState<SkenarioWidget>('hari-ini');
+  // Target terkini (disunting di Pengaturan, fase aktif) untuk tipe hari yang
+  // sama dengan Hari Ini: pratinjau tidak boleh memakai angka yang sudah diganti.
+  const { profil } = useProfil();
+  const { cariTarget } = useTarget();
+  const targetHariIni = cariTarget(mockTipeHariIni(), profil.fase_aktif);
   const [sekarang] = useState(() => new Date());
   // Lewat `siapkanWidget` yang sama dengan widget native: ringkasan kemarin
   // dibuang di sini, bukan disembunyikan oleh layar pratinjau.
@@ -79,10 +87,10 @@ export default function WidgetPengingatScreen() {
   const ringkasan = useMemo(
     () =>
       siapkanWidget(
-        skenario === 'hari-ini' && masukanAsli ? masukanAsli : mockMasukanWidget(skenario, sekarang),
+        skenario === 'hari-ini' && masukanAsli ? masukanAsli : mockMasukanWidget(skenario, targetHariIni, sekarang),
         tanggalHariIni(),
       ),
-    [skenario, sekarang, masukanAsli],
+    [skenario, sekarang, masukanAsli, targetHariIni],
   );
   const [waktuTimbang] = useState(() => mockWaktuTimbang());
   const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);

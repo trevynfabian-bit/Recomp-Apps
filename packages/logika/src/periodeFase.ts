@@ -74,3 +74,38 @@ export function terapkanGantiFase(
     baru,
   };
 }
+
+/**
+ * Fase yang BERLAKU pada satu tanggal — kembaran `fase_pada_tanggal`.
+ * Periode yang sudah ditutup adalah sejarah; periode berjalan dan tanggal di
+ * luar riwayat mengikuti fase aktif profil (tebakan terbaik yang tersedia).
+ */
+export function faseSaat(riwayat: PeriodeFase[], tanggal: string, faseAktif: Fase): Fase {
+  const periode = riwayat
+    .filter((p) => p.mulai <= tanggal && (p.selesai === null || p.selesai >= tanggal))
+    .sort((a, b) => b.mulai.localeCompare(a.mulai))[0];
+  if (!periode || periode.selesai === null) return faseAktif;
+  return periode.fase;
+}
+
+/**
+ * Jangkar koridor Tren: tanggal mulai periode berjalan dan berat awalnya.
+ *
+ * Berat awal kosong (belum ada timbangan dalam 7 hari sebelum fase dimulai)
+ * jatuh ke timbangan PERTAMA sejak fase dimulai — koridor tetap berangkat dari
+ * fase ini, bukan dari fase sebelumnya. Tanpa keduanya `beratKg` null: koridor
+ * belum bisa digambar, dan layar harus mengatakannya alih-alih meminjam jangkar
+ * lama. `null` seluruhnya hanya bila tidak ada periode berjalan.
+ */
+export function jangkarKoridor(
+  riwayat: PeriodeFase[],
+  timbangan: { tanggal: string; berat_pagi_kg: number | null }[],
+): { tanggal: string; beratKg: number | null } | null {
+  const berjalan = periodeBerjalan(riwayat);
+  if (!berjalan) return null;
+  if (berjalan.beratAwalKg !== null) return { tanggal: berjalan.mulai, beratKg: berjalan.beratAwalKg };
+  const pertama = timbangan
+    .filter((t) => t.tanggal >= berjalan.mulai && t.berat_pagi_kg !== null)
+    .sort((a, b) => a.tanggal.localeCompare(b.tanggal))[0];
+  return { tanggal: berjalan.mulai, beratKg: pertama ? (pertama.berat_pagi_kg as number) : null };
+}

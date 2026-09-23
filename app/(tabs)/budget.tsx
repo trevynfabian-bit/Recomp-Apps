@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -8,7 +8,9 @@ import {
   lajuBudget,
   bandingkanTargetTdee,
   estimasiTdee,
+  faseSaat,
   periksaProteksiProtein,
+  redistribusiBasi,
   rincianKumulatif,
   terapkanRedistribusi,
   usiaPada,
@@ -30,6 +32,7 @@ import {
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
+import { useTarget } from '@/state/target';
 import { colors, radius, spacing, typography } from '@/theme';
 
 /**
@@ -49,7 +52,8 @@ const BATAS_BAWAH_KALORI = 1800;
  */
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
-  const { profil } = useProfil();
+  const { profil, riwayatFase } = useProfil();
+  const { cariTarget } = useTarget();
   // Fase dipilih di sini, dikonfirmasi di sheet yang menyebut angka-angkanya.
   const [calonFase, setCalonFase] = useState<Fase | null>(null);
   const hariIni = mockDailyLogHariIni.tanggal;
@@ -63,8 +67,26 @@ export default function BudgetScreen() {
 
   // Target hari mendatang memakai hasil redistribusi bila sudah diterapkan —
   // tanpa ini panelnya terkunci tapi angka di bawahnya tidak berubah sama sekali.
-  const hariDasar = mockHariBudget(hariIni, profil.fase_aktif);
-  const hariSetelah = terapkanRedistribusi(hariDasar, redistribusi);
+  // Hari lampau memakai snapshot targetnya; hari ini & sesudahnya target terkini.
+  const hariDasar = mockHariBudget(hariIni, {
+    faseAktif: profil.fase_aktif,
+    faseLampau: (tanggal) => faseSaat(riwayatFase, tanggal, profil.fase_aktif),
+    targetTerkini: cariTarget,
+  });
+  // Redistribusi menyimpan target absolut per hari. Bila target dasarnya
+  // berubah sesudahnya (target disunting, fase diganti), angka itu tidak lagi
+  // berangkat dari rencana yang berlaku: dilepas, dan pengguna memilih lagi
+  // dari target baru — bukan diam-diam menimpa target yang baru disimpan.
+  const basi = redistribusiBasi(redistribusi, hariDasar);
+  const [catatanRedistribusi, setCatatanRedistribusi] = useState<string | null>(null);
+  useEffect(() => {
+    if (!basi) return;
+    setRedistribusi(null);
+    setCatatanRedistribusi(
+      'Target berubah setelah redistribusi diterapkan, jadi redistribusi pekan ini dilepas. Angkanya kini berangkat dari target baru; pilih lagi bila perlu.',
+    );
+  }, [basi]);
+  const hariSetelah = terapkanRedistribusi(hariDasar, basi ? null : redistribusi);
   const budget = budgetMingguan(hariSetelah, hariIni);
 
   // Hanya hari yang belum berjalan yang bisa terkena redistribusi.
@@ -220,14 +242,25 @@ export default function BudgetScreen() {
           judul="Redistribusi kalori"
           aksi={redistribusi ? 'sudah dipakai' : 'maksimal 1x per minggu'}
         />
-        {redistribusi ? (
+        {catatanRedistribusi && !redistribusi ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19, marginBottom: spacing.sm }}
+          >
+            {catatanRedistribusi}
+          </Text>
+        ) : null}
+        {redistribusi && !basi ? (
           <StatusRedistribusi hasil={redistribusi} diterapkanPada={hariIni} />
         ) : (
           <PanelRedistribusi
             budget={budget}
             batasBawahKalori={BATAS_BAWAH_KALORI}
             sudahDipakai={false}
-            onTerapkan={setRedistribusi}
+            onTerapkan={(h) => {
+              setCatatanRedistribusi(null);
+              setRedistribusi(h);
+            }}
           />
         )}
       </View>

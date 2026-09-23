@@ -20,7 +20,7 @@ export const mockAkun = {
  */
 export const mockRiwayatFase: PeriodeFase[] = [
   { fase: 'Maintenance', mulai: '2026-08-02', selesai: '2026-09-08', beratAwalKg: 74.2 },
-  { fase: 'Lean Gain', mulai: '2026-09-09', selesai: null, beratAwalKg: 74.0 },
+  { fase: 'Lean Gain', mulai: '2026-09-09', selesai: null, beratAwalKg: 73.9 },
 ];
 
 /**

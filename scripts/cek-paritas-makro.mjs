@@ -1574,7 +1574,7 @@ try {
   // Pratinjau di sheet konfirmasi memakai kembaran TS; ia harus menyebut apa
   // yang BENAR-BENAR dilakukan server — ditutup, diganti, tetap, atau ditolak.
   console.log();
-  const { terapkanGantiFase, majuHari: majuHariFase } = muatLogikaTs();
+  const { terapkanGantiFase, faseSaat, majuHari: majuHariFase } = muatLogikaTs();
   const UID_FASE = '99999999-aaaa-aaaa-aaaa-999999999999';
   sql(`insert into auth.users (id, email) values ('${UID_FASE}', 'paritas-fase@contoh.test');`);
   const bacaRiwayat = () =>
@@ -1618,6 +1618,19 @@ try {
     if (!cocok) gagalFase += 1;
     console.log(`${cocok ? '✓' : '✗'} ${l.fase} pada D+${l.hari} → ${ts.jenis}${cocok ? '' : ` (harap ${l.harap}; SQL ${ditolakSql ? 'ditolak' : dariSql}; TS ${dariTs})`}`);
   }
+  // Fase pada tiap tanggal: fase_pada_tanggal (SQL) = faseSaat (TS), dari
+  // sebelum periode pertama sampai sesudah periode berjalan.
+  const faseAktifSql = sql(`select fase_aktif from public.profiles where user_id = '${UID_FASE}';`);
+  const tanggalUji = Array.from({ length: 45 }, (_, i) => majuHariFase(d0, i - 5));
+  const faseDariSql = JSON.parse(
+    sql(`set request.jwt.claim.sub = '${UID_FASE}';
+         select json_agg(public.fase_pada_tanggal(t::date) order by t)
+           from unnest(array[${tanggalUji.map((t) => `'${t}'`).join(',')}]) as t;`),
+  );
+  const bedaTanggal = tanggalUji.filter((t, i) => faseDariSql[i] !== faseSaat(riwayatFaseTs, t, faseAktifSql));
+  if (bedaTanggal.length > 0) gagalFase += 1;
+  console.log(`${bedaTanggal.length === 0 ? '✓' : '✗'} fase_pada_tanggal = faseSaat untuk ${tanggalUji.length} tanggal` +
+    (bedaTanggal.length ? ` — beda: ${bedaTanggal.slice(0, 3).join(', ')}` : ''));
   const faseProfil = sql(`select fase_aktif from public.profiles where user_id = '${UID_FASE}';`);
   const faseTs = riwayatFaseTs.find((p) => p.selesai === null)?.fase;
   if (faseProfil !== faseTs) gagalFase += 1;
