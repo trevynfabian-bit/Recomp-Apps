@@ -335,3 +335,6 @@ export {
 
 export type { HasilGantiFase, PeriodeFase } from './periodeFase.ts';
 export { faseSaat, jangkarKoridor, periodeBerjalan, terapkanGantiFase } from './periodeFase.ts';
+
+export type { ButirStatusPrivasi, KunciStatusPrivasi, MasukanStatusPrivasi } from './privasi.ts';
+export { DATA_TERSIMPAN, susunStatusPrivasi } from './privasi.ts';

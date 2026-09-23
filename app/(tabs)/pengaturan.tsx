@@ -272,6 +272,14 @@ export default function PengaturanScreen() {
         </Card>
         <Card flat style={{ marginTop: spacing.md }}>
           <BarisPengaturan
+            ikon="shield-checkmark-outline"
+            judul="Privasi"
+            nilai="Apa yang disimpan & siapa yang membaca"
+            petunjuk="Membuka penjelasan privasi dalam bahasa sehari-hari beserta keadaannya"
+            onPress={() => router.push('/privasi')}
+          />
+          <Pemisah />
+          <BarisPengaturan
             ikon="log-out-outline"
             judul="Keluar"
             nilai={email}

@@ -74,6 +74,7 @@ function TumpukanAkar() {
               <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
             </Stack.Protected>
             <Stack.Protected guard={!sudahMasuk}>
               <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
