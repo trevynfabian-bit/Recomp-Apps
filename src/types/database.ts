@@ -372,6 +372,62 @@ export type ProteksiProteinRow = {
   rincian: ProteksiProteinHariRow[];
 };
 
+/**
+ * Satu angka yang boleh DIKUTIP coach, beserta asalnya.
+ *
+ * `sumber` adalah FIELD, bukan kata di dalam kalimat: model bisa lupa menulis
+ * "estimasi", tapi ia tidak bisa menghapus field — dan app yang merender
+ * kartunya membaca field itu.
+ */
+export type AngkaKonteksRow = {
+  kunci: string;
+  nilai: number;
+  unit: string;
+  sumber: JenisSumberDb;
+  /** Seberapa tipis dasarnya; angka tanpa dasar tidak bisa diperiksa pengguna. */
+  dasar: Record<string, unknown>;
+};
+
+/** Asal sebuah angka; sama dengan JenisSumber di @/types/domain. */
+export type JenisSumberDb = 'manual' | 'sinkron' | 'estimasi';
+
+/**
+ * Hasil `konteks_coach` — satu snapshot data untuk AI Coach.
+ *
+ * Timbangan HARIAN sengaja tidak ada di `angka[]`: ia hanya muncul di
+ * `tren.deret`, tempat ia jelas merupakan titik grafik dan bukan "berat Anda
+ * hari ini". Coach tidak bisa mengutip angka yang tidak diberikan.
+ */
+export type KonteksCoachRow = {
+  hari_ini: string;
+  fase: FaseProgram;
+  profil: {
+    tinggi_cm: number | null;
+    jenis_kelamin: 'pria' | 'wanita' | null;
+    usia_tahun: number | null;
+    satuan: 'metrik' | 'imperial';
+    batas_pinggang_cm: number | null;
+    batas_bawah_kalori: number;
+  };
+  angka: AngkaKonteksRow[];
+  tren: Record<string, unknown>;
+  budget: Record<string, unknown>;
+  target_hari_ini: Record<string, unknown> | null;
+  ukuran: Record<string, unknown>;
+  body_fat: EstimasiBodyFatRow;
+  tdee: EstimasiTdeeRow;
+  evaluasi_terakhir: Record<string, unknown> | null;
+  ringkasan_terakhir: Record<string, unknown> | null;
+  /** Bendera aturan, bukan kalimatnya; teksnya milik @recomp/logika. */
+  aturan: {
+    wajib_rata_rata_7_hari: boolean;
+    berat_harian_tidak_dikutip: boolean;
+    setiap_angka_bersumber: boolean;
+    dosis_obat_ditolak_di_klien: boolean;
+    sumber_dikenal: JenisSumberDb[];
+  };
+};
+
 /** ringkasan_mingguan — laporan berkala mingguan. */
 export type RingkasanMingguanRow = {
   id: string;
@@ -978,6 +1034,10 @@ export type Database = {
           p_ambang_pekan: number | null;
         };
         Returns: StatusBatasPinggangRow | null;
+      };
+      konteks_coach: {
+        Args: { p_tanggal: string | null; p_persen_lemak: number | null };
+        Returns: KonteksCoachRow;
       };
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
