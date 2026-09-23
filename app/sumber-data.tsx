@@ -1,0 +1,197 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  kesehatanKoneksi,
+  PROFIL_SUMBER,
+  ringkasanKoneksi,
+  urutkanKoneksi,
+} from '@recomp/logika';
+import type { KoneksiSumber, SumberData } from '@recomp/logika';
+import { Card, HeroNumber, KartuSumberData, SectionHeader } from '@/components';
+import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { mockKoneksiSumber } from '@/mocks/sumberData';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+
+/** Seberapa sering "12 menit lalu" disegarkan selama layar terbuka. */
+const SEGARKAN_MS = 60_000;
+
+/**
+ * Layar Sumber Data: apakah data dari Apple Health, WHOOP, Strava, dan Hevy
+ * benar-benar mengalir.
+ *
+ * Pertanyaan yang dijawab layar ini bukan "apa saja yang terhubung", melainkan
+ * "apakah ada yang perlu saya lakukan". Karena itu angka utamanya adalah jumlah
+ * sumber yang AKTIF, kartu yang butuh tindakan diurutkan paling atas, dan tiap
+ * kartu hanya menawarkan satu tindakan yang relevan untuk keadaannya.
+ *
+ * Fase 3 sisi frontend: koneksi berasal dari data tiruan yang disimpan di state
+ * layar ini, jadi menghubungkan dan memutuskan langsung terlihat tanpa backend.
+ * Task backend menukarnya dengan `health_connections` dan alur OAuth/izin
+ * HealthKit yang sebenarnya.
+ */
+export default function SumberDataScreen() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  const [sekarang, setSekarang] = useState(() => new Date());
+  const [koneksi, setKoneksi] = useState<KoneksiSumber[]>(() => mockKoneksiSumber(sekarang));
+
+  // Waktu relatif ("12 menit lalu") dan status "terlambat" bergantung jam,
+  // jadi keduanya disegarkan selama layar terbuka — bukan dibekukan saat dibuka.
+  useEffect(() => {
+    const id = setInterval(() => setSekarang(new Date()), SEGARKAN_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  // Urutan ditetapkan SEKALI saat layar dibuka. Kalau diurutkan ulang setiap
+  // kali status berubah, kartu yang baru saja disambungkan ulang akan melompat
+  // ke bawah tepat di bawah jari pengguna.
+  const [urutan] = useState<SumberData[]>(() =>
+    urutkanKoneksi(koneksi, sekarang).map((k) => k.sumber),
+  );
+  const tampil = useMemo(
+    () =>
+      urutan
+        .map((s) => koneksi.find((k) => k.sumber === s))
+        .filter((k): k is KoneksiSumber => k !== undefined),
+    [urutan, koneksi],
+  );
+
+  const ringkasan = ringkasanKoneksi(koneksi, sekarang);
+
+  function ubah(sumber: SumberData, perubahan: Partial<KoneksiSumber>) {
+    setKoneksi((lama) => lama.map((k) => (k.sumber === sumber ? { ...k, ...perubahan } : k)));
+  }
+
+  function hubungkan(sumber: SumberData) {
+    // Tiruan: di backend, ini membuka alur izin HealthKit atau OAuth layanannya.
+    ubah(sumber, {
+      status: 'terhubung',
+      terhubungPada: new Date().toISOString(),
+      sinkronTerakhir: null,
+      galatTerakhir: null,
+      masukHariIni: [],
+    });
+    ketukBerhasil();
+  }
+
+  function sinkronSekarang(sumber: SumberData) {
+    ubah(sumber, { sinkronTerakhir: new Date().toISOString(), galatTerakhir: null });
+    setSekarang(new Date());
+    ketukBerhasil();
+  }
+
+  function putuskan(sumber: SumberData) {
+    const { nama, membawa } = PROFIL_SUMBER[sumber];
+    // Konfirmasi karena akibatnya tidak langsung terlihat: data lama tetap ada,
+    // tapi data BARU berhenti masuk — dan itu baru terasa berhari-hari kemudian.
+    Alert.alert(
+      `Putuskan ${nama}?`,
+      `Data yang sudah masuk tetap tersimpan, tapi ${membawa.join(', ')} yang baru tidak akan masuk lagi.`,
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Putuskan',
+          style: 'destructive',
+          onPress: () =>
+            ubah(sumber, {
+              status: 'belum',
+              terhubungPada: null,
+              sinkronTerakhir: null,
+              galatTerakhir: null,
+              masukHariIni: [],
+            }),
+        },
+      ],
+    );
+  }
+
+  const keteranganHero =
+    ringkasan.perluPerhatian > 0
+      ? `${ringkasan.perluPerhatian} sumber perlu perhatian`
+      : ringkasan.belum > 0
+        ? `${ringkasan.belum} belum dihubungkan`
+        : 'Semua data mengalir';
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.bg }}
+      contentContainerStyle={{
+        paddingTop: insets.top + spacing.lg,
+        paddingBottom: insets.bottom + spacing.xxl,
+        paddingHorizontal: spacing.lg,
+        gap: spacing.xl,
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Kembali"
+          onPress={() => {
+            ketukRingan();
+            router.back();
+          }}
+          style={({ pressed }) => ({
+            width: TAP_MIN,
+            height: TAP_MIN,
+            borderRadius: radius.pill,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.borderKuat,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+        </Pressable>
+        <View>
+          <Text style={{ ...typography.title, color: colors.text }}>Sumber data</Text>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+            Apple Health, WHOOP, Strava, Hevy
+          </Text>
+        </View>
+      </View>
+
+      <HeroNumber
+        label="Sumber aktif"
+        nilai={String(ringkasan.aktif)}
+        unit={`dari ${ringkasan.total}`}
+        keterangan={keteranganHero}
+        warna={ringkasan.perluPerhatian > 0 ? colors.amber : colors.aksenTeks.jade}
+      />
+
+      <View style={{ gap: spacing.md }}>
+        {tampil.map((k) => (
+          <KartuSumberData
+            key={k.sumber}
+            koneksi={k}
+            kesehatan={kesehatanKoneksi(k, sekarang)}
+            onHubungkan={() => hubungkan(k.sumber)}
+            onSinkronSekarang={() => sinkronSekarang(k.sumber)}
+            onPutuskan={() => putuskan(k.sumber)}
+          />
+        ))}
+      </View>
+
+      {/* Anti-dobel dijelaskan di sini, di tempat orang menghubungkan perangkat
+          kedua — bukan di layar kalori, tempat angka yang "terlalu kecil" baru
+          terasa aneh. */}
+      <View>
+        <SectionHeader judul="Tanpa hitungan ganda" />
+        <Card style={{ gap: spacing.sm }}>
+          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            Kalau dua perangkat mencatat olahraga yang sama, hanya sumber dengan prioritas
+            tertinggi yang dihitung untuk olahraga itu di hari itu.
+          </Text>
+          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            Langkah dan energi aktif memakai total dari satu sumber saja, tidak pernah
+            dijumlahkan antar perangkat.
+          </Text>
+        </Card>
+      </View>
+    </ScrollView>
+  );
+}

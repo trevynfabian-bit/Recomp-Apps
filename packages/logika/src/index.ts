@@ -160,3 +160,21 @@ export {
   saringLanjutan,
   tampilkanPoin,
 } from './ringkasan';
+
+export type {
+  KesehatanKoneksi,
+  KoneksiSumber,
+  MekanismeSync,
+  StatusKoneksi,
+  SumberData,
+  TingkatKesehatan,
+} from './sumberData';
+
+export {
+  formatWaktuRelatif,
+  kesehatanKoneksi,
+  PROFIL_SUMBER,
+  ringkasanKoneksi,
+  URUTAN_SUMBER,
+  urutkanKoneksi,
+} from './sumberData';
