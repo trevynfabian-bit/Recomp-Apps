@@ -1,0 +1,116 @@
+/**
+ * Memeriksa form target harian per tipe hari: cara membaca angka, batas yang
+ * sama dengan database, aturan lintas kolom, nada pesan, dan bahwa target
+ * bawaan sendiri lolos aturan yang sama.
+ *
+ * Yang terakhir penting: form yang menolak angka bawaan app akan memaksa
+ * pengguna "memperbaiki" target yang tidak pernah ia sentuh.
+ */
+import { execFileSync } from 'node:child_process';
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+const require = createRequire(import.meta.url);
+const ts = require('typescript');
+const kerja = mkdtempSync(join(tmpdir(), 'target-'));
+for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
+execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
+  ['targetHarian.ts', 'pengingat.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+  { cwd: kerja, stdio: 'pipe' });
+const {
+  uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
+} = require(join(kerja, 'keluar', 'targetHarian.js'));
+const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
+
+let gagal = 0;
+function cek(nama, lulus, rincian = '') {
+  console.log(`${lulus ? '✓' : '✗'} ${nama}${!lulus && rincian ? ` — ${rincian}` : ''}`);
+  if (!lulus) gagal += 1;
+}
+const pesanSemua = [];
+const periksa = (isian) => {
+  const h = periksaTarget(isian);
+  if (!h.sah) pesanSemua.push(...Object.values(h.galat));
+  return h;
+};
+
+console.log('Membaca angka');
+for (const [teks, harap] of [['2450', 2450], ['2.450', 2450], ['2 450', 2450], [' 3100 ', 3100], ['2,450', null], ['2450,5', null], ['', null], ['-2450', null], ['2e3', null], ['abc', null], ['123456', null]])
+  cek(`kalori "${teks}" → ${harap}`, uraiKalori(teks) === harap, `dapat ${uraiKalori(teks)}`);
+for (const [teks, harap] of [['72', 72], ['72,5', 72.5], ['72.5', 72.5], ['0', 0], ['72,55', null], ['7,2,5', null], ['-5', null], ['', null], ['1.000', null]])
+  cek(`gram "${teks}" → ${harap}`, uraiGram(teks) === harap, `dapat ${uraiGram(teks)}`);
+
+console.log('\nBatas sama dengan database');
+const migrasi = readFileSync('supabase/migrations/20260922000100_log_harian_dan_target.sql', 'utf8');
+const m = migrasi.match(/day_type_targets_kalori_masuk_akal check \(target_kalori between (\d+) and (\d+)\)/);
+cek('CHECK kalori ditemukan di migrasi', m !== null);
+if (m) cek(`rentang kalori = CHECK (${m[1]}–${m[2]})`, RENTANG_TARGET.kalori.min === Number(m[1]) && RENTANG_TARGET.kalori.maks === Number(m[2]));
+cek('kolom gram numeric(6,1): satu desimal', /target_protein_g numeric\(6, 1\)/.test(migrasi) && uraiGram('1,25') === null);
+
+const dasar = { kalori: '2450', protein: '165', lemak: '75', satFat: '22' };
+const h0 = periksa(dasar);
+cek('isian sah diterima', h0.sah && h0.nilai.target_kalori === 2450 && h0.nilai.target_protein_g === 165);
+cek('karbo tersisa = (2450 − 165×4 − 75×9) / 4 → 278 g', h0.sah && h0.karboG === 278, JSON.stringify(h0));
+cek('batas bawah kalori 800 sah', periksa({ ...dasar, kalori: '800', protein: '50', lemak: '20', satFat: '5' }).sah);
+cek('799 kcal ditolak', !periksa({ ...dasar, kalori: '799', protein: '50', lemak: '20', satFat: '5' }).sah);
+cek('8000 kcal sah', periksa({ ...dasar, kalori: '8000' }).sah);
+cek('8001 kcal ditolak', !periksa({ ...dasar, kalori: '8001' }).sah);
+cek('protein 0 sah (angka, bukan kosong)', periksa({ ...dasar, protein: '0' }).sah);
+const salahKetik = periksa({ ...dasar, protein: '1650' });
+cek('salah ketik protein 1650 g ditangkap', !salahKetik.sah && !!salahKetik.galat.protein);
+const format = periksa({ kalori: '2450,5', protein: '72,55', lemak: 'tujuh', satFat: '22' });
+cek('format salah: pesan per kolom', !format.sah && !!format.galat.kalori && !!format.galat.protein && !!format.galat.lemak && !format.galat.satFat,
+  JSON.stringify(format));
+
+console.log('\nAturan lintas kolom');
+const satFat = periksa({ ...dasar, satFat: '80' });
+cek('sat fat > lemak ditolak di kolom sat fat', !satFat.sah && !!satFat.galat.satFat && !satFat.galat.lemak);
+cek('sat fat = lemak sah', periksa({ ...dasar, satFat: '75' }).sah);
+// 250×4 + 150×9 = 2350 > 2000
+const mustahil = periksa({ kalori: '2000', protein: '250', lemak: '150', satFat: '30' });
+cek('protein + lemak melebihi kalori ditolak di kolom kalori', !mustahil.sah && /2\.350 kcal/.test(mustahil.galat.kalori ?? ''), JSON.stringify(mustahil));
+cek('tepat pas (karbo 0) sah', periksa({ kalori: '2350', protein: '250', lemak: '150', satFat: '30' }).sah);
+const kosong = periksa({ kalori: '', protein: '', lemak: '', satFat: '' });
+cek('empat kolom kosong → empat pesan', !kosong.sah && Object.keys(kosong.galat).length === 4);
+cek('karboTersisaG membulatkan ke bawah', karboTersisaG({ target_kalori: 2001, target_protein_g: 100, target_lemak_g: 50, batas_sat_fat_g: 10 }) === 287);
+
+console.log('\nPerubahan');
+const tersimpan = { target_kalori: 2450, target_protein_g: 72.5, target_lemak_g: 75, batas_sat_fat_g: 22 };
+const isianAwal = isianDariTarget(tersimpan);
+cek('isian dari target: desimal pakai koma', isianAwal.protein === '72,5' && isianAwal.kalori === '2450');
+cek('isian awal tidak dihitung berubah', !isianBerubah(isianAwal, tersimpan));
+cek('"2.450" sama dengan 2450 (bukan perubahan)', !isianBerubah({ ...isianAwal, kalori: '2.450' }, tersimpan));
+cek('"72.5" sama dengan 72,5 (bukan perubahan)', !isianBerubah({ ...isianAwal, protein: '72.5' }, tersimpan));
+cek('angka lain = perubahan', isianBerubah({ ...isianAwal, kalori: '2500' }, tersimpan));
+cek('isian belum sah tetap dihitung berubah', isianBerubah({ ...isianAwal, kalori: '' }, tersimpan));
+
+console.log('\nTarget bawaan lolos aturan yang sama');
+const mock = readFileSync('src/mocks/dailyLog.ts', 'utf8');
+const baris = [...mock.matchAll(/\{ id: '(tgt-[^']+)', day_type_id: '[^']+', fase: '[^']+', target_kalori: (\d+), target_protein_g: ([\d.]+), target_lemak_g: ([\d.]+), batas_sat_fat_g: ([\d.]+) \}/g)];
+cek('12 baris target bawaan (4 tipe hari × 3 fase)', baris.length === 12, `dapat ${baris.length}`);
+for (const b of baris) {
+  const t = { target_kalori: +b[2], target_protein_g: +b[3], target_lemak_g: +b[4], batas_sat_fat_g: +b[5] };
+  const h = periksaTarget(isianDariTarget(t));
+  cek(`${b[1]} sah`, h.sah, JSON.stringify(h.galat ?? {}));
+}
+
+console.log('\nNada');
+for (const p of new Set(pesanSemua)) cek(`netral: "${p.length > 70 ? `${p.slice(0, 67)}...` : p}"`, pelanggaranNada(p).length === 0, pelanggaranNada(p).join(', '));
+// Kalimat di layar form, dibaca lewat parser TypeScript.
+const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const kalimat = [];
+(function jelajah(n) {
+  if (ts.isImportDeclaration(n)) return;
+  if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isJsxText(n) || ts.isTemplateHead(n) || ts.isTemplateMiddle(n) || ts.isTemplateTail(n)) {
+    const t = n.text.replace(/\s+/g, ' ').trim();
+    if (/\s/.test(t) && /[a-z]{3}/i.test(t)) kalimat.push(t);
+  }
+  ts.forEachChild(n, jelajah);
+})(sumber);
+cek('layar form punya kalimat untuk diperiksa', kalimat.length >= 10, `hanya ${kalimat.length}`);
+for (const t of kalimat) cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, pelanggaranNada(t).length === 0, pelanggaranNada(t).join(', '));
+
+console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan target lulus');
+process.exit(gagal ? 1 : 0);

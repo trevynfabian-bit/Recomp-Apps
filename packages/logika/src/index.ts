@@ -317,3 +317,15 @@ export {
   pulihkanSesi,
   VERSI_SESI_TERSIMPAN,
 } from './akun';
+
+export type { HasilPeriksaTarget, IsianTarget, KolomTarget, NilaiTarget } from './targetHarian';
+export {
+  isianBerubah,
+  isianDariTarget,
+  karboTersisaG,
+  KKAL_PER_GRAM,
+  periksaTarget,
+  RENTANG_TARGET,
+  uraiGram,
+  uraiKalori,
+} from './targetHarian';

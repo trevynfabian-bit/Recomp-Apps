@@ -170,11 +170,13 @@ for (const n of layarApp) {
   }
 }
 cek('tamu hanya melihat layar masuk', JSON.stringify(tamu) === '["masuk"]', `tamu = ${JSON.stringify(tamu)}`);
-// State per akun (profil, koneksi, kiriman) dimulai ulang tiap pengguna berganti.
+// State per akun (profil, target, koneksi, kiriman) dimulai ulang tiap pengguna berganti.
 const kunciProfil = tataLetak.indexOf("<PenyediaProfil key={pengguna?.id ?? 'tamu'}>");
 cek('penyedia per akun berkunci id pengguna', kunciProfil >= 0);
-cek('penyedia sinkron di dalam penyedia berkunci',
-  kunciProfil >= 0 && tataLetak.indexOf('<PenyediaSinkron>') > kunciProfil && tataLetak.indexOf('<PenyediaSinkron>') < tataLetak.indexOf('</PenyediaProfil>'));
+for (const penyedia of ['PenyediaSinkron', 'PenyediaTarget']) {
+  const i = tataLetak.indexOf(`<${penyedia}>`);
+  cek(`${penyedia} di dalam penyedia berkunci`, kunciProfil >= 0 && i > kunciProfil && i < tataLetak.indexOf('</PenyediaProfil>'));
+}
 // Kiriman Realtime tidak boleh muncul di atas layar masuk.
 cek('banner data masuk hanya saat masuk', /\{sudahMasuk \? <BannerDataMasuk \/> : null\}/.test(tataLetak));
 

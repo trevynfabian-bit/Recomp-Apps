@@ -21,13 +21,13 @@ import { ketukRingan } from '@/lib/haptics';
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
 import { useProfil } from '@/state/profil';
+import { useTarget } from '@/state/target';
 import { simpanCatatanHarian } from '@/data/catatan';
 import { deteksiTipeHari } from '@recomp/logika';
 import { hitungEstimasi, sumberMakanan } from '@/lib/sumber';
 import { mockWorkoutsHariIni } from '@/mocks/workout';
 import {
   beratTerakhirSebelum,
-  cariTarget,
   mockDailyLogHariIni,
   mockDayTypes,
   mockFoodLogsHariIni,
@@ -48,6 +48,8 @@ import type { DailyLog, FoodLog } from '@/types/domain';
 export default function LogHarianScreen() {
   const insets = useSafeAreaInsets();
   const { profil } = useProfil();
+  // Target dari penyedia bersama: yang disunting di Pengaturan langsung dipakai di sini.
+  const { cariTarget } = useTarget();
 
   // Log hari ini disimpan di state supaya kartu Timbang Pagi & pemilih tipe hari
   // bisa menulis balik. Semua angka target diturunkan dari state ini.

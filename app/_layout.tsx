@@ -8,6 +8,7 @@ import { segarkanPengingat } from '@/data/pengingat';
 import { PenyediaProfil } from '@/state/profil';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
+import { PenyediaTarget } from '@/state/target';
 import { colors } from '@/theme';
 
 /**
@@ -52,33 +53,36 @@ function TumpukanAkar() {
   if (status === 'memuat') return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   // State per akun dimulai dari nol setiap pengguna berganti (termasuk
-  // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, koneksi,
-  // atau kiriman yang belum dibaca dari akun sebelumnya.
+  // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, target,
+  // koneksi, atau kiriman yang belum dibaca dari akun sebelumnya.
   return (
     <PenyediaProfil key={pengguna?.id ?? 'tamu'}>
-      <PenyediaSinkron>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg },
-          }}
-        >
-          <Stack.Protected guard={sudahMasuk}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
-          </Stack.Protected>
-          <Stack.Protected guard={!sudahMasuk}>
-            <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
-          </Stack.Protected>
-        </Stack>
-        {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
-        {sudahMasuk ? <BannerDataMasuk /> : null}
-      </PenyediaSinkron>
+      <PenyediaTarget>
+        <PenyediaSinkron>
+          <StatusBar style="light" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg },
+            }}
+          >
+            <Stack.Protected guard={sudahMasuk}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
+              <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
+            </Stack.Protected>
+            <Stack.Protected guard={!sudahMasuk}>
+              <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
+            </Stack.Protected>
+          </Stack>
+          {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
+          {sudahMasuk ? <BannerDataMasuk /> : null}
+        </PenyediaSinkron>
+      </PenyediaTarget>
     </PenyediaProfil>
   );
 }

@@ -47,6 +47,5 @@ export { SheetJamTimbang } from './SheetJamTimbang';
 export { SheetLengkapiProfil } from './SheetLengkapiProfil';
 export { SheetPutuskanSumber } from './SheetPutuskanSumber';
 export { SheetRiwayatPercakapan } from './SheetRiwayatPercakapan';
-export { SheetTargetTipeHari } from './SheetTargetTipeHari';
 export { StatusRedistribusi } from './StatusRedistribusi';
 export { TombolBertepi, TombolUtama } from './Tombol';

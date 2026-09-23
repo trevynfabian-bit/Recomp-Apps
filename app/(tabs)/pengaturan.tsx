@@ -24,18 +24,17 @@ import {
   SheetHapusAkun,
   SheetKeluarAkun,
   SheetLengkapiProfil,
-  SheetTargetTipeHari,
   TombolBertepi,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { mockDayTypes, mockDayTypeTargets } from '@/mocks/dailyLog';
 import { mockAkun, mockFaseMulai, mockHasilLab, mockIsiEkspor, mockSiapkanEkspor } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
+import { useTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
-type Sheet = 'profil' | 'fase' | 'target' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hapus' | null;
+type Sheet = 'profil' | 'fase' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hapus' | null;
 
 /**
  * Pengaturan.
@@ -58,6 +57,13 @@ export default function PengaturanScreen() {
   const router = useRouter();
   const { profil, gantiFase, perbaruiProfil } = useProfil();
   const { pengguna, keluar } = useSesi();
+  const { tipeHari, cariTarget } = useTarget();
+  // Rentang kalori fase aktif: sekilas cukup untuk tahu target sudah seperti yang dimaksud.
+  const kaloriFase = tipeHari.map((d) => cariTarget(d.id, profil.fase_aktif).target_kalori);
+  const rentangKalori =
+    Math.min(...kaloriFase) === Math.max(...kaloriFase)
+      ? formatAngka(kaloriFase[0])
+      : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))}`;
   const email = pengguna?.email ?? mockAkun.email;
   const [sheet, setSheet] = useState<Sheet>(null);
   const [pesanTiruan, setPesanTiruan] = useState<string | null>(null);
@@ -148,9 +154,9 @@ export default function PengaturanScreen() {
           <BarisPengaturan
             ikon="restaurant-outline"
             judul="Target per tipe hari"
-            nilai={`${mockDayTypes.length} tipe hari · ${profil.fase_aktif}`}
-            petunjuk="Membuka target kalori dan makro tiap tipe hari"
-            onPress={() => setSheet('target')}
+            nilai={`${rentangKalori} kcal · ${tipeHari.length} tipe hari · ${profil.fase_aktif}`}
+            petunjuk="Membuka form target kalori dan makro tiap tipe hari"
+            onPress={() => router.push('/target-harian')}
           />
           <Pemisah />
           <BarisPengaturan
@@ -301,13 +307,6 @@ export default function PengaturanScreen() {
           }}
         />
       </KerangkaSheet>
-      <SheetTargetTipeHari
-        terbuka={sheet === 'target'}
-        onTutup={tutup}
-        fase={profil.fase_aktif}
-        daftar={mockDayTypes}
-        target={mockDayTypeTargets}
-      />
       <SheetBatasPinggang
         terbuka={sheet === 'pinggang'}
         onTutup={tutup}
