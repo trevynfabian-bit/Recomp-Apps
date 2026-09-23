@@ -92,11 +92,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/koridor.ts', join(kerja, 'koridor.ts'));
   copyFileSync('packages/logika/src/budget.ts', join(kerja, 'budget.ts'));
   copyFileSync('packages/logika/src/redistribusi.ts', join(kerja, 'redistribusi.ts'));
+  copyFileSync('packages/logika/src/tdee.ts', join(kerja, 'tdee.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts', 'redistribusi.ts',
+     'budget.ts', 'redistribusi.ts', 'tdee.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -108,6 +109,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'koridor.js')),
     ...require(join(kerja, 'keluar', 'budget.js')),
     ...require(join(kerja, 'keluar', 'redistribusi.js')),
+    ...require(join(kerja, 'keluar', 'tdee.js')),
   };
 }
 
@@ -1005,6 +1007,125 @@ try {
   console.log(
     '✓ Penerapan server & pratinjau menghasilkan keadaan sama, dan protein tidak bergeser di keduanya.',
   );
+
+  // === Bagian 10: estimasi TDEE tiga metode ================================
+  //
+  // TDEE bukan satu rumus, melainkan tiga yang harus SEPAKAT lintas bahasa:
+  // BMR majemuk dari tiga suku, massa tanpa lemak, dan energi berat per hari.
+  // Ketiganya memakai pecahan (6,25 · 21,6 · 7.700/hari), jadi presisi float
+  // ikut diuji, bukan cuma logikanya. Masukan diambil dari jawaban SQL supaya
+  // yang dibandingkan rumusnya, bukan cara masing-masing membaca tabel.
+  console.log();
+  const { estimasiTdee, pengaliRataRata, KCAL_PER_KG, PENGALI_AKTIVITAS } = muatLogikaTs();
+
+  const bedaKonstanta = [];
+  if (Number(sql('select public.kcal_per_kg();')) !== KCAL_PER_KG) {
+    bedaKonstanta.push(`kcal_per_kg: SQL ${sql('select public.kcal_per_kg();')} vs TS ${KCAL_PER_KG}`);
+  }
+  for (const nama of ['Rest', 'Angkat Beban', 'Beban+Lari', 'Padel', 'Yoga']) {
+    const sqlPengali = Number(sql(`select public.pengali_aktivitas('${nama}');`));
+    const tsPengali = PENGALI_AKTIVITAS[nama] ?? 1.5;
+    if (sqlPengali !== tsPengali) {
+      bedaKonstanta.push(`pengali ${nama}: SQL ${sqlPengali} vs TS ${tsPengali}`);
+    }
+  }
+  if (bedaKonstanta.length > 0) {
+    for (const d of bedaKonstanta) console.error(`✗ ${d}`);
+    process.exit(1);
+  }
+  console.log('✓ konstanta TDEE sama: 7.700 kcal/kg & lima pengali aktivitas');
+
+  const UID_TDEE = '99999999-6666-6666-6666-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_TDEE}', 'paritas-tdee@contoh.test');`);
+  sql(`update public.profiles
+          set tinggi_cm = 178, jenis_kelamin = 'pria', tanggal_lahir = date '1994-05-10'
+        where user_id = '${UID_TDEE}';`);
+  // 14 hari dengan berat yang MENANJAK tidak rata dan asupan yang berbeda-beda,
+  // supaya rata-ratanya bukan angka bulat dan pembulatannya ikut teruji.
+  sql(`
+    set request.jwt.claim.sub = '${UID_TDEE}';
+    select public.setel_tipe_hari((date '2026-09-10' + i)::date,
+             (select id from public.day_types
+               where user_id = '${UID_TDEE}'
+                 and nama = (array['Rest','Angkat Beban','Beban+Lari','Padel'])[1 + (i % 4)]))
+      from generate_series(0, 13) as i;
+    update public.daily_logs
+       set berat_pagi_kg = 74.00 + (0.07 * (tanggal - date '2026-09-10')),
+           sumber_berat = 'manual',
+           kalori = 2650 + 37 * ((tanggal - date '2026-09-10') % 5)
+     where user_id = '${UID_TDEE}'
+       and tanggal between date '2026-09-10' and date '2026-09-23';`);
+
+  const KASUS_TDEE = [
+    { label: 'tiga metode', sampai: '2026-09-23', hari: 14, bf: 18 },
+    { label: 'tanpa body fat', sampai: '2026-09-23', hari: 14, bf: null },
+    { label: 'periode 7 hari', sampai: '2026-09-23', hari: 7, bf: 18 },
+    { label: 'body fat rendah', sampai: '2026-09-23', hari: 14, bf: 9.5 },
+    { label: 'periode 30 hari', sampai: '2026-09-23', hari: 30, bf: 18 },
+  ];
+
+  let gagalTdee = 0;
+  console.log('kasus             metode  SQL min/maks    TS min/maks     SQL tengah  TS tengah  keyakinan');
+  console.log('─'.repeat(98));
+  for (const k of KASUS_TDEE) {
+    const bf = k.bf === null ? 'null' : String(k.bf);
+    const t = JSON.parse(
+      sql(
+        `set request.jwt.claim.sub = '${UID_TDEE}';
+         select public.estimasi_tdee(date '${k.sampai}', ${k.hari}, ${bf})::text;`,
+      ),
+    );
+    const m = t.masukan;
+    const ts = estimasiTdee({
+      beratKg: Number(m.berat_kg),
+      tinggiCm: m.tinggi_cm === null ? null : Number(m.tinggi_cm),
+      usiaTahun: m.usia_tahun,
+      jenisKelamin: m.jenis_kelamin,
+      persenLemak: m.persen_lemak === null ? null : Number(m.persen_lemak),
+      tipeHariMinggu: m.tipe_hari_minggu,
+      hariData: m.hari_data,
+      rataAsupanKalori: m.rata_asupan_kalori === null ? null : Number(m.rata_asupan_kalori),
+      perubahanBeratKg: m.perubahan_berat_kg === null ? null : Number(m.perubahan_berat_kg),
+    });
+
+    const beda = [];
+    const cek = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    cek('jumlah metode', t.metode.length, ts.metode.length);
+    t.metode.forEach((r, i) => {
+      const x = ts.metode[i];
+      if (!x) return;
+      cek(`metode[${i}].nama`, r.nama, x.nama);
+      cek(`metode[${i}].nilai`, r.nilai, x.nilai);
+      cek(`metode[${i}].berbasisData`, r.berbasis_data, x.berbasisData);
+    });
+    cek('min', t.min, ts.min);
+    cek('maks', t.maks, ts.maks);
+    cek('tengah', t.tengah, ts.tengah);
+    cek('keyakinan', t.keyakinan, ts.keyakinan);
+    // Pengali aktivitas dihitung dua kali dari daftar tipe hari yang sama.
+    cek(
+      'pengali',
+      Number(t.pengali_aktivitas),
+      Number(pengaliRataRata(m.tipe_hari_minggu).toFixed(6)),
+    );
+
+    if (beda.length > 0) gagalTdee += 1;
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${k.label.padEnd(16)} ${String(t.metode.length).padStart(6)}  ` +
+        `${String(`${t.min}–${t.maks}`).padEnd(14)}  ${String(`${ts.min}–${ts.maks}`).padEnd(14)}  ` +
+        `${String(t.tengah).padStart(10)}  ${String(ts.tengah).padStart(9)}  ${t.keyakinan}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  console.log();
+  if (gagalTdee > 0) {
+    console.error(`✗ ${gagalTdee} kasus BERBEDA (estimasi TDEE).`);
+    process.exit(1);
+  }
+  console.log(`✓ ${KASUS_TDEE.length} kasus cocok — estimasi TDEE di SQL dan TypeScript sejalan.`);
 } finally {
   hentikanPostgres();
 }

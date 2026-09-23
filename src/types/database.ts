@@ -290,6 +290,55 @@ export type HasilRedistribusiRow = {
   redistribusi_id?: string | null;
 };
 
+/** Masukan yang dikumpulkan server untuk `estimasi_tdee`. */
+export type MasukanTdeeRow = {
+  /** Rata-rata 7 hari, bukan timbangan hari itu. */
+  berat_kg: number | null;
+  tinggi_cm: number | null;
+  usia_tahun: number | null;
+  jenis_kelamin: 'pria' | 'wanita' | null;
+  persen_lemak: number | null;
+  /** Tipe hari yang BENAR-BENAR dijalani dalam periode. */
+  tipe_hari_minggu: string[];
+  hari_data: number;
+  rata_asupan_kalori: number | null;
+  perubahan_berat_kg: number | null;
+};
+
+/** Satu metode TDEE beserta angka penyusunnya. */
+export type MetodeTdeeRow = {
+  nama: string;
+  nilai: number;
+  berbasis_data: boolean;
+  bmr?: number;
+  pengali?: number;
+  lbm_kg?: number;
+  energi_berat_kcal_per_hari?: number;
+};
+
+/**
+ * Hasil `estimasi_tdee`.
+ *
+ * Tidak memuat kalimat penjelas: `dasar` tiap metode dan `alasan_keyakinan`
+ * disusun `estimasiTdee` di @recomp/logika dari `masukan` yang sama, supaya
+ * angka di dalam kalimatnya diformat sekali saja.
+ */
+export type EstimasiTdeeRow = {
+  dari: string;
+  sampai: string;
+  masukan: MasukanTdeeRow;
+  /** Berapa hari dalam periode yang benar-benar punya catatan asupan. */
+  hari_tercatat: number;
+  pengali_aktivitas: number;
+  kcal_per_kg: number;
+  metode: MetodeTdeeRow[];
+  min: number | null;
+  maks: number | null;
+  tengah: number | null;
+  lebar: number | null;
+  keyakinan: 'rendah' | 'sedang' | 'tinggi';
+};
+
 /** Satu hari dalam bukti `proteksi_protein`. */
 export type ProteksiProteinHariRow = {
   tanggal: string;
@@ -554,6 +603,18 @@ export type Database = {
           p_hari_ini: string | null;
         };
         Returns: HasilRedistribusiRow;
+      };
+      estimasi_tdee: {
+        Args: { p_sampai: string | null; p_hari: number; p_persen_lemak: number | null };
+        Returns: EstimasiTdeeRow;
+      };
+      pengali_aktivitas: {
+        Args: { p_nama: string };
+        Returns: number;
+      };
+      kcal_per_kg: {
+        Args: Record<string, never>;
+        Returns: number;
       };
       proteksi_protein: {
         Args: { p_tanggal: string | null; p_hari_ini: string | null };
