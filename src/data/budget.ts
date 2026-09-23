@@ -3,10 +3,15 @@ import { rincianKumulatif } from '@recomp/logika';
 import type {
   BarisKumulatif,
   BudgetMingguan,
+  Fase,
   LajuBudget,
   RingkasanHariBudget,
 } from '@recomp/logika';
-import type { BudgetMingguanRow } from '@/types/database';
+import type {
+  BudgetMingguanRow,
+  EndpointBudgetRow,
+  TargetHarianRow,
+} from '@/types/database';
 
 /**
  * Akses data budget kalori mingguan.
@@ -72,7 +77,23 @@ export async function snapshotBudget(
   if (!data) throw new KesalahanBudget('Server tidak mengembalikan budget.', true);
 
   const j = data as BudgetMingguanRow;
+  const budget = keBudgetTs(j);
 
+  return {
+    ...budget,
+    hariIni: j.hari_ini,
+    laju: {
+      seharusnya: j.laju.seharusnya,
+      selisih: j.laju.selisih,
+      status: j.laju.status,
+      ambangKcal: j.laju.ambang_kcal,
+    },
+    kumulatif: rincianKumulatif(budget),
+  };
+}
+
+/** Ubah jawaban `budget_mingguan` menjadi bentuk TS paket bersama. */
+function keBudgetTs(j: BudgetMingguanRow): BudgetMingguan {
   const rincian: RingkasanHariBudget[] = j.rincian.map((h) => ({
     tanggal: h.tanggal,
     // Hari tanpa tipe hari sama sekali tidak pernah terjadi lewat RPC-nya
@@ -86,7 +107,7 @@ export async function snapshotBudget(
     selisih: h.selisih,
   }));
 
-  const budget: BudgetMingguan = {
+  return {
     mingguMulai: j.minggu_mulai,
     budgetTotal: j.budget_total,
     terpakai: j.terpakai,
@@ -97,17 +118,104 @@ export async function snapshotBudget(
     rencanaPerHari: j.rencana_per_hari,
     rincian,
   };
+}
+
+/**
+ * Satu snapshot untuk SELURUH layar Budget.
+ *
+ * Dipanggil sekali, bukan lima kali. Alasannya bukan kecepatan: catatan makan
+ * yang masuk di antara dua panggilan menghasilkan layar yang angkanya tidak
+ * cocok satu sama lain — sisa pekan mengatakan satu hal, tawaran redistribusi
+ * mengatakan hal lain — dan ketidakcocokan seperti itu tidak akan pernah bisa
+ * direproduksi saat dilaporkan.
+ *
+ * `kumulatif` dihitung DI SINI dari `budget.rincian` yang baru saja diterima.
+ * Itu bukan pengecualian dari aturan "angka dari server": ia turunan murni dari
+ * data yang sama, jadi tidak ada aturan baru yang bisa menyimpang — dan
+ * menaruhnya di SQL hanya menambah satu paritas lagi untuk dijaga.
+ */
+export type SnapshotLayarBudget = {
+  hariIni: string;
+  mingguMulai: string;
+  fase: Fase;
+  budget: BudgetMingguan;
+  laju: LajuBudget;
+  kumulatif: BarisKumulatif[];
+  /** `null` bila pengguna belum punya tipe hari sama sekali. */
+  targetHariIni: {
+    namaTipeHari: string;
+    fase: Fase;
+    override: boolean;
+    targetKalori: number | null;
+    targetProteinG: number | null;
+    targetLemakG: number | null;
+    batasSatFatG: number | null;
+  } | null;
+  redistribusi: {
+    /** true bila kuota pekan ini sudah terpakai; sekali per pekan. */
+    kuotaTerpakai: boolean;
+    /** Pratinjau `sebar_rata` dari server; belum diterapkan. */
+    tawaran: EndpointBudgetRow['redistribusi']['tawaran'];
+    penerapanTerakhir: EndpointBudgetRow['redistribusi']['penerapan_terakhir'];
+  };
+  proteksiProtein: { utuh: boolean; penjagaAktif: boolean; kaloriDipindah: number };
+  tdee: EndpointBudgetRow['tdee'];
+};
+
+export async function snapshotLayarBudget(
+  tanggal: string | null = null,
+  hariIni: string | null = null,
+  ambangKcal = 300,
+  persenLemak: number | null = null,
+): Promise<SnapshotLayarBudget> {
+  const { data, error } = await supabase.rpc('endpoint_budget_mingguan', {
+    p_tanggal: tanggal,
+    p_hari_ini: hariIni,
+    p_ambang_kcal: ambangKcal,
+    p_persen_lemak: persenLemak,
+  });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanBudget('Server tidak mengembalikan data budget.', true);
+
+  const j = data as EndpointBudgetRow;
+  const budget = keBudgetTs(j.budget);
+  const t: Omit<TargetHarianRow, 'day_type_id'> | null = j.target_hari_ini;
 
   return {
-    ...budget,
     hariIni: j.hari_ini,
+    mingguMulai: j.minggu_mulai,
+    fase: j.fase,
+    budget,
     laju: {
-      seharusnya: j.laju.seharusnya,
-      selisih: j.laju.selisih,
-      status: j.laju.status,
-      ambangKcal: j.laju.ambang_kcal,
+      seharusnya: j.budget.laju.seharusnya,
+      selisih: j.budget.laju.selisih,
+      status: j.budget.laju.status,
+      ambangKcal: j.budget.laju.ambang_kcal,
     },
     kumulatif: rincianKumulatif(budget),
+    targetHariIni: t
+      ? {
+          namaTipeHari: t.nama_tipe_hari,
+          fase: t.fase,
+          override: t.override,
+          targetKalori: t.target_kalori,
+          targetProteinG: t.target_protein_g === null ? null : Number(t.target_protein_g),
+          targetLemakG: t.target_lemak_g === null ? null : Number(t.target_lemak_g),
+          batasSatFatG: t.batas_sat_fat_g === null ? null : Number(t.batas_sat_fat_g),
+        }
+      : null,
+    redistribusi: {
+      kuotaTerpakai: j.redistribusi.kuota_terpakai,
+      tawaran: j.redistribusi.tawaran,
+      penerapanTerakhir: j.redistribusi.penerapan_terakhir,
+    },
+    proteksiProtein: {
+      utuh: j.proteksi_protein.utuh,
+      penjagaAktif: j.proteksi_protein.penjaga_aktif,
+      kaloriDipindah: j.proteksi_protein.kalori_dipindah,
+    },
+    tdee: j.tdee,
   };
 }
 

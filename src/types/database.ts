@@ -371,6 +371,49 @@ export type ProteksiProteinRow = {
   rincian: ProteksiProteinHariRow[];
 };
 
+/**
+ * Hasil `endpoint_budget_mingguan` — satu snapshot untuk seluruh layar Budget.
+ *
+ * Tidak memuat rincian kumulatif: ia turunan MURNI dari `budget.rincian`, jadi
+ * klien menghitungnya lewat `rincianKumulatif` di @recomp/logika.
+ */
+export type EndpointBudgetRow = {
+  hari_ini: string;
+  minggu_mulai: string;
+  fase: FaseProgram;
+  budget: BudgetMingguanRow;
+  /**
+   * `null` bila pengguna belum punya tipe hari sama sekali. `day_type_id`
+   * sengaja tidak disertakan: layar Budget tidak mengubah tipe hari.
+   */
+  target_hari_ini: Omit<TargetHarianRow, 'day_type_id'> | null;
+  redistribusi: {
+    /** true bila pekan itu sudah pernah diatur; kuotanya sekali per pekan. */
+    kuota_terpakai: boolean;
+    /** Pratinjau `sebar_rata`; tidak menulis apa pun. */
+    tawaran: HasilRedistribusiRow;
+    penerapan_terakhir: {
+      id: string;
+      opsi: OpsiRedistribusiDb;
+      perlu_dipindah: number;
+      terserap: number;
+      tersisa: number;
+      dibatasi_lantai: boolean;
+      alasan: string | null;
+      created_at: string;
+    } | null;
+  };
+  proteksi_protein: ProteksiProteinRow;
+  tdee: {
+    min: number | null;
+    maks: number | null;
+    tengah: number | null;
+    keyakinan: 'rendah' | 'sedang' | 'tinggi';
+    hari_data: number;
+    hari_tercatat: number;
+  };
+};
+
 /** Opsi redistribusi; sama persis dengan OpsiRedistribusi di @recomp/logika. */
 export type OpsiRedistribusiDb = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
 
@@ -603,6 +646,15 @@ export type Database = {
           p_hari_ini: string | null;
         };
         Returns: HasilRedistribusiRow;
+      };
+      endpoint_budget_mingguan: {
+        Args: {
+          p_tanggal: string | null;
+          p_hari_ini: string | null;
+          p_ambang_kcal: number;
+          p_persen_lemak: number | null;
+        };
+        Returns: EndpointBudgetRow;
       };
       estimasi_tdee: {
         Args: { p_sampai: string | null; p_hari: number; p_persen_lemak: number | null };
