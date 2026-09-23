@@ -12,6 +12,12 @@ type Props = {
   onHubungkan: () => void;
   onSinkronSekarang: () => void;
   onPutuskan: () => void;
+  /**
+   * Tautan ke data yang dibawa sumber ini (mis. daftar latihan Hevy). Hanya
+   * tampil saat terhubung: tautan ke data dari sumber yang terputus membuka
+   * layar yang isinya sudah basi tanpa mengatakannya.
+   */
+  tautan?: { label: string; onPress: () => void };
 };
 
 /** Tinggi teks label ±18 pt; hitSlop ini menggenapkannya jadi 44 pt (TAP_MIN). */
@@ -46,6 +52,7 @@ export function KartuSumberData({
   onHubungkan,
   onSinkronSekarang,
   onPutuskan,
+  tautan,
 }: Props) {
   const profil = PROFIL_SUMBER[koneksi.sumber];
   const warna = WARNA_TINGKAT[kesehatan.tingkat];
@@ -88,6 +95,21 @@ export function KartuSumberData({
           </Text>
         ) : null}
       </View>
+
+      {tautan && koneksi.status === 'terhubung' ? (
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={tautan.label}
+          onPress={() => {
+            ketukRingan();
+            tautan.onPress();
+          }}
+          hitSlop={{ top: HIT_SLOP_TAUTAN, bottom: HIT_SLOP_TAUTAN, left: spacing.sm, right: spacing.lg }}
+          style={({ pressed }) => ({ alignSelf: 'flex-start', opacity: pressed ? 0.6 : 1 })}
+        >
+          <Text style={{ ...typography.label, color: colors.amber }}>{tautan.label} ›</Text>
+        </Pressable>
+      ) : null}
 
       <AksiKartu
         tingkat={kesehatan.tingkat}

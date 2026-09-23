@@ -163,6 +163,11 @@ export default function SumberDataScreen() {
             onHubungkan={() => setAkanDihubungkan(k.sumber)}
             onSinkronSekarang={() => sinkronSekarang(k.sumber)}
             onPutuskan={() => setAkanDiputuskan(k.sumber)}
+            tautan={
+              k.sumber === 'hevy'
+                ? { label: 'Lihat latihan dari Hevy', onPress: () => router.push('/latihan') }
+                : undefined
+            }
           />
         ))}
       </View>

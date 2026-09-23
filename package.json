@@ -22,10 +22,11 @@
     "cek:prompt": "node scripts/cek-prompt-coach.mjs",
     "cek:ringkasan": "node scripts/cek-ringkasan.mjs",
     "cek:sumber": "node scripts/cek-sumber-data.mjs",
+    "cek:latihan": "node scripts/cek-latihan.mjs",
     "cek:db": "npm run db:cek && npm run cek:paritas",
     "cek:edge": "bash scripts/cek-edge.sh",
     "salin:logika": "node scripts/salin-logika.mjs",
-    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:percakapan && npm run cek:evaluasi && npm run cek:medis && npm run cek:satuan && npm run cek:prompt && npm run cek:ringkasan && npm run cek:sumber && npm run cek:edge && npm run cek:db"
+    "cek:semua": "npm run typecheck && npm run cek:kontras && npm run cek:bf && npm run cek:ukuran && npm run cek:percakapan && npm run cek:evaluasi && npm run cek:medis && npm run cek:satuan && npm run cek:prompt && npm run cek:ringkasan && npm run cek:sumber && npm run cek:latihan && npm run cek:edge && npm run cek:db"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

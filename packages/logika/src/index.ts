@@ -183,3 +183,20 @@ export {
   urutkanKoneksi,
   validasiKunciHevy,
 } from './sumberData';
+
+export type {
+  LatihanDalamSesi,
+  RingkasanLatihan,
+  RingkasanSesi,
+  SesiLatihan,
+  SetLatihan,
+} from './latihan';
+
+export {
+  e1rmEpley,
+  formatBeban,
+  MAKS_REPS_E1RM,
+  ringkasLatihan,
+  ringkasPekan,
+  ringkasSesi,
+} from './latihan';

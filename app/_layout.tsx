@@ -22,6 +22,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
         </Stack>
       </PenyediaProfil>
     </SafeAreaProvider>
