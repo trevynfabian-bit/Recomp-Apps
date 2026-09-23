@@ -11,13 +11,14 @@ import {
   siapkanWidget,
   tanggalHariIni,
 } from '@recomp/logika';
-import type { JenisNotifikasi } from '@recomp/logika';
+import type { JenisNotifikasi, NotifikasiKatalog } from '@recomp/logika';
 import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
 import {
   ambilPengaturanPengingat,
   simpanPengaturanPengingat,
   type PerubahanPengingat,
 } from '@/data/pengaturanNotifikasi';
+import { ambilKatalogNotifikasi } from '@/data/copyNotifikasi';
 import { segarkanPengingat } from '@/data/pengingat';
 import { ambilRingkasanWidget } from '@/data/widget';
 import {
@@ -137,7 +138,20 @@ export default function WidgetPengingatScreen() {
         .catch(() => undefined);
     }
   };
-  const aktif = KATALOG_NOTIFIKASI.filter((n) => atur.jenis[n.jenis]);
+  // Kalimat yang benar-benar akan dikirim: dari server bila ada (diperiksa ulang).
+  const [katalog, setKatalog] = useState<NotifikasiKatalog[]>(() => [...KATALOG_NOTIFIKASI]);
+  useEffect(() => {
+    let batal = false;
+    ambilKatalogNotifikasi()
+      .then((k) => {
+        if (!batal) setKatalog(k);
+      })
+      .catch(() => undefined);
+    return () => {
+      batal = true;
+    };
+  }, []);
+  const aktif = katalog.filter((n) => atur.jenis[n.jenis]);
   const jadwal = useMemo(
     () => ({ hariKerjaMenit: atur.jamTimbangMenit, akhirPekanMenit: atur.jamAkhirPekanMenit }),
     [atur.jamTimbangMenit, atur.jamAkhirPekanMenit],
@@ -184,7 +198,7 @@ export default function WidgetPengingatScreen() {
       <View>
         <SectionHeader judul="Notifikasi" aksi={ringkasJenisAktif(atur.jenis)} />
         <Card flat>
-          {KATALOG_NOTIFIKASI.map((n, i) => (
+          {katalog.map((n, i) => (
             <View key={n.jenis}>
               {i > 0 ? <Pemisah /> : null}
               <BarisSakelar

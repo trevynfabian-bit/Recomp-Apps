@@ -937,6 +937,16 @@ export type DailySummaryRow = {
 /** Keluaran `ringkasan_widget` — langsung masukan `siapkanWidget`. */
 export type RingkasanWidgetDb = MasukanWidget & { tanggal: string; tampilkanAngka: boolean };
 
+/** Baris `copy_notifikasi` — konfigurasi, dibaca semua pengguna login. */
+export type CopyNotifikasiRow = {
+  jenis: 'timbang' | 'ukuran' | 'ringkasan' | 'evaluasi' | 'sumber';
+  nama: string;
+  kapan: string;
+  judul: string;
+  isi: string;
+  diperbarui_pada: string;
+};
+
 /** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
 export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
 
@@ -1209,6 +1219,12 @@ export type Database = {
       };
       workout_sets: {
         Row: WorkoutSetRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      copy_notifikasi: {
+        Row: CopyNotifikasiRow;
         Insert: never;
         Update: never;
         Relationships: [];

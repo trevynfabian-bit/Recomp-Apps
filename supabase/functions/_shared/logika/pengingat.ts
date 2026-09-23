@@ -151,6 +151,34 @@ export const KATALOG_NOTIFIKASI: readonly NotifikasiKatalog[] = [
   },
 ];
 
+/** Satu baris `copy_notifikasi` dari server. */
+export type CopyNotifikasi = Pick<NotifikasiKatalog, 'jenis' | 'nama' | 'kapan' | 'judul' | 'isi'>;
+
+/** Aturan copy yang sama dengan CHECK `copy_notifikasi` di database. */
+export function copySah(c: Pick<CopyNotifikasi, 'nama' | 'kapan' | 'judul' | 'isi'>): boolean {
+  return (
+    pelanggaranNada(`${c.nama} ${c.kapan} ${c.judul} ${c.isi}`).length === 0 &&
+    !/\d/.test(`${c.judul} ${c.isi}`) &&
+    c.judul.length >= 1 &&
+    c.judul.length <= 40 &&
+    c.isi.length >= 1 &&
+    c.isi.length <= 150
+  );
+}
+
+/**
+ * Katalog dengan kalimat dari server (bila ada), diperiksa ULANG di perangkat:
+ * baris yang tidak lolos — atau jenis yang tidak dikenal — diabaikan, dan
+ * kalimat terbundel yang dipakai. Server menjaga lewat CHECK; ini lapis kedua
+ * untuk hari ketika CHECK itu diubah orang tanpa membaca komentarnya.
+ */
+export function gabungCopyNotifikasi(server: readonly CopyNotifikasi[]): NotifikasiKatalog[] {
+  return KATALOG_NOTIFIKASI.map((n) => {
+    const c = server.find((x) => x.jenis === n.jenis);
+    return c && copySah(c) ? { ...n, nama: c.nama, kapan: c.kapan, judul: c.judul, isi: c.isi } : n;
+  });
+}
+
 /** Pengaturan awal: tiap jenis memakai nilai `bawaan`-nya. */
 export function jenisNotifikasiBawaan(): Record<JenisNotifikasi, boolean> {
   return Object.fromEntries(KATALOG_NOTIFIKASI.map((n) => [n.jenis, n.bawaan])) as Record<
@@ -462,6 +490,8 @@ export function rencanaPengingatTimbang(p: {
   sekarang: Date;
   sudahTimbangHariIni: boolean;
   hari?: number;
+  /** Kalimat dari server (lewat gabungCopyNotifikasi); bawaan: NOTIF_TIMBANG. */
+  copy?: { judul: string; isi: string };
 }): RencanaNotifikasi[] {
   if (!p.aktif) return [];
   const hasil: RencanaNotifikasi[] = [];
@@ -474,8 +504,8 @@ export function rencanaPengingatTimbang(p: {
       jenis: 'timbang',
       tanggal,
       waktu: waktu.toISOString(),
-      judul: NOTIF_TIMBANG.judul,
-      isi: NOTIF_TIMBANG.isi,
+      judul: p.copy?.judul ?? NOTIF_TIMBANG.judul,
+      isi: p.copy?.isi ?? NOTIF_TIMBANG.isi,
     });
   }
   return hasil;

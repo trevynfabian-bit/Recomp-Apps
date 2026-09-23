@@ -68,6 +68,8 @@ export async function jadwalkanPengingatTimbang(o: {
   jadwal: JamPengingat;
   sudahTimbangHariIni: boolean;
   sekarang?: Date;
+  /** Kalimat dari server (sudah diperiksa ulang); bawaan dari katalog terbundel. */
+  copy?: { judul: string; isi: string };
 }): Promise<number> {
   if (!notifikasiDidukung) return 0;
   await batalkanJenis('timbang');
@@ -79,6 +81,7 @@ export async function jadwalkanPengingatTimbang(o: {
     hariIni: tanggalHariIni(),
     sekarang: o.sekarang ?? new Date(),
     sudahTimbangHariIni: o.sudahTimbangHariIni,
+    copy: o.copy,
   });
   for (const r of rencana) {
     await Notifications.scheduleNotificationAsync({

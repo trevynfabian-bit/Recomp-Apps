@@ -1,4 +1,5 @@
 import { tanggalHariIni } from '@recomp/logika';
+import { ambilKatalogNotifikasi } from '@/data/copyNotifikasi';
 import { ambilPengaturanPengingat, type PengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { jadwalkanPengingatTimbang } from '@/lib/notifikasi';
 import { supabase, supabaseSiap } from '@/lib/supabase';
@@ -15,10 +16,12 @@ import { mockPengaturanPengingat } from '@/mocks/widget';
  */
 export async function segarkanPengingat(pengaturan?: PengaturanPengingat): Promise<number> {
   const p = pengaturan ?? (supabaseSiap ? await ambilPengaturanPengingat() : mockPengaturanPengingat());
+  const timbang = (await ambilKatalogNotifikasi()).find((n) => n.jenis === 'timbang');
   return jadwalkanPengingatTimbang({
     aktif: p.jenis.timbang,
     jadwal: { hariKerjaMenit: p.jamTimbangMenit, akhirPekanMenit: p.jamAkhirPekanMenit },
     sudahTimbangHariIni: supabaseSiap ? await beratHariIniTercatat() : false,
+    copy: timbang ? { judul: timbang.judul, isi: timbang.isi } : undefined,
   });
 }
 

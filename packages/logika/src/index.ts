@@ -231,6 +231,7 @@ export {
 } from './impor';
 
 export type {
+  CopyNotifikasi,
   JamPengingat,
   JenisNotifikasi,
   KeadaanKosongWidget,
@@ -244,6 +245,8 @@ export {
   formatJamMenit,
   geserJamTimbang,
   JAM_TIMBANG_BAWAAN,
+  copySah,
+  gabungCopyNotifikasi,
   HARI_JADWAL_PENGINGAT,
   jenisNotifikasiBawaan,
   jamSqlDariMenit,

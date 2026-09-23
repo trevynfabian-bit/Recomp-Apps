@@ -24,6 +24,7 @@ const {
   RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
   siapkanWidget, BATAS_SEGAR_MS, KATALOG_NOTIFIKASI, jenisNotifikasiBawaan, ringkasJenisAktif,
   LANGKAH_JAM_MENIT, menitDariJamSql, jamSqlDariMenit, rencanaPengingatTimbang, HARI_JADWAL_PENGINGAT,
+  gabungCopyNotifikasi, copySah,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -66,6 +67,29 @@ console.log('\nSaran jam dari kebiasaan');
   cek(`kurang dari ${MIN_TIMBANGAN_SARAN} timbangan → tanpa saran`, saranJamTimbang(kebiasaan.slice(0, 4)) === null);
   const lambat = saranJamTimbang(['10:50', '10:55', '10:52', '10:58', '10:51'].map((j, i) => wib(`2026-09-${10 + i}`, j)));
   cek('saran tertahan di batas pagi (11.00)', lambat?.saranMenit === RENTANG_JAM_TIMBANG.maks);
+}
+
+console.log('\nCopy notifikasi dari server (diperiksa ulang di perangkat)');
+{
+  const dasar = KATALOG_NOTIFIKASI.find((n) => n.jenis === 'timbang');
+  const baru = { ...dasar, isi: 'Setelah bangun, sebelum sarapan. Satu ketukan untuk mencatat.' };
+  const g = gabungCopyNotifikasi([baru]);
+  cek('kalimat server yang netral dipakai', g.find((n) => n.jenis === 'timbang').isi === baru.isi);
+  cek('jenis lain tetap kalimat terbundel', g.find((n) => n.jenis === 'ringkasan').isi === NOTIF_RINGKASAN.isi);
+  for (const [nama, isi] of [
+    ['menegur', 'Berat Anda melebihi target'],
+    ['tanda seru', 'Timbang sekarang!'],
+    ['membawa angka', 'Kemarin 74,5 kg.'],
+    ['terlalu panjang', 'x'.repeat(151)],
+  ]) {
+    cek(`kalimat server ${nama} → kalimat terbundel`,
+      gabungCopyNotifikasi([{ ...dasar, isi }]).find((n) => n.jenis === 'timbang').isi === dasar.isi);
+  }
+  cek('jenis yang tidak dikenal diabaikan', gabungCopyNotifikasi([{ ...dasar, jenis: 'promo' }]).length === KATALOG_NOTIFIKASI.length);
+  cek('seluruh katalog terbundel lolos aturan yang sama dengan CHECK database', KATALOG_NOTIFIKASI.every(copySah));
+  const r = rencanaPengingatTimbang({ aktif: true, jadwal: { hariKerjaMenit: 390, akhirPekanMenit: null }, hariIni: '2026-09-23',
+    sekarang: new Date('2026-09-23T05:00:00+07:00'), sudahTimbangHariIni: false, copy: { judul: baru.judul, isi: baru.isi } });
+  cek('rencana memakai kalimat server bila diberikan', r.every((x) => x.isi === baru.isi));
 }
 
 console.log('\nRencana notifikasi timbang pagi');

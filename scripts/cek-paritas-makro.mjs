@@ -96,11 +96,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/bodyFat.ts', join(kerja, 'bodyFat.ts'));
   copyFileSync('packages/logika/src/ukuran.ts', join(kerja, 'ukuran.ts'));
   copyFileSync('packages/logika/src/evaluasi.ts', join(kerja, 'evaluasi.ts'));
+  copyFileSync('packages/logika/src/pengingat.ts', join(kerja, 'pengingat.ts'));
+  copyFileSync('packages/logika/src/percakapan.ts', join(kerja, 'percakapan.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts',
+     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -116,6 +118,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'bodyFat.js')),
     ...require(join(kerja, 'keluar', 'ukuran.js')),
     ...require(join(kerja, 'keluar', 'evaluasi.js')),
+    ...require(join(kerja, 'keluar', 'pengingat.js')),
   };
 }
 
@@ -1530,6 +1533,39 @@ try {
   console.log(
     `✓ 960 kombinasi cocok — kode, penentu, dan keyakinan evaluasi di SQL dan TypeScript sejalan.`,
   );
+
+  // --- Nada notifikasi: pelanggaran_nada (SQL) = pelanggaranNada (TS) -------
+  // Kalimat di tabel copy_notifikasi bisa diubah TANPA rilis app; CHECK SQL
+  // yang menjaganya harus menolak persis yang ditolak pemeriksa TypeScript.
+  console.log();
+  const { pelanggaranNada, KATALOG_NOTIFIKASI } = muatLogikaTs();
+  const KALIMAT_NADA = [
+    'Kalori melebihi target!', 'JANGAN lupa timbang', 'Asupan berlebihan', '(gagal)', 'Awas, protein kurang',
+    'Peringatan: tidur pendek', 'Terlalu banyak sat fat', 'kelebihan 300 kcal', 'Timbang pagi, kalau sempat.',
+    'pejangan', 'Tidak ada yang gagal hari ini', 'Ringkasan siap', 'Bagus sekali!', 'menggagalkan', '',
+  ];
+  let gagalNada = 0;
+  for (const k of KALIMAT_NADA) {
+    const dariSql = sql(`select array_to_json(public.pelanggaran_nada(${`'${k.replaceAll("'", "''")}'`}))::text;`);
+    const dariTs = JSON.stringify(pelanggaranNada(k));
+    const cocok = dariSql === dariTs;
+    if (!cocok) gagalNada += 1;
+    console.log(`${cocok ? '✓' : '✗'} "${k}" SQL ${dariSql}  TS ${dariTs}`);
+  }
+  const barisCopy = JSON.parse(sql(`select json_agg(json_build_object('jenis', jenis, 'nama', nama, 'kapan', kapan,
+    'judul', judul, 'isi', isi) order by jenis) from public.copy_notifikasi;`));
+  const bedaCopy = KATALOG_NOTIFIKASI.filter((n) => {
+    const b = barisCopy.find((x) => x.jenis === n.jenis);
+    return !b || b.nama !== n.nama || b.kapan !== n.kapan || b.judul !== n.judul || b.isi !== n.isi;
+  });
+  if (bedaCopy.length > 0 || barisCopy.length !== KATALOG_NOTIFIKASI.length) gagalNada += 1;
+  console.log(`${bedaCopy.length === 0 ? '✓' : '✗'} copy_notifikasi awal = KATALOG_NOTIFIKASI (${barisCopy.length} jenis)` +
+    (bedaCopy.length ? ` — beda: ${bedaCopy.map((n) => n.jenis).join(', ')}` : ''));
+  if (gagalNada > 0) {
+    console.error(`✗ ${gagalNada} ketidakcocokan nada/copy notifikasi antara SQL dan TypeScript.`);
+    process.exit(1);
+  }
+  console.log(`✓ Nada notifikasi: ${KALIMAT_NADA.length} kalimat dinilai sama di SQL dan TypeScript; copy awal sejalan.`);
 } finally {
   hentikanPostgres();
 }
