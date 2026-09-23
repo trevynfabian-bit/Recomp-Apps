@@ -2,7 +2,7 @@ import type { PeriodeFase, TabelEkspor } from '@recomp/logika';
 import { mockRiwayatPercakapan } from '@/mocks/coach';
 import { mockDailyLogHariIni, mockFoodLogsHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockSesiLatihan } from '@/mocks/latihan';
-import { mockHasilLab } from '@/mocks/pengaturan';
+import { mockRiwayatLab } from '@/mocks/hasilLab';
 import { mockUkuran } from '@/mocks/ukuran';
 import type { DayType, DayTypeTarget, Profile } from '@/types/domain';
 
@@ -96,8 +96,15 @@ export function kumpulkanTabelEkspor(m: {
     {
       nama: 'hasil_lab',
       label: 'hasil lab',
-      kolom: ['tanggal', 'nama', 'jumlah_penanda'],
-      baris: mockHasilLab.map((h) => [h.tanggal, h.nama, h.penanda]),
+      kolom: ['tanggal', 'nama', 'laboratorium', 'jumlah_penanda'],
+      baris: mockRiwayatLab.map((h) => [h.tanggal, h.nama, h.laboratorium, h.penanda.length]),
+    },
+    {
+      nama: 'penanda_lab',
+      label: 'penanda lab',
+      // Rentang rujukan dari laboratorium, dibawa apa adanya.
+      kolom: ['tanggal', 'panel', 'penanda', 'nilai', 'satuan', 'rujukan_min', 'rujukan_maks'],
+      baris: mockRiwayatLab.flatMap((h) => h.penanda.map((p) => [h.tanggal, h.nama, p.nama, p.nilai, p.satuan, p.rujukanMin, p.rujukanMaks])),
     },
   ];
 }

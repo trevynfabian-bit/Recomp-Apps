@@ -19,7 +19,6 @@ import {
 import type { Satuan } from '@recomp/logika';
 import {
   Card,
-  KerangkaSheet,
   SectionHeader,
   SheetBatasPinggang,
   SheetEksporData,
@@ -27,18 +26,18 @@ import {
   SheetHapusAkun,
   SheetKeluarAkun,
   SheetLengkapiProfil,
-  TombolBertepi,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
-import { mockAkun, mockHasilLab } from '@/mocks/pengaturan';
+import { mockRiwayatLab } from '@/mocks/hasilLab';
+import { mockAkun } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
-type Sheet = 'profil' | 'fase' | 'pinggang' | 'lab' | 'ekspor' | 'keluar' | 'hapus' | null;
+type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
 /**
  * Pengaturan.
@@ -87,7 +86,7 @@ export default function PengaturanScreen() {
   const ukuranTerurut = [...mockUkuran].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
   const pinggangTerbaru = ukuranTerurut[ukuranTerurut.length - 1]?.pinggang_cm ?? 85;
   const pinggangPertama = ukuranTerurut[0]?.pinggang_cm ?? null;
-  const labTerakhir = mockHasilLab[0];
+  const labTerakhir = [...mockRiwayatLab].sort((a, b) => b.tanggal.localeCompare(a.tanggal))[0];
 
   const panjang = (cm: number) => `${formatDesimal(tampilkanPanjang(cm, profil.satuan), profil.satuan === 'metrik' ? 0 : 1)} ${labelPanjang(profil.satuan)}`;
 
@@ -228,11 +227,11 @@ export default function PengaturanScreen() {
             judul="Hasil lab"
             nilai={
               labTerakhir
-                ? `${mockHasilLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
+                ? `${mockRiwayatLab.length} tersimpan · terakhir ${formatTanggalPanjang(labTerakhir.tanggal).split(', ')[1]}`
                 : 'Belum ada'
             }
-            petunjuk="Membuka daftar hasil lab"
-            onPress={() => setSheet('lab')}
+            petunjuk="Membuka riwayat hasil lab"
+            onPress={() => router.push('/hasil-lab')}
           />
           <Pemisah />
           <BarisPengaturan
@@ -331,31 +330,6 @@ export default function PengaturanScreen() {
         pinggangAwalCm={pinggangPertama}
         onSimpan={(batas) => perbaruiProfil({ batas_pinggang_cm: batas })}
       />
-      <KerangkaSheet terbuka={sheet === 'lab'} onTutup={tutup} label="Hasil lab">
-        <Text style={{ ...typography.title, color: colors.text }}>Hasil lab</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
-          Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis.
-        </Text>
-        <View accessibilityRole="list" style={{ gap: spacing.sm }}>
-          {mockHasilLab.map((h) => (
-            <View
-              key={h.id}
-              accessible
-              accessibilityLabel={`${h.nama}, ${formatTanggalPanjang(h.tanggal)}, ${h.penanda} penanda`}
-              style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs }}
-            >
-              <View style={{ gap: 2 }}>
-                <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{h.nama}</Text>
-                <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
-                  {formatTanggalPanjang(h.tanggal)}
-                </Text>
-              </View>
-              <Text style={{ ...typography.label, color: colors.textMuted }}>{formatAngka(h.penanda)} penanda</Text>
-            </View>
-          ))}
-        </View>
-        <TombolBertepi label="Tutup" onPress={tutup} />
-      </KerangkaSheet>
       <SheetEksporData terbuka={sheet === 'ekspor'} onTutup={tutup} />
       <SheetKeluarAkun terbuka={sheet === 'keluar'} onTutup={tutup} email={email} keluar={keluar} />
       <SheetHapusAkun

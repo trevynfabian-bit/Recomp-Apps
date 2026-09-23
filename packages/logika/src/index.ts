@@ -353,3 +353,6 @@ export {
   susunBerkasEkspor,
   VERSI_FORMAT_EKSPOR,
 } from './ekspor';
+
+export type { HasilLab, PenandaLab, PosisiPenanda, RingkasanHasilLab } from './hasilLab';
+export { kalimatRingkasanLab, kelompokkanPerTahun, posisiPenanda, ringkasHasilLab } from './hasilLab';

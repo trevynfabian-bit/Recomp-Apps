@@ -355,3 +355,6 @@ export {
   susunBerkasEkspor,
   VERSI_FORMAT_EKSPOR,
 } from './ekspor.ts';
+
+export type { HasilLab, PenandaLab, PosisiPenanda, RingkasanHasilLab } from './hasilLab.ts';
+export { kalimatRingkasanLab, kelompokkanPerTahun, posisiPenanda, ringkasHasilLab } from './hasilLab.ts';
