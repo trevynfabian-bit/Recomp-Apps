@@ -1538,6 +1538,13 @@ export type Database = {
         Args: Record<string, never>;
         Returns: SettingsNotificationsRow;
       };
+      simpan_pengaturan_notifikasi: {
+        /** Sebagian saja; kunci tak dikenal & `notif_netral` ditolak (22023) dengan pesan terbaca. */
+        Args: {
+          p_perubahan: Partial<Omit<SettingsNotificationsRow, 'user_id' | 'notif_netral' | 'created_at' | 'updated_at'>>;
+        };
+        Returns: SettingsNotificationsRow;
+      };
       snapshot_hari_ini: {
         Args: { p_tanggal?: string | null; p_user_id?: string | null };
         Returns: SnapshotHariIni;

@@ -64,10 +64,16 @@ export async function ambilPengaturanPengingat(): Promise<PengaturanPengingat> {
   return pengaturanDariBaris(data);
 }
 
-export async function simpanPengaturanPengingat(p: PerubahanPengingat): Promise<void> {
-  const { data: sesi } = await supabase.auth.getSession();
-  const userId = sesi.session?.user.id;
-  if (!userId) throw new Error('Tidak ada sesi login');
-  const { error } = await supabase.from('settings_notifications').update(pembaruanDari(p)).eq('user_id', userId);
-  if (error) throw error;
+/**
+ * Simpan lewat endpoint `simpan_pengaturan_notifikasi`: hanya kolom yang
+ * berubah, divalidasi server dengan pesan yang layak tampil (mis. "Jam timbang
+ * harus antara 04.00 dan 11.00"). Mengembalikan preferensi sesudah disimpan.
+ */
+export async function simpanPengaturanPengingat(p: PerubahanPengingat): Promise<PengaturanPengingat> {
+  const { data, error } = await supabase.rpc('simpan_pengaturan_notifikasi', { p_perubahan: pembaruanDari(p) });
+  if (error || !data) {
+    // 22023 membawa kalimat untuk pengguna; galat lain tidak.
+    throw new Error(error?.code === '22023' ? error.message : 'Pengaturan tidak tersimpan. Coba lagi.');
+  }
+  return pengaturanDariBaris(data);
 }

@@ -160,6 +160,12 @@ console.log('\nSkema settings_notifications sejalan dengan logika');
   cek('konversi jam bolak-balik', menitDariJamSql('06:30:00') === 390 && jamSqlDariMenit(390) === '06:30'
     && jamSqlDariMenit(menitDariJamSql('11:00')) === '11:00');
   cek('nada netral dikunci database (bukan sakelar)', /check \(notif_netral\)/.test(sql));
+  const endp = readFileSync('supabase/migrations/20260922004400_endpoint_preferensi.sql', 'utf8');
+  const boleh = /v_boleh text\[\] := array\[([^\]]*)\]/.exec(endp)?.[1].match(/'([a-z_]+)'/g)?.map((x) => x.slice(1, -1)) ?? [];
+  const harus = [...KATALOG_NOTIFIKASI.map((n) => `${n.jenis}_aktif`), 'jam_timbang', 'jam_timbang_akhir_pekan', 'widget_aktif'];
+  cek('endpoint menerima tepat kolom katalog + jam + widget (tidak lebih, tidak kurang)',
+    JSON.stringify([...boleh].sort()) === JSON.stringify([...harus].sort()), `${boleh} vs ${harus}`);
+  cek('endpoint menolak notif_netral dengan kalimat', endp.includes("Nada netral bukan pengaturan"));
 }
 
 console.log('\nTeks widget');
