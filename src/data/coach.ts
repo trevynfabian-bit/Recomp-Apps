@@ -82,6 +82,26 @@ export function angkaEstimasi(k: KonteksCoachRow): AngkaKonteksRow[] {
 }
 
 /**
+ * Seberapa banyak masukan sebuah angka yang ditaksir, bila diketahui.
+ *
+ * Penanda `estimasi` saja tidak cukup jujur: "1 dari 23 entri ditaksir" dan
+ * "20 dari 23" mendapat penanda yang sama, padahal keduanya keadaan yang sangat
+ * berbeda. Server mengirim rinciannya di `dasar.sumber_rincian`; fungsi ini
+ * mengangkatnya supaya layar bisa menyebut angkanya, bukan cuma memberi label.
+ */
+export function porsiTaksiran(
+  angka: AngkaKonteksRow,
+): { ditaksir: number; total: number } | null {
+  const r = angka.dasar?.sumber_rincian as
+    | { entri_estimasi?: number; total_entri?: number }
+    | undefined;
+  if (!r || typeof r.entri_estimasi !== 'number' || typeof r.total_entri !== 'number') {
+    return null;
+  }
+  return { ditaksir: r.entri_estimasi, total: r.total_entri };
+}
+
+/**
  * Hasil pemeriksaan sebelum pertanyaan dikirim.
  *
  * `ditolak` berarti pertanyaannya TIDAK dikirim ke mana pun — bukan dikirim lalu

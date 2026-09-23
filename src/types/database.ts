@@ -1035,6 +1035,24 @@ export type Database = {
         };
         Returns: StatusBatasPinggangRow | null;
       };
+      sumber_gabungan: {
+        Args: { p_sumber: JenisSumberDb[] };
+        Returns: JenisSumberDb;
+      };
+      sumber_berat_periode: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          sumber: JenisSumberDb;
+          rincian: { manual: number; sinkron: number };
+        };
+      };
+      sumber_kalori_periode: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          sumber: JenisSumberDb;
+          rincian: { entri_manual: number; entri_estimasi: number; total_entri: number };
+        };
+      };
       konteks_coach: {
         Args: { p_tanggal: string | null; p_persen_lemak: number | null };
         Returns: KonteksCoachRow;
@@ -1096,6 +1114,7 @@ export type Database = {
     };
     Enums: {
       fase_program: FaseProgram;
+      jenis_sumber: JenisSumberDb;
       sumber_berat: SumberBeratDb;
       sumber_makanan: SumberMakananDb;
     };
