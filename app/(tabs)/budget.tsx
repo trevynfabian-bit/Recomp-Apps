@@ -11,6 +11,7 @@ import {
   periksaProteksiProtein,
   rincianKumulatif,
   terapkanRedistribusi,
+  usiaPada,
 } from '@recomp/logika';
 import type { BarisKumulatif, HasilRedistribusi } from '@recomp/logika';
 import {
@@ -80,7 +81,7 @@ export default function BudgetScreen() {
   const tdee = estimasiTdee({
     beratKg: beratAkhir ?? 75,
     tinggiCm: profil.tinggi_cm,
-    usiaTahun: usiaDari(profil.tanggal_lahir, hariIni),
+    usiaTahun: usiaPada(profil.tanggal_lahir, hariIni),
     jenisKelamin: profil.jenis_kelamin,
     // Body fat Navy butuh ukuran pinggang & leher — itu Fase 2, jadi metode
     // Katch-McArdle sengaja dilewati sampai datanya ada.
@@ -343,17 +344,6 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
       </View>
     </View>
   );
-}
-
-/** Usia penuh tahun pada tanggal acuan; `null` bila tanggal lahir belum diisi. */
-function usiaDari(tanggalLahir: string | null, pada: string): number | null {
-  if (!tanggalLahir) return null;
-  const [ly, lm, ld] = tanggalLahir.split('-').map(Number);
-  const [py, pm, pd] = pada.split('-').map(Number);
-  let usia = py - ly;
-  // Belum ulang tahun di tahun itu.
-  if (pm < lm || (pm === lm && pd < ld)) usia -= 1;
-  return usia;
 }
 
 const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

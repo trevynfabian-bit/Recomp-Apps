@@ -61,6 +61,7 @@ export {
   formatTanggalPanjang,
   rasio,
   tanggalHariIni,
+  usiaPada,
   ZONA_WAKTU,
 } from './format.ts';
 

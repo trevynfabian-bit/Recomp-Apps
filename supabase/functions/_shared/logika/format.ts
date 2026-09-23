@@ -76,3 +76,14 @@ export function formatRentangTanggal(dari: string, sampai: string): string {
   if (ty === sy) return `${td} ${bulanDari} – ${sd} ${bulanSampai}`;
   return `${td} ${bulanDari} ${ty} – ${sd} ${bulanSampai} ${sy}`;
 }
+
+/** Usia penuh tahun pada tanggal acuan (`YYYY-MM-DD`); `null` bila tanggal lahir belum diisi. */
+export function usiaPada(tanggalLahir: string | null, pada: string): number | null {
+  if (!tanggalLahir) return null;
+  const [ly, lm, ld] = tanggalLahir.split('-').map(Number);
+  const [py, pm, pd] = pada.split('-').map(Number);
+  let usia = py - ly;
+  // Belum ulang tahun di tahun itu.
+  if (pm < lm || (pm === lm && pd < ld)) usia -= 1;
+  return usia;
+}
