@@ -227,6 +227,8 @@ export {
   NOTIF_TIMBANG,
   pelanggaranNada,
   perluPengingatTimbang,
+  isiWidgetLingkar,
   RENTANG_JAM_TIMBANG,
   teksWidget,
+  teksWidgetSebaris,
 } from './pengingat';

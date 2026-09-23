@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
-import { formatJam, teksWidget } from '@recomp/logika';
+import Svg, { Circle } from 'react-native-svg';
+import { formatJam, isiWidgetLingkar, teksWidget, teksWidgetSebaris } from '@recomp/logika';
 import type { RingkasanWidget } from '@recomp/logika';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -8,52 +9,134 @@ type Props = {
   tampilkanAngka: boolean;
 };
 
+/*
+ * Warna layar kunci. iOS menggambar widget layar kunci MONOKROM (vibrant) di
+ * atas wallpaper; tiga tingkat putih transparan ini meniru itu. Tidak ada
+ * aksen amber atau coral di sini dengan sengaja — pratinjau yang berwarna
+ * menjanjikan warna yang tidak akan pernah muncul di layar kunci sungguhan.
+ */
+const PUTIH = '#FFFFFF';
+const PUTIH_REDUP = '#FFFFFFB3';
+const PUTIH_LATAR = '#FFFFFF24';
+
 /**
- * Pratinjau widget layar kunci (bentuk persegi panjang iOS).
+ * Pratinjau widget layar kunci: tiga ukuran iOS dalam satu layar kunci tiruan.
+ *   • sebaris  — di atas jam: "1.120 kcal · 57 g protein";
+ *   • bundar   — cincin porsi target yang terpakai + sisa di tengah;
+ *   • persegi  — judul + dua baris.
  *
- * Teksnya dari `teksWidget` yang sama dengan yang harus diikuti widget native,
- * jadi yang terlihat di sini adalah apa yang akan terlihat di layar kunci —
- * termasuk saat angka disembunyikan. Warna layar kunci iOS monokrom; pratinjau
- * ini sengaja tanpa aksen warna, supaya tidak menjanjikan warna yang tidak
- * akan muncul.
+ * Semua teksnya dari fungsi @recomp/logika yang SAMA dengan yang ditiru widget
+ * native (`targets/widget/TeksWidget.swift`), jadi yang terlihat di sini adalah
+ * yang terlihat di iPhone — termasuk saat angka disembunyikan.
  */
 export function PratinjauWidget({ ringkasan, tampilkanAngka }: Props) {
-  const t = teksWidget(ringkasan, tampilkanAngka);
+  const persegi = teksWidget(ringkasan, tampilkanAngka);
+  const sebaris = teksWidgetSebaris(ringkasan, tampilkanAngka);
+  const lingkar = isiWidgetLingkar(ringkasan, tampilkanAngka);
+
   return (
     <View
       style={{
         alignItems: 'center',
         paddingVertical: spacing.xl,
+        paddingHorizontal: spacing.md,
         borderRadius: radius.lg,
-        // Latar "layar kunci" tiruan.
         backgroundColor: '#0B0C10',
       }}
     >
-      <Text style={{ fontSize: 44, fontWeight: '300', color: '#E9EAEE', letterSpacing: -1 }}>
+      <Text
+        accessibilityLabel={`Pratinjau widget sebaris: ${sebaris}`}
+        numberOfLines={1}
+        style={{ ...typography.label, color: PUTIH_REDUP }}
+      >
+        {sebaris}
+      </Text>
+      <Text style={{ fontSize: 56, fontWeight: '300', color: '#E9EAEE', letterSpacing: -1.5 }}>
         {formatJam(new Date().toISOString())}
       </Text>
-      <View
-        accessible
-        accessibilityLabel={`Pratinjau widget: ${t.aksesLabel}`}
-        style={{
-          marginTop: spacing.md,
-          width: 170,
-          paddingHorizontal: spacing.md,
-          paddingVertical: spacing.sm,
-          borderRadius: radius.md,
-          backgroundColor: '#FFFFFF1F',
-          gap: 1,
-        }}
-      >
-        <Text style={{ ...typography.caption, color: '#FFFFFFB3', textTransform: 'uppercase' }}>{t.judul}</Text>
-        <Text style={{ ...typography.label, color: '#FFFFFF' }}>{t.baris1}</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: '#FFFFFFCC' }}>{t.baris2}</Text>
+
+      <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm, alignItems: 'center' }}>
+        <WidgetLingkar
+          angka={lingkar.angka}
+          satuan={lingkar.satuan}
+          terpakai={lingkar.terpakai}
+          aksesLabel={lingkar.aksesLabel}
+        />
+        <View
+          accessible
+          accessibilityLabel={`Pratinjau widget persegi: ${persegi.aksesLabel}`}
+          style={{
+            width: 160,
+            minHeight: 72,
+            justifyContent: 'center',
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            borderRadius: radius.md,
+            backgroundColor: PUTIH_LATAR,
+            gap: 1,
+          }}
+        >
+          <Text style={{ ...typography.caption, color: PUTIH_REDUP, textTransform: 'uppercase' }}>
+            {persegi.judul}
+          </Text>
+          <Text numberOfLines={1} style={{ ...typography.label, color: PUTIH }}>{persegi.baris1}</Text>
+          <Text numberOfLines={1} style={{ ...typography.label, fontWeight: '500', color: PUTIH_REDUP }}>
+            {persegi.baris2}
+          </Text>
+        </View>
       </View>
+
       {tampilkanAngka && ringkasan.dihitungPada ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.sm }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.md }}>
           dihitung server {formatJam(ringkasan.dihitungPada)}
         </Text>
       ) : null}
+    </View>
+  );
+}
+
+/** Ukuran widget bundar layar kunci iOS, dalam pt. */
+const UKURAN_LINGKAR = 72;
+const TEBAL = 6;
+
+function WidgetLingkar({
+  angka,
+  satuan,
+  terpakai,
+  aksesLabel,
+}: {
+  angka: string;
+  satuan: string;
+  terpakai: number | null;
+  aksesLabel: string;
+}) {
+  const r = (UKURAN_LINGKAR - TEBAL) / 2;
+  const keliling = 2 * Math.PI * r;
+  return (
+    <View
+      accessible
+      accessibilityLabel={`Pratinjau widget bundar: ${aksesLabel}`}
+      style={{ width: UKURAN_LINGKAR, height: UKURAN_LINGKAR, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Svg width={UKURAN_LINGKAR} height={UKURAN_LINGKAR} style={{ position: 'absolute' }}>
+        <Circle cx={UKURAN_LINGKAR / 2} cy={UKURAN_LINGKAR / 2} r={r} stroke={PUTIH_LATAR} strokeWidth={TEBAL} fill="none" />
+        {terpakai !== null ? (
+          <Circle
+            cx={UKURAN_LINGKAR / 2}
+            cy={UKURAN_LINGKAR / 2}
+            r={r}
+            stroke={PUTIH}
+            strokeWidth={TEBAL}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${keliling * terpakai} ${keliling}`}
+            // Mulai dari jam 12, searah jarum jam — seperti gauge iOS.
+            transform={`rotate(-90 ${UKURAN_LINGKAR / 2} ${UKURAN_LINGKAR / 2})`}
+          />
+        ) : null}
+      </Svg>
+      <Text style={{ ...typography.label, fontWeight: '700', color: PUTIH }}>{angka}</Text>
+      <Text style={{ fontSize: 9, fontWeight: '600', color: PUTIH_REDUP }}>{satuan}</Text>
     </View>
   );
 }

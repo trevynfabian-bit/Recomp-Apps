@@ -12,6 +12,7 @@ export function mockRingkasanWidget(sekarang: Date = new Date()): RingkasanWidge
   return {
     sisaKalori: target.target_kalori - log.kalori,
     sisaProteinG: target.target_protein_g - log.protein_g,
+    targetKalori: target.target_kalori,
     dihitungPada: new Date(sekarang.getTime() - 9 * 60_000).toISOString(),
   };
 }

@@ -81,6 +81,11 @@ export function pelanggaranNada(teks: string): string[] {
 export type RingkasanWidget = {
   sisaKalori: number | null;
   sisaProteinG: number | null;
+  /**
+   * Target kalori hari itu, untuk cincin widget bundar. Opsional: tanpanya
+   * widget bundar menampilkan angka saja, tanpa cincin.
+   */
+  targetKalori?: number | null;
   /** ISO 8601 saat server menghitungnya; `null` bila belum pernah. */
   dihitungPada: string | null;
 };
@@ -128,4 +133,48 @@ export function teksWidget(
         ? `${formatMakro(r.sisaProteinG)} g protein lagi`
         : 'Protein tercapai';
   return { judul: 'Sisa hari ini', baris1: kalori, baris2: protein, aksesLabel: `${kalori}. ${protein}.` };
+}
+
+/**
+ * Widget SEBARIS (di atas jam layar kunci): satu baris pendek. iOS memotong
+ * teks yang terlalu panjang tanpa ampun, jadi bentuknya dipadatkan ke angka
+ * dan satuan saja.
+ */
+export function teksWidgetSebaris(r: RingkasanWidget, tampilkanAngka: boolean): string {
+  if (!tampilkanAngka || r.sisaKalori === null) return 'Recomp';
+  const kalori = r.sisaKalori >= 0 ? `${formatAngka(r.sisaKalori)} kcal` : `+${formatAngka(-r.sisaKalori)} kcal`;
+  if (r.sisaProteinG === null) return kalori;
+  const protein = r.sisaProteinG > 0 ? `${formatMakro(r.sisaProteinG)} g protein` : 'protein tercapai';
+  return `${kalori} · ${protein}`;
+}
+
+/**
+ * Widget BUNDAR: satu angka di tengah cincin. Cincin = porsi target yang
+ * sudah terpakai, berhenti di penuh — cincin yang "meluap" merah adalah
+ * peringatan dalam bentuk grafik, dan PRD melarang peringatan.
+ */
+export function isiWidgetLingkar(
+  r: RingkasanWidget,
+  tampilkanAngka: boolean,
+): { angka: string; satuan: string; terpakai: number | null; aksesLabel: string } {
+  if (!tampilkanAngka || r.sisaKalori === null) {
+    return { angka: '–', satuan: 'kcal', terpakai: null, aksesLabel: 'Recomp. Buka app untuk melihat sisa hari ini.' };
+  }
+  const target = r.targetKalori ?? null;
+  const terpakai =
+    target !== null && target > 0 ? Math.min(1, Math.max(0, (target - r.sisaKalori) / target)) : null;
+  if (r.sisaKalori >= 0) {
+    return {
+      angka: formatAngka(r.sisaKalori),
+      satuan: 'kcal',
+      terpakai,
+      aksesLabel: `${formatAngka(r.sisaKalori)} kcal tersisa.`,
+    };
+  }
+  return {
+    angka: `+${formatAngka(-r.sisaKalori)}`,
+    satuan: 'kcal',
+    terpakai,
+    aksesLabel: `${formatAngka(-r.sisaKalori)} kcal di atas target.`,
+  };
 }

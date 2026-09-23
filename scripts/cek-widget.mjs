@@ -7,7 +7,7 @@
  * kunci — untuk seluruh rentang angka — diperiksa di sini.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdtempSync, readdirSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -20,7 +20,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   formatJamMenit, geserJamTimbang, JAM_TIMBANG_BAWAAN, NOTIF_RINGKASAN, NOTIF_TIMBANG,
-  pelanggaranNada, perluPengingatTimbang, RENTANG_JAM_TIMBANG, teksWidget,
+  isiWidgetLingkar, pelanggaranNada, perluPengingatTimbang, RENTANG_JAM_TIMBANG, teksWidget, teksWidgetSebaris,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -75,6 +75,55 @@ console.log('\nTeks widget');
   cek('angka disembunyikan: tidak ada satu digit pun di layar kunci',
     !/\d/.test(`${sembunyi.judul} ${sembunyi.baris1} ${sembunyi.baris2} ${sembunyi.aksesLabel}`));
   cek('belum ada ringkasan', teksWidget({ sisaKalori: null, sisaProteinG: null, dihitungPada: null }, true).baris1 === 'Belum ada ringkasan');
+}
+
+console.log('\nWidget sebaris & bundar');
+{
+  const r = { sisaKalori: 1120, sisaProteinG: 57, targetKalori: 3100, dihitungPada: null };
+  cek(`sebaris: "${teksWidgetSebaris(r, true)}"`, teksWidgetSebaris(r, true) === '1.120 kcal · 57 g protein');
+  cek('sebaris di atas target', teksWidgetSebaris({ ...r, sisaKalori: -120, sisaProteinG: 0 }, true) === '+120 kcal · protein tercapai');
+  cek('sebaris tersembunyi = nama app saja', teksWidgetSebaris(r, false) === 'Recomp');
+  const l = isiWidgetLingkar(r, true);
+  cek(`bundar: ${l.angka} ${l.satuan}, terpakai ${l.terpakai.toFixed(3)}`, l.angka === '1.120' && Math.abs(l.terpakai - 1980 / 3100) < 1e-9);
+  const lewat = isiWidgetLingkar({ ...r, sisaKalori: -500 }, true);
+  cek('cincin berhenti di penuh saat di atas target (tidak "meluap")', lewat.terpakai === 1 && lewat.angka === '+500');
+  cek('tanpa target: tanpa cincin', isiWidgetLingkar({ ...r, targetKalori: null }, true).terpakai === null);
+  const tersembunyi = isiWidgetLingkar(r, false);
+  cek('bundar tersembunyi: tanpa angka & tanpa cincin', !/\d/.test(tersembunyi.angka) && tersembunyi.terpakai === null);
+  const kasar = [];
+  for (let k = -3000; k <= 4000; k += 53) {
+    for (const t of [true, false]) {
+      const semua = `${teksWidgetSebaris({ ...r, sisaKalori: k }, t)} ${isiWidgetLingkar({ ...r, sisaKalori: k }, t).aksesLabel}`;
+      if (pelanggaranNada(semua).length > 0 || /NaN|undefined/.test(semua)) kasar.push(semua);
+    }
+  }
+  cek('sebaris & bundar netral di seluruh rentang', kasar.length === 0, kasar.slice(0, 2).join(' | '));
+}
+
+console.log('\nWidget native (Swift) sejalan dengan TypeScript');
+{
+  const swift = readFileSync('targets/widget/TeksWidget.swift', 'utf8');
+  const widget = readFileSync('targets/widget/RecompWidget.swift', 'utf8');
+  // Setiap frasa tetap yang dihasilkan TypeScript harus ada di Swift.
+  const frasa = [
+    'kcal tersisa', 'kcal di atas target', 'g protein lagi', 'Protein tercapai', 'Protein belum ditargetkan',
+    'Belum ada ringkasan', 'Buka app untuk mulai', 'Buka app untuk', 'melihat sisa hari ini', 'Sisa hari ini',
+    'Recomp. Buka app untuk melihat sisa hari ini.', 'Belum ada ringkasan hari ini.', 'g protein', 'protein tercapai',
+  ];
+  const frasaHilang = (sumber) => frasa.filter((f) => !sumber.includes(f));
+  const hilang = frasaHilang(swift);
+  cek('semua frasa widget TypeScript ada di Swift', hilang.length === 0, `hilang: ${hilang.join(', ')}`);
+  // Kontrol negatif: Swift yang kalimatnya diubah di satu sisi saja harus tertangkap.
+  const rusak = frasaHilang(swift.replaceAll('Protein tercapai', 'Protein sudah cukup'));
+  cek('kontrol: kalimat yang diubah hanya di Swift tertangkap', rusak.includes('Protein tercapai'), JSON.stringify(rusak));
+  const literal = [...(swift + widget).matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1].replace(/\\\([^)]*\)/g, ''));
+  const menegur = literal.filter((t) => pelanggaranNada(t).length > 0);
+  cek(`${literal.length} teks di Swift, semuanya netral`, menegur.length === 0, menegur.join(' | '));
+  cek('angka Swift diformat lokal Indonesia (titik ribuan, koma desimal)', (swift.match(/Locale\(identifier: "id_ID"\)/g) ?? []).length === 2);
+  cek('tiga ukuran layar kunci didukung',
+    ['.accessoryRectangular', '.accessoryCircular', '.accessoryInline'].every((f) => widget.includes(f)));
+  cek('widget hanya membaca: tidak ada perhitungan target di Swift selain porsi cincin',
+    !/target_kalori\s*-|kalori\s*-\s*terpakai/.test(widget));
 }
 
 console.log(gagal === 0 ? '\n✓ Pengingat & widget: nada netral di seluruh rentang, pengingat hanya bila terlewat' : `\n✗ ${gagal} pemeriksaan gagal`);
