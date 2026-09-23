@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -18,7 +18,14 @@ import {
   simpanPengaturanPengingat,
   type PerubahanPengingat,
 } from '@/data/pengaturanNotifikasi';
+import { segarkanPengingat } from '@/data/pengingat';
 import { ambilRingkasanWidget } from '@/data/widget';
+import {
+  izinNotifikasi,
+  mintaIzinNotifikasi,
+  notifikasiDidukung,
+  type IzinNotifikasi,
+} from '@/lib/notifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
 import {
@@ -94,6 +101,21 @@ export default function WidgetPengingatScreen() {
     };
   }, []);
 
+  // Izin notifikasi iOS: bila ditolak, sakelar di sini tidak berarti apa-apa
+  // sampai diizinkan di Pengaturan — dan itu harus dikatakan, bukan disembunyikan.
+  const [izin, setIzin] = useState<IzinNotifikasi | null>(null);
+  useEffect(() => {
+    if (!notifikasiDidukung) return;
+    izinNotifikasi().then(setIzin).catch(() => undefined);
+  }, []);
+
+  // Jadwal pengingat timbang mengikuti sakelar & jamnya.
+  useEffect(() => {
+    void segarkanPengingat(atur).catch(() => undefined);
+    // Hanya bagian yang memengaruhi jadwal timbang.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [atur.jenis.timbang, atur.jamTimbangMenit, atur.jamAkhirPekanMenit]);
+
   /** Simpan hanya yang berubah; tampilan tidak menunggu jaringan. */
   const simpan = (p: PerubahanPengingat) => {
     if (supabaseSiap) simpanPengaturanPengingat(p).catch(() => undefined);
@@ -105,6 +127,15 @@ export default function WidgetPengingatScreen() {
   const ubahJenis = (jenis: JenisNotifikasi, v: boolean) => {
     setAtur((lama) => ({ ...lama, jenis: { ...lama.jenis, [jenis]: v } }));
     simpan({ jenis: { [jenis]: v } });
+    // Izin diminta saat pengguna MENYALAKAN notifikasi — saat alasannya jelas.
+    if (v && notifikasiDidukung) {
+      mintaIzinNotifikasi()
+        .then((hasil) => {
+          setIzin(hasil);
+          if (hasil === 'diizinkan') void segarkanPengingat({ ...atur, jenis: { ...atur.jenis, [jenis]: v } });
+        })
+        .catch(() => undefined);
+    }
   };
   const aktif = KATALOG_NOTIFIKASI.filter((n) => atur.jenis[n.jenis]);
   const jadwal = useMemo(
@@ -189,6 +220,25 @@ export default function WidgetPengingatScreen() {
           ))}
         </Card>
       </View>
+
+      {izin === 'ditolak' && aktif.length > 0 ? (
+        <Card style={{ gap: spacing.sm }}>
+          <Text style={{ ...typography.label, color: colors.text }}>Notifikasi dimatikan di iPhone</Text>
+          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            Pengingat di atas baru terkirim setelah notifikasi untuk Recomp diizinkan di Pengaturan.
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              ketukRingan();
+              void Linking.openSettings();
+            }}
+            style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text style={{ ...typography.label, color: colors.aksenTeks.jade }}>Buka Pengaturan ›</Text>
+          </Pressable>
+        </Card>
+      ) : null}
 
       {/* Pratinjau: janji "netral" ditunjukkan, bukan hanya dikatakan — isi
           yang tampil di sini adalah isi yang dikirim, dari katalog yang sama. */}

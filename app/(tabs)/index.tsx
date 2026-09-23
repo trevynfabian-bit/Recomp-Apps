@@ -16,8 +16,9 @@ import {
   SheetCatatFoto,
   type EntriMakananBaru,
 } from '@/components';
-import { formatAngka, formatMakro, formatTanggalPanjang } from '@recomp/logika';
+import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
+import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
 import { useProfil } from '@/state/profil';
 import { simpanCatatanHarian } from '@/data/catatan';
@@ -80,6 +81,8 @@ export default function LogHarianScreen() {
   async function simpanBeratPagi(beratKg: number) {
     await simpanBeratStub(beratKg);
     setLog((prev) => ({ ...prev, berat_pagi_kg: beratKg, sumber_berat: 'manual' }));
+    // Sudah timbang: pengingat pagi ini tidak perlu datang lagi.
+    if (log.tanggal === tanggalHariIni()) void batalkanPengingatTimbangHariIni().catch(() => undefined);
   }
 
   /**

@@ -238,6 +238,7 @@ export type {
   KeadaanKosongWidget,
   MasukanWidget,
   NotifikasiKatalog,
+  RencanaNotifikasi,
   RingkasanWidget,
 } from './pengingat.ts';
 
@@ -245,8 +246,11 @@ export {
   formatJamMenit,
   geserJamTimbang,
   JAM_TIMBANG_BAWAAN,
+  HARI_JADWAL_PENGINGAT,
   jenisNotifikasiBawaan,
   jamSqlDariMenit,
+  rencanaPengingatTimbang,
+  waktuWib,
   KATALOG_NOTIFIKASI,
   menitDariJamSql,
   LANGKAH_JAM_MENIT,

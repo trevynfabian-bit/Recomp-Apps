@@ -408,6 +408,77 @@ export function ringkasJadwal(jam: JamPengingat): string {
   return `Sen–Jum ${formatJamMenit(jam.hariKerjaMenit)} · Sab–Min ${formatJamMenit(jam.akhirPekanMenit)}`;
 }
 
+// ---------------------------------------------------------------------------
+// Rencana notifikasi lokal
+// ---------------------------------------------------------------------------
+
+/**
+ * Berapa hari ke depan pengingat dijadwalkan. iOS menyimpan paling banyak 64
+ * notifikasi tertunda per app; dua pekan menyisakan ruang untuk jenis lain,
+ * dan cukup untuk orang yang tidak membuka app selama liburan.
+ */
+export const HARI_JADWAL_PENGINGAT = 14;
+
+/** Satu notifikasi lokal yang akan dijadwalkan di perangkat. */
+export type RencanaNotifikasi = {
+  /** Stabil per jenis & tanggal, mis. "timbang-2026-09-23" — dipakai untuk membatalkan. */
+  id: string;
+  jenis: JenisNotifikasi;
+  tanggal: string;
+  /** ISO 8601 (UTC) saat notifikasi muncul. */
+  waktu: string;
+  judul: string;
+  isi: string;
+};
+
+function tambahHari(tanggal: string, n: number): string {
+  const [y, m, d] = tanggal.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+}
+
+/** "2026-09-23" + 390 menit → saat 06.30 WIB tanggal itu. */
+export function waktuWib(tanggal: string, menit: number): Date {
+  return new Date(`${tanggal}T${formatJamMenit(menit).replace('.', ':')}:00+07:00`);
+}
+
+/**
+ * Rencana pengingat timbang pagi untuk HARI_JADWAL_PENGINGAT hari ke depan.
+ *
+ * Sengaja SATU notifikasi per tanggal, bukan satu notifikasi berulang:
+ * notifikasi berulang tidak bisa melewati satu hari, padahal pengingat ini
+ * hanya boleh muncul bila hari itu BELUM timbang. Begitu berat hari ini
+ * tercatat (diketik atau dari timbangan lewat Apple Health), notifikasi
+ * bertanggal hari ini dibatalkan — hari lain tetap terjadwal.
+ *
+ * Hari ini dilewati bila sudah timbang atau jamnya sudah lewat. Jam akhir
+ * pekan dipakai untuk Sabtu & Minggu.
+ */
+export function rencanaPengingatTimbang(p: {
+  aktif: boolean;
+  jadwal: JamPengingat;
+  hariIni: string;
+  sekarang: Date;
+  sudahTimbangHariIni: boolean;
+  hari?: number;
+}): RencanaNotifikasi[] {
+  if (!p.aktif) return [];
+  const hasil: RencanaNotifikasi[] = [];
+  for (let i = 0; i < (p.hari ?? HARI_JADWAL_PENGINGAT); i += 1) {
+    const tanggal = tambahHari(p.hariIni, i);
+    const waktu = waktuWib(tanggal, jamPengingatUntuk(tanggal, p.jadwal));
+    if (i === 0 && (p.sudahTimbangHariIni || waktu.getTime() <= p.sekarang.getTime())) continue;
+    hasil.push({
+      id: `timbang-${tanggal}`,
+      jenis: 'timbang',
+      tanggal,
+      waktu: waktu.toISOString(),
+      judul: NOTIF_TIMBANG.judul,
+      isi: NOTIF_TIMBANG.isi,
+    });
+  }
+  return hasil;
+}
+
 /** Berapa timbangan minimal sebelum kebiasaan dianggap terbaca. */
 export const MIN_TIMBANGAN_SARAN = 5;
 

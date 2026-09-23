@@ -23,7 +23,7 @@ const {
   isiWidgetLingkar, jamPengingatUntuk, MIN_TIMBANGAN_SARAN, pelanggaranNada, perluPengingatTimbang,
   RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
   siapkanWidget, BATAS_SEGAR_MS, KATALOG_NOTIFIKASI, jenisNotifikasiBawaan, ringkasJenisAktif,
-  LANGKAH_JAM_MENIT, menitDariJamSql, jamSqlDariMenit,
+  LANGKAH_JAM_MENIT, menitDariJamSql, jamSqlDariMenit, rencanaPengingatTimbang, HARI_JADWAL_PENGINGAT,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -66,6 +66,33 @@ console.log('\nSaran jam dari kebiasaan');
   cek(`kurang dari ${MIN_TIMBANGAN_SARAN} timbangan → tanpa saran`, saranJamTimbang(kebiasaan.slice(0, 4)) === null);
   const lambat = saranJamTimbang(['10:50', '10:55', '10:52', '10:58', '10:51'].map((j, i) => wib(`2026-09-${10 + i}`, j)));
   cek('saran tertahan di batas pagi (11.00)', lambat?.saranMenit === RENTANG_JAM_TIMBANG.maks);
+}
+
+console.log('\nRencana notifikasi timbang pagi');
+{
+  const jadwal = { hariKerjaMenit: 390, akhirPekanMenit: 480 };
+  // Rabu 23 September 2026, 05.00 WIB — sebelum jam pengingat.
+  const subuh = new Date('2026-09-23T05:00:00+07:00');
+  const r = rencanaPengingatTimbang({ aktif: true, jadwal, hariIni: '2026-09-23', sekarang: subuh, sudahTimbangHariIni: false });
+  cek(`${r.length} notifikasi, satu per tanggal, ${HARI_JADWAL_PENGINGAT} hari`,
+    r.length === HARI_JADWAL_PENGINGAT && new Set(r.map((x) => x.id)).size === r.length);
+  cek(`hari ini 06.30 WIB = ${r[0].waktu}`, r[0].id === 'timbang-2026-09-23' && r[0].waktu === '2026-09-22T23:30:00.000Z');
+  const sabtu = r.find((x) => x.tanggal === '2026-09-26');
+  cek(`Sabtu memakai jam akhir pekan (08.00 WIB = ${sabtu?.waktu})`, sabtu?.waktu === '2026-09-26T01:00:00.000Z');
+  cek('isi dari katalog (nada netral dijaga di satu tempat)', r.every((x) => x.judul === NOTIF_TIMBANG.judul && x.isi === NOTIF_TIMBANG.isi));
+  const sudah = rencanaPengingatTimbang({ aktif: true, jadwal, hariIni: '2026-09-23', sekarang: subuh, sudahTimbangHariIni: true });
+  cek('sudah timbang hari ini → hari ini dilewati, besok tetap', sudah[0].tanggal === '2026-09-24' && sudah.length === HARI_JADWAL_PENGINGAT - 1);
+  const siang = rencanaPengingatTimbang({ aktif: true, jadwal, hariIni: '2026-09-23', sekarang: new Date('2026-09-23T09:00:00+07:00'), sudahTimbangHariIni: false });
+  cek('jam hari ini sudah lewat → tidak dijadwalkan untuk masa lalu', siang[0].tanggal === '2026-09-24');
+  cek('dimatikan → tidak ada rencana', rencanaPengingatTimbang({ aktif: false, jadwal, hariIni: '2026-09-23', sekarang: subuh, sudahTimbangHariIni: false }).length === 0);
+  // Pergantian bulan & tahun tetap berurutan tanpa tanggal ganda.
+  const akhirTahun = rencanaPengingatTimbang({ aktif: true, jadwal, hariIni: '2026-12-25', sekarang: new Date('2026-12-25T00:00:00+07:00'), sudahTimbangHariIni: false });
+  cek('lintas tahun: 25 Des → 7 Jan', akhirTahun[0].tanggal === '2026-12-25' && akhirTahun.at(-1).tanggal === '2027-01-07');
+  const lib = readFileSync('src/lib/notifikasi.ts', 'utf8');
+  cek('penjadwal di perangkat memakai rencana, tanpa teks notifikasi sendiri',
+    lib.includes('rencanaPengingatTimbang(') && lib.includes('title: r.judul, body: r.isi') && !/Timbang pagi|sebelum sarapan/.test(lib));
+  cek('pembatalan hari ini memakai id yang sama dengan rencana', lib.includes('`timbang-${tanggalHariIni()}`'));
+  cek('tanpa suara & tanpa lencana', lib.includes('shouldPlaySound: false') && lib.includes('sound: false') && lib.includes('allowBadge: false'));
 }
 
 console.log('\nPengingat hanya bila terlewat');
