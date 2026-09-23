@@ -33,6 +33,7 @@ import {
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
+import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { DayType } from '@/types/domain';
@@ -48,7 +49,13 @@ const KOLOM: { kunci: KolomTarget; label: string; unit: string }[] = [
 
 const kunciBaris = (dayTypeId: string, fase: Fase) => `${dayTypeId}|${fase}`;
 
-type Status = { jenis: 'diam' } | { jenis: 'menyimpan' } | { jenis: 'tersimpan'; jumlah: number } | { jenis: 'gagal' };
+type Status =
+  | { jenis: 'diam' }
+  | { jenis: 'menyimpan' }
+  | { jenis: 'tersimpan'; jumlah: number; hariDiredistribusiTetap: number }
+  | { jenis: 'gagal'; pesan: string };
+
+const PESAN_GAGAL_SIMPAN = 'Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.';
 
 /**
  * Target harian per tipe hari.
@@ -77,7 +84,8 @@ type Status = { jenis: 'diam' } | { jenis: 'menyimpan' } | { jenis: 'tersimpan';
  * Perubahan berlaku mulai hari ini; hari yang sudah lewat menyimpan target
  * saat itu (snapshot di `daily_logs`), jadi catatan lama tidak berubah angka.
  *
- * Fase 4 sisi frontend: simpan lewat `useTarget` (tiruan di memori).
+ * Simpan lewat `useTarget`: `simpan_target` di Supabase, atau tiruan di memori
+ * tanpa kredensial Supabase.
  */
 export default function TargetHarianScreen() {
   const insets = useSafeAreaInsets();
@@ -177,15 +185,15 @@ export default function TargetHarianScreen() {
       nilai: (b.hasil as Extract<typeof b.hasil, { sah: true }>).nilai,
     }));
     try {
-      await simpanTarget(perubahan);
+      const { hariDiredistribusiTetap } = await simpanTarget(perubahan);
       ketukBerhasil();
       setDraf({});
       setDisentuh({});
       setCobaSimpan(false);
-      setStatus({ jenis: 'tersimpan', jumlah: perubahan.length });
+      setStatus({ jenis: 'tersimpan', jumlah: perubahan.length, hariDiredistribusiTetap });
       setMode('baca');
-    } catch {
-      setStatus({ jenis: 'gagal' });
+    } catch (e) {
+      setStatus({ jenis: 'gagal', pesan: e instanceof KesalahanTarget ? e.message : PESAN_GAGAL_SIMPAN });
     }
   }
 
@@ -382,11 +390,14 @@ export default function TargetHarianScreen() {
             <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.jade, lineHeight: 19 }}>
               {status.jumlah === 1 ? 'Satu target tersimpan' : `${status.jumlah} target tersimpan`}. Berlaku mulai hari ini; hari
               yang sudah lewat tetap memakai target saat itu.
+              {status.hariDiredistribusiTetap > 0
+                ? ` ${status.hariDiredistribusiTetap === 1 ? 'Satu hari' : `${status.hariDiredistribusiTetap} hari`} yang kalorinya sudah diredistribusi tetap memakai angka redistribusinya.`
+                : ''}
             </Text>
           ) : null}
           {status.jenis === 'gagal' ? (
             <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
-              Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.
+              {status.pesan}
             </Text>
           ) : null}
           {cobaSimpan && adaTidakSah ? (
@@ -433,8 +444,10 @@ export default function TargetHarianScreen() {
           fase={suntingSatu.fase}
           tersimpan={cariTarget(suntingSatu.dayTypeId, suntingSatu.fase)}
           simpan={async (nilai) => {
-            await simpanTarget([{ day_type_id: suntingSatu.dayTypeId, fase: suntingSatu.fase, nilai }]);
-            setStatus({ jenis: 'tersimpan', jumlah: 1 });
+            const { hariDiredistribusiTetap } = await simpanTarget([
+              { day_type_id: suntingSatu.dayTypeId, fase: suntingSatu.fase, nilai },
+            ]);
+            setStatus({ jenis: 'tersimpan', jumlah: 1, hariDiredistribusiTetap });
           }}
         />
       ) : null}

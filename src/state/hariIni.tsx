@@ -46,15 +46,22 @@ export function PenyediaHariIni({ children }: { children: React.ReactNode }) {
     [deteksi],
   );
 
+  // Pilihan yang tidak ada di daftar (log tiruan di atas tipe hari dari
+  // server, atau tipe hari yang baru dihapus) jatuh ke tipe hari bawaan —
+  // bukan id yang tidak menunjuk ke mana-mana.
+  const pilihanSah = tipeHari.some((d) => d.id === pilihan.dayTypeId)
+    ? pilihan.dayTypeId
+    : (tipeHari.find((d) => d.is_default)?.id ?? tipeHari[0]?.id ?? pilihan.dayTypeId);
+
   const nilai = useMemo<KonteksHariIni>(
     () => ({
-      dayTypeId: pilihan.override || deteksi.dayTypeId === null ? pilihan.dayTypeId : deteksi.dayTypeId,
+      dayTypeId: pilihan.override || deteksi.dayTypeId === null ? pilihanSah : deteksi.dayTypeId,
       override: pilihan.override,
       deteksi,
       pilihTipeHari,
       kembalikanAuto,
     }),
-    [pilihan, deteksi, pilihTipeHari, kembalikanAuto],
+    [pilihan, pilihanSah, deteksi, pilihTipeHari, kembalikanAuto],
   );
 
   return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>;

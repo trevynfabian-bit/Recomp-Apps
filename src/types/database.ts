@@ -43,6 +43,28 @@ export type DayTypeRow = {
   created_at: string;
 };
 
+/** Satu target di balasan `muat_target` / `simpan_target`. */
+export type TargetApiRow = Omit<DayTypeTargetRow, 'user_id' | 'created_at'>;
+
+export type MuatTargetHasil = {
+  tipe_hari: Omit<DayTypeRow, 'user_id' | 'created_at'>[];
+  target: TargetApiRow[];
+};
+
+export type SimpanTargetButir = Pick<
+  DayTypeTargetRow,
+  'day_type_id' | 'fase' | 'target_kalori' | 'target_protein_g' | 'target_lemak_g' | 'batas_sat_fat_g'
+>;
+
+export type SimpanTargetHasil = {
+  target: TargetApiRow[];
+  /** YYYY-MM-DD, Asia/Jakarta. */
+  berlaku_mulai: string;
+  hari_disegarkan: number;
+  /** Hari ini/mendatang yang sudah diredistribusi dan tidak disentuh. */
+  hari_diredistribusi_tetap: number;
+};
+
 export type DayTypeTargetRow = {
   id: string;
   user_id: string;
@@ -1568,6 +1590,15 @@ export type Database = {
       sinkron_healthkit: {
         Args: { p_kiriman: KirimanHealthKit };
         Returns: HasilSinkronHealthKit;
+      };
+      muat_target: {
+        Args: Record<string, never>;
+        Returns: MuatTargetHasil;
+      };
+      simpan_target: {
+        /** Semua atau tidak sama sekali; 22023/23503/23514 dengan pesan terbaca. */
+        Args: { p_perubahan: SimpanTargetButir[] };
+        Returns: SimpanTargetHasil;
       };
     };
     Enums: {

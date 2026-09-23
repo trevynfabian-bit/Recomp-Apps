@@ -214,5 +214,41 @@ for (const berkas of ['app/(tabs)/budget.tsx', 'app/(tabs)/tren.tsx']) {
 }
 for (const t of kalimat) cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, pelanggaranNada(t).length === 0, pelanggaranNada(t).join(', '));
 
+console.log('\nAPI target (muat_target / simpan_target)');
+{
+  const skema = readFileSync('supabase/migrations/20260922004600_skema_target_preferensi.sql', 'utf8');
+  const dataTs = readFileSync('src/data/target.ts', 'utf8');
+  const penyedia = readFileSync('src/state/target.tsx', 'utf8');
+  // Setiap aturan CHECK target di tabel punya kalimatnya sendiri di app.
+  const aturanSql = [...new Set([...skema.matchAll(/'(day_type_targets_[a-z_]+)',\s*\n?\s*'check/g)].map((x) => x[1]))];
+  aturanSql.push('day_type_targets_kalori_masuk_akal');
+  cek(`${aturanSql.length} aturan CHECK target ditemukan di migrasi`, aturanSql.length >= 6, aturanSql.join(', '));
+  const tanpaPesan = aturanSql.filter((a) => !new RegExp(`^\\s*${a}:`, 'm').test(dataTs));
+  cek('setiap aturan tabel punya pesan di @/data/target', tanpaPesan.length === 0, tanpaPesan.join(', '));
+  // Pesan rentang dibangun dari RENTANG_TARGET, bukan angka yang diketik ulang.
+  cek('pesan rentang memakai RENTANG_TARGET', /RENTANG_TARGET\.protein\.maks/.test(dataTs) && !/antara 0 dan 500/.test(dataTs));
+  const pesanData = [...dataTs.matchAll(/'([^'\n]{12,})'|`([^`\n]{12,})`/g)].map((x) => (x[1] ?? x[2]).replace(/\$\{[^}]*\}/g, 'X'))
+    .filter((t) => /\s/.test(t) && !/^(muat_target|simpan_target)$/.test(t));
+  const bernada = pesanData.filter((t) => pelanggaranNada(t).length > 0);
+  cek(`${pesanData.length} pesan data target netral`, pesanData.length >= 8 && bernada.length === 0, bernada.join(' | '));
+  const layarMuat = readFileSync('src/components/LayarMuatTarget.tsx', 'utf8');
+  const kalimatMuat = [];
+  (function jelajah(n) {
+    if (ts.isImportDeclaration(n)) return;
+    if (ts.isStringLiteral(n) || ts.isJsxText(n)) {
+      const t = n.text.replace(/\s+/g, ' ').trim();
+      if (/\s/.test(t) && /[a-z]{3}/i.test(t)) kalimatMuat.push(t);
+    }
+    ts.forEachChild(n, jelajah);
+  })(ts.createSourceFile('m.tsx', layarMuat, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX));
+  cek('layar muat: kalimat netral', kalimatMuat.length >= 2 && kalimatMuat.every((t) => pelanggaranNada(t).length === 0), kalimatMuat.join(' | '));
+  cek('penyedia memuat dari server hanya saat masuk & kredensial ada', /const pakaiServer = supabaseSiap && pengguna !== null;/.test(penyedia));
+  cek('penyedia memakai baris dari server setelah simpan (bukan isian)', /hasil\.target/.test(penyedia));
+  cek('layar muat punya Coba lagi & Keluar', /label="Coba lagi"/.test(layarMuat) && /label="Keluar"/.test(layarMuat));
+  cek('muat berbatas waktu (tidak menunggu klien Supabase ±30 detik)', /dalamBatasWaktu\(muatTarget\(\), BATAS_MUAT_MS\)/.test(penyedia));
+  cek('hasil muat yang berangkat sebelum simpanan dibuang', /if \(versi\.current !== versiAwal\) return;/.test(penyedia) && /versi\.current \+= 1;/.test(penyedia));
+  cek('salinan di perangkat diperiksa bentuknya sebelum dipakai', /const adaSalinan = dataTargetSah\(salinan\);/.test(penyedia));
+}
+
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan target lulus');
 process.exit(gagal ? 1 : 0);

@@ -1,5 +1,5 @@
 import { periksaTarget, isianDariTarget } from '@recomp/logika';
-import type { PerubahanTarget } from '@/state/target';
+import type { PerubahanTarget } from '@/data/target';
 
 /**
  * Simpan target tiruan (Fase 4, sisi frontend).

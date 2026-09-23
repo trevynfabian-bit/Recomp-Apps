@@ -5,6 +5,7 @@ import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika
 import { InputTarget } from './InputTarget';
 import { KerangkaSheet } from './KerangkaSheet';
 import { TombolBertepi, TombolUtama } from './Tombol';
+import { KesalahanTarget } from '@/data/target';
 import { ketukBerhasil } from '@/lib/haptics';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -15,7 +16,7 @@ type Props = {
   fase: Fase;
   /** `null` bila target ini belum pernah diisi: kolom mulai kosong. */
   tersimpan: NilaiTarget | null;
-  /** Simpan satu target; melempar bila gagal (isian tetap ada). */
+  /** Simpan satu target; melempar bila gagal (isian tetap ada), `KesalahanTarget` membawa pesannya. */
   simpan: (nilai: NilaiTarget) => Promise<void>;
 };
 
@@ -45,6 +46,7 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
   const [disentuh, setDisentuh] = useState<Partial<Record<KolomTarget, true>>>({});
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<'diam' | 'menyimpan' | 'gagal'>('diam');
+  const [pesanGagal, setPesanGagal] = useState('');
 
   useEffect(() => {
     if (!terbuka) return;
@@ -75,7 +77,8 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       await simpan(hasil.nilai);
       ketukBerhasil();
       onTutup();
-    } catch {
+    } catch (e) {
+      setPesanGagal(e instanceof KesalahanTarget ? e.message : 'Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.');
       setStatus('gagal');
     }
   }
@@ -128,7 +131,7 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
 
       {status === 'gagal' ? (
         <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
-          Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.
+          {pesanGagal}
         </Text>
       ) : null}
 

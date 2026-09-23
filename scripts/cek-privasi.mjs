@@ -43,6 +43,10 @@ cek('delapan butir, kunci unik', semua.length === 8 && new Set(semua.map((b) => 
 cek('setiap butir punya status berupa kata', semua.every((b) => b.status.trim().length > 0 && b.judul && b.penjelasan));
 cek('email akun yang masuk disebut', butir(dasar, 'sesi').status === 'trevyn@contoh.id');
 cek('tidak masuk → "Tidak masuk"', butir({ ...dasar, email: null }, 'sesi').status === 'Tidak masuk');
+// Yang disalin ke perangkat disebut, dan disebut ikut terhapus saat keluar
+// (hapusSemuaCadangan di penyedia sesi).
+cek('salinan di perangkat disebut & ikut terhapus saat keluar',
+  /salinan target harian/.test(butir(dasar, 'sesi').penjelasan) && /Keluar menghapus[^.;]*salinan/.test(butir(dasar, 'sesi').penjelasan));
 cek('tiga sumber: jumlah & daftar', butir(dasar, 'sumber').status === '3 tersambung, hanya membaca'
   && butir(dasar, 'sumber').penjelasan.startsWith('Apple Health, Strava dan Hevy.'));
 cek('satu sumber: "sumber ini"', /dari sumber ini/.test(butir({ ...dasar, sumberTerhubung: ['WHOOP'] }, 'sumber').penjelasan));

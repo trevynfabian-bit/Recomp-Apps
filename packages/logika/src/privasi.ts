@@ -57,7 +57,8 @@ export function susunStatusPrivasi(m: MasukanStatusPrivasi): ButirStatusPrivasi[
       judul: 'Masuk di perangkat ini',
       status: m.email ?? 'Tidak masuk',
       nada: 'info',
-      penjelasan: 'Keluar menghapus sesi dan pengingat dari perangkat ini. Data tetap tersimpan di akun Anda.',
+      penjelasan:
+        'Perangkat ini menyimpan salinan target harian supaya app tetap terbuka tanpa sinyal. Keluar menghapus sesi, pengingat, dan salinan itu dari perangkat ini; data tetap tersimpan di akun Anda.',
     },
     {
       kunci: 'sumber',

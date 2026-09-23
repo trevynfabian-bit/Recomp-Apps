@@ -234,7 +234,9 @@ console.log('\nSupabase Auth di app');
   cek('app dibuka: pemeriksaan Supabase berbatas waktu', /dalamBatasWaktu\(auth\.sesiServer\(\), BATAS_PERIKSA_MS\)/.test(sesiTsx));
   cek('masuk & atur ulang berbatas waktu (tombol tidak berputar tanpa akhir)',
     /dalamBatasWaktu\(auth\.masuk\(email, sandi\), BATAS_MASUK_MS\)/.test(sesiTsx) && /dalamBatasWaktu\(auth\.kirimAturUlang\(email\), BATAS_MASUK_MS\)/.test(sesiTsx));
-  cek('batas waktu dibaca sebagai jaringan', kodeGagalMasuk({ status: 0, message: 'batas waktu' }) === 'jaringan' && /class BatasWaktuHabis extends Error \{\s*readonly status = 0;/.test(sesiTsx));
+  cek('batas waktu dibaca sebagai jaringan', kodeGagalMasuk({ status: 0, message: 'batas waktu' }) === 'jaringan' &&
+    /class BatasWaktuHabis extends Error \{\s*readonly status = 0;/.test(readFileSync('src/lib/batasWaktu.ts', 'utf8')));
+  cek('keluar menghapus salinan data akun di perangkat', /await hapusSemuaCadangan\(\);/.test(sesiTsx.slice(sesiTsx.indexOf('const akhiri'))));
   const layarMasuk = readFileSync('app/masuk.tsx', 'utf8');
   cek('layar masuk menampilkan pesan atur ulang dari penyedia', /e instanceof KesalahanAturUlang \? e\.message/.test(layarMasuk) && /: pesanAturUlang\}/.test(layarMasuk));
   const kunciRahasia = [];

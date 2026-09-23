@@ -11,6 +11,8 @@ import {
 } from '@recomp/logika';
 import type { KeputusanSesi, KodeGagalMasuk, SesiServer, SesiTersimpan } from '@recomp/logika';
 import { authSupabase, type AuthApp, type Pengguna } from '@/data/auth';
+import { dalamBatasWaktu } from '@/lib/batasWaktu';
+import { hapusSemuaCadangan } from '@/lib/cadangan';
 import { batalkanSemuaPengingat } from '@/lib/notifikasi';
 import { supabase, supabaseSiap } from '@/lib/supabase';
 import { authTiruan } from '@/mocks/sesi';
@@ -54,15 +56,6 @@ export class KesalahanAturUlang extends Error {
   }
 }
 
-/** Server tidak menjawab dalam batas waktu; diperlakukan seperti putus jaringan. */
-class BatasWaktuHabis extends Error {
-  readonly status = 0;
-  constructor() {
-    super('batas waktu');
-    this.name = 'BatasWaktuHabis';
-  }
-}
-
 /** Kenapa app terbuka di layar masuk, bila ada yang perlu dikatakan. */
 export type Pemulihan = { pesan: string | null; email: string | null };
 
@@ -98,22 +91,6 @@ const BATAS_MASUK_MS = 15000;
  */
 const BATAS_PERIKSA_MS = 4000;
 
-function dalamBatasWaktu<T>(janji: Promise<T>, ms: number): Promise<T> {
-  return new Promise((selesai, gagal) => {
-    const t = setTimeout(() => gagal(new BatasWaktuHabis()), ms);
-    janji.then(
-      (v) => {
-        clearTimeout(t);
-        selesai(v);
-      },
-      (e) => {
-        clearTimeout(t);
-        gagal(e);
-      },
-    );
-  });
-}
-
 const Konteks = createContext<KonteksSesi | null>(null);
 
 export function PenyediaSesi({ children }: { children: React.ReactNode }) {
@@ -141,8 +118,9 @@ export function PenyediaSesi({ children }: { children: React.ReactNode }) {
   const akhiri = useCallback(async (p: Pemulihan) => {
     sesi.current = null;
     await auth.catatan.hapus();
-    // Pengingat lokal milik akun ini; gagal membatalkan tidak menahan keluar.
+    // Pengingat lokal & salinan data milik akun ini; gagal membersihkan tidak menahan keluar.
     await batalkanSemuaPengingat().catch(() => undefined);
+    await hapusSemuaCadangan();
     setPengguna(null);
     setPemulihan(p);
     setStatus('keluar');
