@@ -290,6 +290,38 @@ export type HasilRedistribusiRow = {
   redistribusi_id?: string | null;
 };
 
+/** Satu hari dalam bukti `proteksi_protein`. */
+export type ProteksiProteinHariRow = {
+  tanggal: string;
+  nama_tipe_hari: string | null;
+  diredistribusi: boolean;
+  /** Target kalori menurut rencana semula. */
+  kalori_rencana: number;
+  /** Target kalori yang berlaku setelah redistribusi. */
+  kalori_berlaku: number;
+  selisih_kalori: number;
+  protein_g: number | null;
+  protein_rencana: number | null;
+  /** Selalu 0: redistribusi tidak menyentuh protein. */
+  selisih_protein: number;
+  protein_di_bawah_rencana: boolean;
+};
+
+/**
+ * Hasil `proteksi_protein` — bukti terbaca bahwa redistribusi hanya menggeser
+ * kalori. `penjaga_aktif` melaporkan pemicu database yang menegakkannya, bukan
+ * sekadar keadaan angkanya saat ini.
+ */
+export type ProteksiProteinRow = {
+  minggu_mulai: string;
+  hari_ini: string;
+  utuh: boolean;
+  penjaga_aktif: boolean;
+  jumlah_diredistribusi: number;
+  kalori_dipindah: number;
+  rincian: ProteksiProteinHariRow[];
+};
+
 /** Opsi redistribusi; sama persis dengan OpsiRedistribusi di @recomp/logika. */
 export type OpsiRedistribusiDb = 'sebar_rata' | 'tumpuk_satu_hari' | 'abaikan';
 
@@ -522,6 +554,10 @@ export type Database = {
           p_hari_ini: string | null;
         };
         Returns: HasilRedistribusiRow;
+      };
+      proteksi_protein: {
+        Args: { p_tanggal: string | null; p_hari_ini: string | null };
+        Returns: ProteksiProteinRow;
       };
       terapkan_redistribusi: {
         Args: {

@@ -873,6 +873,138 @@ try {
   console.log(
     `✓ ${KASUS_REDIS.length} kasus cocok — redistribusi di SQL dan TypeScript sejalan.`,
   );
+
+  // === Bagian 9: proteksi protein pada redistribusi ========================
+  //
+  // Dua jalur penerapan harus menghasilkan keadaan yang sama: `terapkan_
+  // redistribusi` di server, dan `terapkanRedistribusi` di memori yang dipakai
+  // pratinjau. Kalau keduanya berbeda, pengguna melihat satu angka sebelum
+  // menekan dan angka lain sesudahnya. Sekalian dibuktikan bahwa yang bergeser
+  // hanya KALORI: `periksaProteksiProtein` membandingkan target protein per
+  // hari sebelum dan sesudah, dan hasilnya dicocokkan dengan jawaban server.
+  console.log();
+  const { terapkanRedistribusi, periksaProteksiProtein } = muatLogikaTs();
+
+  const UID_PROTEIN = '99999999-5555-5555-5555-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_PROTEIN}', 'paritas-protein@contoh.test');`);
+  sql(`update public.profiles set fase_aktif = 'Lean Gain' where user_id = '${UID_PROTEIN}';`);
+  // Pekan dengan kelebihan yang harus ditutup: Sen–Rab makan di atas target.
+  sql(`
+    set request.jwt.claim.sub = '${UID_PROTEIN}';
+    select public.setel_tipe_hari(date '2026-09-21',
+             (select id from public.day_types
+               where user_id = '${UID_PROTEIN}' and nama = 'Angkat Beban'));
+    select public.setel_tipe_hari(date '2026-09-22',
+             (select id from public.day_types
+               where user_id = '${UID_PROTEIN}' and nama = 'Beban+Lari'));
+    select public.setel_tipe_hari(date '2026-09-23',
+             (select id from public.day_types
+               where user_id = '${UID_PROTEIN}' and nama = 'Rest'));
+    update public.daily_logs set kalori = 3600
+      where user_id = '${UID_PROTEIN}' and tanggal = date '2026-09-21';
+    update public.daily_logs set kalori = 3800
+      where user_id = '${UID_PROTEIN}' and tanggal = date '2026-09-22';
+    update public.daily_logs set kalori = 2600
+      where user_id = '${UID_PROTEIN}' and tanggal = date '2026-09-23';`);
+
+  const PEKAN = '2026-09-23';
+  const keHariBudget = (rincian) =>
+    rincian.map((r) => ({
+      tanggal: r.tanggal,
+      namaTipeHari: r.nama_tipe_hari,
+      targetKalori: r.target_kalori,
+      targetAsliKalori: r.target_asli_kalori ?? undefined,
+      terpakaiKalori: r.terpakai_kalori,
+      targetProteinG: r.target_protein_g,
+    }));
+
+  const bacaBudget = () =>
+    JSON.parse(
+      sql(
+        `set request.jwt.claim.sub = '${UID_PROTEIN}';
+         select public.budget_mingguan(date '${PEKAN}', date '${PEKAN}')::text;`,
+      ),
+    );
+
+  const sebelumSql = bacaBudget();
+  const sebelumTs = keHariBudget(sebelumSql.rincian);
+  const budgetSebelum = budgetMingguan(sebelumTs, PEKAN);
+  const tawaran = JSON.parse(
+    sql(
+      `set request.jwt.claim.sub = '${UID_PROTEIN}';
+       select public.hitung_redistribusi(date '${PEKAN}', 'sebar_rata'::public.opsi_redistribusi,
+              null, date '${PEKAN}')::text;`,
+    ),
+  );
+  const hasilTs = hitungRedistribusi(
+    budgetSebelum,
+    'sebar_rata',
+    tawaran.batas_bawah_kalori,
+  );
+  // Penerapan DI MEMORI, jalur yang dipakai pratinjau.
+  const sesudahTs = terapkanRedistribusi(sebelumTs, hasilTs);
+
+  // Penerapan di SERVER.
+  sql(
+    `set request.jwt.claim.sub = '${UID_PROTEIN}';
+     select public.terapkan_redistribusi(date '${PEKAN}', 'sebar_rata'::public.opsi_redistribusi,
+            null, date '${PEKAN}', 'paritas')::text;`,
+  );
+  const sesudahSql = keHariBudget(bacaBudget().rincian);
+
+  const bedaProteksi = [];
+  const cek = (nama, kiri, kanan) => {
+    if (kiri !== kanan) bedaProteksi.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+  };
+  sesudahSql.forEach((r, i) => {
+    const t = sesudahTs[i];
+    cek(`sesudah[${r.tanggal}].targetKalori`, r.targetKalori, t.targetKalori);
+    cek(`sesudah[${r.tanggal}].targetAsliKalori`, r.targetAsliKalori, t.targetAsliKalori);
+    cek(`sesudah[${r.tanggal}].targetProteinG`, r.targetProteinG, t.targetProteinG);
+    // Protein per hari tidak boleh bergeser sedikit pun di kedua jalur.
+    cek(`protein[${r.tanggal}] tetap`, r.targetProteinG, sebelumTs[i].targetProteinG);
+  });
+
+  const proteksiTs = periksaProteksiProtein(sebelumTs, sesudahTs);
+  const proteksiSql = JSON.parse(
+    sql(
+      `set request.jwt.claim.sub = '${UID_PROTEIN}';
+       select public.proteksi_protein(date '${PEKAN}', date '${PEKAN}')::text;`,
+    ),
+  );
+  cek('utuh', proteksiSql.utuh, proteksiTs.utuh);
+  if (proteksiSql.penjaga_aktif !== true) {
+    bedaProteksi.push('pemicu penjaga protein tidak aktif di database');
+  }
+  // Kalori sebelum/sesudah per hari harus sama di kedua sisi, karena itulah
+  // angka yang dipakai untuk MEMPERLIHATKAN bahwa hanya kalori yang bergeser.
+  proteksiSql.rincian.forEach((r, i) => {
+    const t = proteksiTs.hari[i];
+    if (!t) return;
+    cek(`proteksi[${r.tanggal}].kaloriSebelum`, r.kalori_rencana, t.kaloriSebelum);
+    cek(`proteksi[${r.tanggal}].kaloriSesudah`, r.kalori_berlaku, t.kaloriSesudah);
+    cek(`proteksi[${r.tanggal}].proteinG`, Number(r.protein_g), t.proteinG);
+    cek(`proteksi[${r.tanggal}].proteinSesudahG`, Number(r.protein_g), t.proteinSesudahG);
+  });
+
+  console.log('proteksi protein   SQL utuh  TS utuh  hari digeser  kalori digeser  penjaga');
+  console.log('─'.repeat(84));
+  console.log(
+    `${bedaProteksi.length === 0 ? '✓' : '✗'} penerapan sejalan  ` +
+      `${String(proteksiSql.utuh).padStart(8)}  ${String(proteksiTs.utuh).padStart(7)}  ` +
+      `${String(proteksiSql.jumlah_diredistribusi).padStart(12)}  ` +
+      `${String(proteksiSql.kalori_dipindah).padStart(14)}  ${proteksiSql.penjaga_aktif}`,
+  );
+  for (const d of bedaProteksi) console.log(`    ↳ ${d}`);
+
+  console.log();
+  if (bedaProteksi.length > 0) {
+    console.error(`✗ ${bedaProteksi.length} selisih (proteksi protein & penerapan redistribusi).`);
+    process.exit(1);
+  }
+  console.log(
+    '✓ Penerapan server & pratinjau menghasilkan keadaan sama, dan protein tidak bergeser di keduanya.',
+  );
 } finally {
   hentikanPostgres();
 }

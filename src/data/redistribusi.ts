@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { HasilRedistribusi, OpsiRedistribusi } from '@recomp/logika';
 import type {
   HasilRedistribusiRow,
+  ProteksiProteinRow,
   RedistribusiHariRow,
   RedistribusiMingguanRow,
 } from '@/types/database';
@@ -57,6 +58,32 @@ export type TawaranRedistribusi = Omit<HasilRedistribusi, 'alasan'> & {
   /** Hanya terisi pada hasil penerapan. */
   diterapkan: boolean;
   redistribusiId: string | null;
+};
+
+/** Bukti per hari bahwa hanya kalori yang bergeser. */
+export type BuktiProteksiProtein = {
+  mingguMulai: string;
+  hariIni: string;
+  /** false bila ada hari diredistribusi yang proteinnya di bawah rencana. */
+  utuh: boolean;
+  /** Status pemicu database yang menolak penurunan target protein. */
+  penjagaAktif: boolean;
+  jumlahDiredistribusi: number;
+  /** Jumlah pergeseran kalori sepekan; negatif berarti dipotong. */
+  kaloriDipindah: number;
+  hari: {
+    tanggal: string;
+    namaTipeHari: string;
+    diredistribusi: boolean;
+    kaloriSebelum: number;
+    kaloriSesudah: number;
+    selisihKalori: number;
+    proteinG: number | null;
+    proteinRencanaG: number | null;
+    /** Selalu 0 — dan justru itu yang ingin diperlihatkan. */
+    selisihProtein: number;
+    proteinDiBawahRencana: boolean;
+  }[];
 };
 
 /**
@@ -116,6 +143,51 @@ export async function terapkanRedistribusiPekan(
   if (error) throw terjemahkan(error);
   if (!data) throw new KesalahanRedistribusi('Server tidak mengembalikan hasil.', true);
   return keBentukTs(data as HasilRedistribusiRow);
+}
+
+/**
+ * Bukti bahwa redistribusi hanya menggeser KALORI.
+ *
+ * PRD menyebut "protein tidak pernah dipotong" sebagai aturan keras, dan klaim
+ * seperti itu tidak layak ditampilkan sebagai kalimat saja. Yang dikembalikan
+ * di sini adalah angkanya: rencana semula vs yang berlaku per hari, target
+ * protein yang tidak ikut bergeser, dan status pemicu database yang
+ * menegakkannya (`penjagaAktif`) — supaya UI bisa menunjukkan aturannya sedang
+ * BERLAKU, bukan sedang benar kebetulan.
+ */
+export async function proteksiProtein(
+  tanggal: string | null = null,
+  hariIni: string | null = null,
+): Promise<BuktiProteksiProtein> {
+  const { data, error } = await supabase.rpc('proteksi_protein', {
+    p_tanggal: tanggal,
+    p_hari_ini: hariIni,
+  });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanRedistribusi('Server tidak mengembalikan bukti proteksi.', true);
+
+  const j = data as ProteksiProteinRow;
+  return {
+    mingguMulai: j.minggu_mulai,
+    hariIni: j.hari_ini,
+    utuh: j.utuh,
+    penjagaAktif: j.penjaga_aktif,
+    jumlahDiredistribusi: j.jumlah_diredistribusi,
+    kaloriDipindah: j.kalori_dipindah,
+    hari: j.rincian.map((h) => ({
+      tanggal: h.tanggal,
+      namaTipeHari: h.nama_tipe_hari ?? 'Tanpa tipe hari',
+      diredistribusi: h.diredistribusi,
+      kaloriSebelum: h.kalori_rencana,
+      kaloriSesudah: h.kalori_berlaku,
+      selisihKalori: h.selisih_kalori,
+      proteinG: h.protein_g === null ? null : Number(h.protein_g),
+      proteinRencanaG: h.protein_rencana === null ? null : Number(h.protein_rencana),
+      selisihProtein: h.selisih_protein,
+      proteinDiBawahRencana: h.protein_di_bawah_rencana,
+    })),
+  };
 }
 
 /** Jejak penerapan redistribusi, terbaru lebih dulu. */
