@@ -22,8 +22,8 @@ import {
   periksaAngkaBacaan,
   periksaJawabanMedis,
   saringLanjutan,
-} from '../../../packages/logika/src/index.ts';
-import type { DataRingkasanMingguan } from '../../../packages/logika/src/index.ts';
+} from './logika/index.ts';
+import type { DataRingkasanMingguan } from './logika/index.ts';
 
 /**
  * Effort penulis ringkasan, disetel EKSPLISIT dengan alasan yang sama seperti

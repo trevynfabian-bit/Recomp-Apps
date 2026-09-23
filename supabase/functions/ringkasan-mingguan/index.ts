@@ -38,8 +38,8 @@
  */
 import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
-import { judulRingkasan } from '../../../packages/logika/src/index.ts';
-import type { DataRingkasanMingguan } from '../../../packages/logika/src/index.ts';
+import { judulRingkasan } from '../_shared/logika/index.ts';
+import type { DataRingkasanMingguan } from '../_shared/logika/index.ts';
 import { BETA_FALLBACK, MODEL_COACH } from '../_shared/promptCoach.ts';
 import {
   ATURAN_RINGKASAN,

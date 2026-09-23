@@ -51,7 +51,7 @@
  */
 import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { periksaBatasMedis, periksaJawabanMedis } from '../../../packages/logika/src/batasMedis.ts';
+import { periksaBatasMedis, periksaJawabanMedis } from '../_shared/logika/batasMedis.ts';
 import {
   BETA_FALLBACK,
   jalankanTool,

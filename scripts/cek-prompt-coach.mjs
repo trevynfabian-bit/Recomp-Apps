@@ -17,7 +17,7 @@
  *    tidak boleh dipakai pada model yang menolaknya.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -25,23 +25,17 @@ import { join } from 'node:path';
 const require = createRequire(import.meta.url);
 
 /**
- * Kompilasi inti prompt BESERTA paket logika bersamanya, dengan struktur
- * direktori yang sama seperti di repo — impor relatifnya menembus dua tingkat ke
- * `packages/logika/src`, dan itu bagian dari yang diuji: kalau salinan kedua
- * aturan muncul di dalam promptCoach.ts, impor itu tidak lagi dibutuhkan dan
- * pemeriksaan di bawah akan menemukan selisihnya.
+ * Kompilasi inti prompt BESERTA salinan logika bersamanya
+ * (`_shared/logika`, turunan mesin dari `packages/logika/src` yang dijaga
+ * `salin-logika.mjs --periksa`), dengan struktur direktori yang sama seperti di
+ * repo. Kalau salinan KEDUA aturan muncul di dalam promptCoach.ts, impor itu
+ * tidak lagi dibutuhkan dan pemeriksaan di bawah akan menemukan selisihnya.
  */
 function muatInti() {
   const kerja = mkdtempSync(join(tmpdir(), 'coach-'));
-  mkdirSync(join(kerja, 'supabase/functions/_shared'), { recursive: true });
-  mkdirSync(join(kerja, 'packages/logika/src'), { recursive: true });
-  copyFileSync(
-    'supabase/functions/_shared/promptCoach.ts',
-    join(kerja, 'supabase/functions/_shared/promptCoach.ts'),
-  );
-  for (const berkas of readdirSync('packages/logika/src')) {
-    copyFileSync(join('packages/logika/src', berkas), join(kerja, 'packages/logika/src', berkas));
-  }
+  // Seluruh `_shared`, termasuk salinan logika yang dipakai Edge Function —
+  // yang diuji di sini harus kode yang SAMA dengan yang di-deploy.
+  cpSync('supabase/functions/_shared', join(kerja, 'supabase/functions/_shared'), { recursive: true });
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['supabase/functions/_shared/promptCoach.ts',
@@ -49,12 +43,14 @@ function muatInti() {
      // Impor bergaya Deno memakai akhiran `.ts`; tsc menulis ulang jadi `.js`
      // saat emit, jadi satu sumber yang sama bisa dijalankan Deno dan Node.
      '--rewriteRelativeImportExtensions',
-     '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+     // rootDir dipatok: tanpa itu tsc menyimpulkan akar dari berkas yang
+     // dikompilasi, dan jalur keluaran di bawah ikut bergeser.
+     '--rootDir', '.', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
   return {
     inti: require(join(kerja, 'keluar/supabase/functions/_shared/promptCoach.js')),
-    logika: require(join(kerja, 'keluar/packages/logika/src/index.js')),
+    logika: require(join(kerja, 'keluar/supabase/functions/_shared/logika/index.js')),
   };
 }
 

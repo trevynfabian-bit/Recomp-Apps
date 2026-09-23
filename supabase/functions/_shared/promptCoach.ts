@@ -32,12 +32,12 @@ import {
   formatDesimal,
   hitungMakro,
   rincianKumulatif,
-} from '../../../packages/logika/src/index.ts';
+} from './logika/index.ts';
 import type {
   BudgetMingguan,
   Fase,
   MacroProgress,
-} from '../../../packages/logika/src/tipe.ts';
+} from './logika/tipe.ts';
 
 /**
  * Model coach.

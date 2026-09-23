@@ -19,7 +19,7 @@
  * 5. Sifat endpoint yang hanya bisa dibaca dari sumbernya.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -28,28 +28,22 @@ const require = createRequire(import.meta.url);
 
 function muat() {
   const kerja = mkdtempSync(join(tmpdir(), 'ringkasan-'));
-  mkdirSync(join(kerja, 'supabase/functions/_shared'), { recursive: true });
-  mkdirSync(join(kerja, 'packages/logika/src'), { recursive: true });
-  for (const berkas of ['promptRingkasan.ts', 'promptCoach.ts']) {
-    copyFileSync(
-      join('supabase/functions/_shared', berkas),
-      join(kerja, 'supabase/functions/_shared', berkas),
-    );
-  }
-  for (const berkas of readdirSync('packages/logika/src')) {
-    copyFileSync(join('packages/logika/src', berkas), join(kerja, 'packages/logika/src', berkas));
-  }
+  // Seluruh `_shared`, termasuk salinan logika yang dipakai Edge Function —
+  // yang diuji di sini harus kode yang SAMA dengan yang di-deploy.
+  cpSync('supabase/functions/_shared', join(kerja, 'supabase/functions/_shared'), { recursive: true });
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['supabase/functions/_shared/promptRingkasan.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--rewriteRelativeImportExtensions',
-     '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+     // rootDir dipatok: tanpa itu tsc menyimpulkan akar dari berkas yang
+     // dikompilasi, dan jalur keluaran di bawah ikut bergeser.
+     '--rootDir', '.', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
   return {
     inti: require(join(kerja, 'keluar/supabase/functions/_shared/promptRingkasan.js')),
-    logika: require(join(kerja, 'keluar/packages/logika/src/index.js')),
+    logika: require(join(kerja, 'keluar/supabase/functions/_shared/logika/index.js')),
   };
 }
 

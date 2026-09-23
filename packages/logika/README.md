@@ -35,3 +35,12 @@ membaca angka yang dihitung server (WidgetKit tidak bisa menjalankan paket TS).
 Dua tempat berarti dua aturan yang bisa menyimpang diam-diam, jadi pemeriksaan
 paritas menjalankan daftar kasus yang sama lewat keduanya dan membandingkan
 hasilnya. Kalau salah satu sisi diubah tanpa yang lain, pemeriksaan itu gagal.
+
+## Edge Function (Deno)
+
+Edge Function tidak mengimpor `src/` langsung: Deno menolak impor relatif tanpa
+akhiran, dan bundler-nya bekerja dari `supabase/functions`. Salinan turunan ada
+di `supabase/functions/_shared/logika/` — satu-satunya perbedaan adalah akhiran
+`.ts` pada impor relatif. Setelah mengubah berkas di `src/`, jalankan
+`npm run salin:logika` lalu commit hasilnya; `npm run cek:edge` gagal bila
+salinannya tertinggal.

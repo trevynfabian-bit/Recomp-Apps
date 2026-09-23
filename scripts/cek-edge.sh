@@ -19,9 +19,8 @@ TERPASANG="$(node -p "require('$REPO/node_modules/@anthropic-ai/sdk/package.json
 KERJA="$(mktemp -d)"
 trap 'rm -rf "$KERJA"' EXIT
 
-mkdir -p "$KERJA/supabase/functions" "$KERJA/packages/logika"
+mkdir -p "$KERJA/supabase/functions"
 cp -r "$REPO/supabase/functions/." "$KERJA/supabase/functions/"
-cp -r "$REPO/packages/logika/src" "$KERJA/packages/logika/src"
 ln -s "$REPO/node_modules" "$KERJA/node_modules"
 
 cat > "$KERJA/deno.d.ts" <<'TS'
@@ -68,7 +67,34 @@ for f in "$KERJA"/supabase/functions/*/index.ts; do
   fi
 done
 
+# --- Salinan logika untuk Deno harus sama dengan sumbernya ---------------------
+if ! (cd "$REPO" && node scripts/salin-logika.mjs --periksa); then
+  GAGAL=1
+fi
+
+# --- Pemeriksaan dengan Deno SUNGGUHAN ----------------------------------------
+# Tiruan tsc di atas tidak menangkap impor relatif tanpa akhiran — tsc
+# menyelesaikannya, Deno menolaknya, dan fungsi yang ditolak Deno tidak bisa
+# di-deploy. Jadi yang terakhir berkata "lulus" harus Deno sendiri. Deno diambil
+# lewat npm (tanpa instalasi global); cache-nya disimpan di node_modules.
+export DENO_DIR="${DENO_DIR:-$REPO/node_modules/.cache/deno}"
+if ! DENO_VERSI="$(npx -y deno@2 --version 2>/dev/null | head -1)"; then
+  echo "✗ Deno tidak bisa diambil (npx deno@2); pemeriksaan Deno tidak dijalankan"
+  GAGAL=1
+else
+  for f in "$REPO"/supabase/functions/*/index.ts; do
+    nama="$(basename "$(dirname "$f")")"
+    if (cd "$REPO" && NO_COLOR=1 npx -y deno@2 check --no-config "supabase/functions/$nama/index.ts" >"$KERJA/deno-$nama.log" 2>&1); then
+      echo "✓ $nama: lolos deno check ($DENO_VERSI)"
+    else
+      echo "✗ $nama: ditolak deno check"
+      grep -E "^(TS|error)" -A2 "$KERJA/deno-$nama.log" | head -20
+      GAGAL=1
+    fi
+  done
+fi
+
 if [ "$GAGAL" -ne 0 ]; then
   exit 1
 fi
-echo "✓ Semua Edge Function cocok dengan tipe SDK resmi, dan versinya sama dengan yang terpasang."
+echo "✓ Semua Edge Function cocok dengan tipe SDK resmi, lolos Deno, dan versinya sama dengan yang terpasang."
