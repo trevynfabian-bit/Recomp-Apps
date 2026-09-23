@@ -130,3 +130,68 @@ export function pesanPemulihanSesi(alasan: 'kosong' | 'rusak' | 'berakhir'): str
   // Kosong: pertama kali. Rusak: pengguna tidak bisa berbuat apa-apa soal itu.
   return null;
 }
+
+// ---------------------------------------------------------------------------
+// Sesi perangkat × sesi Supabase.
+//
+// Ada dua catatan di perangkat: sesi tersimpan milik app (batas 30 hari yang
+// menggeser, di atas) dan sesi Supabase Auth (token akses & token pembaru).
+// Catatan app adalah GERBANG: tanpa catatan yang berlaku, app tidak masuk,
+// meski token Supabase masih tertinggal (mis. keluar yang terputus sebelum
+// server menjawab). Sebaliknya catatan app saja tidak cukup: bila Supabase
+// sudah mencabut sesinya (kata sandi diganti di web, "keluar dari semua
+// perangkat"), app ikut keluar.
+// ---------------------------------------------------------------------------
+
+/** Keadaan sesi Supabase Auth di perangkat ini. */
+export type SesiServer =
+  | { ada: true; pengguna: { id: string; email: string } }
+  | { ada: false }
+  /**
+   * Tidak bisa dipastikan: token perlu diperbarui tetapi server tidak
+   * terjangkau (luring, server bermasalah), atau memang tidak diperiksa.
+   */
+  | { ada: 'tidak-pasti' };
+
+export type KeputusanSesi =
+  | { masuk: SesiTersimpan }
+  | {
+      masuk: null;
+      alasan: 'kosong' | 'rusak' | 'berakhir';
+      email?: string;
+      /** Hapus sisa sesi Supabase di perangkat supaya tidak bisa dipakai lagi. */
+      bersihkanServer: boolean;
+    };
+
+/**
+ * Gabungkan hasil `pulihkanSesi` dengan keadaan sesi Supabase.
+ *
+ *   • catatan app tidak berlaku → keluar; sisa sesi Supabase dibersihkan;
+ *   • sesi Supabase milik akun LAIN → keluar tanpa pesan (dianggap rusak):
+ *     data satu akun tidak pernah tampil di bawah catatan akun lain;
+ *   • sesi Supabase sudah dicabut → keluar dengan pesan "berakhir";
+ *   • server tidak terjangkau → tetap masuk dengan catatan app. App yang
+ *     dibuka tanpa sinyal tidak boleh melempar orang ke layar masuk; bila
+ *     token ternyata memang dicabut, Supabase memberi tahu saat terhubung.
+ *
+ * Email diambil dari server bila ada, karena email bisa diganti di web.
+ */
+export function putuskanSesi(lokal: HasilPulihkanSesi, server: SesiServer, sekarang: Date): KeputusanSesi {
+  if (!lokal.sesi) {
+    return {
+      masuk: null,
+      alasan: lokal.alasan,
+      ...(lokal.email ? { email: lokal.email } : {}),
+      bersihkanServer: server.ada !== false,
+    };
+  }
+  if (server.ada === 'tidak-pasti') return { masuk: lokal.sesi };
+  if (server.ada === false) {
+    return { masuk: null, alasan: 'berakhir', email: lokal.sesi.pengguna.email, bersihkanServer: false };
+  }
+  if (server.pengguna.id !== lokal.sesi.pengguna.id) {
+    return { masuk: null, alasan: 'rusak', bersihkanServer: true };
+  }
+  const email = emailSah(server.pengguna.email) ? server.pengguna.email : lokal.sesi.pengguna.email;
+  return { masuk: buatSesiTersimpan({ id: server.pengguna.id, email }, sekarang, lokal.sesi.masukPada) };
+}

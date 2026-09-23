@@ -22,7 +22,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK, buatSesiTersimpan, pulihkanSesi, pesanPemulihanSesi,
-  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN,
+  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN, putuskanSesi,
 } = require(join(kerja, 'keluar', 'akun.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -147,6 +147,74 @@ cek('sheet keluar punya kalimat untuk diperiksa', kalimatKeluar.length >= 5, `ha
 for (const t of [...kalimatMasuk, ...kalimatKeluar]) {
   const p = pelanggaranNada(t);
   cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, p.length === 0, `melanggar: ${p.join(', ')}`);
+}
+
+console.log('\nSesi perangkat × sesi Supabase');
+{
+  const u = { id: 'uuid-1', email: 'trevyn@contoh.id' };
+  const tBuka = new Date('2026-09-23T07:00:00Z');
+  const catatan = buatSesiTersimpan(u, new Date('2026-09-10T07:00:00Z'));
+  const lokalSah = pulihkanSesi(JSON.stringify(catatan), tBuka);
+  const ADA = { ada: true, pengguna: u };
+  const TAK_PASTI = { ada: 'tidak-pasti' };
+  const TIADA = { ada: false };
+
+  const k1 = putuskanSesi(lokalSah, ADA, tBuka);
+  cek('catatan berlaku + sesi Supabase sama → masuk, batas digeser, waktu masuk tetap',
+    k1.masuk && k1.masuk.pengguna.id === u.id && k1.masuk.masukPada === catatan.masukPada &&
+    Date.parse(k1.masuk.berlakuSampai) === tBuka.getTime() + LAMA_SESI_HARI * HARI);
+  const k2 = putuskanSesi(lokalSah, { ada: true, pengguna: { id: u.id, email: 'baru@contoh.id' } }, tBuka);
+  cek('email diganti di web → email server yang dipakai', k2.masuk && k2.masuk.pengguna.email === 'baru@contoh.id');
+  const k3 = putuskanSesi(lokalSah, { ada: true, pengguna: { id: u.id, email: '' } }, tBuka);
+  cek('server tanpa email → email catatan dipertahankan (catatan tetap sah)',
+    k3.masuk && k3.masuk.pengguna.email === u.email && pulihkanSesi(JSON.stringify(k3.masuk), tBuka).sesi !== null);
+  const k4 = putuskanSesi(lokalSah, TAK_PASTI, tBuka);
+  cek('luring / server bermasalah → tetap masuk dengan catatan app', k4.masuk && k4.masuk.pengguna.id === u.id);
+  const k5 = putuskanSesi(lokalSah, TIADA, tBuka);
+  cek('sesi dicabut dari web → keluar "berakhir" dengan email terisi',
+    k5.masuk === null && k5.alasan === 'berakhir' && k5.email === u.email && k5.bersihkanServer === false);
+  const k6 = putuskanSesi(lokalSah, { ada: true, pengguna: { id: 'uuid-lain', email: 'lain@contoh.id' } }, tBuka);
+  cek('sesi Supabase milik akun lain → keluar tanpa pesan, sisa sesi dibersihkan',
+    k6.masuk === null && k6.alasan === 'rusak' && k6.email === undefined && k6.bersihkanServer === true && pesanPemulihanSesi(k6.alasan) === null);
+  const k7 = putuskanSesi(pulihkanSesi(null, tBuka), ADA, tBuka);
+  cek('tanpa catatan app, token Supabase tertinggal → tetap keluar & dibersihkan',
+    k7.masuk === null && k7.alasan === 'kosong' && k7.bersihkanServer === true);
+  const lewat30 = pulihkanSesi(JSON.stringify(catatan), new Date('2026-12-01T07:00:00Z'));
+  const k8 = putuskanSesi(lewat30, ADA, new Date('2026-12-01T07:00:00Z'));
+  cek('catatan lewat 30 hari → keluar "berakhir" meski token Supabase masih ada',
+    k8.masuk === null && k8.alasan === 'berakhir' && k8.email === u.email && k8.bersihkanServer === true);
+  const k9 = putuskanSesi(pulihkanSesi('{rusak', tBuka), TIADA, tBuka);
+  cek('catatan rusak & tanpa sesi Supabase → keluar, tidak ada yang perlu dibersihkan', k9.masuk === null && k9.bersihkanServer === false);
+}
+
+console.log('\nSupabase Auth di app');
+{
+  const authTs = readFileSync('src/data/auth.ts', 'utf8');
+  const sesiTsx = readFileSync('src/state/sesi.tsx', 'utf8');
+  const tiruanTs = readFileSync('src/mocks/sesi.ts', 'utf8');
+  const keluarSemua = [...authTs.matchAll(/signOut\(([^)]*)\)/g)].map((m) => m[1]);
+  cek(`keluar hanya mencabut sesi perangkat ini (${keluarSemua.length} panggilan, scope 'local')`,
+    keluarSemua.length >= 2 && keluarSemua.every((a) => /scope: 'local'/.test(a)), keluarSemua.join(' | '));
+  cek('galat Supabase dilempar apa adanya untuk kodeGagalMasuk', /if \(error\) throw error;/.test(authTs));
+  cek('luring dibedakan dari sesi dicabut (isAuthRetryableFetchError)', /isAuthRetryableFetchError\(error\)\) return \{ ada: 'tidak-pasti' \}/.test(authTs));
+  cek('penyedia memilih Supabase bila kredensial ada, tiruan bila tidak', /const auth: AuthApp = supabaseSiap \? authSupabase : authTiruan;/.test(sesiTsx));
+  cek('penyedia tidak memanggil fungsi tiruan langsung', !/mock(Masuk|Keluar|KirimAturUlang|BacaSesi|SimpanSesi|HapusSesi)/.test(sesiTsx));
+  const kunciAsli = authTs.match(/penyimpananSesi\('([^']+)'\)/)?.[1];
+  const kunciTiruan = tiruanTs.match(/penyimpananSesi\('([^']+)'\)/)?.[1];
+  cek('catatan sesi sungguhan dan tiruan berkunci berbeda', !!kunciAsli && !!kunciTiruan && kunciAsli !== kunciTiruan, `${kunciAsli} / ${kunciTiruan}`);
+  const tubuhKeluar = sesiTsx.slice(sesiTsx.indexOf('const keluar = useCallback'));
+  cek('keluar: catatan dikosongkan SEBELUM server dipanggil (bukan dianggap "berakhir")',
+    tubuhKeluar.indexOf('sesi.current = null;') >= 0 && tubuhKeluar.indexOf('sesi.current = null;') < tubuhKeluar.indexOf('auth.keluar()'));
+  const tubuhMasuk = sesiTsx.slice(sesiTsx.indexOf('const masuk = useCallback'));
+  cek('masuk menunggu pencabutan yang masih berjalan', tubuhMasuk.indexOf('pencabutan.current') >= 0 && tubuhMasuk.indexOf('pencabutan.current') < tubuhMasuk.indexOf('auth.masuk('));
+  cek('app dibuka: pemeriksaan Supabase berbatas waktu', /dalamBatasWaktu\(auth\.sesiServer\(\), BATAS_PERIKSA_MS\)/.test(sesiTsx));
+  const kunciRahasia = [];
+  const jelajahi = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) {
+    const f = join(d, e.name);
+    if (e.isDirectory()) jelajahi(f); else if (/\.(ts|tsx)$/.test(e.name) && /service_role|SERVICE_ROLE/.test(readFileSync(f, 'utf8'))) kunciRahasia.push(f);
+  } };
+  jelajahi('app'); jelajahi('src');
+  cek('app tidak menyebut service-role key sama sekali', kunciRahasia.length === 0, kunciRahasia.join(', '));
 }
 
 console.log('\nPerlindungan sesi');

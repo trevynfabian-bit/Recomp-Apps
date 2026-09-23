@@ -22,8 +22,9 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * Setelah sesi berakhir, email akunnya sudah terisi dan satu kalimat tenang
  * menjelaskan kenapa diminta masuk lagi — bukan layar kosong tanpa alasan.
  *
- * Fase 4 sisi frontend: `useSesi` memakai autentikasi tiruan; lihat
- * `@/mocks/sesi` untuk memicu tiap keadaan gagal.
+ * `useSesi` masuk lewat Supabase Auth (akun yang sama dengan web). Tanpa
+ * kredensial Supabase, autentikasi tiruan dipakai; lihat `@/mocks/sesi` untuk
+ * memicu tiap keadaan gagal.
  */
 export default function MasukScreen() {
   const insets = useSafeAreaInsets();

@@ -1,25 +1,24 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { SesiTersimpan } from '@recomp/logika';
+import type { AuthApp, Pengguna } from '@/data/auth';
+import { penyimpananSesi } from '@/lib/sesiPerangkat';
 
 /**
- * Autentikasi tiruan (Fase 4, sisi frontend). Antarmukanya sama dengan yang
- * akan dipakai Supabase Auth: galat membawa `code` seperti galat Supabase,
- * sehingga pemetaan pesannya (`kodeGagalMasuk`) sudah diuji sebelum backend ada.
+ * Autentikasi tiruan. Antarmukanya `AuthApp`, sama dengan `authSupabase`:
+ * galat membawa `code` seperti galat Supabase, sehingga pemetaan pesannya
+ * (`kodeGagalMasuk`) teruji juga tanpa server.
  *
  * Untuk mencoba keadaan gagal:
  *   kata sandi "salah"        → email/kata sandi tidak cocok
  *   email @belum.contoh       → email belum dikonfirmasi
  *   email berawalan "offline" → tidak bisa terhubung
  *
- * Sesinya tersimpan di AsyncStorage (di web: localStorage), jadi app yang
- * dibuka ulang langsung masuk. Supabase Auth menyimpan sesinya sendiri di
- * tempat yang sama; task backend cukup menukar fungsi-fungsi di sini.
+ * Dipakai hanya bila kredensial Supabase belum diisi (`supabaseSiap`), mis.
+ * saat mencoba app di web tanpa proyek Supabase. Catatan sesinya tersimpan
+ * di AsyncStorage (di web: localStorage), jadi app yang dibuka ulang langsung
+ * masuk.
  */
-export type PenggunaTiruan = { id: string; email: string };
-
 const JEDA_MS = 900;
 
-export function mockMasuk(email: string, sandi: string): Promise<PenggunaTiruan> {
+export function mockMasuk(email: string, sandi: string): Promise<Pengguna> {
   return new Promise((selesai, gagal) =>
     setTimeout(() => {
       const e = email.trim().toLowerCase();
@@ -48,34 +47,17 @@ export function mockKeluar(): Promise<void> {
   );
 }
 
-const KUNCI_SESI = 'recomp.sesi-tiruan';
-
 /**
- * Penyimpanan bisa gagal (mode privat browser, penyimpanan penuh). Gagal
- * membaca = belum masuk; gagal menulis = sesi hanya bertahan sampai app
- * ditutup. Keduanya tidak boleh menghalangi app dipakai.
+ * Pengganti `authSupabase` saat kredensial Supabase belum diisi. Tanpa server
+ * tidak ada yang bisa dipastikan, jadi catatan app sendiri yang menentukan.
+ * Kuncinya berbeda dari catatan sesi sungguhan, jadi keduanya tidak tercampur.
  */
-export async function mockBacaSesi(): Promise<string | null> {
-  try {
-    return await AsyncStorage.getItem(KUNCI_SESI);
-  } catch {
-    return null;
-  }
-}
-
-export async function mockSimpanSesi(sesi: SesiTersimpan): Promise<void> {
-  try {
-    await AsyncStorage.setItem(KUNCI_SESI, JSON.stringify(sesi));
-  } catch {
-    // Lihat di atas: sesi tetap berlaku di memori.
-  }
-}
-
-export async function mockHapusSesi(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(KUNCI_SESI);
-  } catch {
-    // Tidak ada yang bisa dilakukan; isi yang tertinggal akan ditolak saat
-    // dibaca bila rusak atau berakhir.
-  }
-}
+export const authTiruan: AuthApp = {
+  masuk: mockMasuk,
+  keluar: mockKeluar,
+  kirimAturUlang: mockKirimAturUlang,
+  sesiServer: async () => ({ ada: 'tidak-pasti' }),
+  async bersihkan() {},
+  dengarkanBerakhir: () => () => undefined,
+  catatan: penyimpananSesi('recomp.sesi-tiruan'),
+};

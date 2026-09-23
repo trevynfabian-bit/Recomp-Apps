@@ -309,7 +309,7 @@ export {
   tambahDetik,
 } from './sinkronLuar.ts';
 
-export type { HasilPulihkanSesi, KodeGagalMasuk, SesiTersimpan } from './akun.ts';
+export type { HasilPulihkanSesi, KeputusanSesi, KodeGagalMasuk, SesiServer, SesiTersimpan } from './akun.ts';
 export {
   buatSesiTersimpan,
   emailSah,
@@ -318,6 +318,7 @@ export {
   PESAN_GAGAL_MASUK,
   pesanPemulihanSesi,
   pulihkanSesi,
+  putuskanSesi,
   VERSI_SESI_TERSIMPAN,
 } from './akun.ts';
 
