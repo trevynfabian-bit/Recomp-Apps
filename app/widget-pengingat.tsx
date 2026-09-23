@@ -18,6 +18,7 @@ import {
   simpanPengaturanPengingat,
   type PerubahanPengingat,
 } from '@/data/pengaturanNotifikasi';
+import { ambilRingkasanWidget } from '@/data/widget';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
 import {
@@ -52,9 +53,28 @@ export default function WidgetPengingatScreen() {
   const [sekarang] = useState(() => new Date());
   // Lewat `siapkanWidget` yang sama dengan widget native: ringkasan kemarin
   // dibuang di sini, bukan disembunyikan oleh layar pratinjau.
+  // Dengan Supabase, "Hari ini" adalah angka SUNGGUHAN dari server; skenario
+  // lain tetap tiruan karena memang pratinjau keadaan yang tidak sedang terjadi.
+  const [masukanAsli, setMasukanAsli] = useState<Awaited<ReturnType<typeof ambilRingkasanWidget>> | null>(null);
+  useEffect(() => {
+    if (!supabaseSiap) return;
+    let batal = false;
+    ambilRingkasanWidget()
+      .then((m) => {
+        if (!batal) setMasukanAsli(m);
+      })
+      .catch(() => undefined);
+    return () => {
+      batal = true;
+    };
+  }, []);
   const ringkasan = useMemo(
-    () => siapkanWidget(mockMasukanWidget(skenario, sekarang), tanggalHariIni()),
-    [skenario, sekarang],
+    () =>
+      siapkanWidget(
+        skenario === 'hari-ini' && masukanAsli ? masukanAsli : mockMasukanWidget(skenario, sekarang),
+        tanggalHariIni(),
+      ),
+    [skenario, sekarang, masukanAsli],
   );
   const [waktuTimbang] = useState(() => mockWaktuTimbang());
   const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);

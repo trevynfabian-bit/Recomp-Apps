@@ -6,7 +6,7 @@
  * tidak ada lapisan penerjemahan yang bisa salah diam-diam.
  */
 
-import type { DataRingkasanMingguan, PoinRingkasan, SnapshotHariIni } from '@recomp/logika';
+import type { DataRingkasanMingguan, MasukanWidget, PoinRingkasan, SnapshotHariIni } from '@recomp/logika';
 
 export type FaseProgram = 'Maintenance' | 'Lean Gain' | 'Cut';
 export type SumberBeratDb = 'manual' | 'healthkit';
@@ -918,6 +918,25 @@ export type SettingsNotificationsRow = {
   updated_at: string;
 };
 
+/** Baris `daily_summaries` — dihitung server, hanya dibaca klien & widget. */
+export type DailySummaryRow = {
+  user_id: string;
+  tanggal: string;
+  nama_tipe_hari: string | null;
+  target_kalori: number | null;
+  target_protein_g: number | null;
+  kalori: number;
+  protein_g: number;
+  /** Boleh negatif; `null` bila target tidak ada. */
+  sisa_kalori: number | null;
+  sisa_protein_g: number | null;
+  sumber: JenisSumberDb;
+  dihitung_pada: string;
+};
+
+/** Keluaran `ringkasan_widget` — langsung masukan `siapkanWidget`. */
+export type RingkasanWidgetDb = MasukanWidget & { tanggal: string; tampilkanAngka: boolean };
+
 /** Olahraga/jenis yang punya urutan prioritas sumber sendiri. */
 export type OlahragaPrioritas = 'angkat_beban' | 'lari' | 'padel' | 'lainnya' | JenisDataKesehatan;
 
@@ -1190,6 +1209,12 @@ export type Database = {
       };
       workout_sets: {
         Row: WorkoutSetRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      daily_summaries: {
+        Row: DailySummaryRow;
         Insert: never;
         Update: never;
         Relationships: [];
@@ -1504,6 +1529,10 @@ export type Database = {
       impor_terakhir: {
         Args: Record<string, never>;
         Returns: ImportJobRow[];
+      };
+      ringkasan_widget: {
+        Args: Record<string, never>;
+        Returns: RingkasanWidgetDb;
       };
       pengaturan_notifikasi: {
         Args: Record<string, never>;

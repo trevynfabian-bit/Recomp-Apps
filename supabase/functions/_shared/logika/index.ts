@@ -236,6 +236,7 @@ export type {
   JamPengingat,
   JenisNotifikasi,
   KeadaanKosongWidget,
+  MasukanWidget,
   NotifikasiKatalog,
   RingkasanWidget,
 } from './pengingat.ts';

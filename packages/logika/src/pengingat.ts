@@ -288,6 +288,16 @@ export function teksWidget(
 export const BATAS_SEGAR_MS = 60 * 60_000;
 
 /**
+ * Apa yang tersimpan untuk widget — bentuk yang sama dengan keluaran RPC
+ * `ringkasan_widget` (tanpa `tanggal`/`tampilkanAngka` di tingkat atas).
+ */
+export type MasukanWidget = {
+  masuk: boolean;
+  ringkasan: (RingkasanWidget & { tanggal: string }) | null;
+  target: { kalori: number | null; proteinG: number | null } | null;
+};
+
+/**
  * Siapkan masukan widget dari apa yang tersimpan di perangkat.
  *
  * Aturan terpentingnya: ringkasan yang tanggalnya BUKAN hari ini (Asia/Jakarta)
@@ -295,14 +305,7 @@ export const BATAS_SEGAR_MS = 60 * 60_000;
  * "1.120 kcal tersisa" yang sebenarnya milik kemarin adalah angka salah yang
  * terlihat benar — lebih buruk daripada tidak ada angka.
  */
-export function siapkanWidget(
-  masukan: {
-    masuk: boolean;
-    ringkasan: (RingkasanWidget & { tanggal: string }) | null;
-    target: { kalori: number | null; proteinG: number | null } | null;
-  },
-  hariIni: string,
-): RingkasanWidget {
+export function siapkanWidget(masukan: MasukanWidget, hariIni: string): RingkasanWidget {
   const kosong = (k: KeadaanKosongWidget): RingkasanWidget => ({
     kosong: k,
     sisaKalori: null,
