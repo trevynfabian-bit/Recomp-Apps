@@ -57,3 +57,12 @@ alter default privileges in schema public
 alter default privileges in schema public
   grant execute on functions to authenticated, anon, service_role;
 grant usage on schema public to service_role;
+
+-- Kunci service role di Supabase membawa hak penuh atas tabel publik (dan
+-- melewati RLS). Ditiru supaya jalur terjadwal yang berjalan sebagai
+-- service_role diuji dengan hak yang sama seperti di produksi — tidak lebih.
+alter default privileges in schema public
+  grant all on tables to service_role;
+alter default privileges in schema public
+  grant all on sequences to service_role;
+grant usage on schema auth to service_role;

@@ -21,7 +21,7 @@ declare v_id uuid;
 begin
   insert into public.ringkasan_mingguan (user_id, periode_dari, periode_sampai, poin, bacaan)
   values ('bbbb5555-0000-0000-0000-000000000005', date '2026-09-14', date '2026-09-20',
-          '[{"label":"Rata-rata 7 hari","nilai":"74,5 kg","sumber":"manual"}]'::jsonb,
+          '[{"kunci":"berat_rata","nilai":74.5,"unit":"kg","sumber":"manual"}]'::jsonb,
           'Berat naik 0,3 kg, pinggang tetap. Sesuai koridor Lean Gain.')
   returning id into v_id;
   assert v_id is not null, 'ringkasan yang sah seharusnya diterima';
