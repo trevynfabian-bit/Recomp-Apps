@@ -217,3 +217,18 @@ export type {
 } from './impor.ts';
 
 export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor.ts';
+
+export type { RingkasanWidget } from './pengingat.ts';
+
+export {
+  formatJamMenit,
+  geserJamTimbang,
+  JAM_TIMBANG_BAWAAN,
+  LANGKAH_JAM_MENIT,
+  NOTIF_RINGKASAN,
+  NOTIF_TIMBANG,
+  pelanggaranNada,
+  perluPengingatTimbang,
+  RENTANG_JAM_TIMBANG,
+  teksWidget,
+} from './pengingat.ts';

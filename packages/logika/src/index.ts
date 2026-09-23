@@ -215,3 +215,18 @@ export type {
 } from './impor';
 
 export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor';
+
+export type { RingkasanWidget } from './pengingat';
+
+export {
+  formatJamMenit,
+  geserJamTimbang,
+  JAM_TIMBANG_BAWAAN,
+  LANGKAH_JAM_MENIT,
+  NOTIF_RINGKASAN,
+  NOTIF_TIMBANG,
+  pelanggaranNada,
+  perluPengingatTimbang,
+  RENTANG_JAM_TIMBANG,
+  teksWidget,
+} from './pengingat';

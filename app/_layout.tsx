@@ -27,6 +27,7 @@ export default function RootLayout() {
             <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
           </Stack>
           {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
           <BannerDataMasuk />

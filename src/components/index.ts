@@ -32,6 +32,7 @@ export { PemilihTipeHari } from './PemilihTipeHari';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';
+export { PratinjauWidget } from './PratinjauWidget';
 export { RiwayatPerubahan } from './RiwayatPerubahan';
 export { SectionHeader } from './SectionHeader';
 export { SheetBatasPinggang } from './SheetBatasPinggang';
