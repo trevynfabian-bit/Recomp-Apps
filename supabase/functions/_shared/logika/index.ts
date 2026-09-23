@@ -323,6 +323,9 @@ export {
   VERSI_SESI_TERSIMPAN,
 } from './akun.ts';
 
+export type { BarisTarget, SnapshotTargetHari, TargetBerlaku } from './targetBerlaku.ts';
+export { cariBarisTarget, targetBerlaku, tipeHariBerlaku } from './targetBerlaku.ts';
+
 export type { BarisMatriks, HasilPeriksaTarget, IsianTarget, KolomTarget, NilaiTarget, SelMatriks } from './targetHarian.ts';
 export {
   ISIAN_KOSONG,

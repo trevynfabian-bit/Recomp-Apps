@@ -101,12 +101,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/percakapan.ts', join(kerja, 'percakapan.ts'));
   copyFileSync('packages/logika/src/periodeFase.ts', join(kerja, 'periodeFase.ts'));
   copyFileSync('packages/logika/src/targetHarian.ts', join(kerja, 'targetHarian.ts'));
+  copyFileSync('packages/logika/src/targetBerlaku.ts', join(kerja, 'targetBerlaku.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     'periodeFase.ts', 'targetHarian.ts', '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -124,6 +125,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'pengingat.js')),
     ...require(join(kerja, 'keluar', 'periodeFase.js')),
     ...require(join(kerja, 'keluar', 'targetHarian.js')),
+    ...require(join(kerja, 'keluar', 'targetBerlaku.js')),
   };
 }
 
@@ -1738,6 +1740,74 @@ try {
     console.error('✗ Seed bawaan dan data tiruan app tidak sejalan.');
     process.exit(1);
   }
+
+  // --- Target berlaku: ambil_target_harian (SQL) = targetBerlaku (TS) -------
+  // Satu aturan untuk web, app, dan server: snapshot hari itu, lalu target
+  // (tipe hari x fase), lalu "belum diisi" — tanpa cadangan.
+  const { targetBerlaku } = muatLogikaTs();
+  const UID_BERLAKU = '99999999-dddd-dddd-dddd-999999999999';
+  const hariIniJkt = sql(`select (now() at time zone 'Asia/Jakarta')::date;`);
+  const geser = (n) => sql(`select (date '${hariIniJkt}' + ${n})::text;`);
+  const D = { lalu2: geser(-2), lalu1: geser(-1), ini: hariIniJkt, esok: geser(1), lusa: geser(2) };
+  sql(`insert into auth.users (id, email) values ('${UID_BERLAKU}', 'paritas-berlaku@contoh.test');`);
+  sql(`set request.jwt.claim.sub = '${UID_BERLAKU}';
+       do $$
+       declare
+         v_rest uuid := (select id from public.day_types where user_id = '${UID_BERLAKU}' and nama = 'Rest');
+         v_padel uuid := (select id from public.day_types where user_id = '${UID_BERLAKU}' and nama = 'Padel');
+         v_fase public.fase_program := (select fase_aktif from public.profiles where user_id = '${UID_BERLAKU}');
+         v_sementara uuid;
+         v_yoga uuid;
+       begin
+         -- Hari lewat dengan snapshot, lalu targetnya disunting (snapshot tetap).
+         perform public.setel_tipe_hari(date '${D.lalu2}', v_rest);
+         update public.day_type_targets set target_kalori = target_kalori + 100 where day_type_id = v_rest and fase = v_fase;
+         -- Hari lewat yang tipe harinya kemudian dihapus.
+         insert into public.day_types (user_id, nama, auto_detect, urutan) values ('${UID_BERLAKU}', 'Sementara', false, 8) returning id into v_sementara;
+         insert into public.day_type_targets (user_id, day_type_id, fase, target_kalori, target_protein_g, target_lemak_g, batas_sat_fat_g)
+         values ('${UID_BERLAKU}', v_sementara, v_fase, 1900, 140.5, 60.5, 18);
+         perform public.setel_tipe_hari(date '${D.lalu1}', v_sementara);
+         delete from public.day_types where id = v_sementara;
+         -- Hari ini dipilih manual.
+         perform public.setel_tipe_hari(date '${D.ini}', v_padel, true);
+         -- Lusa: tipe hari tanpa target di fase ini.
+         insert into public.day_types (user_id, nama, auto_detect, urutan) values ('${UID_BERLAKU}', 'Yoga', false, 9) returning id into v_yoga;
+         perform public.setel_tipe_hari(date '${D.lusa}', v_yoga);
+       end $$;`, { diam: true });
+  const tipeHariSql = JSON.parse(sql(`select json_agg(json_build_object('id', id, 'nama', nama, 'auto_detect', auto_detect, 'is_default', is_default) order by urutan)
+                                         from public.day_types where user_id = '${UID_BERLAKU}';`));
+  const targetSql = JSON.parse(sql(`select json_agg(json_build_object('day_type_id', day_type_id, 'fase', fase, 'target_kalori', target_kalori,
+                                        'target_protein_g', target_protein_g::float8, 'target_lemak_g', target_lemak_g::float8, 'batas_sat_fat_g', batas_sat_fat_g::float8))
+                                        from public.day_type_targets where user_id = '${UID_BERLAKU}';`));
+  let gagalBerlaku = 0;
+  for (const [nama, tgl] of Object.entries(D)) {
+    const [dariSql] = JSON.parse(sql(`set request.jwt.claim.sub = '${UID_BERLAKU}';
+      select coalesce(json_agg(json_build_object('day_type_id', r.day_type_id, 'fase', r.fase, 'override', r.override,
+        'target_kalori', r.target_kalori, 'target_protein_g', r.target_protein_g::float8, 'target_lemak_g', r.target_lemak_g::float8,
+        'batas_sat_fat_g', r.batas_sat_fat_g::float8)), '[]') from public.ambil_target_harian(date '${tgl}') r;`).split('\n').pop());
+    const snapshot = JSON.parse(sql(`select json_build_object('day_type_id', day_type_id, 'day_type_override', day_type_override, 'fase', fase,
+        'target_kalori', target_kalori, 'target_protein_g', target_protein_g::float8, 'target_lemak_g', target_lemak_g::float8,
+        'batas_sat_fat_g', batas_sat_fat_g::float8)
+        from public.daily_logs where user_id = '${UID_BERLAKU}' and tanggal = date '${tgl}';`) || 'null');
+    const faseTanggal = sql(`set request.jwt.claim.sub = '${UID_BERLAKU}'; select public.fase_pada_tanggal(date '${tgl}');`).split('\n').pop();
+    const ts = targetBerlaku({ tipeHari: tipeHariSql, target: targetSql, snapshot, faseTanggal });
+    const ringkasSql = dariSql
+      ? `${dariSql.day_type_id}|${dariSql.fase}|${dariSql.override}|${dariSql.target_kalori}|${dariSql.target_protein_g}|${dariSql.target_lemak_g}|${dariSql.batas_sat_fat_g}`
+      : 'tidak-ada';
+    const ringkasTs = ts
+      ? `${ts.tipeHari.id}|${ts.fase}|${ts.override}|${ts.nilai?.target_kalori ?? null}|${ts.nilai?.target_protein_g ?? null}|${ts.nilai?.target_lemak_g ?? null}|${ts.nilai?.batas_sat_fat_g ?? null}`
+      : 'tidak-ada';
+    const cocok = ringkasSql === ringkasTs;
+    if (!cocok) gagalBerlaku += 1;
+    const tipeNama = tipeHariSql.find((d) => d.id === ts?.tipeHari.id)?.nama ?? '-';
+    console.log(`${cocok ? '✓' : '✗'} ${nama.padEnd(6)} ${tgl}: ${tipeNama}, ${ts?.fase}, ${ts?.asal}${ts?.nilai ? ` ${ts.nilai.target_kalori} kcal` : ''}${cocok ? '' : ` — SQL ${ringkasSql} · TS ${ringkasTs}`}`);
+  }
+  if (gagalBerlaku > 0) {
+    console.error(`✗ ${gagalBerlaku} hari: target berlaku di SQL dan TypeScript berbeda.`);
+    process.exit(1);
+  }
+  console.log(`✓ Target berlaku: ${Object.keys(D).length} hari (snapshot lama, tipe hari terhapus, pilihan manual, belum tercatat, belum diisi) sama di SQL dan TypeScript.`);
+  console.log();
 
   // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
   // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak

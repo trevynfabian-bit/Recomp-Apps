@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { cariBarisTarget } from '@recomp/logika';
 import type { Fase } from '@recomp/logika';
 import { LayarMuatTarget } from '@/components/LayarMuatTarget';
 import {
@@ -144,10 +145,8 @@ export function PenyediaTarget({ children }: { children: React.ReactNode }) {
     };
   }, [pakaiServer, penggunaId, muatDariServer]);
 
-  const cariTarget = useCallback(
-    (dayTypeId: string, fase: Fase) => data.target.find((t) => t.day_type_id === dayTypeId && t.fase === fase) ?? null,
-    [data],
-  );
+  // Aturan "tanpa cadangan" yang sama dengan web & server (@recomp/logika).
+  const cariTarget = useCallback((dayTypeId: string, fase: Fase) => cariBarisTarget(data.target, dayTypeId, fase), [data]);
 
   const simpanTarget = useCallback(
     async (perubahan: PerubahanTarget[]) => {

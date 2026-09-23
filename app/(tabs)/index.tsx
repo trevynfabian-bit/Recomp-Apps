@@ -18,7 +18,7 @@ import {
   TombolUtama,
   type EntriMakananBaru,
 } from '@/components';
-import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni } from '@recomp/logika';
+import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHariBerlaku } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
@@ -62,7 +62,9 @@ export default function LogHarianScreen() {
 
   const fase = profil.fase_aktif;
 
-  const dayType = tipeHari.find((d) => d.id === dayTypeId) ?? tipeHari[0];
+  // Aturan bersama (`tipeHariBerlaku`); tipe pertama hanya jaring terakhir
+  // bila akun tidak punya tipe bawaan sama sekali.
+  const dayType = tipeHariBerlaku(tipeHari, dayTypeId) ?? tipeHari[0];
   const target = cariTarget(dayTypeId, fase);
   const macros = susunMacros(log, target);
 

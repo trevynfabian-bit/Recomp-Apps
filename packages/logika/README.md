@@ -11,6 +11,8 @@ lewat function calling alih-alih menghitung sendiri.
 | --- | --- |
 | `makro` | `hitungMakro`, `keteranganMakro` — sisa vs terpakai, sat fat sebagai BATAS |
 | `deteksiTipeHari` | `deteksiTipeHari`, `alasanDeteksi` — tebakan tipe hari dari workout |
+| `targetBerlaku` | `targetBerlaku`, `tipeHariBerlaku`, `cariBarisTarget` — target absolut yang berlaku untuk satu hari (snapshot → target tipe hari x fase → belum diisi, tanpa cadangan); kembaran SQL-nya `ambil_target_harian` |
+| `targetHarian` | `periksaTarget`, `karboTersisaG`, `rincianKaloriMakro` — aturan isian target (sama dengan CHECK tabel) |
 | `format` | format angka & tanggal Indonesia, helper Asia/Jakarta |
 | `tipe` | tipe domain yang dipakai bersama |
 

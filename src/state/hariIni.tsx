@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { deteksiTipeHari } from '@recomp/logika';
+import { deteksiTipeHari, tipeHariBerlaku } from '@recomp/logika';
 import type { HasilDeteksi } from '@recomp/logika';
 import { mockDailyLogHariIni } from '@/mocks/dailyLog';
 import { mockWorkoutsHariIni } from '@/mocks/workout';
@@ -48,10 +48,9 @@ export function PenyediaHariIni({ children }: { children: React.ReactNode }) {
 
   // Pilihan yang tidak ada di daftar (log tiruan di atas tipe hari dari
   // server, atau tipe hari yang baru dihapus) jatuh ke tipe hari bawaan —
-  // bukan id yang tidak menunjuk ke mana-mana.
-  const pilihanSah = tipeHari.some((d) => d.id === pilihan.dayTypeId)
-    ? pilihan.dayTypeId
-    : (tipeHari.find((d) => d.is_default)?.id ?? tipeHari[0]?.id ?? pilihan.dayTypeId);
+  // aturan yang sama dengan web & server (`tipeHariBerlaku`), bukan id yang
+  // tidak menunjuk ke mana-mana.
+  const pilihanSah = tipeHariBerlaku(tipeHari, pilihan.dayTypeId)?.id ?? tipeHari[0]?.id ?? pilihan.dayTypeId;
 
   const nilai = useMemo<KonteksHariIni>(
     () => ({

@@ -17,7 +17,7 @@ const ts = require('typescript');
 const kerja = mkdtempSync(join(tmpdir(), 'target-'));
 for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-  ['targetHarian.ts', 'pengingat.ts', 'redistribusi.ts', 'deteksiTipeHari.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+  ['targetHarian.ts', 'targetBerlaku.ts', 'pengingat.ts', 'redistribusi.ts', 'deteksiTipeHari.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
@@ -26,6 +26,7 @@ const {
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
 const { deteksiTipeHari, aturanDeteksiTipeHari } = require(join(kerja, 'keluar', 'deteksiTipeHari.js'));
+const { targetBerlaku, tipeHariBerlaku, cariBarisTarget } = require(join(kerja, 'keluar', 'targetBerlaku.js'));
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -213,6 +214,36 @@ for (const berkas of ['app/(tabs)/budget.tsx', 'app/(tabs)/tren.tsx']) {
   kalimat.push(...temuan);
 }
 for (const t of kalimat) cek(`netral: "${t.length > 70 ? `${t.slice(0, 67)}...` : t}"`, pelanggaranNada(t).length === 0, pelanggaranNada(t).join(', '));
+
+console.log('\nTarget berlaku (satu aturan untuk web, app, server)');
+{
+  const T = [
+    { id: 'rest', nama: 'Rest', auto_detect: true, is_default: true },
+    { id: 'padel', nama: 'Padel', auto_detect: true, is_default: false },
+    { id: 'yoga', nama: 'Yoga', auto_detect: false, is_default: false },
+  ];
+  const baris = (id, fase, k) => ({ day_type_id: id, fase, target_kalori: k, target_protein_g: 150, target_lemak_g: 70, batas_sat_fat_g: 20 });
+  const G = [baris('rest', 'Cut', 2000), baris('rest', 'Lean Gain', 2450), baris('padel', 'Cut', 2450)];
+  const snap = (id, fase, k, override = false) => ({ day_type_id: id, day_type_override: override, fase, target_kalori: k,
+    target_protein_g: k === null ? null : 150, target_lemak_g: k === null ? null : 70, batas_sat_fat_g: k === null ? null : 20 });
+  const r1 = targetBerlaku({ tipeHari: T, target: G, snapshot: null, faseTanggal: 'Cut' });
+  cek('belum tercatat → tipe bawaan & target tabel', r1.tipeHari.id === 'rest' && r1.asal === 'target' && r1.nilai.target_kalori === 2000);
+  const r2 = targetBerlaku({ tipeHari: T, target: G, snapshot: snap('rest', 'Cut', 1950), faseTanggal: 'Lean Gain' });
+  cek('hari lewat: snapshot & fasenya menang atas target & fase sekarang', r2.asal === 'snapshot' && r2.fase === 'Cut' && r2.nilai.target_kalori === 1950);
+  const r3 = targetBerlaku({ tipeHari: T, target: G, snapshot: null, faseTanggal: 'Maintenance' });
+  cek('fase tanpa target → belum diisi, tanpa pinjam fase lain', r3.asal === 'belum-diisi' && r3.nilai === null);
+  const r4 = targetBerlaku({ tipeHari: T, target: G, snapshot: snap('yoga', 'Cut', null, true), faseTanggal: 'Cut' });
+  cek('tipe tanpa target → belum diisi, tanpa pinjam tipe lain', r4.tipeHari.id === 'yoga' && r4.override && r4.asal === 'belum-diisi');
+  const r5 = targetBerlaku({ tipeHari: T, target: G, snapshot: snap('terhapus', 'Cut', null), faseTanggal: 'Cut' });
+  cek('tipe hari terhapus → tipe bawaan', r5.tipeHari.id === 'rest' && r5.nilai.target_kalori === 2000);
+  cek('tanpa tipe bawaan → tidak ada target berlaku', targetBerlaku({ tipeHari: T.map((t) => ({ ...t, is_default: false })), target: G, snapshot: null, faseTanggal: 'Cut' }) === null);
+  cek('tipeHariBerlaku: pilihan yang ada dipakai', tipeHariBerlaku(T, 'padel').id === 'padel' && tipeHariBerlaku(T, 'hilang').id === 'rest' && tipeHariBerlaku([], null) === null);
+  cek('cariBarisTarget: tanpa cadangan', cariBarisTarget(G, 'padel', 'Lean Gain') === null && cariBarisTarget(G, 'padel', 'Cut').target_kalori === 2450);
+  // App memakai aturan bersama, bukan salinannya sendiri.
+  cek('penyedia target & Hari Ini memakai helper bersama',
+    /cariBarisTarget\(data\.target, dayTypeId, fase\)/.test(readFileSync('src/state/target.tsx', 'utf8')) &&
+    /tipeHariBerlaku\(tipeHari, pilihan\.dayTypeId\)/.test(readFileSync('src/state/hariIni.tsx', 'utf8')));
+}
 
 console.log('\nAritmetika pasti (gram satu desimal)');
 // Pecahan biner membuat 7,4 × 4 + 41,6 × 9 = 403,99999999999994: sisa karbo
