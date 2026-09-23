@@ -176,3 +176,78 @@ export function isiWidgetLingkar(
     aksesLabel: `${formatAngka(-r.sisaKalori)} kcal di atas target.`,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Jam pengingat per hari & saran dari kebiasaan
+// ---------------------------------------------------------------------------
+
+/** Jam pengingat: hari kerja, dan (opsional) akhir pekan yang berbeda. */
+export type JamPengingat = {
+  hariKerjaMenit: number;
+  /** `null` berarti akhir pekan memakai jam hari kerja. */
+  akhirPekanMenit: number | null;
+};
+
+/** Sabtu atau Minggu, untuk tanggal `YYYY-MM-DD`. */
+function akhirPekan(tanggal: string): boolean {
+  const [y, m, d] = tanggal.split('-').map(Number);
+  const hari = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return hari === 0 || hari === 6;
+}
+
+/** Jam pengingat yang berlaku untuk satu tanggal, dalam menit sejak tengah malam. */
+export function jamPengingatUntuk(tanggal: string, jam: JamPengingat): number {
+  return akhirPekan(tanggal) && jam.akhirPekanMenit !== null ? jam.akhirPekanMenit : jam.hariKerjaMenit;
+}
+
+/** Ringkasan jadwal sepekan, mis. "Sen–Jum 06.30 · Sab–Min 08.00" atau "Setiap hari 06.30". */
+export function ringkasJadwal(jam: JamPengingat): string {
+  if (jam.akhirPekanMenit === null || jam.akhirPekanMenit === jam.hariKerjaMenit) {
+    return `Setiap hari ${formatJamMenit(jam.hariKerjaMenit)}`;
+  }
+  return `Sen–Jum ${formatJamMenit(jam.hariKerjaMenit)} · Sab–Min ${formatJamMenit(jam.akhirPekanMenit)}`;
+}
+
+/** Berapa timbangan minimal sebelum kebiasaan dianggap terbaca. */
+export const MIN_TIMBANGAN_SARAN = 5;
+
+/**
+ * Saran jam pengingat dari waktu timbang yang sudah tercatat.
+ *
+ * Pengingat hanya dikirim bila hari itu BELUM timbang, jadi jam terbaiknya
+ * SESUDAH kebiasaan, bukan sebelumnya: median waktu timbang dibulatkan ke atas
+ * ke kelipatan 15 menit, lalu ditambah 15 menit. Pengingat sebelum jam
+ * kebiasaan akan muncul hampir setiap hari — tepat sebelum orang itu memang
+ * akan timbang — dan terasa seperti gangguan, bukan bantuan.
+ *
+ * Median, bukan rata-rata: satu pagi yang timbang pukul 10.30 tidak boleh
+ * menggeser saran sepuluh menit. Timbangan di luar rentang pagi diabaikan.
+ * `null` bila datanya kurang dari MIN_TIMBANGAN_SARAN.
+ */
+export function saranJamTimbang(
+  waktuIso: string[],
+): { saranMenit: number; kebiasaanMenit: number; dasar: number } | null {
+  const menit = waktuIso
+    .map((w) => {
+      const jamMenit = new Date(w).toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      const [j, m] = jamMenit.split(':').map(Number);
+      return j * 60 + m;
+    })
+    .filter((m) => Number.isFinite(m) && m >= RENTANG_JAM_TIMBANG.min && m <= RENTANG_JAM_TIMBANG.maks)
+    .sort((a, b) => a - b);
+  if (menit.length < MIN_TIMBANGAN_SARAN) return null;
+
+  const tengah = Math.floor(menit.length / 2);
+  const median = menit.length % 2 === 1 ? menit[tengah] : Math.round((menit[tengah - 1] + menit[tengah]) / 2);
+  const saran = Math.ceil(median / LANGKAH_JAM_MENIT) * LANGKAH_JAM_MENIT + LANGKAH_JAM_MENIT;
+  return {
+    saranMenit: geserJamTimbang(saran, 0),
+    kebiasaanMenit: median,
+    dasar: menit.length,
+  };
+}

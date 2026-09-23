@@ -20,7 +20,8 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   formatJamMenit, geserJamTimbang, JAM_TIMBANG_BAWAAN, NOTIF_RINGKASAN, NOTIF_TIMBANG,
-  isiWidgetLingkar, pelanggaranNada, perluPengingatTimbang, RENTANG_JAM_TIMBANG, teksWidget, teksWidgetSebaris,
+  isiWidgetLingkar, jamPengingatUntuk, MIN_TIMBANGAN_SARAN, pelanggaranNada, perluPengingatTimbang,
+  RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -35,6 +36,35 @@ cek('format dua digit', formatJamMenit(5 * 60 + 5) === '05.05');
 cek('geser +15', geserJamTimbang(390, 15) === 405);
 cek('tertahan di batas pagi (11.00)', geserJamTimbang(RENTANG_JAM_TIMBANG.maks, 15) === RENTANG_JAM_TIMBANG.maks);
 cek('tertahan di batas bawah (04.00)', geserJamTimbang(RENTANG_JAM_TIMBANG.min, -15) === RENTANG_JAM_TIMBANG.min);
+
+console.log('\nJadwal hari kerja & akhir pekan');
+{
+  const jam = { hariKerjaMenit: 390, akhirPekanMenit: 480 };
+  cek('Rabu memakai jam hari kerja', jamPengingatUntuk('2026-09-23', jam) === 390);
+  cek('Sabtu & Minggu memakai jam akhir pekan',
+    jamPengingatUntuk('2026-09-26', jam) === 480 && jamPengingatUntuk('2026-09-27', jam) === 480);
+  cek('tanpa jam akhir pekan: Sabtu memakai jam hari kerja',
+    jamPengingatUntuk('2026-09-26', { hariKerjaMenit: 390, akhirPekanMenit: null }) === 390);
+  cek(`ringkasan: "${ringkasJadwal(jam)}"`, ringkasJadwal(jam) === 'Sen–Jum 06.30 · Sab–Min 08.00');
+  cek('jam sama → "Setiap hari"', ringkasJadwal({ hariKerjaMenit: 390, akhirPekanMenit: 390 }) === 'Setiap hari 06.30');
+}
+
+console.log('\nSaran jam dari kebiasaan');
+{
+  // Waktu timbang WIB → UTC (−7 jam). Kebiasaan sekitar 06.40.
+  const wib = (tgl, jam) => new Date(`${tgl}T${jam}:00+07:00`).toISOString();
+  const kebiasaan = ['06:32', '06:41', '06:38', '06:45', '06:40', '06:36', '06:44'].map((j, i) => wib(`2026-09-${10 + i}`, j));
+  const s1 = saranJamTimbang(kebiasaan);
+  cek(`median 06.40 → saran SESUDAH kebiasaan (07.00): ${s1 && formatJamMenit(s1.saranMenit)}`,
+    s1?.kebiasaanMenit === 400 && s1?.saranMenit === 420 && s1?.dasar === 7);
+  const pencilan = saranJamTimbang([...kebiasaan, wib('2026-09-20', '10:30'), wib('2026-09-21', '10:45')]);
+  cek('dua pagi yang sangat telat tidak menggeser saran (median, bukan rata-rata)', pencilan?.saranMenit === 420);
+  const malam = saranJamTimbang([...kebiasaan, wib('2026-09-22', '21:00')]);
+  cek('timbangan malam diabaikan (di luar rentang pagi)', malam?.dasar === 7);
+  cek(`kurang dari ${MIN_TIMBANGAN_SARAN} timbangan → tanpa saran`, saranJamTimbang(kebiasaan.slice(0, 4)) === null);
+  const lambat = saranJamTimbang(['10:50', '10:55', '10:52', '10:58', '10:51'].map((j, i) => wib(`2026-09-${10 + i}`, j)));
+  cek('saran tertahan di batas pagi (11.00)', lambat?.saranMenit === RENTANG_JAM_TIMBANG.maks);
+}
 
 console.log('\nPengingat hanya bila terlewat');
 cek('aktif & belum timbang → kirim', perluPengingatTimbang(true, false) === true);

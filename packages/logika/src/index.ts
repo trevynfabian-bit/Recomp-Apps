@@ -216,7 +216,7 @@ export type {
 
 export { uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } from './impor';
 
-export type { RingkasanWidget } from './pengingat';
+export type { JamPengingat, RingkasanWidget } from './pengingat';
 
 export {
   formatJamMenit,
@@ -228,7 +228,11 @@ export {
   pelanggaranNada,
   perluPengingatTimbang,
   isiWidgetLingkar,
+  jamPengingatUntuk,
+  MIN_TIMBANGAN_SARAN,
   RENTANG_JAM_TIMBANG,
+  ringkasJadwal,
+  saranJamTimbang,
   teksWidget,
   teksWidgetSebaris,
 } from './pengingat';

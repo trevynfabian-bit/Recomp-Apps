@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   formatJamMenit,
-  geserJamTimbang,
-  LANGKAH_JAM_MENIT,
+  jamPengingatUntuk,
   NOTIF_RINGKASAN,
   NOTIF_TIMBANG,
-  RENTANG_JAM_TIMBANG,
+  ringkasJadwal,
+  tanggalHariIni,
 } from '@recomp/logika';
-import { Card, PratinjauWidget, SectionHeader } from '@/components';
+import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { mockPengaturanPengingat, mockRingkasanWidget } from '@/mocks/widget';
+import { mockPengaturanPengingat, mockRingkasanWidget, mockWaktuTimbang } from '@/mocks/widget';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
@@ -31,9 +31,16 @@ export default function WidgetPengingatScreen() {
   const router = useRouter();
   const [atur, setAtur] = useState(mockPengaturanPengingat);
   const [ringkasan] = useState(() => mockRingkasanWidget());
+  const [waktuTimbang] = useState(() => mockWaktuTimbang());
+  const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);
 
   const ubah = (p: Partial<typeof atur>) => setAtur((lama) => ({ ...lama, ...p }));
-  const jam = formatJamMenit(atur.jamTimbangMenit);
+  const jadwal = useMemo(
+    () => ({ hariKerjaMenit: atur.jamTimbangMenit, akhirPekanMenit: atur.jamAkhirPekanMenit }),
+    [atur.jamTimbangMenit, atur.jamAkhirPekanMenit],
+  );
+  // Jam pratinjau notifikasi = jam yang berlaku HARI INI (hari kerja/akhir pekan).
+  const jam = formatJamMenit(jamPengingatUntuk(tanggalHariIni(), jadwal));
 
   return (
     <ScrollView
@@ -81,44 +88,27 @@ export default function WidgetPengingatScreen() {
             onUbah={(v) => ubah({ timbangAktif: v })}
           />
           {atur.timbangAktif ? (
-            <View
-              style={{
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Jam pengingat: ${ringkasJadwal(jadwal)}`}
+              accessibilityHint="Membuka pengaturan jam"
+              onPress={() => {
+                ketukRingan();
+                setSheetJamTerbuka(true);
+              }}
+              style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                minHeight: TAP_MIN,
                 paddingHorizontal: spacing.lg,
                 paddingBottom: spacing.lg,
-              }}
+                opacity: pressed ? 0.6 : 1,
+              })}
             >
               <Text style={{ ...typography.label, color: colors.textMuted }}>Jam</Text>
-              <View
-                accessible
-                accessibilityRole="adjustable"
-                accessibilityLabel={`Jam pengingat timbang, ${jam}`}
-                accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-                onAccessibilityAction={(e) =>
-                  ubah({
-                    jamTimbangMenit: geserJamTimbang(
-                      atur.jamTimbangMenit,
-                      e.nativeEvent.actionName === 'increment' ? LANGKAH_JAM_MENIT : -LANGKAH_JAM_MENIT,
-                    ),
-                  })
-                }
-                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-              >
-                <TombolGeser
-                  label="−"
-                  nonaktif={atur.jamTimbangMenit <= RENTANG_JAM_TIMBANG.min}
-                  onPress={() => ubah({ jamTimbangMenit: geserJamTimbang(atur.jamTimbangMenit, -LANGKAH_JAM_MENIT) })}
-                />
-                <Text style={{ ...typography.title, color: colors.text, minWidth: 72, textAlign: 'center' }}>{jam}</Text>
-                <TombolGeser
-                  label="+"
-                  nonaktif={atur.jamTimbangMenit >= RENTANG_JAM_TIMBANG.maks}
-                  onPress={() => ubah({ jamTimbangMenit: geserJamTimbang(atur.jamTimbangMenit, LANGKAH_JAM_MENIT) })}
-                />
-              </View>
-            </View>
+              <Text style={{ ...typography.label, color: colors.text }}>{ringkasJadwal(jadwal)} ›</Text>
+            </Pressable>
           ) : null}
           <Pemisah />
           <BarisSakelar
@@ -167,6 +157,13 @@ export default function WidgetPengingatScreen() {
           </Text>
         </Card>
       </View>
+      <SheetJamTimbang
+        terbuka={sheetJamTerbuka}
+        onTutup={() => setSheetJamTerbuka(false)}
+        jam={jadwal}
+        waktuTimbang={waktuTimbang}
+        onSimpan={(j) => ubah({ jamTimbangMenit: j.hariKerjaMenit, jamAkhirPekanMenit: j.akhirPekanMenit })}
+      />
     </ScrollView>
   );
 }
@@ -210,34 +207,6 @@ function BarisSakelar({
         thumbColor={colors.text}
       />
     </View>
-  );
-}
-
-function TombolGeser({ label, onPress, nonaktif }: { label: string; onPress: () => void; nonaktif: boolean }) {
-  return (
-    <Pressable
-      // Dibungkus elemen `adjustable` di atas; pembaca layar memakai aksi
-      // naik/turun pada pembungkusnya, bukan dua tombol terpisah.
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      disabled={nonaktif}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        width: TAP_MIN,
-        height: TAP_MIN,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        borderColor: colors.borderKuat,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: nonaktif ? 0.35 : pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.title, color: colors.text }}>{label}</Text>
-    </Pressable>
   );
 }
 
