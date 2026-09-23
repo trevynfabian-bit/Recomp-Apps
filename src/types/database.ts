@@ -6,6 +6,8 @@
  * tidak ada lapisan penerjemahan yang bisa salah diam-diam.
  */
 
+import type { DataRingkasanMingguan, PoinRingkasan } from '@recomp/logika';
+
 export type FaseProgram = 'Maintenance' | 'Lean Gain' | 'Cut';
 export type SumberBeratDb = 'manual' | 'healthkit';
 export type SumberMakananDb = 'manual' | 'foto_ai';
@@ -435,13 +437,26 @@ export type RingkasanMingguanRow = {
   /** Senin pekan yang diringkas; database menuntut Senin dan tepat 7 hari. */
   periode_dari: string;
   periode_sampai: string;
-  poin: unknown[];
+  /** Poin MENTAH dari `poin_ringkasan_mingguan`; diformat `keRingkasanTampil`. */
+  poin: PoinRingkasan[];
   bacaan: string;
-  lanjutan: unknown[] | null;
+  lanjutan: string[] | null;
   /** Pesan yang mengantarkannya; jadi `null` bila pesannya dihapus. */
   pesan_id: string | null;
   created_at: string;
 };
+
+/** Hasil `simpan_ringkasan_mingguan`. `baru` false berarti pekan itu sudah diringkas. */
+export type SimpanRingkasanRow = {
+  baru: boolean;
+  ringkasan_id: string;
+  pesan_id: string | null;
+  percakapan_id: string | null;
+  periode: { dari: string; sampai: string };
+};
+
+/** Jawaban `poin_ringkasan_mingguan`; bentuknya milik paket logika bersama. */
+export type PoinRingkasanMingguanRow = DataRingkasanMingguan;
 
 /** Arah sebuah metrik selama periode evaluasi. */
 export type ArahMetrikDb = 'naik' | 'datar' | 'turun' | 'belum jelas';
@@ -1101,6 +1116,20 @@ export type Database = {
       evaluasi_4_mingguan: {
         Args: { p_sampai: string | null };
         Returns: Evaluasi4MingguanRow;
+      };
+      poin_ringkasan_mingguan: {
+        Args: { p_minggu_mulai: string | null; p_user_id: string | null };
+        Returns: PoinRingkasanMingguanRow;
+      };
+      simpan_ringkasan_mingguan: {
+        Args: {
+          p_minggu_mulai: string;
+          p_bacaan: string;
+          p_lanjutan: string[] | null;
+          p_judul: string | null;
+          p_user_id: string | null;
+        };
+        Returns: SimpanRingkasanRow;
       };
       estimasi_body_fat: {
         Args: { p_tanggal: string | null };

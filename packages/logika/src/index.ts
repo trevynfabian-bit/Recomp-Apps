@@ -134,3 +134,29 @@ export {
   pengaliRataRata,
   PENGALI_AKTIVITAS,
 } from './tdee';
+
+export type {
+  ArahTujuan,
+  DataRingkasanMingguan,
+  KunciPoin,
+  PoinRingkasan,
+  PoinTampil,
+  RingkasanTampil,
+  SumberPoin,
+} from './ringkasan';
+
+export {
+  angkaDariTeks,
+  angkaYangBoleh,
+  bacaanCadangan,
+  formatDeltaPoin,
+  formatNilaiPoin,
+  judulRingkasan,
+  keRingkasanTampil,
+  KUNCI_POIN,
+  LABEL_POIN,
+  MAKS_LANJUTAN,
+  periksaAngkaBacaan,
+  saringLanjutan,
+  tampilkanPoin,
+} from './ringkasan';
