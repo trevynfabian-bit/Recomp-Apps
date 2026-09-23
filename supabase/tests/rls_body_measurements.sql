@@ -205,3 +205,75 @@ begin
 end $$;
 
 select '✓ body_measurements: satu pencatatan per tanggal, baris kosong & salah ketik ditolak, pencatatan sebagian diterima, RLS mengisolasi' as hasil;
+
+-- ---------------------------------------------------------------------------
+-- 11. riwayat_ukuran: hanya membaca milik sendiri, dan batas jumlahnya dijaga.
+--     Aritmetika deltanya diuji mesin lewat `npm run cek:paritas`; di sini yang
+--     diperiksa hal-hal yang tidak bisa dibandingkan dengan TypeScript —
+--     isolasi, batas argumen, dan bentuk keluaran untuk data yang kosong.
+-- ---------------------------------------------------------------------------
+set request.jwt.claim.sub = 'aaaa3333-0000-0000-0000-000000000003';
+set role authenticated;
+
+do $$
+declare r jsonb;
+begin
+  -- Pengguna B punya satu pencatatan (7 Sep, pinggang 78,2) dari blok 9.
+  r := public.riwayat_ukuran(date '2026-09-30', 12, 4);
+  assert (r->>'jumlah')::int = 1, format('jumlah = %s, seharusnya 1', r->>'jumlah');
+  assert jsonb_array_length(r->'catatan') = 1, 'catatan pengguna lain ikut terbaca';
+  assert (r->'bagian'->'pinggang_cm'->>'jumlah')::int = 1, 'deret pinggang bukan satu titik';
+  -- Satu titik: tidak ada yang bisa dibandingkan, jadi total & laju KOSONG —
+  -- bukan nol, yang akan terbaca sebagai "tidak berubah".
+  assert (r->'bagian'->'pinggang_cm'->'total_selisih') = 'null'::jsonb,
+    'total selisih dari satu titik seharusnya kosong';
+  assert (r->'bagian'->'pinggang_cm'->'laju_terkini') = 'null'::jsonb,
+    'laju dari satu titik seharusnya kosong';
+  -- Bagian yang tidak pernah diukur tidak muncul sebagai deret kosong.
+  assert not (r->'bagian') ? 'dada_cm', 'bagian yang tidak pernah diukur seharusnya tidak muncul';
+end $$;
+
+do $$
+declare r jsonb;
+begin
+  -- Tanggal sebelum pencatatan mana pun: bentuknya tetap utuh, isinya kosong.
+  r := public.riwayat_ukuran(date '2026-01-01', 12, 4);
+  assert (r->>'jumlah')::int = 0, format('jumlah = %s, seharusnya 0', r->>'jumlah');
+  assert (r->'catatan') = '[]'::jsonb, 'catatan seharusnya array kosong, bukan null';
+  assert (r->'bagian') = '{}'::jsonb, 'bagian seharusnya objek kosong, bukan null';
+  assert (r->'batas_pinggang') = 'null'::jsonb,
+    'tanpa satu pun lingkar pinggang, keadaan batas seharusnya kosong';
+end $$;
+
+do $$
+declare v_gagal boolean;
+begin
+  v_gagal := false;
+  begin
+    perform public.riwayat_ukuran(null, 0, 4);
+  exception when numeric_value_out_of_range then v_gagal := true; end;
+  assert v_gagal, 'batas 0 pencatatan seharusnya ditolak';
+
+  v_gagal := false;
+  begin
+    perform public.riwayat_ukuran(null, 500, 4);
+  exception when numeric_value_out_of_range then v_gagal := true; end;
+  assert v_gagal, 'batas 500 pencatatan seharusnya ditolak';
+end $$;
+
+reset role;
+reset request.jwt.claim.sub;
+do $$
+begin
+  begin
+    perform public.riwayat_ukuran(null, 12, 4);
+    assert false, 'tanpa sesi seharusnya ditolak';
+  exception when invalid_authorization_specification then null; end;
+
+  assert not has_function_privilege('anon', 'public.riwayat_ukuran(date, integer, integer)', 'execute'),
+    'anon masih boleh membaca riwayat ukuran';
+  assert has_function_privilege('authenticated', 'public.riwayat_ukuran(date, integer, integer)', 'execute'),
+    'authenticated seharusnya boleh membaca riwayat ukurannya';
+end $$;
+
+select '✓ riwayat_ukuran: isolasi, batas argumen, dan bentuk keluaran untuk data kosong terjaga' as hasil;

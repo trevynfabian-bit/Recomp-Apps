@@ -373,6 +373,64 @@ export type ProteksiProteinRow = {
 };
 
 /**
+ * Hasil `riwayat_ukuran` — riwayat beserta delta per bagian tubuh.
+ *
+ * Kuncinya `bagian` adalah nama kolom (`pinggang_cm`, …), dan bagian yang tidak
+ * pernah diukur TIDAK muncul — bukan muncul sebagai deret kosong, yang akan
+ * terbaca sebagai "diukur tapi nol".
+ */
+export type RiwayatUkuranRow = {
+  sampai: string;
+  jumlah: number;
+  hari_per_pekan: number;
+  maks_titik_laju: number;
+  catatan: {
+    tanggal: string;
+    pinggang_cm: number | null;
+    dada_cm: number | null;
+    leher_cm: number | null;
+    lengan_kiri_cm: number | null;
+    lengan_kanan_cm: number | null;
+    paha_kiri_cm: number | null;
+    paha_kanan_cm: number | null;
+    catatan: string | null;
+  }[];
+  bagian: Record<
+    string,
+    {
+      titik: { tanggal: string; nilai: number }[];
+      perubahan: {
+        dari: string;
+        ke: string;
+        nilai_dari: number;
+        nilai_ke: number;
+        selisih: number;
+        jarak_hari: number;
+        laju_per_pekan: number;
+      }[];
+      /** `null` bila baru satu pencatatan; nol akan terbaca "tidak berubah". */
+      total_selisih: number | null;
+      rentang_hari: number | null;
+      awal: { tanggal: string; nilai: number };
+      akhir: { tanggal: string; nilai: number };
+      /** Laju dari beberapa pencatatan terakhir sekaligus. */
+      laju_terkini: number | null;
+      jumlah: number;
+    }
+  >;
+  /** `null` bila belum ada satu pun lingkar pinggang untuk dinilai. */
+  batas_pinggang: {
+    keadaan: 'belum-ditetapkan' | 'lewat' | 'mendekat' | 'aman';
+    batas_cm: number | null;
+    pinggang_cm: number;
+    selisih_cm: number | null;
+    laju_per_pekan: number | null;
+    pekan_lagi: number | null;
+    ambang_pekan: number;
+  } | null;
+};
+
+/**
  * Hasil `estimasi_body_fat`.
  *
  * `kurang` adalah KODE, bukan kalimat: kalimatnya disusun `estimasiBodyFatNavy`
@@ -739,6 +797,10 @@ export type Database = {
       hapus_ukuran: {
         Args: { p_tanggal: string };
         Returns: boolean;
+      };
+      riwayat_ukuran: {
+        Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
+        Returns: RiwayatUkuranRow;
       };
       estimasi_body_fat: {
         Args: { p_tanggal: string | null };

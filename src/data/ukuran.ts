@@ -1,7 +1,11 @@
 import { supabase } from '@/lib/supabase';
 import { lajuTerkini, ringkasPerubahan, statusBatasPinggang } from '@recomp/logika';
 import type { RingkasanPerubahan, StatusBatasPinggang, TitikUkuran } from '@recomp/logika';
-import type { BodyMeasurementRow, EstimasiBodyFatRow } from '@/types/database';
+import type {
+  BodyMeasurementRow,
+  EstimasiBodyFatRow,
+  RiwayatUkuranRow,
+} from '@/types/database';
 
 /**
  * Akses data ukuran tubuh mingguan.
@@ -189,6 +193,36 @@ export async function riwayatUkuran(batas = 52): Promise<PencatatanUkuran[]> {
 }
 
 /**
+ * Riwayat lengkap beserta DELTA per bagian tubuh, dihitung server.
+ *
+ * Nilai mentahnya hampir tidak berguna dibaca berderet: "85,4 — 85,2 — 84,8"
+ * memaksa orang mengurangi di kepala tiap kali. Yang dicari selalu
+ * perubahannya, dan perubahan itu baru bermakna kalau jaraknya ikut disebut —
+ * +0,3 cm dalam 3 hari dan +0,3 cm dalam 12 hari adalah dua hal yang sangat
+ * berbeda.
+ *
+ * Kenapa dari server padahal `perubahanBagian` di bawah bisa menghitungnya dari
+ * `riwayatUkuran`: angka yang sama dibaca AI coach lewat function calling, dan
+ * ia tidak bisa menjalankan TypeScript. `npm run cek:paritas` membuktikan
+ * keduanya identik.
+ */
+export async function riwayatDanDelta(
+  sampai: string | null = null,
+  batas = 12,
+  maksTitikLaju = 4,
+): Promise<RiwayatUkuranRow> {
+  const { data, error } = await supabase.rpc('riwayat_ukuran', {
+    p_sampai: sampai,
+    p_batas: batas,
+    p_maks_titik_laju: maksTitikLaju,
+  });
+
+  if (error) throw terjemahkan(error);
+  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan riwayat.', true);
+  return data as RiwayatUkuranRow;
+}
+
+/**
  * Deret satu bagian tubuh, melewati tanggal yang bagian itu tidak diukur.
  *
  * Dilewati, BUKAN diisi nol: satu titik nol di tengah deret akan membuat
@@ -252,9 +286,11 @@ function kePencatatanTs(r: BodyMeasurementRow): PencatatanUkuran {
  */
 function terjemahkan(error: { code?: string; message: string }): KesalahanUkuran {
   switch (error.code) {
-    case '22003': // numeric_value_out_of_range — satu bagian di luar rentang
-      // Pesan RPC-nya sudah menyebut bagian tubuh & rentangnya, jadi ia lebih
-      // menolong daripada kalimat umum apa pun yang bisa ditulis di sini.
+    case '22003':
+      // Dua sebab memakai kode ini: satu bagian di luar rentang, dan batas
+      // jumlah pencatatan di luar 1–260. Pesan RPC-nya sudah menyebut mana yang
+      // terjadi beserta angkanya, jadi ia lebih menolong daripada kalimat umum
+      // apa pun yang bisa ditulis di sini.
       return new KesalahanUkuran(error.message, false);
     case '22004': // null_value_not_allowed — pencatatan baru tanpa ukuran
       return new KesalahanUkuran('Isi setidaknya satu ukuran sebelum menyimpan.', false);

@@ -94,11 +94,12 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/redistribusi.ts', join(kerja, 'redistribusi.ts'));
   copyFileSync('packages/logika/src/tdee.ts', join(kerja, 'tdee.ts'));
   copyFileSync('packages/logika/src/bodyFat.ts', join(kerja, 'bodyFat.ts'));
+  copyFileSync('packages/logika/src/ukuran.ts', join(kerja, 'ukuran.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
-     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts',
+     'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts',
      '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
@@ -112,6 +113,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'redistribusi.js')),
     ...require(join(kerja, 'keluar', 'tdee.js')),
     ...require(join(kerja, 'keluar', 'bodyFat.js')),
+    ...require(join(kerja, 'keluar', 'ukuran.js')),
   };
 }
 
@@ -1271,6 +1273,186 @@ try {
   }
   console.log(
     `✓ ${KASUS_BF.length + 1} kasus cocok — estimasi body fat Navy di SQL dan TypeScript sejalan.`,
+  );
+
+  // === Bagian 12: riwayat & delta ukuran ===================================
+  //
+  // Tiga aturan sekaligus. Yang diuji terutama selang yang panjangnya TIDAK
+  // seragam — keadaan normal untuk pencatatan mingguan yang tertunda sehari-dua
+  // hari — dan bagian tubuh yang tidak diukur di sebagian tanggal, karena
+  // keduanya mengubah pembagi laju per pekan.
+  //
+  // Satu hal yang TIDAK diuji di sini, dan sebaiknya disebut daripada
+  // disamarkan: urutan pembulatan (laju dari selisih yang sudah dibulatkan vs
+  // dari nilai mentah) tidak bisa dibedakan lewat jalur ini, karena kolomnya
+  // numeric(5,1) — selisih dua nilai tersimpan selalu sudah berdesimal satu.
+  // Membalik urutannya di SQL tidak membuat satu pun kasus di bawah berbeda.
+  console.log();
+  const { ringkasPerubahan, lajuTerkini, statusBatasPinggang, HARI_PER_PEKAN } = muatLogikaTs();
+
+  const pekanSql = Number(sql('select public.hari_per_pekan();'));
+  const ambangSql = Number(sql('select public.ambang_pekan_batas();'));
+  if (pekanSql !== HARI_PER_PEKAN) {
+    console.error(`✗ Hari per pekan BERBEDA: SQL ${pekanSql} vs TS ${HARI_PER_PEKAN}.`);
+    process.exit(1);
+  }
+  console.log(`✓ konstanta riwayat sama: ${pekanSql} hari/pekan, ambang ${ambangSql} pekan`);
+
+  const UID_RIWAYAT = '99999999-8888-8888-8888-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_RIWAYAT}', 'paritas-riwayat@contoh.test');`);
+
+  // Selang SENGAJA tidak seragam (7, 3, 12, 7, 9 hari) dan dua bagian tubuh
+  // bolong di sebagian tanggal, supaya jalur "lewati tanggal tanpa pengukuran"
+  // ikut terbandingkan.
+  const CATATAN = [
+    { geser: 38, pinggang: 85.4, dada: 102.0, leher: 38.5, paha: 57.0 },
+    { geser: 31, pinggang: 85.1, dada: 101.6, leher: 38.5, paha: null },
+    { geser: 28, pinggang: 84.9, dada: null, leher: 38.4, paha: 56.8 },
+    { geser: 16, pinggang: 84.4, dada: 101.2, leher: 38.4, paha: null },
+    { geser: 9, pinggang: 84.6, dada: null, leher: 38.3, paha: 56.5 },
+    { geser: 0, pinggang: 84.2, dada: 100.9, leher: 38.3, paha: 56.3 },
+  ];
+  for (const c of CATATAN) {
+    const n = (v) => (v === null ? 'null' : v);
+    sql(`
+      set request.jwt.claim.sub = '${UID_RIWAYAT}';
+      select public.simpan_ukuran(
+        ((now() at time zone 'Asia/Jakarta')::date - ${c.geser})::date,
+        ${n(c.pinggang)}, ${n(c.dada)}, ${n(c.leher)}, null, null, ${n(c.paha)}, null);`);
+  }
+
+  const BAGIAN = ['pinggang_cm', 'dada_cm', 'leher_cm', 'paha_kiri_cm'];
+  let gagalRiwayat = 0;
+  console.log('bagian           titik  selang  SQL total  TS total  SQL laju  TS laju');
+  console.log('─'.repeat(78));
+
+  const r = JSON.parse(
+    sql(
+      `set request.jwt.claim.sub = '${UID_RIWAYAT}';
+       select public.riwayat_ukuran(null, 12, 4)::text;`,
+    ),
+  );
+
+  for (const bagian of BAGIAN) {
+    const b = r.bagian[bagian];
+    const titik = b.titik.map((t) => ({ tanggal: t.tanggal, nilai: Number(t.nilai) }));
+    const ts = ringkasPerubahan(titik);
+    const tsLaju = lajuTerkini(titik);
+
+    const beda = [];
+    const cek = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    const angka = (n) => (n === null || n === undefined ? null : Number(n));
+
+    cek('jumlah selang', b.perubahan.length, ts.perubahan.length);
+    b.perubahan.forEach((p, i) => {
+      const t = ts.perubahan[i];
+      if (!t) return;
+      cek(`selang[${i}].dari`, p.dari, t.dari);
+      cek(`selang[${i}].ke`, p.ke, t.ke);
+      cek(`selang[${i}].nilai_dari`, Number(p.nilai_dari), t.nilaiDari);
+      cek(`selang[${i}].nilai_ke`, Number(p.nilai_ke), t.nilaiKe);
+      cek(`selang[${i}].selisih`, Number(p.selisih), t.selisih);
+      cek(`selang[${i}].jarak_hari`, p.jarak_hari, t.jarakHari);
+      cek(`selang[${i}].laju_per_pekan`, Number(p.laju_per_pekan), t.lajuPerPekan);
+    });
+    cek('total_selisih', angka(b.total_selisih), ts.totalSelisih);
+    cek('rentang_hari', b.rentang_hari, ts.rentangHari);
+    cek('awal.tanggal', b.awal.tanggal, ts.awal?.tanggal ?? null);
+    cek('akhir.nilai', Number(b.akhir.nilai), ts.akhir?.nilai ?? null);
+    cek('laju_terkini', angka(b.laju_terkini), tsLaju);
+    // Total selisih harus sama dengan jumlah tiap selang; kalau tidak, salah
+    // satu dari keduanya salah dan layar memperlihatkan dua cerita berbeda.
+    if (ts.totalSelisih !== null) {
+      const jumlah = b.perubahan.reduce((n, p) => n + Number(p.selisih), 0);
+      if (Math.abs(jumlah - Number(b.total_selisih)) > 0.001) {
+        beda.push(`total ${b.total_selisih} ≠ jumlah selang ${jumlah.toFixed(1)}`);
+      }
+    }
+
+    if (beda.length > 0) gagalRiwayat += 1;
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${bagian.padEnd(15)} ${String(b.titik.length).padStart(5)}  ` +
+        `${String(b.perubahan.length).padStart(6)}  ${String(b.total_selisih).padStart(9)}  ` +
+        `${String(ts.totalSelisih).padStart(8)}  ${String(b.laju_terkini).padStart(8)}  ${tsLaju}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  // Batas pinggang: empat keadaan, dan yang menentukan adalah perkiraan WAKTU
+  // sampai batas tercapai, bukan jaraknya.
+  //
+  // Deret di atas MENGECIL, jadi lajunya negatif dan batasnya tidak sedang
+  // didekati — tiga keadaan bisa diuji darinya, tapi `mendekat` tidak. Untuk itu
+  // dipakai pengguna kedua dengan pinggang yang NAIK +0,3 cm/pekan.
+  const UID_NAIK = '99999999-9999-8888-8888-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_NAIK}', 'paritas-naik@contoh.test');`);
+  for (const [geser, nilai] of [[21, 84.0], [14, 84.3], [7, 84.6], [0, 84.9]]) {
+    sql(`
+      set request.jwt.claim.sub = '${UID_NAIK}';
+      select public.simpan_ukuran(
+        ((now() at time zone 'Asia/Jakarta')::date - ${geser})::date, ${nilai}, null, 38.5);`);
+  }
+
+  const KASUS_BATAS = [
+    { label: 'belum ditetapkan', uid: UID_RIWAYAT, batas: null },
+    { label: 'sudah lewat', uid: UID_RIWAYAT, batas: 83.0 },
+    { label: 'laju turun → aman', uid: UID_RIWAYAT, batas: 95.0 },
+    // Pinggang naik +0,3/pekan, sisa 0,6 cm → 2,0 pekan lagi, di bawah ambang 4.
+    { label: 'mendekat', uid: UID_NAIK, batas: 85.5 },
+    // Sisa 3,1 cm dengan laju yang sama → 10,4 pekan, masih aman.
+    { label: 'laju naik → aman', uid: UID_NAIK, batas: 88.0 },
+  ];
+  console.log();
+  console.log('batas pinggang     SQL keadaan        TS keadaan        SQL pekan  TS pekan');
+  console.log('─'.repeat(82));
+  for (const k of KASUS_BATAS) {
+    sql(`update public.profiles set batas_pinggang_cm = ${k.batas ?? 'null'}
+          where user_id = '${k.uid}';`);
+    const rr = JSON.parse(
+      sql(
+        `set request.jwt.claim.sub = '${k.uid}';
+         select public.riwayat_ukuran(null, 12, 4)::text;`,
+      ),
+    );
+    const bp = rr.batas_pinggang;
+    const titik = rr.bagian.pinggang_cm.titik.map((t) => ({
+      tanggal: t.tanggal,
+      nilai: Number(t.nilai),
+    }));
+    const ts = statusBatasPinggang(
+      titik[titik.length - 1].nilai,
+      k.batas,
+      lajuTerkini(titik),
+    );
+
+    const beda = [];
+    const cek = (nama, kiri, kanan) => {
+      if (kiri !== kanan) beda.push(`${nama}: SQL ${kiri} vs TS ${kanan}`);
+    };
+    const angka = (n) => (n === null || n === undefined ? null : Number(n));
+    cek('keadaan', bp.keadaan, ts.keadaan);
+    cek('selisih_cm', angka(bp.selisih_cm), ts.selisihCm);
+    cek('laju_per_pekan', angka(bp.laju_per_pekan), ts.lajuPerPekan);
+    cek('pekan_lagi', angka(bp.pekan_lagi), ts.pekanLagi);
+
+    if (beda.length > 0) gagalRiwayat += 1;
+    console.log(
+      `${beda.length === 0 ? '✓' : '✗'} ${k.label.padEnd(17)} ${String(bp.keadaan).padEnd(17)}  ` +
+        `${String(ts.keadaan).padEnd(16)}  ${String(bp.pekan_lagi).padStart(9)}  ${ts.pekanLagi}`,
+    );
+    for (const d of beda) console.log(`    ↳ ${d}`);
+  }
+
+  console.log();
+  if (gagalRiwayat > 0) {
+    console.error(`✗ ${gagalRiwayat} kasus BERBEDA (riwayat & delta ukuran).`);
+    process.exit(1);
+  }
+  console.log(
+    `✓ ${BAGIAN.length} bagian tubuh & ${KASUS_BATAS.length} keadaan batas cocok — ` +
+      'riwayat & delta ukuran di SQL dan TypeScript sejalan.',
   );
 } finally {
   hentikanPostgres();
