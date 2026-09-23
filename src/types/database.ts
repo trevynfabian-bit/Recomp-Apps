@@ -689,6 +689,24 @@ export type Database = {
         };
         Returns: EndpointBudgetRow;
       };
+      simpan_ukuran: {
+        Args: {
+          p_tanggal: string | null;
+          p_pinggang_cm: number | null;
+          p_dada_cm: number | null;
+          p_leher_cm: number | null;
+          p_lengan_kiri_cm: number | null;
+          p_lengan_kanan_cm: number | null;
+          p_paha_kiri_cm: number | null;
+          p_paha_kanan_cm: number | null;
+          p_catatan: string | null;
+        };
+        Returns: BodyMeasurementRow;
+      };
+      hapus_ukuran: {
+        Args: { p_tanggal: string };
+        Returns: boolean;
+      };
       estimasi_tdee: {
         Args: { p_sampai: string | null; p_hari: number; p_persen_lemak: number | null };
         Returns: EstimasiTdeeRow;
