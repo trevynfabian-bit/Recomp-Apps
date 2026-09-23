@@ -7,6 +7,8 @@ import { colors, radius, spacing, typography } from '@/theme';
 type Props = {
   ringkasan: RingkasanWidget;
   tampilkanAngka: boolean;
+  /** Untuk label "Sisa per 07.12" saat angkanya sudah lebih dari sejam. */
+  sekarang?: Date;
 };
 
 /*
@@ -29,8 +31,8 @@ const PUTIH_LATAR = '#FFFFFF24';
  * native (`targets/widget/TeksWidget.swift`), jadi yang terlihat di sini adalah
  * yang terlihat di iPhone — termasuk saat angka disembunyikan.
  */
-export function PratinjauWidget({ ringkasan, tampilkanAngka }: Props) {
-  const persegi = teksWidget(ringkasan, tampilkanAngka);
+export function PratinjauWidget({ ringkasan, tampilkanAngka, sekarang }: Props) {
+  const persegi = teksWidget(ringkasan, tampilkanAngka, sekarang);
   const sebaris = teksWidgetSebaris(ringkasan, tampilkanAngka);
   const lingkar = isiWidgetLingkar(ringkasan, tampilkanAngka);
 
@@ -120,7 +122,8 @@ function WidgetLingkar({
     >
       <Svg width={UKURAN_LINGKAR} height={UKURAN_LINGKAR} style={{ position: 'absolute' }}>
         <Circle cx={UKURAN_LINGKAR / 2} cy={UKURAN_LINGKAR / 2} r={r} stroke={PUTIH_LATAR} strokeWidth={TEBAL} fill="none" />
-        {terpakai !== null ? (
+        {/* Busur nol tidak digambar: ujung bulat pada panjang nol menjadi titik. */}
+        {terpakai !== null && terpakai > 0 ? (
           <Circle
             cx={UKURAN_LINGKAR / 2}
             cy={UKURAN_LINGKAR / 2}

@@ -1,6 +1,7 @@
 // BERKAS TURUNAN — jangan diedit. Disalin dari packages/logika/src oleh
 // `npm run salin:logika`; satu-satunya perubahan: akhiran .ts pada impor relatif.
 import { formatAngka, formatMakro } from './format.ts';
+import { formatJam } from './percakapan.ts';
 
 /**
  * Pengingat & widget layar kunci.
@@ -77,8 +78,22 @@ export function pelanggaranNada(teks: string): string[] {
   return hasil;
 }
 
+/**
+ * Keadaan widget saat TIDAK ADA angka hari ini untuk ditampilkan:
+ *   • belum-masuk  — app belum pernah masuk di perangkat ini;
+ *   • tanpa-target — belum ada target kalori, jadi "sisa" tidak bermakna;
+ *   • hari-baru    — belum ada ringkasan HARI INI (mis. lewat tengah malam,
+ *                    server belum menghitung). Ringkasan kemarin TIDAK PERNAH
+ *                    ditampilkan sebagai hari ini.
+ */
+export type KeadaanKosongWidget = 'belum-masuk' | 'tanpa-target' | 'hari-baru';
+
 /** Ringkasan hari yang dibaca widget, seperti `daily_summaries` di PRD. */
 export type RingkasanWidget = {
+  /** Diisi `siapkanWidget` bila tidak ada angka hari ini. */
+  kosong?: KeadaanKosongWidget;
+  /** Target protein hari itu; dipakai keadaan hari-baru. */
+  targetProteinG?: number | null;
   sisaKalori: number | null;
   sisaProteinG: number | null;
   /**
@@ -105,6 +120,8 @@ export type RingkasanWidget = {
 export function teksWidget(
   r: RingkasanWidget,
   tampilkanAngka: boolean,
+  /** Untuk label "per 07.12" bila angkanya sudah lebih dari sejam; opsional. */
+  sekarang?: Date,
 ): { judul: string; baris1: string; baris2: string; aksesLabel: string } {
   if (!tampilkanAngka) {
     return {
@@ -114,7 +131,29 @@ export function teksWidget(
       aksesLabel: 'Recomp. Buka app untuk melihat sisa hari ini.',
     };
   }
-  if (r.sisaKalori === null) {
+  if (r.kosong === 'belum-masuk') {
+    return {
+      judul: 'Recomp',
+      baris1: 'Masuk ke app untuk',
+      baris2: 'melihat sisa hari ini',
+      aksesLabel: 'Recomp. Masuk ke app untuk melihat sisa hari ini.',
+    };
+  }
+  if (r.kosong === 'tanpa-target') {
+    return {
+      judul: 'Sisa hari ini',
+      baris1: 'Target belum diatur',
+      baris2: 'Atur di app',
+      aksesLabel: 'Target belum diatur. Atur di app.',
+    };
+  }
+  if (r.kosong === 'hari-baru' && r.targetKalori != null) {
+    const kalori = `Target ${formatAngka(r.targetKalori)} kcal`;
+    const protein =
+      r.targetProteinG != null ? `Protein ${formatMakro(r.targetProteinG)} g` : 'Belum ada catatan';
+    return { judul: 'Hari baru', baris1: kalori, baris2: protein, aksesLabel: `Hari baru. ${kalori}. ${protein}.` };
+  }
+  if (r.sisaKalori === null || r.kosong === 'hari-baru') {
     return {
       judul: 'Sisa hari ini',
       baris1: 'Belum ada ringkasan',
@@ -132,7 +171,48 @@ export function teksWidget(
       : r.sisaProteinG > 0
         ? `${formatMakro(r.sisaProteinG)} g protein lagi`
         : 'Protein tercapai';
-  return { judul: 'Sisa hari ini', baris1: kalori, baris2: protein, aksesLabel: `${kalori}. ${protein}.` };
+  // Angka yang sudah lebih dari sejam diberi jamnya: siapa pun yang makan
+  // siang setelah ringkasan pukul 07.12 berhak tahu angkanya belum ikut.
+  const basi =
+    sekarang !== undefined &&
+    r.dihitungPada !== null &&
+    sekarang.getTime() - Date.parse(r.dihitungPada) > BATAS_SEGAR_MS;
+  const judul = basi ? `Sisa per ${formatJam(r.dihitungPada as string)}` : 'Sisa hari ini';
+  return { judul, baris1: kalori, baris2: protein, aksesLabel: `${judul}: ${kalori}. ${protein}.` };
+}
+
+/** Setelah selama ini, angka widget diberi label jamnya. */
+export const BATAS_SEGAR_MS = 60 * 60_000;
+
+/**
+ * Siapkan masukan widget dari apa yang tersimpan di perangkat.
+ *
+ * Aturan terpentingnya: ringkasan yang tanggalnya BUKAN hari ini (Asia/Jakarta)
+ * dibuang. Widget layar kunci bisa hidup berjam-jam tanpa dimuat ulang, dan
+ * "1.120 kcal tersisa" yang sebenarnya milik kemarin adalah angka salah yang
+ * terlihat benar — lebih buruk daripada tidak ada angka.
+ */
+export function siapkanWidget(
+  masukan: {
+    masuk: boolean;
+    ringkasan: (RingkasanWidget & { tanggal: string }) | null;
+    target: { kalori: number | null; proteinG: number | null } | null;
+  },
+  hariIni: string,
+): RingkasanWidget {
+  const kosong = (k: KeadaanKosongWidget): RingkasanWidget => ({
+    kosong: k,
+    sisaKalori: null,
+    sisaProteinG: null,
+    targetKalori: masukan.target?.kalori ?? null,
+    targetProteinG: masukan.target?.proteinG ?? null,
+    dihitungPada: null,
+  });
+  if (!masukan.masuk) return kosong('belum-masuk');
+  if (masukan.target === null || masukan.target.kalori === null) return kosong('tanpa-target');
+  if (masukan.ringkasan === null || masukan.ringkasan.tanggal !== hariIni) return kosong('hari-baru');
+  const { tanggal: _t, ...r } = masukan.ringkasan;
+  return { ...r, targetKalori: r.targetKalori ?? masukan.target.kalori };
 }
 
 /**
@@ -141,7 +221,10 @@ export function teksWidget(
  * dan satuan saja.
  */
 export function teksWidgetSebaris(r: RingkasanWidget, tampilkanAngka: boolean): string {
-  if (!tampilkanAngka || r.sisaKalori === null) return 'Recomp';
+  if (tampilkanAngka && r.kosong === 'hari-baru' && r.targetKalori != null) {
+    return `Target ${formatAngka(r.targetKalori)} kcal`;
+  }
+  if (!tampilkanAngka || r.kosong !== undefined || r.sisaKalori === null) return 'Recomp';
   const kalori = r.sisaKalori >= 0 ? `${formatAngka(r.sisaKalori)} kcal` : `+${formatAngka(-r.sisaKalori)} kcal`;
   if (r.sisaProteinG === null) return kalori;
   const protein = r.sisaProteinG > 0 ? `${formatMakro(r.sisaProteinG)} g protein` : 'protein tercapai';
@@ -157,7 +240,16 @@ export function isiWidgetLingkar(
   r: RingkasanWidget,
   tampilkanAngka: boolean,
 ): { angka: string; satuan: string; terpakai: number | null; aksesLabel: string } {
-  if (!tampilkanAngka || r.sisaKalori === null) {
+  if (tampilkanAngka && r.kosong === 'hari-baru' && r.targetKalori != null) {
+    // Cincin kosong + target: hari baru dimulai dari nol, bukan dari angka kemarin.
+    return {
+      angka: formatAngka(r.targetKalori),
+      satuan: 'target',
+      terpakai: 0,
+      aksesLabel: `Hari baru. Target ${formatAngka(r.targetKalori)} kcal.`,
+    };
+  }
+  if (!tampilkanAngka || r.kosong !== undefined || r.sisaKalori === null) {
     return { angka: '–', satuan: 'kcal', terpakai: null, aksesLabel: 'Recomp. Buka app untuk melihat sisa hari ini.' };
   }
   const target = r.targetKalori ?? null;

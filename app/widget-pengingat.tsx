@@ -8,11 +8,18 @@ import {
   NOTIF_RINGKASAN,
   NOTIF_TIMBANG,
   ringkasJadwal,
+  siapkanWidget,
   tanggalHariIni,
 } from '@recomp/logika';
 import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { mockPengaturanPengingat, mockRingkasanWidget, mockWaktuTimbang } from '@/mocks/widget';
+import {
+  LABEL_SKENARIO_WIDGET,
+  mockMasukanWidget,
+  mockPengaturanPengingat,
+  mockWaktuTimbang,
+  type SkenarioWidget,
+} from '@/mocks/widget';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
@@ -30,7 +37,14 @@ export default function WidgetPengingatScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [atur, setAtur] = useState(mockPengaturanPengingat);
-  const [ringkasan] = useState(() => mockRingkasanWidget());
+  const [skenario, setSkenario] = useState<SkenarioWidget>('hari-ini');
+  const [sekarang] = useState(() => new Date());
+  // Lewat `siapkanWidget` yang sama dengan widget native: ringkasan kemarin
+  // dibuang di sini, bukan disembunyikan oleh layar pratinjau.
+  const ringkasan = useMemo(
+    () => siapkanWidget(mockMasukanWidget(skenario, sekarang), tanggalHariIni()),
+    [skenario, sekarang],
+  );
   const [waktuTimbang] = useState(() => mockWaktuTimbang());
   const [sheetJamTerbuka, setSheetJamTerbuka] = useState(false);
 
@@ -144,7 +158,8 @@ export default function WidgetPengingatScreen() {
       <View>
         <SectionHeader judul="Widget layar kunci" />
         <Card style={{ gap: spacing.lg }}>
-          <PratinjauWidget ringkasan={ringkasan} tampilkanAngka={atur.widgetTampilkanAngka} />
+          <PratinjauWidget ringkasan={ringkasan} tampilkanAngka={atur.widgetTampilkanAngka} sekarang={sekarang} />
+          <PemilihSkenario terpilih={skenario} onPilih={setSkenario} />
           <BarisSakelar
             judul="Tampilkan angka di layar kunci"
             keterangan="Layar kunci bisa dilihat tanpa membuka kunci. Matikan bila tidak ingin sisa kalori & protein terlihat orang lain."
@@ -206,6 +221,67 @@ function BarisSakelar({
         trackColor={{ true: colors.jade, false: colors.surfaceSunken }}
         thumbColor={colors.text}
       />
+    </View>
+  );
+}
+
+const SKENARIO = Object.keys(LABEL_SKENARIO_WIDGET) as SkenarioWidget[];
+
+/**
+ * Pratinjau keadaan layar kunci. Widget paling sering dilihat justru saat
+ * TIDAK ada angka hari ini — lewat tengah malam, sebelum masuk, sebelum target
+ * diatur — jadi keadaan itu ikut dipratinjau, bukan hanya hari yang lengkap.
+ */
+function PemilihSkenario({
+  terpilih,
+  onPilih,
+}: {
+  terpilih: SkenarioWidget;
+  onPilih: (s: SkenarioWidget) => void;
+}) {
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        Pratinjau keadaan
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        accessibilityRole="radiogroup"
+        accessibilityLabel="Pratinjau keadaan widget"
+        contentContainerStyle={{ gap: spacing.sm }}
+      >
+        {SKENARIO.map((s) => {
+          const aktif = s === terpilih;
+          return (
+            <Pressable
+              key={s}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: aktif }}
+              accessibilityLabel={`Pratinjau: ${LABEL_SKENARIO_WIDGET[s]}`}
+              onPress={() => {
+                if (aktif) return;
+                ketukRingan();
+                onPilih(s);
+              }}
+              style={({ pressed }) => ({
+                minHeight: TAP_MIN,
+                justifyContent: 'center',
+                paddingHorizontal: spacing.lg,
+                borderRadius: radius.pill,
+                borderWidth: 1,
+                borderColor: aktif ? colors.borderKuat : colors.border,
+                backgroundColor: aktif ? colors.surfaceSunken : 'transparent',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
+                {LABEL_SKENARIO_WIDGET[s]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }

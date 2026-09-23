@@ -25,10 +25,30 @@ struct PenyediaTiruan: TimelineProvider {
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<EntriWidget>) -> Void) {
+    let sekarang = Date()
+    let tersimpan = RingkasanTersimpan(ringkasan: Self.contoh, tanggal: TeksWidget.tanggalWib(sekarang))
+    let tengahMalam = TeksWidget.tengahMalamBerikut(setelah: sekarang)
+    // Tiga titik waktu: sekarang, saat angka berganti label "Sisa per 07.12",
+    // dan tengah malam WIB — saat ringkasan ini berhenti berlaku. Entri tengah
+    // malam dibuat SEKARANG, jadi layar kunci berganti ke "Hari baru" walau
+    // app tidak dibuka dan iOS menunda pemuatan ulang.
+    let waktu = [sekarang, sekarang.addingTimeInterval(TeksWidget.batasSegar + 60), tengahMalam]
+      .filter { $0 <= tengahMalam }
+      .sorted()
+    let entri = waktu.map { t in
+      EntriWidget(
+        date: t,
+        ringkasan: TeksWidget.siapkan(
+          masuk: true, tersimpan: tersimpan, targetKalori: 3100, targetProteinG: 180,
+          hariIni: TeksWidget.tanggalWib(t)
+        ),
+        tampilkanAngka: true
+      )
+    }
     // Minta dimuat ulang setengah jam lagi; server menghitung ulang ringkasan
     // secara berkala, dan layar kunci tidak perlu lebih segar dari itu.
-    let berikut = Date().addingTimeInterval(30 * 60)
-    completion(Timeline(entries: [placeholder(in: context)], policy: .after(berikut)))
+    let berikut = sekarang.addingTimeInterval(30 * 60)
+    completion(Timeline(entries: entri, policy: .after(berikut)))
   }
 }
 
@@ -43,7 +63,7 @@ struct TampilanWidget: View {
     case .accessoryCircular:
       WidgetLingkar(isi: TeksWidget.lingkar(entri.ringkasan, tampilkanAngka: entri.tampilkanAngka))
     default:
-      WidgetPersegi(teks: TeksWidget.persegi(entri.ringkasan, tampilkanAngka: entri.tampilkanAngka))
+      WidgetPersegi(teks: TeksWidget.persegi(entri.ringkasan, tampilkanAngka: entri.tampilkanAngka, sekarang: entri.date))
     }
   }
 }

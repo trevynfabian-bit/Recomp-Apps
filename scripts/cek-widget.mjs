@@ -22,6 +22,7 @@ const {
   formatJamMenit, geserJamTimbang, JAM_TIMBANG_BAWAAN, NOTIF_RINGKASAN, NOTIF_TIMBANG,
   isiWidgetLingkar, jamPengingatUntuk, MIN_TIMBANGAN_SARAN, pelanggaranNada, perluPengingatTimbang,
   RENTANG_JAM_TIMBANG, ringkasJadwal, saranJamTimbang, teksWidget, teksWidgetSebaris,
+  siapkanWidget, BATAS_SEGAR_MS,
 } = require(join(kerja, 'keluar', 'pengingat.js'));
 
 let gagal = 0;
@@ -130,6 +131,84 @@ console.log('\nWidget sebaris & bundar');
   cek('sebaris & bundar netral di seluruh rentang', kasar.length === 0, kasar.slice(0, 2).join(' | '));
 }
 
+console.log('\nWidget saat data kosong');
+{
+  const hariIni = '2026-09-23';
+  const target = { kalori: 3100, proteinG: 180 };
+  const kemarin = { sisaKalori: 1120, sisaProteinG: 57, targetKalori: 3100, dihitungPada: '2026-09-22T12:00:00Z', tanggal: '2026-09-22' };
+  const baru = siapkanWidget({ masuk: true, ringkasan: kemarin, target }, hariIni);
+  // "Bocor" = angka kemarin terbaca di layar kunci hari ini.
+  const bocor = (r) => /1\.120|57 g/.test(`${teksWidget(r, true).aksesLabel} ${teksWidgetSebaris(r, true)} ${isiWidgetLingkar(r, true).aksesLabel}`);
+  cek('ringkasan kemarin → keadaan "hari-baru", tanpa sisa', baru.kosong === 'hari-baru' && baru.sisaKalori === null);
+  cek('angka kemarin tidak pernah tampil sebagai hari ini', !bocor(baru));
+  // Kontrol negatif: widget yang tidak memeriksa tanggal menampilkan angka kemarin.
+  const { tanggal: _t, ...naif } = kemarin;
+  cek('kontrol: tanpa pemeriksaan tanggal, angka kemarin tertangkap bocor', bocor(naif));
+  const sekarang = siapkanWidget({ masuk: true, ringkasan: { ...kemarin, tanggal: hariIni }, target }, hariIni);
+  cek('ringkasan hari ini diteruskan apa adanya', sekarang.kosong === undefined && sekarang.sisaKalori === 1120);
+  const tanpaTargetRingkasan = siapkanWidget(
+    { masuk: true, ringkasan: { ...kemarin, targetKalori: undefined, tanggal: hariIni }, target }, hariIni);
+  cek('target cincin diambil dari target hari bila ringkasan tidak membawanya', tanpaTargetRingkasan.targetKalori === 3100);
+  cek('belum masuk menang atas ringkasan apa pun',
+    siapkanWidget({ masuk: false, ringkasan: { ...kemarin, tanggal: hariIni }, target }, hariIni).kosong === 'belum-masuk');
+  cek('tanpa target → "tanpa-target"',
+    siapkanWidget({ masuk: true, ringkasan: null, target: null }, hariIni).kosong === 'tanpa-target' &&
+      siapkanWidget({ masuk: true, ringkasan: null, target: { kalori: null, proteinG: 150 } }, hariIni).kosong === 'tanpa-target');
+
+  const t = teksWidget(baru, true);
+  cek(`hari baru: "${t.judul}" / "${t.baris1}" / "${t.baris2}"`,
+    t.judul === 'Hari baru' && t.baris1 === 'Target 3.100 kcal' && t.baris2 === 'Protein 180 g');
+  cek('hari baru tanpa target protein', teksWidget({ ...baru, targetProteinG: null }, true).baris2 === 'Belum ada catatan');
+  cek(`sebaris hari baru: "${teksWidgetSebaris(baru, true)}"`, teksWidgetSebaris(baru, true) === 'Target 3.100 kcal');
+  const l = isiWidgetLingkar(baru, true);
+  cek('bundar hari baru: cincin kosong + target', l.terpakai === 0 && l.angka === '3.100' && l.satuan === 'target');
+
+  const semuaKosong = ['belum-masuk', 'tanpa-target', 'hari-baru'].flatMap((k) =>
+    [3100, null].flatMap((tk) => [180, null].map((tp) => ({
+      kosong: k, sisaKalori: null, sisaProteinG: null, targetKalori: tk, targetProteinG: tp, dihitungPada: null,
+    }))));
+  const kasar = [];
+  const digitBocor = [];
+  for (const r of semuaKosong) {
+    for (const tampil of [true, false]) {
+      const p = teksWidget(r, tampil, new Date());
+      const teks = `${p.judul} ${p.baris1} ${p.baris2} ${p.aksesLabel} ${teksWidgetSebaris(r, tampil)} ${isiWidgetLingkar(r, tampil).aksesLabel}`;
+      if (pelanggaranNada(teks).length > 0 || /NaN|undefined|null|-\d/.test(teks)) kasar.push(`${r.kosong}: ${teks}`);
+      // Angka hanya boleh muncul sebagai TARGET hari baru, dan hanya bila angka ditampilkan.
+      if (/\d/.test(teks) && !(tampil && r.kosong === 'hari-baru' && r.targetKalori !== null)) digitBocor.push(`${r.kosong}/${tampil}: ${teks}`);
+    }
+  }
+  cek(`${semuaKosong.length * 2} keadaan kosong netral, tanpa NaN/null`, kasar.length === 0, kasar.slice(0, 2).join(' | '));
+  cek('keadaan kosong tanpa angka, kecuali target hari baru saat angka ditampilkan', digitBocor.length === 0, digitBocor.slice(0, 2).join(' | '));
+  const belum = teksWidget(semuaKosong[0], true);
+  cek(`belum masuk: "${belum.baris1} ${belum.baris2}"`, belum.baris1 === 'Masuk ke app untuk');
+  // Widget persegi layar kunci ±160 pt: baris lebih panjang dari
+  // "melihat sisa hari ini" (21 karakter) terpotong "…" di iPhone.
+  const panjang = semuaKosong.flatMap((r) => {
+    const p = teksWidget(r, true);
+    return [p.baris1, p.baris2].filter((b) => b.length > 21);
+  });
+  cek('teks keadaan kosong muat satu baris widget persegi', panjang.length === 0, panjang.join(' | '));
+  cek('kontrol: kalimat lama yang terpotong tertangkap', 'untuk melihat sisa hari ini'.length > 21);
+  const tanpa = teksWidget(semuaKosong[4], true);
+  cek(`tanpa target: "${tanpa.baris1} · ${tanpa.baris2}"`, tanpa.baris1 === 'Target belum diatur' && tanpa.baris2 === 'Atur di app');
+}
+
+console.log('\nAngka yang sudah lama diberi jamnya');
+{
+  const r = { sisaKalori: 1120, sisaProteinG: 57, targetKalori: 3100, dihitungPada: '2026-09-23T00:12:00Z' }; // 07.12 WIB
+  const pada = (menit) => new Date(Date.parse(r.dihitungPada) + menit * 60_000);
+  cek(`batas segar sejam (${BATAS_SEGAR_MS} ms)`, BATAS_SEGAR_MS === 3_600_000);
+  cek('38 menit: "Sisa hari ini"', teksWidget(r, true, pada(38)).judul === 'Sisa hari ini');
+  cek('tepat sejam: masih "Sisa hari ini"', teksWidget(r, true, pada(60)).judul === 'Sisa hari ini');
+  const lama = teksWidget(r, true, pada(61));
+  cek(`61 menit: "${lama.judul}" (jam WIB, bukan UTC 00.12)`, lama.judul === 'Sisa per 07.12');
+  cek('label aksesibilitas ikut menyebut jamnya', lama.aksesLabel.startsWith('Sisa per 07.12:'));
+  cek('tanpa jam sekarang: tidak pernah diberi label lama', teksWidget(r, true).judul === 'Sisa hari ini');
+  const sembunyi = teksWidget(r, false, pada(300));
+  cek('angka disembunyikan: label jam pun tidak muncul', !/\d/.test(`${sembunyi.judul} ${sembunyi.aksesLabel}`));
+}
+
 console.log('\nWidget native (Swift) sejalan dengan TypeScript');
 {
   const swift = readFileSync('targets/widget/TeksWidget.swift', 'utf8');
@@ -139,6 +218,10 @@ console.log('\nWidget native (Swift) sejalan dengan TypeScript');
     'kcal tersisa', 'kcal di atas target', 'g protein lagi', 'Protein tercapai', 'Protein belum ditargetkan',
     'Belum ada ringkasan', 'Buka app untuk mulai', 'Buka app untuk', 'melihat sisa hari ini', 'Sisa hari ini',
     'Recomp. Buka app untuk melihat sisa hari ini.', 'Belum ada ringkasan hari ini.', 'g protein', 'protein tercapai',
+    // Keadaan kosong & label angka lama.
+    'Masuk ke app untuk', 'Recomp. Masuk ke app untuk melihat sisa hari ini.',
+    'Target belum diatur', 'Atur di app', 'Target belum diatur. Atur di app.', 'Hari baru', 'Target ', 'Protein ',
+    'Belum ada catatan', 'Sisa per ', '"target"',
   ];
   const frasaHilang = (sumber) => frasa.filter((f) => !sumber.includes(f));
   const hilang = frasaHilang(swift);
@@ -150,6 +233,14 @@ console.log('\nWidget native (Swift) sejalan dengan TypeScript');
   const menegur = literal.filter((t) => pelanggaranNada(t).length > 0);
   cek(`${literal.length} teks di Swift, semuanya netral`, menegur.length === 0, menegur.join(' | '));
   cek('angka Swift diformat lokal Indonesia (titik ribuan, koma desimal)', (swift.match(/Locale\(identifier: "id_ID"\)/g) ?? []).length === 2);
+  cek('Swift memakai batas segar yang sama (sejam)', /batasSegar: TimeInterval = 60 \* 60/.test(swift));
+  cek('Swift membuang ringkasan yang tanggalnya bukan hari ini', /tanggal == hariIni/.test(swift) && /\.hariBaru/.test(swift));
+  const jumlah = (pola) => (swift.match(pola) ?? []).length;
+  cek('Swift memakai zona WIB untuk setiap tanggal, jam, & tengah malam',
+    jumlah(/DateFormatter\(\)/g) === 2 && jumlah(/f\.timeZone = zonaWib/g) === 2 &&
+      swift.includes('kalender.timeZone = zonaWib') && swift.includes('"Asia/Jakarta"'));
+  cek('timeline menyiapkan entri tengah malam (berganti ke "Hari baru" tanpa app dibuka)',
+    widget.includes('tengahMalamBerikut') && widget.includes('TeksWidget.siapkan('));
   cek('tiga ukuran layar kunci didukung',
     ['.accessoryRectangular', '.accessoryCircular', '.accessoryInline'].every((f) => widget.includes(f)));
   cek('widget hanya membaca: tidak ada perhitungan target di Swift selain porsi cincin',
