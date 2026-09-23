@@ -1,5 +1,6 @@
 // BERKAS TURUNAN — jangan diedit. Disalin dari packages/logika/src oleh
 // `npm run salin:logika`; satu-satunya perubahan: akhiran .ts pada impor relatif.
+import type { JenisSet, SesiLatihan, SetLatihan } from './latihan.ts';
 import type { JenisOlahraga } from './tipe.ts';
 
 /**
@@ -268,4 +269,108 @@ export function kirimanHapusRecoveryWhoop(idTidur: string): KirimanLuar {
       { id: idTidur, jenis: 'hrv' },
     ],
   };
+}
+
+// ---------------------------------------------------------------------------
+// Hevy (API publik v1, ditarik cron)
+// ---------------------------------------------------------------------------
+
+export type SetHevy = {
+  index: number;
+  type: string;
+  weight_kg: number | null;
+  reps: number | null;
+  distance_meters?: number | null;
+  duration_seconds?: number | null;
+};
+
+export type WorkoutHevy = {
+  id: string;
+  title: string;
+  start_time: string;
+  end_time: string;
+  updated_at?: string;
+  exercises: { index: number; title: string; sets: SetHevy[] }[];
+};
+
+/** Satu peristiwa dari `GET /v1/workouts/events`. */
+export type PeristiwaHevy =
+  | { type: 'updated'; workout: WorkoutHevy }
+  | { type: 'deleted'; id: string; deleted_at?: string };
+
+/** Sesi Hevy siap untuk `terima_sesi_hevy`: sesi + jenis olahraganya. */
+export type SesiHevy = SesiLatihan & { jenis: JenisOlahraga };
+
+const JENIS_SET: readonly JenisSet[] = ['normal', 'warmup', 'dropset', 'failure'];
+
+/**
+ * Satu workout Hevy → satu sesi, dengan aturan yang SAMA seperti impor CSV
+ * (`uraiCsvHevy`): nomor set mulai 1, beban 0 kg = berat badan (`null`), set
+ * tanpa repetisi (kardio, plank berdurasi) tidak masuk `workout_sets`.
+ * Latihan yang tercatat dua kali dalam satu sesi tetap dua entri — urutannya
+ * bagian dari latihan itu.
+ */
+export function sesiDariWorkoutHevy(w: WorkoutHevy): SesiHevy {
+  const latihan = [...(w.exercises ?? [])]
+    .sort((a, b) => a.index - b.index)
+    .map((e) => ({
+      latihan: (e.title ?? '').trim().slice(0, 120) || 'Latihan',
+      sets: [...(e.sets ?? [])]
+        .sort((a, b) => a.index - b.index)
+        .filter((st) => st.reps != null && Number.isInteger(st.reps) && st.reps > 0)
+        .map(
+          (st): SetLatihan => ({
+            set_ke: st.index + 1,
+            beban_kg: st.weight_kg == null || st.weight_kg <= 0 ? null : Math.round(st.weight_kg * 100) / 100,
+            reps: st.reps as number,
+            jenis: (JENIS_SET as readonly string[]).includes(st.type) ? (st.type as JenisSet) : 'normal',
+          }),
+        ),
+    }))
+    .filter((l) => l.sets.length > 0);
+
+  const durasi = (Date.parse(w.end_time) - Date.parse(w.start_time)) / 1000;
+  return {
+    id: w.id,
+    mulai: w.start_time,
+    nama: (w.title ?? '').trim().slice(0, 120) || 'Latihan Hevy',
+    durasi_menit: menit(durasi) ?? 0,
+    latihan,
+    // Hevy adalah catatan latihan BEBAN. Sesi tanpa satu pun set berepetisi
+    // (hanya kardio yang dicatat di Hevy) bukan hari angkat beban.
+    jenis: latihan.length > 0 ? 'angkat_beban' : 'lainnya',
+  };
+}
+
+/**
+ * Ringkas satu halaman (atau lebih) peristiwa menjadi kiriman. Satu workout
+ * bisa muncul dua kali (diubah lalu dihapus); yang TERAKHIR menang, menurut
+ * waktunya — urutan dalam halaman tidak dijamin.
+ */
+export function kirimanHevy(peristiwa: PeristiwaHevy[]): { sesi: SesiHevy[]; hapus: string[] } {
+  const terakhir = new Map<string, { waktu: number; p: PeristiwaHevy }>();
+  for (const p of peristiwa) {
+    const id = p.type === 'updated' ? p.workout.id : p.id;
+    const waktu = Date.parse(p.type === 'updated' ? (p.workout.updated_at ?? p.workout.end_time) : (p.deleted_at ?? '')) || 0;
+    const lama = terakhir.get(id);
+    if (!lama || waktu >= lama.waktu) terakhir.set(id, { waktu, p });
+  }
+  const sesi: SesiHevy[] = [];
+  const hapus: string[] = [];
+  for (const [id, { p }] of terakhir) {
+    if (p.type === 'updated') sesi.push(sesiDariWorkoutHevy(p.workout));
+    else hapus.push(id);
+  }
+  return { sesi, hapus };
+}
+
+/**
+ * Kursor penarikan berikutnya: saat penarikan DIMULAI, dikurangi jeda.
+ * Workout yang disimpan Hevy tepat saat kita menarik tidak boleh terlewat;
+ * menariknya dua kali aman karena penerimanya idempoten.
+ */
+export const JEDA_KURSOR_HEVY_MS = 5 * 60_000;
+
+export function kursorHevyBerikut(mulaiTarik: Date): string {
+  return new Date(mulaiTarik.getTime() - JEDA_KURSOR_HEVY_MS).toISOString();
 }

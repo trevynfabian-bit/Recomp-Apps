@@ -772,8 +772,29 @@ export type HealthConnectionRow = {
   sinkron_terakhir: string | null;
   galat_terakhir: string | null;
   galat_pada: string | null;
+  /** Sumber yang ditarik cron (Hevy): peristiwa sejak waktu ini belum diambil. */
+  kursor_sinkron: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * Baris `workout_sets` — set latihan beban dari Hevy. Hanya dibaca klien;
+ * Hevy adalah sumber kebenarannya.
+ */
+export type WorkoutSetRow = {
+  id: string;
+  workout_id: string;
+  user_id: string;
+  latihan: string;
+  /** Urutan latihan dalam sesi (1…); latihan yang sama bisa muncul dua kali. */
+  latihan_ke: number;
+  set_ke: number;
+  jenis_set: 'normal' | 'warmup' | 'dropset' | 'failure';
+  /** `null` = berat badan tanpa beban tambahan. */
+  beban_kg: number | null;
+  reps: number;
+  created_at: string;
 };
 
 /** Jenis angka di `health_data`; satuannya tetap per jenis (lihat `satuan`). */
@@ -995,6 +1016,8 @@ export type WorkoutRow = {
   sumber: SumberWorkoutDb;
   durasi_menit: number | null;
   external_id: string | null;
+  /** Waktu mulai asli; bila ada, `tanggal` = tanggal WIB-nya (dijaga CHECK). */
+  waktu_mulai: string | null;
   created_at: string;
 };
 
@@ -1119,6 +1142,12 @@ export type Database = {
         Update: Partial<
           Pick<HealthConnectionRow, 'status' | 'sinkron_terakhir' | 'galat_terakhir' | 'galat_pada'>
         >;
+        Relationships: [];
+      };
+      workout_sets: {
+        Row: WorkoutSetRow;
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       health_data: {

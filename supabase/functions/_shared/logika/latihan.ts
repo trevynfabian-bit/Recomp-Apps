@@ -20,12 +20,17 @@ import { tanggalDariWaktu } from './percakapan.ts';
 /** Batas repetisi untuk e1RM; SAMA dengan aturan `workout_sets.e1rm_kg` di PRD. */
 export const MAKS_REPS_E1RM = 12;
 
+/** Jenis set di Hevy. Pemanasan tetap disimpan, tapi bukan bukti kekuatan. */
+export type JenisSet = 'normal' | 'warmup' | 'dropset' | 'failure';
+
 /** Satu set seperti yang tersimpan di `workout_sets`. */
 export type SetLatihan = {
   set_ke: number;
   /** `null` untuk latihan berat badan (pull-up, dip) tanpa beban tambahan. */
   beban_kg: number | null;
   reps: number;
+  /** Dari API Hevy; ekspor CSV lama tidak selalu membawanya. */
+  jenis?: JenisSet;
 };
 
 export type LatihanDalamSesi = {

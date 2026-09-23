@@ -1,5 +1,5 @@
 /**
- * Memeriksa normalisasi webhook Strava & WHOOP dan tanda tangan WHOOP.
+ * Memeriksa normalisasi Strava, WHOOP & Hevy dan tanda tangan WHOOP.
  *
  * Yang paling mudah salah diam-diam di sini bukan kodenya, melainkan
  * SATUAN dan WAKTU: energi WHOOP dalam kilojoule, recovery yang harus jatuh
@@ -28,11 +28,12 @@ writeFileSync(
 writeFileSync(join(kerja, 'deno.d.ts'), 'declare namespace Deno { const env: { get(n: string): string | undefined }; }\n');
 symlinkSync(join(process.cwd(), 'node_modules'), join(kerja, 'node_modules'));
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-  ['sinkronLuar.ts', 'sumberLuar.ts', 'deno.d.ts', '--module', 'commonjs', '--target', 'es2022',
+  ['sinkronLuar.ts', 'sumberLuar.ts', 'impor.ts', 'deno.d.ts', '--module', 'commonjs', '--target', 'es2022',
    '--lib', 'es2022,dom', '--outDir', join(kerja, 'keluar'), '--skipLibCheck', '--strict'],
   { cwd: kerja, stdio: 'pipe' });
 const L = require(join(kerja, 'keluar', 'sinkronLuar.js'));
 const S = require(join(kerja, 'keluar', 'sumberLuar.js'));
+const I = require(join(kerja, 'keluar', 'impor.js'));
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -107,6 +108,59 @@ console.log('\nWHOOP');
   cek('hapus recovery TIDAK menyebut tidur', hr.hapus_data.every((d) => d.jenis !== 'tidur') && hr.hapus_data.length === 3);
 }
 
+console.log('\nHevy (API)');
+{
+  const w = {
+    id: 'hv-1', title: 'Push Day A', start_time: '2026-09-15T23:10:00Z', end_time: '2026-09-16T00:12:00Z',
+    updated_at: '2026-09-16T00:15:00Z',
+    exercises: [
+      // Sengaja tidak berurutan: urutan dari `index`, bukan dari posisi di array.
+      { index: 1, title: 'Pull Up', sets: [{ index: 0, type: 'normal', weight_kg: 0, reps: 8 }] },
+      { index: 0, title: 'Bench Press (Barbell)', sets: [
+        { index: 1, type: 'normal', weight_kg: 80, reps: 6 },
+        { index: 0, type: 'warmup', weight_kg: 40, reps: 10 },
+        { index: 2, type: 'failure', weight_kg: 80, reps: 5 },
+      ] },
+      { index: 2, title: 'Treadmill', sets: [{ index: 0, type: 'normal', weight_kg: null, reps: null, distance_meters: 1000, duration_seconds: 360 }] },
+    ],
+  };
+  const s = L.sesiDariWorkoutHevy(w);
+  cek('urutan latihan & set dari index', s.latihan.map((l) => l.latihan).join('|') === 'Bench Press (Barbell)|Pull Up'
+    && s.latihan[0].sets.map((x) => x.set_ke).join(',') === '1,2,3');
+  cek('beban 0 kg = berat badan (null)', s.latihan[1].sets[0].beban_kg === null);
+  cek('set tanpa repetisi (treadmill) tidak masuk set', !s.latihan.some((l) => l.latihan === 'Treadmill'));
+  cek('jenis set dibawa (pemanasan dikenali)', s.latihan[0].sets[0].jenis === 'warmup' && s.latihan[0].sets[2].jenis === 'failure');
+  cek(`durasi ${s.durasi_menit} menit, jenis ${s.jenis}`, s.durasi_menit === 62 && s.jenis === 'angkat_beban');
+  cek('waktu mulai tetap UTC (tanggal WIB diturunkan database)', s.mulai === '2026-09-15T23:10:00Z');
+  const kardio = L.sesiDariWorkoutHevy({ ...w, id: 'hv-k', exercises: [w.exercises[2]] });
+  cek('sesi Hevy hanya kardio → bukan hari angkat beban', kardio.jenis === 'lainnya' && kardio.latihan.length === 0);
+
+  // Aturan SAMA dengan impor CSV: sesi yang sama lewat dua jalur → set yang sama.
+  const csv = [
+    'title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps',
+    'Push Day A,2026-09-16 06:10,2026-09-16 07:12,Bench Press (Barbell),0,warmup,40,10',
+    'Push Day A,2026-09-16 06:10,2026-09-16 07:12,Bench Press (Barbell),1,normal,80,6',
+    'Push Day A,2026-09-16 06:10,2026-09-16 07:12,Bench Press (Barbell),2,failure,80,5',
+    'Push Day A,2026-09-16 06:10,2026-09-16 07:12,Pull Up,0,normal,0,8',
+  ].join('\n');
+  const dariCsv = I.uraiCsvHevy(csv).sesi[0];
+  const tanpaJenis = (x) => x.latihan.map((l) => ({ latihan: l.latihan, sets: l.sets.map(({ set_ke, beban_kg, reps }) => ({ set_ke, beban_kg, reps })) }));
+  cek('API & impor CSV menghasilkan set yang sama untuk sesi yang sama',
+    JSON.stringify(tanpaJenis(s)) === JSON.stringify(tanpaJenis(dariCsv)) && dariCsv.mulai === new Date(s.mulai).toISOString()
+      && dariCsv.durasi_menit === s.durasi_menit,
+    `${JSON.stringify(tanpaJenis(s))} vs ${JSON.stringify(tanpaJenis(dariCsv))}`);
+
+  // Peristiwa ganda untuk satu workout: yang TERAKHIR menang, apa pun urutannya.
+  const ubah = { type: 'updated', workout: w };
+  const hapus = { type: 'deleted', id: 'hv-1', deleted_at: '2026-09-16T08:00:00Z' };
+  const a = L.kirimanHevy([hapus, ubah]);
+  cek('diubah lalu dihapus (urutan terbalik di halaman) → dihapus', a.hapus.join() === 'hv-1' && a.sesi.length === 0);
+  const b = L.kirimanHevy([{ ...hapus, deleted_at: '2026-09-15T20:00:00Z' }, ubah]);
+  cek('dihapus lalu dibuat ulang → ada', b.sesi.length === 1 && b.hapus.length === 0);
+  cek(`kursor berikutnya = mulai tarik − ${L.JEDA_KURSOR_HEVY_MS / 60_000} menit`,
+    L.kursorHevyBerikut(new Date('2026-09-16T10:00:00Z')) === '2026-09-16T09:55:00.000Z');
+}
+
 console.log('\nTanda tangan WHOOP');
 {
   const rahasia = 'uji-rahasia-klien';
@@ -131,8 +185,14 @@ console.log('\nTanda tangan WHOOP');
   cek('perbandingan waktu-tetap: sama/beda', (await S.samaWaktuTetap('abc', 'abc')) && !(await S.samaWaktuTetap('abc', 'abd')));
 }
 
-console.log('\nWebhook memakai normalisasi & pembuktian yang sama');
+console.log('\nWebhook & cron memakai normalisasi & pembuktian yang sama');
 {
+  const hevy = readFileSync('supabase/functions/sinkron-hevy/index.ts', 'utf8');
+  cek('Hevy: kursor hanya maju lewat terima_sesi_hevy (satu transaksi dengan sesinya)',
+    hevy.includes('p_kursor: kursorHevyBerikut(mulai)') && !/update\(\{[^}]*kursor_sinkron/.test(hevy));
+  cek('Hevy: semua halaman ditarik sebelum apa pun ditulis',
+    hevy.indexOf('await tarikPeristiwa(') < hevy.indexOf("db.rpc('terima_sesi_hevy'"));
+  cek('Hevy: pintu cron dijaga rahasia jadwal', hevy.includes("req.headers.get('x-jadwal-rahasia')"));
   const strava = readFileSync('supabase/functions/webhook-strava/index.ts', 'utf8');
   const whoop = readFileSync('supabase/functions/webhook-whoop/index.ts', 'utf8');
   cek('Strava: hapus hanya setelah API menjawab 404 (aktivitas === null)',

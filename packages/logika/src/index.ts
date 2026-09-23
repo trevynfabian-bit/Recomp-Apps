@@ -191,6 +191,7 @@ export {
 } from './sumberData';
 
 export type {
+  JenisSet,
   LatihanDalamSesi,
   RingkasanLatihan,
   RingkasanSesi,
@@ -252,8 +253,12 @@ export type {
   DataLuar,
   KirimanLuar,
   LatihanLuar,
+  PeristiwaHevy,
   RecoveryWhoop,
+  SesiHevy,
+  SetHevy,
   TidurWhoop,
+  WorkoutHevy,
   WorkoutWhoop,
 } from './sinkronLuar';
 
@@ -270,5 +275,9 @@ export {
   kirimanRecoveryWhoop,
   kirimanTidurWhoop,
   kirimanWorkoutWhoop,
+  JEDA_KURSOR_HEVY_MS,
+  kirimanHevy,
+  kursorHevyBerikut,
+  sesiDariWorkoutHevy,
   tambahDetik,
 } from './sinkronLuar';
