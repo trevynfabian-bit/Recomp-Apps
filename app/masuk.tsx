@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { emailSah } from '@recomp/logika';
 import { TombolUtama } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
-import { KesalahanMasuk, useSesi } from '@/state/sesi';
+import { KesalahanAturUlang, KesalahanMasuk, useSesi } from '@/state/sesi';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
@@ -37,6 +37,7 @@ export default function MasukScreen() {
   const [memproses, setMemproses] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const [aturUlang, setAturUlang] = useState<'idle' | 'mengirim' | 'terkirim' | 'gagal'>('idle');
+  const [pesanAturUlang, setPesanAturUlang] = useState('');
   const refSandi = useRef<TextInput>(null);
 
   const isianLengkap = emailSah(email) && sandi.length > 0;
@@ -66,7 +67,8 @@ export default function MasukScreen() {
     try {
       await kirimAturUlangSandi(email.trim());
       setAturUlang('terkirim');
-    } catch {
+    } catch (e) {
+      setPesanAturUlang(e instanceof KesalahanAturUlang ? e.message : 'Tautan belum terkirim. Coba lagi sebentar lagi.');
       setAturUlang('gagal');
     }
   }
@@ -227,7 +229,7 @@ export default function MasukScreen() {
             >
               {aturUlang === 'terkirim'
                 ? 'Bila email ini punya akun, tautan atur ulang sudah dikirim. Periksa kotak masuk Anda.'
-                : 'Tautan belum terkirim. Periksa koneksi, lalu coba lagi.'}
+                : pesanAturUlang}
             </Text>
           ) : null}
         </View>

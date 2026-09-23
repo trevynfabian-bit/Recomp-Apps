@@ -316,6 +316,7 @@ export {
   kodeGagalMasuk,
   LAMA_SESI_HARI,
   PESAN_GAGAL_MASUK,
+  pesanGagalAturUlang,
   pesanPemulihanSesi,
   pulihkanSesi,
   putuskanSesi,

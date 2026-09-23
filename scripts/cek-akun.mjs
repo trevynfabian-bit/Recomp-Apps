@@ -22,7 +22,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK, buatSesiTersimpan, pulihkanSesi, pesanPemulihanSesi,
-  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN, putuskanSesi,
+  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN, putuskanSesi, pesanGagalAturUlang,
 } = require(join(kerja, 'keluar', 'akun.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -47,8 +47,21 @@ const kasus = [
   [{ status: 429 }, 'dibatasi'],
   [{ status: 0, message: 'Failed to fetch' }, 'jaringan'],
   [{ message: 'Network request failed' }, 'jaringan'],
-  [{ code: 'unexpected_failure', status: 500 }, 'lain'],
+  [{ code: 'user_banned', status: 403 }, 'dinonaktifkan'],
+  [{ code: 'over_sms_send_rate_limit', status: 429 }, 'dibatasi'],
+  [{ code: 'unexpected_failure', status: 500 }, 'server'],
+  [{ status: 503, message: 'Service Unavailable' }, 'server'],
+  [{ status: 522, message: 'HTTP 522' }, 'server'],
+  [{ status: 0, message: 'batas waktu' }, 'jaringan'],
+  [{ code: 'validation_failed', status: 422 }, 'lain'],
+  [{ status: 400, message: 'Something else' }, 'lain'],
   [null, 'lain'],
+  // Supabase Auth versi lama: tanpa `code`, hanya kalimat.
+  [{ status: 400, message: 'Invalid login credentials' }, 'kredensial'],
+  [{ status: 400, message: 'Email not confirmed' }, 'belum-dikonfirmasi'],
+  [{ status: 400, message: 'User is banned' }, 'dinonaktifkan'],
+  [{ status: 400, message: 'For security purposes, you can only request this after 42 seconds.' }, 'dibatasi'],
+  [{ status: 400, message: 'Email rate limit exceeded' }, 'dibatasi'],
 ];
 for (const [g, harap] of kasus) {
   const hasil = kodeGagalMasuk(g);
@@ -117,6 +130,17 @@ cek('pertama kali: tanpa pesan', pesanPemulihanSesi('kosong') === null);
 cek('isi rusak: tanpa pesan (bukan urusan pengguna)', pesanPemulihanSesi('rusak') === null);
 const pesanBerakhir = pesanPemulihanSesi('berakhir');
 cek('berakhir: ada pesan, netral, tanpa angka', !!pesanBerakhir && pelanggaranNada(pesanBerakhir).length === 0 && !/\d/.test(pesanBerakhir));
+
+console.log('\nTautan atur ulang kata sandi');
+cek('email tak dikenal dijawab seperti terkirim (tidak membocorkan akun)', pesanGagalAturUlang(kodeGagalMasuk({ code: 'user_not_found', status: 400 })) === null);
+const pesanAturUlang = ['belum-dikonfirmasi', 'dibatasi', 'dinonaktifkan', 'jaringan', 'server', 'lain'].map((k) => [k, pesanGagalAturUlang(k)]);
+cek('selain itu selalu ada pesan', pesanAturUlang.every(([, p]) => typeof p === 'string' && p.length > 10));
+cek('dibatasi: minta menunggu', /tunggu/i.test(pesanGagalAturUlang('dibatasi')));
+cek('jaringan: minta periksa koneksi', /koneksi/i.test(pesanGagalAturUlang('jaringan')));
+for (const [k, p] of pesanAturUlang) {
+  const langgar = pelanggaranNada(p);
+  cek(`atur ulang ${k} netral`, langgar.length === 0, `melanggar: ${langgar.join(', ')}`);
+}
 
 console.log('\nNada pesan');
 for (const [kode, pesan] of Object.entries(PESAN_GAGAL_MASUK)) {
@@ -208,6 +232,11 @@ console.log('\nSupabase Auth di app');
   const tubuhMasuk = sesiTsx.slice(sesiTsx.indexOf('const masuk = useCallback'));
   cek('masuk menunggu pencabutan yang masih berjalan', tubuhMasuk.indexOf('pencabutan.current') >= 0 && tubuhMasuk.indexOf('pencabutan.current') < tubuhMasuk.indexOf('auth.masuk('));
   cek('app dibuka: pemeriksaan Supabase berbatas waktu', /dalamBatasWaktu\(auth\.sesiServer\(\), BATAS_PERIKSA_MS\)/.test(sesiTsx));
+  cek('masuk & atur ulang berbatas waktu (tombol tidak berputar tanpa akhir)',
+    /dalamBatasWaktu\(auth\.masuk\(email, sandi\), BATAS_MASUK_MS\)/.test(sesiTsx) && /dalamBatasWaktu\(auth\.kirimAturUlang\(email\), BATAS_MASUK_MS\)/.test(sesiTsx));
+  cek('batas waktu dibaca sebagai jaringan', kodeGagalMasuk({ status: 0, message: 'batas waktu' }) === 'jaringan' && /class BatasWaktuHabis extends Error \{\s*readonly status = 0;/.test(sesiTsx));
+  const layarMasuk = readFileSync('app/masuk.tsx', 'utf8');
+  cek('layar masuk menampilkan pesan atur ulang dari penyedia', /e instanceof KesalahanAturUlang \? e\.message/.test(layarMasuk) && /: pesanAturUlang\}/.test(layarMasuk));
   const kunciRahasia = [];
   const jelajahi = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) {
     const f = join(d, e.name);

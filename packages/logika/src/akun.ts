@@ -13,24 +13,68 @@ export function emailSah(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
 
-export type KodeGagalMasuk = 'kredensial' | 'belum-dikonfirmasi' | 'dibatasi' | 'jaringan' | 'lain';
+export type KodeGagalMasuk =
+  | 'kredensial'
+  | 'belum-dikonfirmasi'
+  | 'dibatasi'
+  | 'dinonaktifkan'
+  | 'jaringan'
+  | 'server'
+  | 'lain';
 
 export const PESAN_GAGAL_MASUK: Record<KodeGagalMasuk, string> = {
   kredensial: 'Email atau kata sandi tidak cocok.',
   'belum-dikonfirmasi': 'Email ini belum dikonfirmasi. Buka tautan konfirmasi di kotak masuk Anda.',
   dibatasi: 'Percobaan masuk sedang dibatasi. Coba lagi beberapa menit lagi.',
+  dinonaktifkan: 'Akun ini sedang dinonaktifkan, jadi belum bisa dipakai untuk masuk.',
   jaringan: 'Tidak bisa terhubung. Periksa koneksi, lalu coba lagi.',
+  server: 'Server akun sedang tidak menjawab. Coba lagi beberapa menit lagi.',
   lain: 'Belum bisa masuk. Coba lagi sebentar lagi.',
 };
 
-/** Kode galat Supabase Auth (atau galat jaringan) → jenis kegagalan. */
+/**
+ * Kode galat Supabase Auth (atau galat jaringan) → jenis kegagalan.
+ *
+ * Supabase Auth versi baru mengirim `code`; versi lama (proyek yang belum
+ * diperbarui) hanya mengirim kalimat seperti "Invalid login credentials".
+ * Keduanya dikenali, karena proyek Supabase-nya dipakai bersama web dan
+ * versinya tidak diatur dari app.
+ */
 export function kodeGagalMasuk(e: { code?: string | null; status?: number | null; message?: string | null } | null): KodeGagalMasuk {
   if (!e) return 'lain';
-  if (e.code === 'invalid_credentials' || e.code === 'user_not_found') return 'kredensial';
-  if (e.code === 'email_not_confirmed') return 'belum-dikonfirmasi';
-  if (e.code === 'over_request_rate_limit' || e.code === 'over_email_send_rate_limit' || e.status === 429) return 'dibatasi';
-  if (e.status === 0 || /fetch|network|jaringan/i.test(e.message ?? '')) return 'jaringan';
+  const kode = e.code ?? '';
+  const pesan = e.message ?? '';
+  if (kode === 'invalid_credentials' || kode === 'user_not_found' || /invalid login credentials/i.test(pesan)) return 'kredensial';
+  if (kode === 'email_not_confirmed' || /email not confirmed/i.test(pesan)) return 'belum-dikonfirmasi';
+  if (kode === 'user_banned' || /user is banned/i.test(pesan)) return 'dinonaktifkan';
+  if (/^over_\w+_rate_limit$/.test(kode) || e.status === 429 || /rate limit|you can only request this after/i.test(pesan)) return 'dibatasi';
+  if (e.status === 0 || /fetch|network|jaringan/i.test(pesan)) return 'jaringan';
+  if (typeof e.status === 'number' && e.status >= 500) return 'server';
   return 'lain';
+}
+
+/**
+ * Pesan saat tautan atur ulang kata sandi tidak terkirim; `null` = tampilkan
+ * seolah terkirim.
+ *
+ * `kredensial` (email tidak dikenal) sengaja dijawab SAMA dengan berhasil:
+ * "Bila email ini punya akun, tautan sudah dikirim". Menjawab "tidak
+ * terkirim" untuk email yang tidak terdaftar membocorkan email mana yang
+ * punya akun — hal yang juga dijaga layar masuk.
+ */
+export function pesanGagalAturUlang(kode: KodeGagalMasuk): string | null {
+  switch (kode) {
+    case 'kredensial':
+      return null;
+    case 'dibatasi':
+      return 'Tautan baru saja diminta. Tunggu beberapa menit sebelum meminta lagi.';
+    case 'jaringan':
+      return 'Tautan belum terkirim. Periksa koneksi, lalu coba lagi.';
+    case 'server':
+      return 'Tautan belum terkirim; server akun sedang tidak menjawab. Coba lagi beberapa menit lagi.';
+    default:
+      return 'Tautan belum terkirim. Coba lagi sebentar lagi.';
+  }
 }
 
 // ---------------------------------------------------------------------------

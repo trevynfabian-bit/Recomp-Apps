@@ -4,6 +4,7 @@ import {
   buatSesiTersimpan,
   kodeGagalMasuk,
   PESAN_GAGAL_MASUK,
+  pesanGagalAturUlang,
   pesanPemulihanSesi,
   pulihkanSesi,
   putuskanSesi,
@@ -45,6 +46,23 @@ export class KesalahanMasuk extends Error {
   }
 }
 
+/** Tautan atur ulang tidak terkirim; `message` layak tampil apa adanya. */
+export class KesalahanAturUlang extends Error {
+  constructor(pesan: string) {
+    super(pesan);
+    this.name = 'KesalahanAturUlang';
+  }
+}
+
+/** Server tidak menjawab dalam batas waktu; diperlakukan seperti putus jaringan. */
+class BatasWaktuHabis extends Error {
+  readonly status = 0;
+  constructor() {
+    super('batas waktu');
+    this.name = 'BatasWaktuHabis';
+  }
+}
+
 /** Kenapa app terbuka di layar masuk, bila ada yang perlu dikatakan. */
 export type Pemulihan = { pesan: string | null; email: string | null };
 
@@ -54,7 +72,9 @@ type KonteksSesi = {
   pemulihan: Pemulihan;
   /** Melempar KesalahanMasuk dengan pesan yang layak tampil. */
   masuk: (email: string, sandi: string) => Promise<void>;
+  /** Tidak pernah melempar: perangkat selalu keluar, server atau tidak. */
   keluar: () => Promise<void>;
+  /** Melempar KesalahanAturUlang dengan pesan yang layak tampil. */
   kirimAturUlangSandi: (email: string) => Promise<void>;
 };
 
@@ -62,6 +82,14 @@ const TANPA_PEMULIHAN: Pemulihan = { pesan: null, email: null };
 
 /** Paling lama menunggu server saat keluar. */
 const BATAS_KELUAR_MS = 3000;
+
+/**
+ * Paling lama menunggu server saat masuk atau meminta tautan atur ulang.
+ * Sinyal yang putus-sambung bisa membuat permintaan menggantung tanpa galat;
+ * tombol yang berputar tanpa akhir lebih buruk daripada pesan "tidak bisa
+ * terhubung" yang bisa dicoba lagi.
+ */
+const BATAS_MASUK_MS = 15000;
 
 /**
  * Paling lama menunggu Supabase saat app dibuka. Lewat dari ini dianggap
@@ -72,7 +100,7 @@ const BATAS_PERIKSA_MS = 4000;
 
 function dalamBatasWaktu<T>(janji: Promise<T>, ms: number): Promise<T> {
   return new Promise((selesai, gagal) => {
-    const t = setTimeout(() => gagal(new Error('batas waktu')), ms);
+    const t = setTimeout(() => gagal(new BatasWaktuHabis()), ms);
     janji.then(
       (v) => {
         clearTimeout(t);
@@ -179,7 +207,7 @@ export function PenyediaSesi({ children }: { children: React.ReactNode }) {
       await dalamBatasWaktu(pencabutan.current, BATAS_KELUAR_MS).catch(() => undefined);
       let p: Pengguna;
       try {
-        p = await auth.masuk(email, sandi);
+        p = await dalamBatasWaktu(auth.masuk(email, sandi), BATAS_MASUK_MS);
       } catch (e) {
         throw new KesalahanMasuk(kodeGagalMasuk(e as { code?: string; status?: number; message?: string }));
       }
@@ -201,9 +229,19 @@ export function PenyediaSesi({ children }: { children: React.ReactNode }) {
     await akhiri(TANPA_PEMULIHAN);
   }, [akhiri]);
 
+  const kirimAturUlangSandi = useCallback(async (email: string) => {
+    try {
+      await dalamBatasWaktu(auth.kirimAturUlang(email), BATAS_MASUK_MS);
+    } catch (e) {
+      const pesan = pesanGagalAturUlang(kodeGagalMasuk(e as { code?: string; status?: number; message?: string }));
+      // null: dijawab seperti terkirim (tidak membocorkan email mana yang terdaftar).
+      if (pesan) throw new KesalahanAturUlang(pesan);
+    }
+  }, []);
+
   const nilai = useMemo<KonteksSesi>(
-    () => ({ status, pengguna, pemulihan, masuk, keluar, kirimAturUlangSandi: auth.kirimAturUlang }),
-    [status, pengguna, pemulihan, masuk, keluar],
+    () => ({ status, pengguna, pemulihan, masuk, keluar, kirimAturUlangSandi }),
+    [status, pengguna, pemulihan, masuk, keluar, kirimAturUlangSandi],
   );
 
   return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>;
