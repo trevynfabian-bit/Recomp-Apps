@@ -43,7 +43,7 @@ export const mockDayTypes: DayType[] = [
  * Target absolut per (tipe hari x fase) — nilai dipakai langsung, tanpa pengali.
  *
  * Isinya SAMA PERSIS dengan yang di-seed migrasi
- * `20260922000200_seed_pengguna_baru_dan_rls.sql`. Keduanya harus cocok:
+ * `20260922000200_seed_pengguna_baru_dan_rls.sql` (dijaga `npm run cek:paritas`). Keduanya harus cocok:
  * kalau mock hanya memuat sebagian fase, mengganti fase di app akan diam-diam
  * jatuh ke nilai cadangan dan membuat fitur "target menyesuaikan" tampak
  * bekerja padahal angkanya salah.

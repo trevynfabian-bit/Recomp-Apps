@@ -1689,6 +1689,40 @@ try {
     process.exit(1);
   }
 
+  // --- Seed bawaan (SQL) = data tiruan app (TS) ------------------------------
+  // Tanpa kredensial Supabase app memakai tiruan; akun baru memakai seed.
+  // Keduanya harus menunjukkan tipe hari dan angka yang SAMA, dan seednya
+  // lolos aturan form yang sama.
+  const UID_SEED = '99999999-cccc-cccc-cccc-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_SEED}', 'paritas-seed@contoh.test');`);
+  const seedTipe = JSON.parse(sql(`select json_agg(json_build_object('nama', nama, 'auto_detect', auto_detect, 'is_default', is_default) order by urutan)
+                                     from public.day_types where user_id = '${UID_SEED}';`));
+  const seedTarget = JSON.parse(sql(`select json_agg(json_build_object('tipe', d.nama, 'fase', t.fase, 'kalori', t.target_kalori,
+                                       'protein', t.target_protein_g, 'lemak', t.target_lemak_g, 'satFat', t.batas_sat_fat_g))
+                                       from public.day_type_targets t join public.day_types d on d.id = t.day_type_id
+                                      where t.user_id = '${UID_SEED}';`));
+  const mockTeks = readFileSync('src/mocks/dailyLog.ts', 'utf8');
+  // Yoga hanya ada di tiruan: tipe hari tanpa target, untuk layar "belum diisi".
+  const HANYA_TIRUAN = ['Yoga'];
+  const mockTipe = [...mockTeks.matchAll(/\{ id: '([^']+)', nama: '([^']+)', auto_detect: (true|false), is_default: (true|false) \}/g)]
+    .map((m) => ({ id: m[1], nama: m[2], auto_detect: m[3] === 'true', is_default: m[4] === 'true' }))
+    .filter((t) => !HANYA_TIRUAN.includes(t.nama));
+  const namaId = Object.fromEntries(mockTipe.map((t) => [t.id, t.nama]));
+  const mockTarget = [...mockTeks.matchAll(/day_type_id: '([^']+)', fase: '([^']+)', target_kalori: (\d+), target_protein_g: ([\d.]+), target_lemak_g: ([\d.]+), batas_sat_fat_g: ([\d.]+)/g)]
+    .map((m) => ({ tipe: namaId[m[1]], fase: m[2], kalori: Number(m[3]), protein: Number(m[4]), lemak: Number(m[5]), satFat: Number(m[6]) }));
+  const kunciT = (t) => `${t.tipe}|${t.fase}|${t.kalori}|${Number(t.protein)}|${Number(t.lemak)}|${Number(t.satFat)}`;
+  const tipeSama = JSON.stringify(seedTipe) === JSON.stringify(mockTipe.map(({ nama, auto_detect, is_default }) => ({ nama, auto_detect, is_default })));
+  const targetSama = JSON.stringify(seedTarget.map(kunciT).sort()) === JSON.stringify(mockTarget.map(kunciT).sort());
+  const seedTidakSah = seedTarget.filter((t) => !periksaTarget(isianDariTarget({
+    target_kalori: t.kalori, target_protein_g: Number(t.protein), target_lemak_g: Number(t.lemak), batas_sat_fat_g: Number(t.satFat) })).sah);
+  console.log(`${tipeSama ? '✓' : '✗'} ${seedTipe.length} tipe hari bawaan sama dengan tiruan (nama, auto-deteksi, bawaan, urutan)`);
+  console.log(`${targetSama ? '✓' : '✗'} ${seedTarget.length} target bawaan sama dengan tiruan (${mockTarget.length} di tiruan)`);
+  console.log(`${seedTidakSah.length === 0 ? '✓' : '✗'} semua target bawaan lolos periksaTarget`);
+  if (!tipeSama || !targetSama || seedTarget.length !== 12 || seedTidakSah.length > 0) {
+    console.error('✗ Seed bawaan dan data tiruan app tidak sejalan.');
+    process.exit(1);
+  }
+
   // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
   // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak
   // membuat typecheck gagal — klien diam-diam membaca `undefined`.
