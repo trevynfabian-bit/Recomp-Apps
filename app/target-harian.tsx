@@ -3,15 +3,21 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput,
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  alasanDeteksi,
+  aturanDeteksiTipeHari,
+  deteksiTipeHari,
   formatAngka,
   formatMakro,
   isianBerubah,
   isianDariTarget,
+  karboTersisaG,
   periksaTarget,
 } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
-import { Card, KerangkaSheet, TombolBertepi, TombolUtama } from '@/components';
+import { Card, KerangkaSheet, Pill, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { mockTipeHariIni } from '@/mocks/dailyLog';
+import { mockWorkoutsHariIni, NAMA_SUMBER } from '@/mocks/workout';
 import { useProfil } from '@/state/profil';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -38,6 +44,12 @@ type Status = { jenis: 'diam' } | { jenis: 'menyimpan' } | { jenis: 'tersimpan';
  * layar, karena target Cut paling masuk akal disiapkan SEBELUM berpindah ke
  * Cut, bukan setelahnya.
  *
+ * Halaman ini dibuka untuk MEMBACA lebih dulu: tiap tipe hari dengan
+ * targetnya, sisa karbo, kapan ia terpilih otomatis (`aturanDeteksiTipeHari`),
+ * dan tanda tipe hari ini beserta alasannya. Menyunting adalah mode yang
+ * dipilih dengan sengaja — form yang selalu terbuka membuat satu ketukan
+ * salah di kolom kalori terasa seperti hal biasa.
+ *
  * Aturannya dari `periksaTarget` (@recomp/logika) — batas yang sama dengan
  * database, plus dua aturan lintas kolom (sat fat di dalam lemak; protein +
  * lemak muat di kalori). Galat baru tampil setelah kolomnya ditinggalkan
@@ -62,6 +74,11 @@ export default function TargetHarianScreen() {
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<Status>({ jenis: 'diam' });
   const [konfirmasiKeluar, setKonfirmasiKeluar] = useState(false);
+  /** Membaca lebih dulu; menyunting adalah langkah yang dipilih, bukan keadaan bawaan. */
+  const [mode, setMode] = useState<'baca' | 'sunting'>('baca');
+  const tipeHariIni = mockTipeHariIni();
+  const deteksiHariIni = deteksiTipeHari(mockWorkoutsHariIni, tipeHari);
+  const menyunting = mode === 'sunting';
 
   const isianBaris = (dt: string, f: Fase) => draf[kunciBaris(dt, f)] ?? isianDariTarget(cariTarget(dt, f));
 
@@ -121,14 +138,20 @@ export default function TargetHarianScreen() {
       setDisentuh({});
       setCobaSimpan(false);
       setStatus({ jenis: 'tersimpan', jumlah: perubahan.length });
+      setMode('baca');
     } catch {
       setStatus({ jenis: 'gagal' });
     }
   }
 
   function kembali() {
-    if (berubah.length > 0) setKonfirmasiKeluar(true);
+    if (menyunting && berubah.length > 0) setKonfirmasiKeluar(true);
     else router.back();
+  }
+
+  function selesaiMenyunting() {
+    buangSemua();
+    setMode('baca');
   }
 
   return (
@@ -182,23 +205,38 @@ export default function TargetHarianScreen() {
               ? `${fase} adalah fase aktif; angka ini yang dipakai Hari Ini.`
               : `${fase} belum aktif. Angka ini dipakai saat Anda berpindah ke ${fase}.`}
           </Text>
+          {!menyunting && fase === profil.fase_aktif ? (
+            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+              Hari ini terbaca {tipeHari.find((d) => d.id === tipeHariIni)?.nama ?? 'Rest'}:{' '}
+              {alasanDeteksi(deteksiHariIni, NAMA_SUMBER)}.
+            </Text>
+          ) : null}
         </View>
 
-        {tipeHari.map((d) => (
-          <BarisTarget
-            key={kunciBaris(d.id, fase)}
-            dayType={d}
-            fase={fase}
-            isian={isianBaris(d.id, fase)}
-            tersimpan={cariTarget(d.id, fase)}
-            diubah={berubah.some((b) => b.kunci === kunciBaris(d.id, fase))}
-            tampilkanGalat={(kolom) => cobaSimpan || Boolean(disentuh[`${kunciBaris(d.id, fase)}|${kolom}`])}
-            onUbah={(kolom, teks) => ubah(d.id, kolom, teks)}
-            onTinggalkan={(kolom) => setDisentuh((x) => ({ ...x, [`${kunciBaris(d.id, fase)}|${kolom}`]: true }))}
-            onKembalikan={() => kembalikan(d.id)}
-            nonaktif={menyimpan}
-          />
-        ))}
+        {tipeHari.map((d) =>
+          !menyunting ? (
+            <KartuTargetBaca
+              key={kunciBaris(d.id, fase)}
+              dayType={d}
+              target={cariTarget(d.id, fase)}
+              hariIni={fase === profil.fase_aktif && d.id === tipeHariIni}
+            />
+          ) : (
+            <BarisTarget
+              key={kunciBaris(d.id, fase)}
+              dayType={d}
+              fase={fase}
+              isian={isianBaris(d.id, fase)}
+              tersimpan={cariTarget(d.id, fase)}
+              diubah={berubah.some((b) => b.kunci === kunciBaris(d.id, fase))}
+              tampilkanGalat={(kolom) => cobaSimpan || Boolean(disentuh[`${kunciBaris(d.id, fase)}|${kolom}`])}
+              onUbah={(kolom, teks) => ubah(d.id, kolom, teks)}
+              onTinggalkan={(kolom) => setDisentuh((x) => ({ ...x, [`${kunciBaris(d.id, fase)}|${kolom}`]: true }))}
+              onKembalikan={() => kembalikan(d.id)}
+              nonaktif={menyimpan}
+            />
+          ),
+        )}
 
         <View style={{ gap: spacing.sm }}>
           {status.jenis === 'tersimpan' ? (
@@ -217,13 +255,29 @@ export default function TargetHarianScreen() {
               Ada isian yang perlu diperbaiki sebelum disimpan.
             </Text>
           ) : null}
-          <TombolUtama
-            label={berubah.length > 1 ? `Simpan ${berubah.length} perubahan` : 'Simpan perubahan'}
-            nonaktif={berubah.length === 0}
-            memproses={menyimpan}
-            onPress={() => void simpan()}
-          />
-          {berubah.length > 0 ? <TombolBertepi label="Batalkan perubahan" onPress={buangSemua} nonaktif={menyimpan} /> : null}
+          {menyunting ? (
+            <>
+              <TombolUtama
+                label={berubah.length > 1 ? `Simpan ${berubah.length} perubahan` : 'Simpan perubahan'}
+                nonaktif={berubah.length === 0}
+                memproses={menyimpan}
+                onPress={() => void simpan()}
+              />
+              <TombolBertepi
+                label={berubah.length > 0 ? 'Batalkan perubahan' : 'Selesai menyunting'}
+                onPress={selesaiMenyunting}
+                nonaktif={menyimpan}
+              />
+            </>
+          ) : (
+            <TombolUtama
+              label="Sunting target"
+              onPress={() => {
+                setStatus({ jenis: 'diam' });
+                setMode('sunting');
+              }}
+            />
+          )}
           <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
             Karbo tidak ditargetkan: yang tersisa dari kalori setelah protein dan lemak ditampilkan sebagai gambaran.
           </Text>
@@ -249,6 +303,37 @@ export default function TargetHarianScreen() {
         </View>
       </KerangkaSheet>
     </KeyboardAvoidingView>
+  );
+}
+
+/** Satu tipe hari dalam mode baca: target, sisa karbo, dan kapan ia terpilih. */
+function KartuTargetBaca({ dayType, target, hariIni }: { dayType: DayType; target: NilaiTarget; hariIni: boolean }) {
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${dayType.nama}${hariIni ? ', hari ini' : ''}: ${formatAngka(target.target_kalori)} kilokalori, protein ${formatMakro(target.target_protein_g)} gram, lemak ${formatMakro(target.target_lemak_g)} gram, sat fat paling banyak ${formatMakro(target.batas_sat_fat_g)} gram. ${aturanDeteksiTipeHari(dayType)}`}
+    >
+      <Card style={{ gap: spacing.md, borderWidth: hariIni ? 1 : 0, borderColor: colors.amber }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
+          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+            {dayType.nama}
+            {dayType.is_default ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · bawaan</Text> : null}
+          </Text>
+          {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
+          <Text style={{ ...typography.title, color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
+          <Text style={{ ...typography.label, color: colors.textFaint }}>kcal</Text>
+        </View>
+        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+          Protein {formatMakro(target.target_protein_g)} g · Lemak {formatMakro(target.target_lemak_g)} g · Sat fat ≤
+          {formatMakro(target.batas_sat_fat_g)} g · sisa karbo {formatAngka(karboTersisaG(target))} g
+        </Text>
+        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          {aturanDeteksiTipeHari(dayType)}
+        </Text>
+      </Card>
+    </View>
   );
 }
 

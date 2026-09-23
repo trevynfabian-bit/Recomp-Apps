@@ -17,13 +17,14 @@ const ts = require('typescript');
 const kerja = mkdtempSync(join(tmpdir(), 'target-'));
 for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-  ['targetHarian.ts', 'pengingat.ts', 'redistribusi.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+  ['targetHarian.ts', 'pengingat.ts', 'redistribusi.ts', 'deteksiTipeHari.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
 } = require(join(kerja, 'keluar', 'targetHarian.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
+const { deteksiTipeHari, aturanDeteksiTipeHari } = require(join(kerja, 'keluar', 'deteksiTipeHari.js'));
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -108,6 +109,33 @@ cek('tanpa pelepasan, target baru tertimpa angka lama (alasan aturan ini)',
 const lampauBerubah = minggu.map((h) => (h.tanggal === '2026-09-21' ? { ...h, targetKalori: 2000 } : h));
 cek('hari lampau bukan bagian redistribusi → tidak membuat basi', !redistribusiBasi(redis, lampauBerubah));
 cek('tanpa redistribusi / abaikan → tidak basi', !redistribusiBasi(null, disunting) && !redistribusiBasi({ ...redis, opsi: 'abaikan' }, disunting));
+
+console.log('\nKalimat aturan deteksi = perilaku deteksi');
+const tipe = [
+  { id: 'r', nama: 'Rest', auto_detect: true, is_default: true },
+  { id: 'a', nama: 'Angkat Beban', auto_detect: true, is_default: false },
+  { id: 'bl', nama: 'Beban+Lari', auto_detect: true, is_default: false },
+  { id: 'p', nama: 'Padel', auto_detect: true, is_default: false },
+  { id: 'k', nama: 'Yoga', auto_detect: false, is_default: false },
+];
+const w = (jenis) => ({ id: jenis, jenis, nama: jenis, sumber: 'hevy', mulai: '2026-09-22T06:00:00+07:00', durasi_menit: 60 });
+// Tiap kalimat dibuktikan: workout yang digambarkannya menghasilkan tipe itu.
+const bukti = [
+  ['Beban+Lari', /angkat beban dan lari/, [w('angkat_beban'), w('lari')]],
+  ['Angkat Beban', /angkat beban tanpa lari/, [w('angkat_beban')]],
+  ['Padel', /padel tanpa angkat beban/, [w('padel')]],
+  ['Rest', /tidak ada workout yang cocok/, [w('lainnya')]],
+];
+for (const [nama, pola, workouts] of bukti) {
+  const dt = tipe.find((t) => t.nama === nama);
+  cek(`${nama}: kalimat "${aturanDeteksiTipeHari(dt)}"`, pola.test(aturanDeteksiTipeHari(dt)));
+  cek(`${nama}: deteksi pada workout yang digambarkan → ${nama}`, deteksiTipeHari(workouts, tipe).nama === nama);
+}
+cek('padel + angkat beban → bukan Padel (sesuai "tanpa angkat beban")', deteksiTipeHari([w('padel'), w('angkat_beban')], tipe).nama === 'Angkat Beban');
+cek('tipe kustom: hanya manual', /manual/.test(aturanDeteksiTipeHari(tipe[4])));
+cek('tipe bawaan dengan auto dimatikan: hanya manual',
+  /manual/.test(aturanDeteksiTipeHari({ ...tipe[3], auto_detect: false })) && deteksiTipeHari([w('padel')], tipe.map((t) => (t.nama === 'Padel' ? { ...t, auto_detect: false } : t))).nama === 'Rest');
+for (const dt of tipe) cek(`nada: ${dt.nama}`, pelanggaranNada(aturanDeteksiTipeHari(dt)).length === 0);
 
 console.log('\nTarget bawaan lolos aturan yang sama');
 const mock = readFileSync('src/mocks/dailyLog.ts', 'utf8');

@@ -80,7 +80,7 @@ export { evaluasi4Mingguan, PEKAN_EVALUASI } from './evaluasi';
 
 export { DISCLAIMER_COACH, periksaBatasMedis, periksaJawabanMedis } from './batasMedis';
 
-export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
+export { alasanDeteksi, aturanDeteksiTipeHari, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari';
 
 export {
   arahSesuaiFase,

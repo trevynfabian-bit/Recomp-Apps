@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
@@ -36,7 +37,7 @@ import {
   simpanBeratStub,
   susunMacros,
 } from '@/mocks/dailyLog';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { DailyLog, FoodLog } from '@/types/domain';
 
 /**
@@ -47,6 +48,7 @@ import type { DailyLog, FoodLog } from '@/types/domain';
  */
 export default function LogHarianScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { profil } = useProfil();
   // Target dari penyedia bersama: yang disunting di Pengaturan langsung dipakai di sini.
   const { cariTarget } = useTarget();
@@ -223,6 +225,14 @@ export default function LogHarianScreen() {
           onPilih={pilihTipeHari}
           onKembalikanAuto={kembalikanAuto}
         />
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel="Lihat target semua tipe hari"
+          onPress={() => router.push('/target-harian')}
+          style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+        >
+          <Text style={{ ...typography.label, color: colors.amber }}>Target semua tipe hari ›</Text>
+        </Pressable>
       </View>
 
       {/* Rincian makro vs target absolut hari ini */}

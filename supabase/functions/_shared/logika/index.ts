@@ -82,7 +82,7 @@ export { evaluasi4Mingguan, PEKAN_EVALUASI } from './evaluasi.ts';
 
 export { DISCLAIMER_COACH, periksaBatasMedis, periksaJawabanMedis } from './batasMedis.ts';
 
-export { alasanDeteksi, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari.ts';
+export { alasanDeteksi, aturanDeteksiTipeHari, deteksiTipeHari, type HasilDeteksi } from './deteksiTipeHari.ts';
 
 export {
   arahSesuaiFase,

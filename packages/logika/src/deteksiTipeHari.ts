@@ -60,3 +60,24 @@ export function alasanDeteksi(
   if (hasil.dasar.length === 0) return 'Belum ada workout tercatat hari ini';
   return hasil.dasar.map((w) => `${w.nama} (${namaSumber[w.sumber]})`).join(' · ');
 }
+
+/**
+ * Kapan sebuah tipe hari terpilih otomatis, dalam satu kalimat — penjelas
+ * aturan `deteksiTipeHari` untuk halaman target. Harus sejalan dengan
+ * fungsinya; `npm run cek:target` membuktikan tiap kalimat dengan
+ * menjalankan deteksi pada workout yang digambarkannya.
+ */
+export function aturanDeteksiTipeHari(dt: DayType): string {
+  if (dt.nama === 'Rest') return 'Otomatis saat tidak ada workout yang cocok dengan tipe lain.';
+  if (!dt.auto_detect) return 'Hanya bila dipilih manual di Hari Ini.';
+  switch (dt.nama) {
+    case 'Beban+Lari':
+      return 'Otomatis saat hari itu ada angkat beban dan lari.';
+    case 'Angkat Beban':
+      return 'Otomatis saat ada angkat beban tanpa lari.';
+    case 'Padel':
+      return 'Otomatis saat ada padel tanpa angkat beban.';
+    default:
+      return 'Hanya bila dipilih manual di Hari Ini; deteksi otomatis mengenal tipe bawaan saja.';
+  }
+}
