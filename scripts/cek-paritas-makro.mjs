@@ -100,12 +100,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/pengingat.ts', join(kerja, 'pengingat.ts'));
   copyFileSync('packages/logika/src/percakapan.ts', join(kerja, 'percakapan.ts'));
   copyFileSync('packages/logika/src/periodeFase.ts', join(kerja, 'periodeFase.ts'));
+  copyFileSync('packages/logika/src/targetHarian.ts', join(kerja, 'targetHarian.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     'periodeFase.ts', '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', 'targetHarian.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -122,6 +123,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'evaluasi.js')),
     ...require(join(kerja, 'keluar', 'pengingat.js')),
     ...require(join(kerja, 'keluar', 'periodeFase.js')),
+    ...require(join(kerja, 'keluar', 'targetHarian.js')),
   };
 }
 
@@ -1640,6 +1642,52 @@ try {
     process.exit(1);
   }
   console.log(`✓ Riwayat fase: ${LANGKAH.length} langkah ganti fase sama di SQL dan TypeScript (ditutup, diganti, tetap, ditolak).`);
+
+  // --- Target: aturan tabel day_type_targets (SQL) = periksaTarget (TS) -----
+  // Form menolak dan server menerima (atau sebaliknya) adalah dua cara target
+  // yang sama menjadi "sah" di satu tempat dan "salah" di tempat lain.
+  console.log();
+  const { periksaTarget, isianDariTarget, RENTANG_TARGET } = muatLogikaTs();
+  const UID_TARGET = '99999999-bbbb-bbbb-bbbb-999999999999';
+  sql(`insert into auth.users (id, email) values ('${UID_TARGET}', 'paritas-target@contoh.test');
+       insert into public.day_types (user_id, nama, auto_detect) values ('${UID_TARGET}', 'Paritas', false);`);
+  const tepi = (r) => [r.min - 1, r.min, r.maks, r.maks + 1];
+  const nilaiKalori = [...tepi(RENTANG_TARGET.kalori), 1500, 1509, 2450];
+  const nilaiProtein = [...tepi(RENTANG_TARGET.protein), 150, 72.5];
+  const nilaiLemak = [...tepi(RENTANG_TARGET.lemak), 60, 100, 101];
+  const nilaiSatFat = [...tepi(RENTANG_TARGET.satFat), 21, 60, 61, 100.5];
+  const KASUS_TARGET = [];
+  for (const k of nilaiKalori) for (const p of nilaiProtein) for (const l of nilaiLemak) for (const f of nilaiSatFat) {
+    KASUS_TARGET.push({ target_kalori: k, target_protein_g: p, target_lemak_g: l, batas_sat_fat_g: f });
+  }
+  const barisNilai = KASUS_TARGET.map((n, i) =>
+    `(${i}, ${n.target_kalori}, ${n.target_protein_g}, ${n.target_lemak_g}, ${n.batas_sat_fat_g})`).join(',');
+  // Hanya baris terakhir: tag CREATE TABLE/DO ikut tercetak di depannya.
+  const sahSql = JSON.parse(sql(`
+    create temp table hasil_target (i int primary key, sah boolean);
+    do $$
+    declare r record; v_dt uuid := (select id from public.day_types where user_id = '${UID_TARGET}' and nama = 'Paritas');
+    begin
+      for r in select * from (values ${barisNilai}) as t(i, k, p, l, f) loop
+        begin
+          insert into public.day_type_targets (user_id, day_type_id, fase, target_kalori, target_protein_g, target_lemak_g, batas_sat_fat_g)
+          values ('${UID_TARGET}', v_dt, 'Cut', r.k, r.p, r.l, r.f);
+          delete from public.day_type_targets where day_type_id = v_dt;
+          insert into hasil_target values (r.i, true);
+        exception when check_violation then
+          insert into hasil_target values (r.i, false);
+        end;
+      end loop;
+    end $$;
+    select json_agg(sah order by i) from hasil_target;`).split('\n').pop());
+  const bedaTarget = KASUS_TARGET.filter((n, i) => sahSql[i] !== periksaTarget(isianDariTarget(n)).sah);
+  const nSah = sahSql.filter(Boolean).length;
+  console.log(`${bedaTarget.length === 0 ? '✓' : '✗'} ${KASUS_TARGET.length} kombinasi target: ${nSah} sah, ${KASUS_TARGET.length - nSah} ditolak — ${bedaTarget.length === 0 ? 'sama' : 'BERBEDA'} di SQL dan TypeScript` +
+    (bedaTarget.length ? ` — beda: ${bedaTarget.slice(0, 3).map((n) => JSON.stringify(n)).join('; ')}` : ''));
+  if (bedaTarget.length > 0 || nSah === 0 || nSah === KASUS_TARGET.length) {
+    console.error('✗ Aturan target di tabel dan di form tidak sejalan (atau kasusnya tidak menguji kedua sisi).');
+    process.exit(1);
+  }
 } finally {
   hentikanPostgres();
 }
