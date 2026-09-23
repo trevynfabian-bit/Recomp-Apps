@@ -67,11 +67,16 @@ export default function PengaturanScreen() {
   const { pengguna, keluar } = useSesi();
   const { tipeHari, cariTarget } = useTarget();
   // Rentang kalori fase aktif: sekilas cukup untuk tahu target sudah seperti yang dimaksud.
-  const kaloriFase = tipeHari.map((d) => cariTarget(d.id, profil.fase_aktif).target_kalori);
+  const kaloriFase = tipeHari
+    .map((d) => cariTarget(d.id, profil.fase_aktif)?.target_kalori ?? null)
+    .filter((k): k is number => k !== null);
+  const belumDiisi = tipeHari.length - kaloriFase.length;
   const rentangKalori =
-    Math.min(...kaloriFase) === Math.max(...kaloriFase)
-      ? formatAngka(kaloriFase[0])
-      : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))}`;
+    kaloriFase.length === 0
+      ? 'belum diisi'
+      : Math.min(...kaloriFase) === Math.max(...kaloriFase)
+        ? `${formatAngka(kaloriFase[0])} kcal`
+        : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))} kcal`;
   const email = pengguna?.email ?? mockAkun.email;
   const [sheet, setSheet] = useState<Sheet>(null);
   const [pesanTiruan, setPesanTiruan] = useState<string | null>(null);
@@ -162,7 +167,7 @@ export default function PengaturanScreen() {
           <BarisPengaturan
             ikon="restaurant-outline"
             judul="Target per tipe hari"
-            nilai={`${rentangKalori} kcal · ${tipeHari.length} tipe hari · ${profil.fase_aktif}`}
+            nilai={`${rentangKalori} · ${tipeHari.length} tipe hari · ${profil.fase_aktif}${belumDiisi > 0 ? ` · ${belumDiisi} belum diisi` : ''}`}
             petunjuk="Membuka form target kalori dan makro tiap tipe hari"
             onPress={() => router.push('/target-harian')}
           />

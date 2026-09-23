@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   aturanDeteksiTipeHari,
@@ -9,6 +9,7 @@ import {
   formatTanggalPanjang,
   isianBerubah,
   isianDariTarget,
+  ISIAN_KOSONG,
   karboTersisaG,
   periksaTarget,
   periodeBerjalan,
@@ -96,6 +97,13 @@ export default function TargetHarianScreen() {
   const [sheetFase, setSheetFase] = useState(false);
   /** Satu target yang sedang disunting lewat sheet (dari kartu atau sel matriks). */
   const [suntingSatu, setSuntingSatu] = useState<{ dayTypeId: string; fase: Fase } | null>(null);
+  // Dibuka dari "Isi target" di Hari Ini: langsung ke penyunting tipe hari itu di fase aktif.
+  const { isi } = useLocalSearchParams<{ isi?: string }>();
+  useEffect(() => {
+    if (isi && tipeHari.some((d) => d.id === isi)) setSuntingSatu({ dayTypeId: isi, fase: profil.fase_aktif });
+    // Hanya saat parameter datang.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isi]);
   const faseMulai = periodeBerjalan(riwayatFase)?.mulai ?? null;
   // Fase diganti dari halaman ini (atau di tempat lain): tab fase ikut fase yang baru aktif.
   useEffect(() => {
@@ -109,7 +117,12 @@ export default function TargetHarianScreen() {
   const matriks = !menyunting && tampilan === 'matriks';
   const barisMatriks = useMemo(() => susunMatriksTarget(tipeHari, target), [tipeHari, target]);
 
-  const isianBaris = (dt: string, f: Fase) => draf[kunciBaris(dt, f)] ?? isianDariTarget(cariTarget(dt, f));
+  /** Isian awal baris: nilai tersimpan, atau kosong bila targetnya belum diisi. */
+  const isianTersimpan = (dt: string, f: Fase) => {
+    const t = cariTarget(dt, f);
+    return t ? isianDariTarget(t) : ISIAN_KOSONG;
+  };
+  const isianBaris = (dt: string, f: Fase) => draf[kunciBaris(dt, f)] ?? isianTersimpan(dt, f);
 
   // Baris yang BENAR-BENAR berubah (setelah diurai: "2.450" = 2450 bukan perubahan).
   const berubah = useMemo(
@@ -128,7 +141,7 @@ export default function TargetHarianScreen() {
 
   function ubah(dt: string, kolom: KolomTarget, teks: string) {
     const k = kunciBaris(dt, fase);
-    setDraf((d) => ({ ...d, [k]: { ...(d[k] ?? isianDariTarget(cariTarget(dt, fase))), [kolom]: teks } }));
+    setDraf((d) => ({ ...d, [k]: { ...(d[k] ?? isianTersimpan(dt, fase)), [kolom]: teks } }));
     if (status.jenis !== 'menyimpan') setStatus({ jenis: 'diam' });
   }
 
@@ -310,13 +323,16 @@ export default function TargetHarianScreen() {
 
         {(matriks ? [] : tipeHari).map((d) =>
           !menyunting ? (
-            <KartuTargetBaca
-              key={kunciBaris(d.id, fase)}
-              dayType={d}
-              target={cariTarget(d.id, fase)}
-              hariIni={fase === profil.fase_aktif && d.id === tipeHariIni}
-              onSunting={() => setSuntingSatu({ dayTypeId: d.id, fase })}
-            />
+            (() => {
+              const t = cariTarget(d.id, fase);
+              const hariIni = fase === profil.fase_aktif && d.id === tipeHariIni;
+              const buka = () => setSuntingSatu({ dayTypeId: d.id, fase });
+              return t ? (
+                <KartuTargetBaca key={kunciBaris(d.id, fase)} dayType={d} target={t} hariIni={hariIni} onSunting={buka} />
+              ) : (
+                <KartuTargetKosong key={kunciBaris(d.id, fase)} dayType={d} fase={fase} hariIni={hariIni} onIsi={buka} />
+              );
+            })()
           ) : (
             <BarisTarget
               key={kunciBaris(d.id, fase)}
@@ -477,6 +493,42 @@ const TAMPILAN: { nilai: 'per-fase' | 'matriks'; label: string }[] = [
   { nilai: 'matriks', label: 'Matriks' },
 ];
 
+/** Tipe hari yang belum punya target di fase ini: dikatakan, lalu satu ketukan untuk mengisinya. */
+function KartuTargetKosong({
+  dayType,
+  fase,
+  hariIni,
+  onIsi,
+}: {
+  dayType: DayType;
+  fase: Fase;
+  hariIni: boolean;
+  onIsi: () => void;
+}) {
+  return (
+    <Card style={{ gap: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: hariIni ? colors.amber : colors.borderKuat }}>
+      <View
+        accessible
+        accessibilityLabel={`${dayType.nama}${hariIni ? ', hari ini' : ''}: target fase ${fase} belum diisi. ${aturanDeteksiTipeHari(dayType)}`}
+        style={{ gap: spacing.sm }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
+          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{dayType.nama}</Text>
+          {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
+        </View>
+        <Text style={{ ...typography.title, color: colors.textMuted }}>Belum diisi</Text>
+        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          Hari bertipe {dayType.nama} di fase {fase} belum punya target, jadi Hari Ini belum bisa menghitung sisanya.
+        </Text>
+        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          {aturanDeteksiTipeHari(dayType)}
+        </Text>
+      </View>
+      <TombolUtama label="Isi target" aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`} onPress={onIsi} />
+    </Card>
+  );
+}
+
 function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'; onPilih: (t: 'per-fase' | 'matriks') => void }) {
   return (
     <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -580,7 +632,8 @@ function BarisTarget({
   dayType: DayType;
   fase: Fase;
   isian: IsianTarget;
-  tersimpan: NilaiTarget;
+  /** `null` bila target ini belum pernah diisi. */
+  tersimpan: NilaiTarget | null;
   diubah: boolean;
   tampilkanGalat: (kolom: KolomTarget) => boolean;
   onUbah: (kolom: KolomTarget, teks: string) => void;
@@ -602,7 +655,11 @@ function BarisTarget({
         {diubah ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Kembalikan ${dayType.nama} ke ${formatAngka(tersimpan.target_kalori)} kilokalori`}
+            accessibilityLabel={
+              tersimpan
+                ? `Kembalikan ${dayType.nama} ke ${formatAngka(tersimpan.target_kalori)} kilokalori`
+                : `Kosongkan lagi isian ${dayType.nama}`
+            }
             disabled={nonaktif}
             onPress={() => {
               ketukRingan();
@@ -644,7 +701,7 @@ function BarisTarget({
 
       <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
         {hasil.sah
-          ? `Sisa untuk karbo ${formatAngka(hasil.karboG)} g${diubah ? ` · tersimpan ${formatAngka(tersimpan.target_kalori)} kcal, protein ${formatMakro(tersimpan.target_protein_g)} g` : ''}`
+          ? `Sisa untuk karbo ${formatAngka(hasil.karboG)} g${diubah && tersimpan ? ` · tersimpan ${formatAngka(tersimpan.target_kalori)} kcal, protein ${formatMakro(tersimpan.target_protein_g)} g` : ''}`
           : 'Sisa untuk karbo muncul setelah isian lengkap.'}
       </Text>
     </Card>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { formatAngka, isianBerubah, isianDariTarget, periksaTarget, rincianKaloriMakro } from '@recomp/logika';
+import { formatAngka, ISIAN_KOSONG, isianBerubah, isianDariTarget, periksaTarget, rincianKaloriMakro } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import { InputTarget } from './InputTarget';
 import { KerangkaSheet } from './KerangkaSheet';
@@ -13,7 +13,8 @@ type Props = {
   onTutup: () => void;
   namaTipeHari: string;
   fase: Fase;
-  tersimpan: NilaiTarget;
+  /** `null` bila target ini belum pernah diisi: kolom mulai kosong. */
+  tersimpan: NilaiTarget | null;
   /** Simpan satu target; melempar bila gagal (isian tetap ada). */
   simpan: (nilai: NilaiTarget) => Promise<void>;
 };
@@ -39,14 +40,15 @@ const KOLOM: { kunci: KolomTarget; label: string; unit: string; akses: string }[
  * setelah kolom ditinggalkan atau saat menyimpan.
  */
 export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersimpan, simpan }: Props) {
-  const [isian, setIsian] = useState<IsianTarget>(() => isianDariTarget(tersimpan));
+  const awal = () => (tersimpan ? isianDariTarget(tersimpan) : ISIAN_KOSONG);
+  const [isian, setIsian] = useState<IsianTarget>(awal);
   const [disentuh, setDisentuh] = useState<Partial<Record<KolomTarget, true>>>({});
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<'diam' | 'menyimpan' | 'gagal'>('diam');
 
   useEffect(() => {
     if (!terbuka) return;
-    setIsian(isianDariTarget(tersimpan));
+    setIsian(awal());
     setDisentuh({});
     setCobaSimpan(false);
     setStatus('diam');
@@ -84,7 +86,9 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
         {namaTipeHari} · {fase}
       </Text>
       <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
-        Tersimpan: {formatAngka(tersimpan.target_kalori)} kcal. Perubahan berlaku mulai hari ini.
+        {tersimpan
+          ? `Tersimpan: ${formatAngka(tersimpan.target_kalori)} kcal. Perubahan berlaku mulai hari ini.`
+          : 'Belum ada target untuk tipe hari ini di fase ini. Isi keempat angkanya; berlaku mulai hari ini.'}
       </Text>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>

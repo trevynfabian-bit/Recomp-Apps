@@ -30,6 +30,9 @@ type Props = {
 };
 
 const tanggalRingkas = (t: string) => formatTanggalPanjang(t).split(', ')[1];
+/** Untuk pembaca layar; target yang belum diisi disebut begitu, bukan nol. */
+const kalori = (t: { target_kalori: number } | null) => (t ? `${formatAngka(t.target_kalori)} kilokalori` : 'belum diisi');
+const protein = (t: { target_protein_g: number } | null) => (t ? `${formatMakro(t.target_protein_g)} gram` : 'belum diisi');
 const persen = (n: number) => `${n > 0 ? '+' : ''}${formatDesimal(n * 100, 2)}%`;
 
 /**
@@ -119,13 +122,14 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
               <View
                 key={d.id}
                 accessible
-                accessibilityLabel={`${d.nama}: ${formatAngka(lama.target_kalori)} menjadi ${formatAngka(baru.target_kalori)} kilokalori, protein ${formatMakro(lama.target_protein_g)} menjadi ${formatMakro(baru.target_protein_g)} gram`}
+                accessibilityLabel={`${d.nama}: ${kalori(lama)} menjadi ${kalori(baru)}, protein ${protein(lama)} menjadi ${protein(baru)}`}
                 style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md }}
               >
                 <Text style={{ ...typography.label, color: colors.text }}>{d.nama}</Text>
                 <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, textAlign: 'right' }}>
-                  {formatAngka(lama.target_kalori)} → {formatAngka(baru.target_kalori)} kcal · P {formatMakro(lama.target_protein_g)} →{' '}
-                  {formatMakro(baru.target_protein_g)} g
+                  {lama || baru
+                    ? `${lama ? formatAngka(lama.target_kalori) : '–'} → ${baru ? formatAngka(baru.target_kalori) : '–'} kcal · P ${lama ? formatMakro(lama.target_protein_g) : '–'} → ${baru ? formatMakro(baru.target_protein_g) : '–'} g`
+                    : 'belum diisi'}
                 </Text>
               </View>
             );

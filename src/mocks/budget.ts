@@ -41,14 +41,19 @@ export function mockHariBudget(
     faseAktif: Fase;
     /** Fase yang berlaku pada tanggal lampau (`faseSaat`). */
     faseLampau: (tanggal: string) => Fase;
-    /** Target terkini dari penyedia target. */
-    targetTerkini: (dayTypeId: string, fase: Fase) => DayTypeTarget;
+    /** Target terkini dari penyedia target; `null` bila belum diisi. */
+    targetTerkini: (dayTypeId: string, fase: Fase) => DayTypeTarget | null;
   },
 ): HariBudget[] {
   return hariDalamMinggu(hariIni).map((tanggal, i) => {
     const dayTypeId = TIPE_MINGGU_INI[i];
     const lampau = tanggal < hariIni;
-    const target = lampau ? cariTarget(dayTypeId, o.faseLampau(tanggal)) : o.targetTerkini(dayTypeId, o.faseAktif);
+    // Minggu contoh hanya memakai empat tipe bawaan, yang selalu punya target
+    // di seed untuk pasangan (tipe hari x fase) yang SAMA — bukan pinjaman dari
+    // tipe atau fase lain.
+    const target = lampau
+      ? cariTarget(dayTypeId, o.faseLampau(tanggal))
+      : (o.targetTerkini(dayTypeId, o.faseAktif) ?? cariTarget(dayTypeId, o.faseAktif));
     const nama = mockDayTypes.find((d) => d.id === dayTypeId)?.nama ?? 'Rest';
     return {
       tanggal,

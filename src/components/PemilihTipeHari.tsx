@@ -10,8 +10,8 @@ import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
 type Props = {
   daftar: DayType[];
   terpilihId: string;
-  /** Target absolut untuk (tipe hari terpilih x fase aktif). */
-  target: DayTypeTarget;
+  /** Target absolut untuk (tipe hari terpilih x fase aktif); `null` bila belum diisi. */
+  target: DayTypeTarget | null;
   fase: Fase;
   /** true bila pilihan saat ini hasil override manual atas auto-deteksi. */
   override: boolean;
@@ -86,19 +86,28 @@ export function PemilihTipeHari({
         </ScrollView>
 
         {/* Pratinjau target yang berlaku untuk pilihan saat ini */}
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingTop: spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-          }}
-        >
-          <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macroTeks.kalori} />
-          <TargetRingkas label="Protein" nilai={formatMakro(target.target_protein_g)} unit="g" warna={colors.macroTeks.protein} />
-          <TargetRingkas label="Lemak" nilai={formatMakro(target.target_lemak_g)} unit="g" warna={colors.macroTeks.lemak} />
-          <TargetRingkas label="Sat fat" nilai={`≤${formatMakro(target.batas_sat_fat_g)}`} unit="g" warna={colors.macroTeks.satFat} />
-        </View>
+        {target ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingTop: spacing.lg,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+            }}
+          >
+            <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macroTeks.kalori} />
+            <TargetRingkas label="Protein" nilai={formatMakro(target.target_protein_g)} unit="g" warna={colors.macroTeks.protein} />
+            <TargetRingkas label="Lemak" nilai={formatMakro(target.target_lemak_g)} unit="g" warna={colors.macroTeks.lemak} />
+            <TargetRingkas label="Sat fat" nilai={`≤${formatMakro(target.batas_sat_fat_g)}`} unit="g" warna={colors.macroTeks.satFat} />
+          </View>
+        ) : (
+          // Belum diisi: dikatakan apa adanya, bukan diisi angka tipe hari lain.
+          <View style={{ paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
+            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+              Target {daftar.find((d) => d.id === terpilihId)?.nama ?? 'tipe hari ini'} untuk fase {fase} belum diisi.
+            </Text>
+          </View>
+        )}
 
         {/* Hasil auto-deteksi selalu dijelaskan, bukan diam-diam dipakai. */}
         <View style={{ gap: spacing.sm }}>

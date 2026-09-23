@@ -21,8 +21,12 @@ export type PerubahanTarget = { day_type_id: string; fase: Fase; nilai: NilaiTar
 type KonteksTarget = {
   tipeHari: DayType[];
   target: DayTypeTarget[];
-  /** Target untuk (tipe hari x fase); cadangan baris pertama bila datanya kurang. */
-  cariTarget: (dayTypeId: string, fase: Fase) => DayTypeTarget;
+  /**
+   * Target untuk (tipe hari x fase), atau `null` bila belum diisi. TIDAK ada
+   * cadangan: angka pinjaman dari tipe hari atau fase lain adalah angka salah
+   * yang tampak benar — layar harus mengatakan "belum diisi".
+   */
+  cariTarget: (dayTypeId: string, fase: Fase) => DayTypeTarget | null;
   /** Simpan beberapa baris sekaligus; semua atau tidak sama sekali. */
   simpanTarget: (perubahan: PerubahanTarget[]) => Promise<void>;
 };
@@ -33,23 +37,23 @@ export function PenyediaTarget({ children }: { children: React.ReactNode }) {
   const [target, setTarget] = useState<DayTypeTarget[]>(mockDayTypeTargets);
 
   const cariTarget = useCallback(
-    (dayTypeId: string, fase: Fase) => {
-      const hit = target.find((t) => t.day_type_id === dayTypeId && t.fase === fase);
-      if (hit) return hit;
-      if (__DEV__) console.warn(`[target] tidak ada target untuk ${dayTypeId} pada fase ${fase}`);
-      return target[0];
-    },
+    (dayTypeId: string, fase: Fase) => target.find((t) => t.day_type_id === dayTypeId && t.fase === fase) ?? null,
     [target],
   );
 
   const simpanTarget = useCallback(async (perubahan: PerubahanTarget[]) => {
     await mockSimpanTarget(perubahan);
-    setTarget((lama) =>
-      lama.map((t) => {
+    // Upsert: target yang belum ada (tipe hari baru, fase yang belum diisi) dibuat.
+    setTarget((lama) => {
+      const diperbarui = lama.map((t) => {
         const p = perubahan.find((x) => x.day_type_id === t.day_type_id && x.fase === t.fase);
         return p ? { ...t, ...p.nilai } : t;
-      }),
-    );
+      });
+      const baru = perubahan
+        .filter((p) => !lama.some((t) => t.day_type_id === p.day_type_id && t.fase === p.fase))
+        .map((p) => ({ id: `tgt-${p.day_type_id}-${p.fase}`, day_type_id: p.day_type_id, fase: p.fase, ...p.nilai }));
+      return [...diperbarui, ...baru];
+    });
   }, []);
 
   const nilai = useMemo<KonteksTarget>(

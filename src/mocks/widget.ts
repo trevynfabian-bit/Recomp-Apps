@@ -59,8 +59,12 @@ export const LABEL_SKENARIO_WIDGET: Record<SkenarioWidget, string> = {
  * `siapkanWidget`. "Hari baru" sengaja MENYIMPAN ringkasan kemarin lengkap
  * dengan angkanya — pratinjau harus membuktikan angka itu tidak muncul.
  */
-export function mockMasukanWidget(skenario: SkenarioWidget, target: DayTypeTarget, sekarang: Date = new Date()) {
+export function mockMasukanWidget(skenario: SkenarioWidget, target: DayTypeTarget | null, sekarang: Date = new Date()) {
   const hariIni = tanggalDariWaktu(sekarang.toISOString());
+  // Target tipe hari ini belum diisi: widget tidak punya "sisa" untuk
+  // ditampilkan — keadaan yang sama dengan skenario "Tanpa target".
+  if (!target && skenario !== 'belum-masuk') return { masuk: true, ringkasan: null, target: null };
+  if (!target) return { masuk: false, ringkasan: null, target: null };
   const ringkasan = mockRingkasanWidget(target, sekarang);
   const targetHari = { kalori: target.target_kalori, proteinG: target.target_protein_g };
   switch (skenario) {

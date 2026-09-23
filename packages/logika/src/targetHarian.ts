@@ -142,8 +142,16 @@ export function periksaTarget(isian: IsianTarget): HasilPeriksaTarget {
   return { sah: true, nilai, karboG: karboTersisaG(nilai) };
 }
 
-/** Apakah isian berbeda dari nilai tersimpan (setelah diurai — "2.450" sama dengan 2450). */
-export function isianBerubah(isian: IsianTarget, tersimpan: NilaiTarget): boolean {
+/** Isian kosong untuk target yang belum pernah diisi. */
+export const ISIAN_KOSONG: IsianTarget = { kalori: '', protein: '', lemak: '', satFat: '' };
+
+/**
+ * Apakah isian berbeda dari nilai tersimpan (setelah diurai — "2.450" sama
+ * dengan 2450). Tanpa nilai tersimpan (target belum diisi), isian dianggap
+ * berubah begitu satu kolom saja terisi.
+ */
+export function isianBerubah(isian: IsianTarget, tersimpan: NilaiTarget | null): boolean {
+  if (tersimpan === null) return (Object.keys(isian) as KolomTarget[]).some((k) => isian[k].trim() !== '');
   const h = periksaTarget(isian);
   if (!h.sah) {
     // Isian yang belum sah tetap dihitung berubah bila teksnya berbeda.

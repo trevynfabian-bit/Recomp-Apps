@@ -21,7 +21,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
-  susunMatriksTarget, urutanFaseJanggal, URUTAN_FASE_MATRIKS, rincianKaloriMakro,
+  susunMatriksTarget, urutanFaseJanggal, URUTAN_FASE_MATRIKS, rincianKaloriMakro, ISIAN_KOSONG,
 } = require(join(kerja, 'keluar', 'targetHarian.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
@@ -88,6 +88,10 @@ cek('"2.450" sama dengan 2450 (bukan perubahan)', !isianBerubah({ ...isianAwal, 
 cek('"72.5" sama dengan 72,5 (bukan perubahan)', !isianBerubah({ ...isianAwal, protein: '72.5' }, tersimpan));
 cek('angka lain = perubahan', isianBerubah({ ...isianAwal, kalori: '2500' }, tersimpan));
 cek('isian belum sah tetap dihitung berubah', isianBerubah({ ...isianAwal, kalori: '' }, tersimpan));
+// Target belum diisi (tipe hari baru): kosong bukan perubahan, satu kolom terisi sudah perubahan.
+cek('belum diisi: isian kosong bukan perubahan', !isianBerubah(ISIAN_KOSONG, null));
+cek('belum diisi: satu kolom terisi = perubahan', isianBerubah({ ...ISIAN_KOSONG, kalori: '2200' }, null));
+cek('belum diisi: isian kosong ditolak dengan empat pesan', Object.keys(periksaTarget(ISIAN_KOSONG).galat ?? {}).length === 4);
 
 console.log('\nRedistribusi setelah target berubah');
 const minggu = [
@@ -189,7 +193,7 @@ for (const b of baris) {
 console.log('\nNada');
 for (const p of new Set(pesanSemua)) cek(`netral: "${p.length > 70 ? `${p.slice(0, 67)}...` : p}"`, pelanggaranNada(p).length === 0, pelanggaranNada(p).join(', '));
 // Kalimat di layar form, dibaca lewat parser TypeScript.
-const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8') + '\n' + readFileSync('src/components/MatriksTarget.tsx', 'utf8') + '\n' + readFileSync('src/components/SheetSuntingTarget.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const sumber = ts.createSourceFile('t.tsx', readFileSync('app/target-harian.tsx', 'utf8') + '\n' + readFileSync('src/components/MatriksTarget.tsx', 'utf8') + '\n' + readFileSync('src/components/SheetSuntingTarget.tsx', 'utf8') + '\n' + readFileSync('src/components/PemilihTipeHari.tsx', 'utf8') + '\n' + readFileSync('app/(tabs)/index.tsx', 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const kalimat = [];
 (function jelajah(n) {
   if (ts.isImportDeclaration(n)) return;
@@ -203,7 +207,7 @@ cek('layar form punya kalimat untuk diperiksa', kalimat.length >= 10, `hanya ${k
 // Kalimat yang lahir dari perubahan target/fase di layar lain (Budget, Tren).
 for (const berkas of ['app/(tabs)/budget.tsx', 'app/(tabs)/tren.tsx']) {
   const src = readFileSync(berkas, 'utf8');
-  const temuan = [...src.matchAll(/'([^'\n]*(?:Target berubah|posisinya terbaca|digambar setelah)[^'\n]*)'|`([^`\n]*(?:Target berubah|posisinya terbaca|digambar setelah)[^`\n]*)`/g)]
+  const temuan = [...src.matchAll(/'([^'\n]*(?:Target berubah|posisinya terbaca|digambar setelah|belum bisa dihitung|belum diisi)[^'\n]*)'|`([^`\n]*(?:Target berubah|posisinya terbaca|digambar setelah|belum bisa dihitung|belum diisi)[^`\n]*)`/g)]
     .map((m) => (m[1] ?? m[2]).replace(/\$\{[^}]*\}/g, 'X'));
   cek(`${berkas}: kalimat perubahan ditemukan`, temuan.length >= 1, 'tidak ada');
   kalimat.push(...temuan);

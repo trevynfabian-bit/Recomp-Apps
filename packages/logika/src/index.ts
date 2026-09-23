@@ -321,6 +321,7 @@ export {
 
 export type { BarisMatriks, HasilPeriksaTarget, IsianTarget, KolomTarget, NilaiTarget, SelMatriks } from './targetHarian';
 export {
+  ISIAN_KOSONG,
   isianBerubah,
   isianDariTarget,
   karboTersisaG,

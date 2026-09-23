@@ -33,6 +33,10 @@ export const mockDayTypes: DayType[] = [
   { id: 'dt-angkat', nama: 'Angkat Beban', auto_detect: true, is_default: false },
   { id: 'dt-beban-lari', nama: 'Beban+Lari', auto_detect: true, is_default: false },
   { id: 'dt-padel', nama: 'Padel', auto_detect: true, is_default: false },
+  // Tipe hari buatan pengguna yang targetnya BELUM diisi — keadaan nyata saat
+  // tipe hari baru ditambahkan (seed hanya mengisi empat tipe bawaan). Ada di
+  // data tiruan supaya keadaan kosongnya bisa dilihat dan diuji di setiap layar.
+  { id: 'dt-yoga', nama: 'Yoga', auto_detect: false, is_default: false },
 ];
 
 /**
@@ -135,7 +139,17 @@ export function cariTarget(dayTypeId: string, fase: Fase): DayTypeTarget {
  * Susun MacroProgress dari log + target. Karbo tidak ditargetkan (target `null`)
  * karena PRD hanya menetapkan kalori, protein, lemak, dan batas sat fat.
  */
-export function susunMacros(log: DailyLog, target: DayTypeTarget): MacroProgress[] {
+export function susunMacros(log: DailyLog, target: DayTypeTarget | null): MacroProgress[] {
+  // Target belum diisi: semua makro tanpa target — yang terpakai tetap tampil.
+  if (!target) {
+    return [
+      { key: 'kalori', label: 'Kalori', terpakai: log.kalori, target: null, unit: 'kcal' },
+      { key: 'protein', label: 'Protein', terpakai: log.protein_g, target: null, unit: 'g' },
+      { key: 'lemak', label: 'Lemak', terpakai: log.lemak_g, target: null, unit: 'g' },
+      { key: 'karbo', label: 'Karbo', terpakai: log.karbo_g, target: null, unit: 'g' },
+      { key: 'satFat', label: 'Sat Fat', terpakai: log.sat_fat_g, target: null, unit: 'g', isBatas: true },
+    ];
+  }
   return [
     { key: 'kalori', label: 'Kalori', terpakai: log.kalori, target: target.target_kalori, unit: 'kcal' },
     { key: 'protein', label: 'Protein', terpakai: log.protein_g, target: target.target_protein_g, unit: 'g' },

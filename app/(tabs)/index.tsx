@@ -15,6 +15,7 @@ import {
   Pill,
   SectionHeader,
   SheetCatatFoto,
+  TombolUtama,
   type EntriMakananBaru,
 } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni } from '@recomp/logika';
@@ -65,9 +66,10 @@ export default function LogHarianScreen() {
   const target = cariTarget(dayTypeId, fase);
   const macros = susunMacros(log, target);
 
-  const sisaKalori = target.target_kalori - log.kalori;
-  const sisaProtein = target.target_protein_g - log.protein_g;
-  const sisaLemak = target.target_lemak_g - log.lemak_g;
+  // Target belum diisi (mis. tipe hari baru): tidak ada "sisa" untuk dihitung.
+  const sisaKalori = target ? target.target_kalori - log.kalori : null;
+  const sisaProtein = target ? target.target_protein_g - log.protein_g : null;
+  const sisaLemak = target ? target.target_lemak_g - log.lemak_g : null;
   const beratSebelumnya = beratTerakhirSebelum(log.tanggal);
   const jumlahEstimasi = hitungEstimasi(foodLogs);
 
@@ -146,13 +148,31 @@ export default function LogHarianScreen() {
 
       {/* Angka utama: sisa kalori hari ini */}
       <Card style={{ paddingVertical: spacing.xl }}>
-        <HeroNumber
-          label="Sisa kalori hari ini"
-          nilai={formatAngka(sisaKalori)}
-          unit="kcal"
-          keterangan={`${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal`}
-          warna={sisaKalori >= 0 ? colors.amber : colors.coral}
-        />
+        {target && sisaKalori !== null ? (
+          <HeroNumber
+            label="Sisa kalori hari ini"
+            nilai={formatAngka(sisaKalori)}
+            unit="kcal"
+            keterangan={`${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal`}
+            warna={sisaKalori >= 0 ? colors.amber : colors.coral}
+          />
+        ) : (
+          <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>
+            <Text style={{ ...typography.caption, color: colors.textMuted }}>SISA KALORI HARI INI</Text>
+            <Text style={{ ...typography.title, color: colors.text }}>
+              Target {dayType.nama} · {fase} belum diisi
+            </Text>
+            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+              Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
+              tetap tersimpan seperti biasa.
+            </Text>
+            <TombolUtama
+              label="Isi target"
+              aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`}
+              onPress={() => router.push({ pathname: '/target-harian', params: { isi: dayTypeId } })}
+            />
+          </View>
+        )}
 
         <View
           style={{
@@ -163,9 +183,9 @@ export default function LogHarianScreen() {
             borderTopColor: colors.border,
           }}
         >
-          <StatKecil label="Sisa protein" nilai={formatMakro(sisaProtein)} unit="g" warna={colors.aksenTeks.jade} />
+          <StatKecil label="Sisa protein" nilai={sisaProtein !== null ? formatMakro(sisaProtein) : '–'} unit={sisaProtein !== null ? 'g' : ''} warna={colors.aksenTeks.jade} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
-          <StatKecil label="Sisa lemak" nilai={formatMakro(sisaLemak)} unit="g" warna={colors.text} />
+          <StatKecil label="Sisa lemak" nilai={sisaLemak !== null ? formatMakro(sisaLemak) : '–'} unit={sisaLemak !== null ? 'g' : ''} warna={colors.text} />
           <View style={{ width: 1, backgroundColor: colors.border }} />
           <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.text} kecil />
         </View>
