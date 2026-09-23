@@ -267,6 +267,18 @@ console.log('\nAPI target (muat_target / simpan_target)');
   cek('muat berbatas waktu (tidak menunggu klien Supabase ±30 detik)', /dalamBatasWaktu\(muatTarget\(\), BATAS_MUAT_MS\)/.test(penyedia));
   cek('hasil muat yang berangkat sebelum simpanan dibuang', /if \(versi\.current !== versiAwal\) return;/.test(penyedia) && /versi\.current \+= 1;/.test(penyedia));
   cek('salinan di perangkat diperiksa bentuknya sebelum dipakai', /const adaSalinan = dataTargetSah\(salinan\);/.test(penyedia));
+  // Konkurensi optimistis: waktu muat ikut dikirim, konflik memuat ulang.
+  cek('simpan membawa waktu muat tiap baris', /diperbarui_pada:\s*\n?\s*p\.diperbarui_pada \?\?/.test(penyedia) && /diperbarui_pada: b\.updated_at/.test(dataTs));
+  cek('konflik (40001) → pesan sendiri & muat ulang', /case '40001':/.test(dataTs) && /e\.kode === 'konflik'\) await muatDariServer\(true\)/.test(penyedia));
+  // Satu jalan tulis dari app: RPC simpan_target, bukan UPDATE langsung.
+  const tulisLangsung = [];
+  const jelajahi = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) {
+    const f = join(d, e.name);
+    if (e.isDirectory()) jelajahi(f);
+    else if (/\.(ts|tsx)$/.test(e.name) && /from\('day_type_targets'\)\s*\.(update|insert|upsert|delete)/.test(readFileSync(f, 'utf8'))) tulisLangsung.push(f);
+  } };
+  jelajahi('src'); jelajahi('app');
+  cek('app tidak menulis day_type_targets langsung (hanya simpan_target)', tulisLangsung.length === 0, tulisLangsung.join(', '));
 }
 
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan target lulus');

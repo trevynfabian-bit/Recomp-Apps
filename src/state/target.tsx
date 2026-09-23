@@ -152,7 +152,23 @@ export function PenyediaTarget({ children }: { children: React.ReactNode }) {
   const simpanTarget = useCallback(
     async (perubahan: PerubahanTarget[]) => {
       if (pakaiServer) {
-        const hasil = await simpanTargetServer(perubahan);
+        // Waktu muat tiap baris ikut dikirim: bila baris itu sudah diubah di
+        // perangkat lain sejak dimuat, server menolak alih-alih menimpanya.
+        const denganWaktu = perubahan.map((p) => ({
+          ...p,
+          diperbarui_pada:
+            p.diperbarui_pada ??
+            dataTerkini.current.target.find((t) => t.day_type_id === p.day_type_id && t.fase === p.fase)?.diperbarui_pada,
+        }));
+        let hasil: Awaited<ReturnType<typeof simpanTargetServer>>;
+        try {
+          hasil = await simpanTargetServer(denganWaktu);
+        } catch (e) {
+          // Angka terbaru dimuat supaya yang dilihat pengguna saat menyimpan lagi
+          // adalah angka dari perangkat lain itu, bukan yang lama.
+          if (e instanceof KesalahanTarget && e.kode === 'konflik') await muatDariServer(true);
+          throw e;
+        }
         versi.current += 1;
         // Baris dari server yang dipakai, bukan isian: itu yang benar-benar tersimpan.
         const lama = dataTerkini.current;
@@ -185,7 +201,7 @@ export function PenyediaTarget({ children }: { children: React.ReactNode }) {
       });
       return { hariDiredistribusiTetap: 0 };
     },
-    [pakaiServer, penggunaId],
+    [pakaiServer, penggunaId, muatDariServer],
   );
 
   const nilai = useMemo<KonteksTarget>(

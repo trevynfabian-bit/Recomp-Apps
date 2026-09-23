@@ -94,34 +94,6 @@ export async function targetSemuaFase(): Promise<DayTypeTargetRow[]> {
 }
 
 /**
- * Ubah target absolut satu kombinasi (tipe hari × fase).
- *
- * Hari yang SUDAH tercatat tidak ikut berubah: snapshot di `daily_logs`
- * memegang angka yang berlaku saat itu. Itu disengaja — target yang diedit
- * hari ini tidak boleh menulis ulang "sisa kalori" tiga pekan lalu.
- */
-export async function ubahTargetFase(
-  id: string,
-  perubahan: Partial<
-    Pick<
-      DayTypeTargetRow,
-      'target_kalori' | 'target_protein_g' | 'target_lemak_g' | 'batas_sat_fat_g'
-    >
-  >,
-): Promise<DayTypeTargetRow> {
-  const { data, error } = await supabase
-    .from('day_type_targets')
-    .update(perubahan)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanFase('Target tidak ditemukan.', false);
-  return data;
-}
-
-/**
  * Ubah kesalahan Postgres/PostgREST menjadi pesan berbahasa Indonesia.
  * Kode SQLSTATE-nya sengaja dicocokkan dengan yang di-`raise` oleh RPC.
  */

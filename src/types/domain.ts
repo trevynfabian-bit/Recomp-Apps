@@ -65,6 +65,12 @@ export type DayTypeTarget = {
   target_protein_g: number;
   target_lemak_g: number;
   batas_sat_fat_g: number;
+  /**
+   * Kapan baris ini terakhir berubah di server, apa adanya (ISO). Dikirim
+   * kembali saat menyimpan supaya perubahan dari perangkat lain tidak
+   * tertimpa diam-diam. Tidak ada di data tiruan.
+   */
+  diperbarui_pada?: string;
 };
 
 /** daily_logs — log harian inti (berat pagi, konsumsi manual, catatan). */

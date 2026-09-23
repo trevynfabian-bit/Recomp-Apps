@@ -70,7 +70,10 @@ export type MuatTargetHasil = {
 export type SimpanTargetButir = Pick<
   DayTypeTargetRow,
   'day_type_id' | 'fase' | 'target_kalori' | 'target_protein_g' | 'target_lemak_g' | 'batas_sat_fat_g'
->;
+> & {
+  /** Waktu baris terakhir berubah saat klien memuatnya; berbeda di server → 40001. */
+  diperbarui_pada?: string;
+};
 
 export type SimpanTargetHasil = {
   target: TargetApiRow[];

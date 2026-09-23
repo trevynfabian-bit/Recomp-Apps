@@ -23,13 +23,21 @@ export class KesalahanTarget extends Error {
     pesan: string,
     /** true bila mencoba lagi masuk akal (mis. jaringan putus). */
     readonly bisaDiulang: boolean,
+    /** `konflik`: target sudah diubah di perangkat lain sejak dimuat. */
+    readonly kode: 'konflik' | null = null,
   ) {
     super(pesan);
     this.name = 'KesalahanTarget';
   }
 }
 
-export type PerubahanTarget = { day_type_id: string; fase: Fase; nilai: NilaiTarget };
+export type PerubahanTarget = {
+  day_type_id: string;
+  fase: Fase;
+  nilai: NilaiTarget;
+  /** Waktu baris terakhir berubah saat dimuat; bila berbeda di server, simpanan ditolak. */
+  diperbarui_pada?: string;
+};
 
 export type DataTarget = { tipeHari: DayType[]; target: DayTypeTarget[] };
 
@@ -52,6 +60,7 @@ function keTarget(b: TargetApiRow): DayTypeTarget {
     target_protein_g: Number(b.target_protein_g),
     target_lemak_g: Number(b.target_lemak_g),
     batas_sat_fat_g: Number(b.batas_sat_fat_g),
+    diperbarui_pada: b.updated_at,
   };
 }
 
@@ -95,7 +104,12 @@ export async function ambilTarget(
 
 export async function simpanTargetServer(perubahan: PerubahanTarget[]): Promise<HasilSimpanTarget> {
   const { data, error } = await supabase.rpc('simpan_target', {
-    p_perubahan: perubahan.map((p) => ({ day_type_id: p.day_type_id, fase: p.fase, ...p.nilai })),
+    p_perubahan: perubahan.map((p) => ({
+      day_type_id: p.day_type_id,
+      fase: p.fase,
+      ...p.nilai,
+      ...(p.diperbarui_pada ? { diperbarui_pada: p.diperbarui_pada } : {}),
+    })),
   });
   if (error) throw terjemahkan(error, 'simpan');
   return {
@@ -138,6 +152,12 @@ function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 
     }
     case '23503':
       return new KesalahanTarget('Tipe hari ini sudah tidak ada. Muat ulang target, lalu coba lagi.', false);
+    case '40001':
+      return new KesalahanTarget(
+        'Target ini baru saja diubah di perangkat lain. Angka terbarunya sudah dimuat; periksa lalu simpan lagi.',
+        false,
+        'konflik',
+      );
     case '22023': // pesan dari simpan_target sudah berbahasa Indonesia
       return new KesalahanTarget(error.message, false);
     case '28000':
