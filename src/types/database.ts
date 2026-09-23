@@ -372,6 +372,42 @@ export type ProteksiProteinRow = {
   rincian: ProteksiProteinHariRow[];
 };
 
+/** percakapan — satu utas AI Coach. */
+export type PercakapanRow = {
+  id: string;
+  user_id: string;
+  /** Diturunkan dari pertanyaan pertama; lihat `judulPercakapan`. */
+  judul: string;
+  /** Waktu pesan terakhir; dijaga trigger, bukan pemanggil. */
+  diperbarui_pada: string;
+  created_at: string;
+};
+
+/**
+ * pesan_coach — satu pesan dalam percakapan.
+ *
+ * `rujukan`/`widget`/`ringkasan`/`evaluasi`/`penolakan` hanya boleh terisi pada
+ * pesan coach; database menolak sebaliknya. Bentuknya `unknown` di sini karena
+ * isinya milik `@/types/domain` (RujukanData, WidgetCoach, …) dan divalidasi di
+ * tempat ia dirender, bukan di lapisan tabel.
+ */
+export type PesanCoachRow = {
+  id: string;
+  /** Urutan monoton dalam satu percakapan; dipakai mengurutkan, bukan `waktu`. */
+  urutan: number;
+  percakapan_id: string;
+  user_id: string;
+  peran: 'pengguna' | 'coach';
+  teks: string;
+  waktu: string;
+  rujukan: unknown[] | null;
+  widget: unknown[] | null;
+  ringkasan: Record<string, unknown> | null;
+  evaluasi: Record<string, unknown> | null;
+  penolakan: Record<string, unknown> | null;
+  created_at: string;
+};
+
 /** alert_pinggang — jejak keadaan batas pinggang. */
 export type AlertPinggangRow = {
   id: string;
@@ -712,6 +748,22 @@ export type Database = {
         Row: RedistribusiHariRow;
         Insert: Omit<RedistribusiHariRow, 'id'>;
         Update: Partial<RedistribusiHariRow>;
+        Relationships: [];
+      };
+      percakapan: {
+        Row: PercakapanRow;
+        Insert: Omit<PercakapanRow, 'id' | 'diperbarui_pada' | 'created_at'> & {
+          diperbarui_pada?: string;
+        };
+        Update: Partial<PercakapanRow>;
+        Relationships: [];
+      };
+      pesan_coach: {
+        Row: PesanCoachRow;
+        Insert: Omit<PesanCoachRow, 'id' | 'urutan' | 'waktu' | 'created_at'> & {
+          waktu?: string;
+        };
+        Update: Partial<PesanCoachRow>;
         Relationships: [];
       };
       alert_pinggang: {

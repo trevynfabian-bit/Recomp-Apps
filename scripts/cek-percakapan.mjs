@@ -11,7 +11,7 @@
  * harinya adalah 17.30 UTC di tanggal yang SAMA menurut UTC. Implementasi yang
  * memakai zona perangkat akan menyatukan keduanya dalam satu kelompok.
  */
-import { copyFileSync, mkdtempSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -161,6 +161,31 @@ cek(
   'bulan tidak diulang saat sama',
   (formatRentangTanggal('2026-09-15', '2026-09-21').match(/September/g) || []).length === 1,
 );
+
+console.log('\nBatas judul sejalan dengan database');
+{
+  // Judul disimpan di kolom `percakapan.judul` dengan CHECK-nya sendiri. Batas
+  // yang hanya ada di satu sisi akan menolak di sisi lain dengan pesan yang
+  // tidak bisa dibaca pengguna — atau lebih buruk, memotong judul tanpa
+  // sepengetahuan siapa pun.
+  const migrasi = readFileSync('supabase/migrations/20260922002600_percakapan_coach.sql', 'utf8');
+  cek(
+    `MAKS_JUDUL ${MAKS_JUDUL} ada sebagai konstanta SQL`,
+    migrasi.includes(`as $$ select ${MAKS_JUDUL}; $$;`),
+  );
+  cek(
+    `CHECK judul memakai ${MAKS_JUDUL} + 1 karakter elipsis`,
+    migrasi.includes(`between 1 and ${MAKS_JUDUL + 1}`),
+  );
+  // Dan judul terpanjang yang bisa DIHASILKAN memang muat di kolomnya.
+  const panjang = judulPercakapan([
+    { id: '1', peran: 'pengguna', teks: 'a'.repeat(200), waktu: '' },
+  ]);
+  cek(
+    `judul terpanjang ${panjang.length} karakter, muat di batas ${MAKS_JUDUL + 1}`,
+    panjang.length <= MAKS_JUDUL + 1,
+  );
+}
 
 console.log(gagal === 0 ? '\n✓ Semua pemeriksaan percakapan lulus' : `\n✗ ${gagal} pemeriksaan gagal`);
 process.exit(gagal === 0 ? 0 : 1);
