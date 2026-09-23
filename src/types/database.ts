@@ -1591,6 +1591,18 @@ export type Database = {
         Args: { p_kiriman: KirimanHealthKit };
         Returns: HasilSinkronHealthKit;
       };
+      ekspor_data_saya: {
+        Args: Record<string, never>;
+        /** Bentuk tabelnya sama dengan `TabelEkspor` di @recomp/logika. */
+        Returns: {
+          dibuat_pada: string;
+          tabel: { nama: string; label: string; kolom: string[]; baris: (string | number | boolean | null)[][] }[];
+        };
+      };
+      ringkas_ekspor_data_saya: {
+        Args: Record<string, never>;
+        Returns: { nama: string; label: string; jumlah: number }[];
+      };
       muat_target: {
         Args: Record<string, never>;
         Returns: MuatTargetHasil;

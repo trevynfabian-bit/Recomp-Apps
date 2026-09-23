@@ -29,7 +29,7 @@ const jam = (iso: string) =>
  * data kesehatan — setelah keluar dari app, penjagaannya ada di tempat tujuan.
  */
 export function SheetEksporData({ terbuka, onTutup }: Props) {
-  const { status, isi, mulai, serahkan, buang, setSheetTerbuka } = useEkspor();
+  const { status, isi, isiGagal, mulai, serahkan, buang, setSheetTerbuka } = useEkspor();
   const [galatSerah, setGalatSerah] = useState(false);
   const [menyerahkan, setMenyerahkan] = useState(false);
 
@@ -63,8 +63,15 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
         app ini.
       </Text>
 
+      {isi === null ? (
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          {isiGagal
+            ? 'Isi berkas belum bisa dihitung sekarang; berkasnya tetap bisa disiapkan.'
+            : 'Menghitung isi berkas…'}
+        </Text>
+      ) : null}
       <View accessibilityRole="list" style={{ gap: spacing.xs }}>
-        {isi.map((b) => (
+        {(isi ?? []).map((b) => (
           <View key={b.label} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{b.label}</Text>
             <Text style={{ ...typography.label, color: colors.text }}>{formatAngka(b.jumlah)}</Text>

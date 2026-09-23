@@ -1,6 +1,7 @@
 import type { HasilLab, PeriodeFase, TabelEkspor } from '@recomp/logika';
 import { mockRiwayatPercakapan } from '@/mocks/coach';
 import { mockDailyLogHariIni, mockFoodLogsHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { supabase } from '@/lib/supabase';
 import { mockSesiLatihan } from '@/mocks/latihan';
 import { mockUkuran } from '@/mocks/ukuran';
 import type { DayType, DayTypeTarget, Profile } from '@/types/domain';
@@ -14,8 +15,9 @@ import type { DayType, DayTypeTarget, Profile } from '@/types/domain';
  * layar-layarnya. Satuan disebut di nama kolom; semuanya metrik seperti yang
  * tersimpan, apa pun satuan tampilan yang dipilih.
  *
- * Fase 4 sisi frontend: task backend menukar sumber tiruan dengan kueri
- * Supabase (termasuk `health_data`) tanpa mengubah bentuk tabelnya.
+ * Ini jalur tiruan (tanpa kredensial Supabase). Dengan Supabase, tabelnya
+ * datang dari server lewat `eksporDataSaya` di bawah — termasuk yang hanya
+ * ada di server, seperti data tersinkron (`health_data`).
  */
 export function kumpulkanTabelEkspor(m: {
   profil: Profile;
@@ -93,18 +95,49 @@ export function kumpulkanTabelEkspor(m: {
       kolom: ['percakapan', 'waktu', 'peran', 'teks'],
       baris: mockRiwayatPercakapan.flatMap((p) => p.pesan.map((x) => [p.judul, x.waktu, x.peran, x.teks])),
     },
+    ...tabelHasilLab(m.hasilLab),
+  ];
+}
+
+/**
+ * Hasil lab sebagai tabel ekspor. Terpisah karena hasil lab belum punya tabel
+ * di server: di kedua jalur (tiruan dan Supabase) tabelnya dirakit di app dari
+ * `useHasilLab`, lalu ditempelkan ke tabel lainnya.
+ */
+export function tabelHasilLab(hasilLab: HasilLab[]): TabelEkspor[] {
+  return [
     {
       nama: 'hasil_lab',
       label: 'hasil lab',
       kolom: ['tanggal', 'nama', 'laboratorium', 'jumlah_penanda'],
-      baris: m.hasilLab.map((h) => [h.tanggal, h.nama, h.laboratorium, h.penanda.length]),
+      baris: hasilLab.map((h) => [h.tanggal, h.nama, h.laboratorium, h.penanda.length]),
     },
     {
       nama: 'penanda_lab',
       label: 'penanda lab',
       // Rentang rujukan dari laboratorium, dibawa apa adanya.
       kolom: ['tanggal', 'panel', 'penanda', 'nilai', 'satuan', 'rujukan_min', 'rujukan_maks'],
-      baris: m.hasilLab.flatMap((h) => h.penanda.map((p) => [h.tanggal, h.nama, p.nama, p.nilai, p.satuan, p.rujukanMin, p.rujukanMaks])),
+      baris: hasilLab.flatMap((h) => h.penanda.map((p) => [h.tanggal, h.nama, p.nama, p.nilai, p.satuan, p.rujukanMin, p.rujukanMaks])),
     },
   ];
+}
+
+/**
+ * Seluruh data milik akun dari server (`ekspor_data_saya`): profil, fase,
+ * tipe hari & target, catatan harian, makanan, ukuran, latihan, data
+ * tersinkron, sumber data, redistribusi, percakapan coach, ringkasan,
+ * evaluasi, dan preferensi — dalam bentuk `TabelEkspor` yang sama.
+ * RLS yang menjaga: yang terbaca hanya milik akun yang masuk.
+ */
+export async function eksporDataSaya(): Promise<{ dibuatPada: string; tabel: TabelEkspor[] }> {
+  const { data, error } = await supabase.rpc('ekspor_data_saya');
+  if (error) throw new Error(error.message);
+  return { dibuatPada: data.dibuat_pada, tabel: data.tabel };
+}
+
+/** Hitungan baris per tabel, untuk memperlihatkan isi ekspor sebelum berkasnya disiapkan. */
+export async function ringkasEksporDataSaya(): Promise<{ label: string; jumlah: number }[]> {
+  const { data, error } = await supabase.rpc('ringkas_ekspor_data_saya');
+  if (error) throw new Error(error.message);
+  return data.map(({ label, jumlah }) => ({ label, jumlah: Number(jumlah) }));
 }

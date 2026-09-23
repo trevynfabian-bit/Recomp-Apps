@@ -1,9 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { namaBerkasEkspor, NOTIF_EKSPOR_SIAP, ringkasIsiEkspor, susunBerkasEkspor, tanggalHariIni } from '@recomp/logika';
-import { kumpulkanTabelEkspor } from '@/data/ekspor';
+import type { TabelEkspor } from '@recomp/logika';
+import { eksporDataSaya, kumpulkanTabelEkspor, ringkasEksporDataSaya, tabelHasilLab } from '@/data/ekspor';
+import { dalamBatasWaktu } from '@/lib/batasWaktu';
 import { buatZip, serahkanZip } from '@/lib/berkas';
 import { kirimNotifikasiSekarang } from '@/lib/notifikasi';
+import { supabaseSiap } from '@/lib/supabase';
 import { useHasilLab } from '@/state/hasilLab';
 import { useProfil } from '@/state/profil';
 import { useSesi } from '@/state/sesi';
@@ -25,11 +28,19 @@ import { useTarget } from '@/state/target';
  * penyedia berkunci id pengguna, jadi berkas milik akun sebelumnya ikut
  * hilang saat keluar atau berganti akun.
  *
- * Fase 4 sisi frontend: datanya tiruan (`@/data/ekspor`), dan jeda
- * `JEDA_TIRUAN_MS` meniru server yang sedang menyiapkan berkas.
+ * Dengan Supabase, isinya datang dari server (`ekspor_data_saya`, RLS yang
+ * menjaga) ditambah hasil lab yang masih hidup di app; hitungan "apa yang
+ * akan ada di berkas" diambil (`ringkas_ekspor_data_saya`) setiap sheet
+ * dibuka. Tanpa kredensial Supabase, datanya tiruan (`@/data/ekspor`) dan
+ * jeda `JEDA_TIRUAN_MS` meniru server yang sedang menyiapkan berkas.
  */
 
 const JEDA_TIRUAN_MS = 2500;
+
+/** Paling lama menunggu seluruh data dari server. */
+const BATAS_EKSPOR_MS = 45000;
+/** Paling lama menunggu hitungannya; lewat dari itu sheet tetap bisa menyiapkan berkas. */
+const BATAS_HITUNG_MS = 10000;
 
 export type StatusEkspor =
   | { jenis: 'diam' }
@@ -40,8 +51,12 @@ export type StatusEkspor =
 
 type KonteksEkspor = {
   status: StatusEkspor;
-  /** Apa yang AKAN ada di berkas, dari data saat ini. */
-  isi: { label: string; jumlah: number }[];
+  /**
+   * Apa yang AKAN ada di berkas, dari data saat ini. `null` selama hitungannya
+   * diambil dari server; `isiGagal` bila hitungannya belum bisa diambil.
+   */
+  isi: { label: string; jumlah: number }[] | null;
+  isiGagal: boolean;
   mulai: () => Promise<void>;
   /** Bagikan (native) atau unduh (web); melempar bila gagal. */
   serahkan: () => Promise<void>;
@@ -66,18 +81,45 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
   const zip = useRef<Uint8Array | null>(null);
   const sheetTerbuka = useRef(false);
 
-  const tabel = useMemo(
-    () => kumpulkanTabelEkspor({ profil, riwayatFase, tipeHari, target, hasilLab }),
-    [profil, riwayatFase, tipeHari, target, hasilLab],
+  // Penyedia ini dipasang ulang tiap akun berganti (kunci id pengguna).
+  const pakaiServer = supabaseSiap && pengguna !== null;
+  const tabelLab = useMemo(() => tabelHasilLab(hasilLab), [hasilLab]);
+  const tabelTiruan = useMemo(
+    () => (pakaiServer ? null : kumpulkanTabelEkspor({ profil, riwayatFase, tipeHari, target, hasilLab })),
+    [pakaiServer, profil, riwayatFase, tipeHari, target, hasilLab],
   );
-  const isi = useMemo(() => ringkasIsiEkspor(tabel), [tabel]);
+  const [hitunganServer, setHitunganServer] = useState<{ label: string; jumlah: number }[] | 'memuat' | 'gagal'>('memuat');
+  const isi = useMemo(() => {
+    if (tabelTiruan) return ringkasIsiEkspor(tabelTiruan);
+    return Array.isArray(hitunganServer) ? [...hitunganServer, ...ringkasIsiEkspor(tabelLab)] : null;
+  }, [tabelTiruan, hitunganServer, tabelLab]);
+
+  const hitungDariServer = useCallback(async () => {
+    setHitunganServer('memuat');
+    try {
+      setHitunganServer(await dalamBatasWaktu(ringkasEksporDataSaya(), BATAS_HITUNG_MS));
+    } catch {
+      setHitunganServer('gagal');
+    }
+  }, []);
+
+  /** Seluruh tabel untuk berkas: dari server (+ hasil lab) atau tiruan. */
+  const ambilTabel = useCallback(async (): Promise<{ tabel: TabelEkspor[]; dibuatPada: string }> => {
+    if (tabelTiruan) {
+      await new Promise((r) => setTimeout(r, JEDA_TIRUAN_MS));
+      return { tabel: tabelTiruan, dibuatPada: new Date().toISOString() };
+    }
+    const dariServer = await dalamBatasWaktu(eksporDataSaya(), BATAS_EKSPOR_MS);
+    // Hitungan di sheet diganti isi yang benar-benar masuk berkas.
+    setHitunganServer(ringkasIsiEkspor(dariServer.tabel));
+    return { tabel: [...dariServer.tabel, ...tabelLab], dibuatPada: dariServer.dibuatPada };
+  }, [tabelTiruan, tabelLab]);
 
   const mulai = useCallback(async () => {
     setStatus({ jenis: 'memproses' });
     setPerluDiberitahu(false);
     try {
-      await new Promise((r) => setTimeout(r, JEDA_TIRUAN_MS));
-      const dibuatPada = new Date().toISOString();
+      const { tabel, dibuatPada } = await ambilTabel();
       zip.current = buatZip(susunBerkasEkspor(tabel, { dibuatPada, email: pengguna?.email ?? null }));
       setStatus({ jenis: 'siap', namaBerkas: namaBerkasEkspor(tanggalHariIni()), ukuranByte: zip.current.byteLength, dibuatPada });
       if (!sheetTerbuka.current) setPerluDiberitahu(true);
@@ -88,7 +130,7 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
       zip.current = null;
       setStatus({ jenis: 'gagal' });
     }
-  }, [tabel, pengguna]);
+  }, [ambilTabel, pengguna]);
 
   const serahkan = useCallback(async () => {
     if (status.jenis !== 'siap' || !zip.current) return;
@@ -104,15 +146,21 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
     setStatus({ jenis: 'diam' });
   }, []);
 
-  const setSheetTerbuka = useCallback((terbuka: boolean) => {
-    sheetTerbuka.current = terbuka;
-    if (terbuka) setPerluDiberitahu(false);
-  }, []);
+  const setSheetTerbuka = useCallback(
+    (terbuka: boolean) => {
+      sheetTerbuka.current = terbuka;
+      if (terbuka) setPerluDiberitahu(false);
+      // Hitungan segar setiap sheet dibuka: data bisa bertambah sejak terakhir.
+      if (terbuka && pakaiServer) void hitungDariServer();
+    },
+    [pakaiServer, hitungDariServer],
+  );
 
   const nilai = useMemo<KonteksEkspor>(
     () => ({
       status,
       isi,
+      isiGagal: hitunganServer === 'gagal' && !tabelTiruan,
       mulai,
       serahkan,
       buang,
@@ -120,7 +168,7 @@ export function PenyediaEkspor({ children }: { children: React.ReactNode }) {
       perluDiberitahu,
       tutupPemberitahuan: () => setPerluDiberitahu(false),
     }),
-    [status, isi, mulai, serahkan, buang, setSheetTerbuka, perluDiberitahu],
+    [status, isi, hitunganServer, tabelTiruan, mulai, serahkan, buang, setSheetTerbuka, perluDiberitahu],
   );
 
   return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>;
