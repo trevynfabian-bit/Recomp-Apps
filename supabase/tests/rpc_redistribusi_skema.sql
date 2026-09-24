@@ -68,6 +68,36 @@ begin
   assert n = 3, format('%s hari tersimpan, seharusnya 3', n);
 end $$;
 
+-- 3b. Bentuk pekan dijaga database, juga untuk tulisan langsung (PostgREST):
+--     pekan dimulai Senin, dan hari-harinya berada DI DALAM pekan itu.
+do $$
+declare v_kode text; v_id uuid;
+begin
+  v_kode := null;
+  begin
+    insert into public.redistribusi_mingguan (user_id, minggu_mulai, opsi, perlu_dipindah, terserap, tersisa)
+    values ('eeee7777-0000-0000-0000-000000000007', date '2026-09-22', 'sebar_rata', 0, 0, 0);  -- Selasa
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('pekan mulai Selasa: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+
+  select id into v_id from public.redistribusi_mingguan where minggu_mulai = date '2026-09-21' limit 1;
+  v_kode := null;
+  begin
+    insert into public.redistribusi_hari (redistribusi_id, user_id, tanggal, target_lama, target_baru)
+    values (v_id, 'eeee7777-0000-0000-0000-000000000007', date '2026-09-28', 2450, 2400);  -- Senin berikutnya
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('hari di luar pekan: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+
+  v_kode := null;
+  begin
+    update public.redistribusi_hari set tanggal = date '2026-09-20' where redistribusi_id = v_id and tanggal = date '2026-09-24';
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('hari digeser ke pekan lalu: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+end $$;
+
 -- 4. Satu tanggal hanya boleh muncul SEKALI dalam satu penerapan.
 do $$
 declare v_id uuid; v_gagal boolean := false;
@@ -157,6 +187,24 @@ begin
   assert n = 0, format('B melihat %s penerapan — riwayat A bocor', n);
   select count(*) into n from public.redistribusi_hari;
   assert n = 0, format('B melihat %s baris hari — riwayat A bocor', n);
+end $$;
+
+-- 8b. B tidak bisa menempelkan baris hari ke penerapan milik A, walau tahu
+--     id-nya: baris hari harus milik pemilik penerapannya.
+reset role;
+select set_config('uji.redis_a', id::text, false)
+  from public.redistribusi_mingguan where user_id = 'eeee7777-0000-0000-0000-000000000007' limit 1;
+set request.jwt.claim.sub = 'eeee8888-0000-0000-0000-000000000008';
+set role authenticated;
+do $$
+declare v_kode text;
+begin
+  begin
+    insert into public.redistribusi_hari (redistribusi_id, user_id, tanggal, target_lama, target_baru)
+    values (current_setting('uji.redis_a')::uuid, 'eeee8888-0000-0000-0000-000000000008', date '2026-09-27', 2450, 2400);
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23503', format('baris hari di penerapan orang lain: %s, seharusnya 23503', coalesce(v_kode, 'diterima'));
 end $$;
 
 -- 9. anon tidak boleh menyentuh kedua tabel.
