@@ -200,3 +200,64 @@ layar kunci iOS dan memang dikecualikan dari palet.
   `textTransform: 'uppercase'`, bukan huruf kapital yang diketik.
 - Dynamic Type: teks isi menskala penuh; hanya `hero` yang dibatasi
   `MAKS_SKALA_HERO` (1,3).
+
+---
+
+## 3. Kepadatan tata letak
+
+### 3.1 Karakter
+
+**Lega di tingkat layar, rapat di dalam kartu.** Jarak antar-kartu besar
+(`xl` 24) supaya satu angka hero dan kartu-kartu di bawahnya terbaca sebagai
+blok terpisah; di dalam kartu, label dan nilai dirapatkan supaya satu kartu
+terbaca sekali lirik. Kepadatan ini tidak berubah dari kondisi sekarang: audit
+menunjukkan layar sudah memakainya secara konsisten, yang belum ada hanya
+namanya.
+
+### 3.2 Token jarak (skala 4pt + satu langkah 2pt)
+
+| Token | Nilai | Pemakaian | Kejadian saat audit |
+|---|---|---|---|
+| `xxs` **(baru)** | 2 | Label ↔ nilai yang menempel (judul + subjudul header, nama + angka di baris makro) | 43 literal (`gap: 2` ×30, `marginTop: 2` ×13) |
+| `xs` | 4 | Ikon ↔ teks, pill vertikal | 75 |
+| `sm` | 8 | Antar-baris dalam satu grup | 164 |
+| `md` | 12 | Antar-grup dalam kartu, padding field isian, jarak di bawah `SectionHeader` | 179 |
+| `lg` | 16 | Padding kartu, margin sisi layar, padding atas layar | 137 |
+| `xl` | 24 | **Antar-kartu di layar**, padding sheet | 48 |
+| `xxl` | 32 | Padding bawah layar (di atas inset) | 15 |
+
+Aturan:
+
+- Tidak ada angka jarak mentah. Nilai 3 dan 5 (11 kejadian) dibulatkan ke
+  `xxs`/`xs`; `spacing.xs + 1` (12 kejadian, padding vertikal pill) menjadi
+  token `ukuran.pillVertikal` di Fase 2, bukan aritmetika di tempat.
+- Layar: `paddingHorizontal: lg`, `paddingTop: insets.top + lg`,
+  `paddingBottom: insets.bottom + xxl`, `gap: xl` antar-blok. Satu kerangka
+  layar bersama (Fase 3) memegang aturan ini.
+- Kartu: `padding: lg`, isi dengan `gap: sm` (dalam grup) atau `md` (antar-grup).
+- Sheet: `padding: xl`, `gap: lg`.
+
+### 3.3 Token radius
+
+| Token | Nilai | Pemakaian |
+|---|---|---|
+| `sm` | 8 | Sudut "ekor" gelembung chat, sel matriks target |
+| `md` | 12 | Tombol, field isian, chip pilihan |
+| `lg` | 18 | Kartu, gelembung chat |
+| `xl` | 24 | Sudut atas sheet |
+| `pill` | 999 | Pill, tombol bulat, pegangan sheet, titik status |
+
+Aturan: radius elemen di dalam kartu harus **lebih kecil** dari radius kartunya
+(`md` di dalam `lg`) supaya sudut terlihat sejajar. Tidak ada radius mentah
+(1 kejadian di `target-harian.tsx` dibereskan di Fase 5).
+
+### 3.4 Tinggi baris & tinggi kontrol
+
+- **Tinggi baris teks** dibawa gaya tipografi (bab 2.2): `body` 24, `label` 19,
+  `caption` 16, `title` 26, `display` 40. Tidak ada `lineHeight` mentah.
+- **Tinggi baris daftar** (baris pengaturan, baris riwayat) minimal `TAP_MIN`
+  (44) bila bisa diketuk, dengan padding vertikal `md`.
+- **Tinggi kontrol**: tombol, field isian, chip, dan stepper minimal 44×44 pt
+  (`TAP_MIN`, 71 pemakaian). Tinggi mentah lain yang ditemukan (14, 24, 36, 72,
+  96, 140) adalah area grafik/pratinjau, bukan kontrol, dan dijadikan token
+  ukuran bernama di Fase 2.
