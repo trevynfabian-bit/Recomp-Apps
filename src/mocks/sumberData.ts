@@ -98,3 +98,14 @@ export function mockKejadianMasuk(sekarang: Date = new Date()): KejadianMasuk {
     ],
   };
 }
+
+/**
+ * Sinkron manual tiruan: jeda seperti menarik dari layanan, lalu yang masuk.
+ * Hevy membawa satu sesi; sumber lain tidak membawa data baru — supaya kedua
+ * kalimat hasil ("… baru" dan "tidak ada data baru") sama-sama terlihat.
+ */
+export function mockSinkronSekarang(sumber: SumberData): Promise<{ label: string; jumlah: number }[]> {
+  return new Promise((selesai) =>
+    setTimeout(() => selesai(sumber === 'hevy' ? [{ label: 'sesi latihan', jumlah: 1 }] : []), 1200),
+  );
+}

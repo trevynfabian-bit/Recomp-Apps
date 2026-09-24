@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logika';
+import { formatAngka, kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logika';
 import type { KoneksiSumber, SumberData } from '@recomp/logika';
 import {
   BarisTautan,
@@ -14,10 +14,10 @@ import {
   SheetHubungkanSumber,
   SheetPutuskanSumber,
 } from '@/components';
-import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { mockHubungkan, mockPutuskan } from '@/mocks/sumberData';
+import { ketukBerhasil } from '@/lib/haptics';
+import { mockHubungkan, mockPutuskan, mockSinkronSekarang } from '@/mocks/sumberData';
 import { useSinkron } from '@/state/sinkron';
-import { colors, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
 /**
  * Layar Sumber Data: apakah data dari Apple Health, WHOOP, Strava, dan Hevy
@@ -73,9 +73,36 @@ export default function SumberDataScreen() {
     });
   }
 
-  function sinkronSekarang(sumber: SumberData) {
-    ubah(sumber, { sinkronTerakhir: new Date().toISOString(), galatTerakhir: null });
+  /** Sinkron manual per sumber: sedang berjalan, lalu kalimat hasilnya. */
+  const [sinkron, setSinkron] = useState<Partial<Record<SumberData, { berjalan: boolean; hasil: string | null }>>>({});
+
+  async function sinkronSekarang(sumber: SumberData) {
+    setSinkron((s) => ({ ...s, [sumber]: { berjalan: true, hasil: null } }));
+    const masuk = await mockSinkronSekarang(sumber);
+    const lama = koneksi.find((k) => k.sumber === sumber)?.masukHariIni ?? [];
+    ubah(sumber, {
+      sinkronTerakhir: new Date().toISOString(),
+      galatTerakhir: null,
+      // Yang baru masuk ditambahkan ke hitungan "Hari ini" kartunya.
+      masukHariIni: masuk.reduce(
+        (daftar, m) =>
+          daftar.some((d) => d.label === m.label)
+            ? daftar.map((d) => (d.label === m.label ? { ...d, jumlah: d.jumlah + m.jumlah } : d))
+            : [...daftar, m],
+        lama,
+      ),
+    });
     ketukBerhasil();
+    setSinkron((s) => ({
+      ...s,
+      [sumber]: {
+        berjalan: false,
+        hasil:
+          masuk.length > 0
+            ? `Sinkron selesai: ${masuk.map((m) => `${formatAngka(m.jumlah)} ${m.label}`).join(', ')} baru.`
+            : 'Sinkron selesai: tidak ada data baru sejak sinkron terakhir.',
+      },
+    }));
   }
 
   async function putuskan(sumber: SumberData, hapusData: boolean) {
@@ -127,7 +154,8 @@ export default function SumberDataScreen() {
             koneksi={k}
             kesehatan={kesehatanKoneksi(k, sekarang)}
             onHubungkan={() => setAkanDihubungkan(k.sumber)}
-            onSinkronSekarang={() => sinkronSekarang(k.sumber)}
+            onSinkronSekarang={() => void sinkronSekarang(k.sumber)}
+            sinkron={sinkron[k.sumber]}
             onPutuskan={() => setAkanDiputuskan(k.sumber)}
             tautan={
               k.sumber === 'hevy'
