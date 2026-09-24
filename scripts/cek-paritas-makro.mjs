@@ -254,13 +254,13 @@ try {
     });
 
     const namaSql = sql(
-      `select coalesce((select nama from public.deteksi_tipe_hari(date '${tanggal}', '${UID}')), 'â€”');`,
+      `select coalesce((select nama from public.deteksi_tipe_hari(date '${tanggal}', '${UID}')), '(tidak ada)');`,
     );
 
     const workouts = k.jenis.map((j, n) => ({
       id: `w${n}`, nama: `w${n}`, jenis: j, sumber: 'manual', durasi_menit: 30,
     }));
-    const namaTs = deteksiTipeHari(workouts, dayTypes).nama ?? 'â€”';
+    const namaTs = deteksiTipeHari(workouts, dayTypes).nama ?? '(tidak ada)';
 
     const cocok = namaSql === namaTs;
     if (!cocok) gagalDeteksi += 1;
@@ -268,6 +268,32 @@ try {
       `${cocok ? '✓' : '✗'} ${k.label.padEnd(28)} ${namaSql.padEnd(15)} ${namaTs}`,
     );
   });
+
+  // Kisi lengkap: setiap kombinasi 0–2 sesi dari keempat jenis olahraga
+  // (3⁴ = 81), termasuk hari tanpa latihan. Kasus di atas memberi nama; kisi
+  // ini memastikan tidak ada kombinasi yang diputuskan berbeda.
+  const JENIS_OLAHRAGA = ['angkat_beban', 'lari', 'padel', 'lainnya'];
+  let gagalKisi = 0;
+  for (let kode = 0; kode < 81; kode += 1) {
+    const jumlah = JENIS_OLAHRAGA.map((_, j) => Math.floor(kode / 3 ** j) % 3);
+    const jenis = JENIS_OLAHRAGA.flatMap((j, x) => Array(jumlah[x]).fill(j));
+    const tanggal = new Date(Date.UTC(2026, 10, 1 + kode)).toISOString().slice(0, 10);
+    if (jenis.length > 0) {
+      sql(`insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id) values ${jenis
+        .map((j, n) => `('${UID}', date '${tanggal}', 'k${n}', '${j}', 'manual', 'kisi-${tanggal}-${n}')`)
+        .join(', ')};`);
+    }
+    const namaSql = sql(`select coalesce((select nama from public.deteksi_tipe_hari(date '${tanggal}', '${UID}')), '(tidak ada)');`);
+    const namaTs =
+      deteksiTipeHari(jenis.map((j, n) => ({ id: `k${n}`, nama: `k${n}`, jenis: j, sumber: 'manual', durasi_menit: 30 })), dayTypes).nama ??
+      '(tidak ada)';
+    if (namaSql !== namaTs) {
+      gagalKisi += 1;
+      console.log(`✗ kisi ${jenis.join('+') || '(tanpa latihan)'}: SQL ${namaSql}, TS ${namaTs}`);
+    }
+  }
+  gagalDeteksi += gagalKisi;
+  if (gagalKisi === 0) console.log('✓ kisi 81 kombinasi jenis latihan (0–2 sesi tiap jenis) diputuskan sama di SQL dan TypeScript');
 
   console.log();
   if (gagalDeteksi > 0) {

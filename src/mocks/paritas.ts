@@ -100,7 +100,7 @@ const PASANGAN: PasanganParitas[] = [
     aturan: 'Deteksi tipe hari dari latihan',
     ts: 'deteksiTipeHari',
     sql: 'deteksi_tipe_hari',
-    kasus: 11,
+    kasus: 91,
     keadaan: 'sama',
   },
   {
