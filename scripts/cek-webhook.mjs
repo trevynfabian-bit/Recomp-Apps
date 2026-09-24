@@ -135,6 +135,15 @@ console.log('\nHevy (API)');
   const kardio = L.sesiDariWorkoutHevy({ ...w, id: 'hv-k', exercises: [w.exercises[2]] });
   cek('sesi Hevy hanya kardio → bukan hari angkat beban', kardio.jenis === 'lainnya' && kardio.latihan.length === 0);
 
+  // Batas database per set: set di luar batas dilewati SENDIRIAN, sesinya tetap masuk.
+  const luar = L.sesiDariWorkoutHevy({ ...w, id: 'hv-luar', exercises: [{ ...w.exercises[0], sets: [
+    { index: 0, type: 'normal', weight_kg: 80, reps: 8 },
+    { index: 1, type: 'normal', weight_kg: 700, reps: 1 },
+    { index: 2, type: 'normal', weight_kg: 20, reps: 250 },
+  ] }] });
+  cek('set > 600 kg & > 200 repetisi dilewati, set sah tetap', luar.latihan[0]?.sets.map((x) => x.set_ke).join(',') === '1', JSON.stringify(luar.latihan));
+  cek('sesi dengan set di luar batas tetap hari angkat beban', luar.jenis === 'angkat_beban');
+
   // Aturan SAMA dengan impor CSV: sesi yang sama lewat dua jalur → set yang sama.
   const csv = [
     'title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps',

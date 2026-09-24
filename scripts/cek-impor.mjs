@@ -56,6 +56,11 @@ console.log('\nCSV');
   cek('CRLF & baris baru di dalam kutip dihitung benar', uraiCsvRinci('a,b\r\n"ok\nlagi",2\r\n5,"putus\r\n6,7\r\n').kutipTerbuka === 4);
   const hevyPutus = uraiCsvHevy('title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps\n"Push,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,0,normal,80,8\nPush,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,1,normal,80,8\n');
   cek('Hevy: kutip tidak ditutup → berkas ditolak menyebut barisnya', hevyPutus.galat?.startsWith('Tanda kutip di baris 2 tidak ditutup'), JSON.stringify(hevyPutus).slice(0, 120));
+  const hevyLuar = uraiCsvHevy('title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps\nPush,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,0,normal,80,8\nPush,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,1,normal,700,1\nPush,22 Sep 2026 07:00,22 Sep 2026 08:00,Calf,0,normal,20,250\n');
+  cek('Hevy: set di luar batas database dilewati sendirian dengan alasannya',
+    hevyLuar.sesi?.[0]?.latihan.length === 1 && hevyLuar.sesi[0].latihan[0].sets.length === 1 &&
+    JSON.stringify(hevyLuar.dilewati) === JSON.stringify([{ baris: 3, alasan: 'beban di atas 600 kg' }, { baris: 4, alasan: 'repetisi di atas 200' }]),
+    JSON.stringify(hevyLuar.dilewati));
   const ukuranPutus = uraiCsvUkuran('tanggal,pinggang\n2026-09-01,"85\n2026-09-08,84\n', '2026-09-24');
   cek('Ukuran: kutip tidak ditutup → berkas ditolak', ukuranPutus.galat?.startsWith('Tanda kutip di baris 2 tidak ditutup'), JSON.stringify(ukuranPutus).slice(0, 120));
 }

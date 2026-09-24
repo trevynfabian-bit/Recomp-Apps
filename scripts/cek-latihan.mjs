@@ -19,7 +19,7 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['latihan.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { arahKekuatan, ringkasArahKekuatan, e1rmEpley, formatBeban, MAKS_REPS_E1RM, ringkasLatihan, ringkasPekan, ringkasSesi } =
+const { arahKekuatan, ringkasArahKekuatan, e1rmEpley, formatBeban, MAKS_REPS_E1RM, RENTANG_SET, masalahSet, ringkasLatihan, ringkasPekan, ringkasSesi } =
   require(join(kerja, 'keluar', 'latihan.js'));
 
 let gagal = 0;
@@ -134,6 +134,19 @@ console.log('\nArah kekuatan (keterangan awam)');
   const r = ringkasArahKekuatan(h);
   cek('ringkasan sumbu: "1 dari 3 gerakan naik", seri → datar', r.teks === '1 dari 3 gerakan naik' && r.arah === 'datar', JSON.stringify(r));
   cek('ringkasan tanpa gerakan berulang → belum jelas', ringkasArahKekuatan(arahKekuatan([data[0]])).arah === 'belum jelas');
+}
+
+console.log('\nBatas set = CHECK database');
+{
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const sqlTeks = readdirSync('supabase/migrations').sort().map((b) => readFileSync(join('supabase/migrations', b), 'utf8')).join('\n');
+  const beban = /workout_sets_beban_wajar check \(beban_kg is null or \(beban_kg > 0 and beban_kg <= (\d+)\)\)/.exec(sqlTeks);
+  const reps = /workout_sets_reps_wajar check \(reps between (\d+) and (\d+)\)/.exec(sqlTeks);
+  cek(`beban maks TS ${RENTANG_SET.bebanKg.maks} = database ${beban?.[1]}`, Number(beban?.[1]) === RENTANG_SET.bebanKg.maks);
+  cek(`repetisi TS ${RENTANG_SET.reps.min}–${RENTANG_SET.reps.maks} = database ${reps?.[1]}–${reps?.[2]}`,
+    Number(reps?.[1]) === RENTANG_SET.reps.min && Number(reps?.[2]) === RENTANG_SET.reps.maks);
+  cek('600 kg sah, 600,5 kg tidak', masalahSet(600, 1) === null && masalahSet(600.5, 1) === 'beban di atas 600 kg');
+  cek('200 repetisi sah, 201 tidak', masalahSet(null, 200) === null && masalahSet(null, 201) === 'repetisi di atas 200');
 }
 
 console.log(gagal === 0 ? '\n✓ Latihan: e1RM hanya ≤ 12 repetisi & dibulatkan seperti SQL, pekan menurut Jakarta' : `\n✗ ${gagal} pemeriksaan gagal`);

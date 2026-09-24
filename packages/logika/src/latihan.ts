@@ -18,6 +18,22 @@ import { tanggalDariWaktu } from './percakapan';
 /** Batas repetisi untuk e1RM; SAMA dengan aturan `workout_sets.e1rm_kg` di PRD. */
 export const MAKS_REPS_E1RM = 12;
 
+/**
+ * Batas satu set yang boleh disimpan; SAMA dengan CHECK `workout_sets_beban_wajar`
+ * (0 < beban ≤ 600 kg; tanpa beban = berat badan) dan `workout_sets_reps_wajar`
+ * (1–200 repetisi). Set di luar batas dilewati SENDIRIAN oleh pengurai impor dan
+ * sinkron; tanpa ini satu set salah ketik menolak seluruh sesinya di database.
+ */
+export const RENTANG_SET = { bebanKg: { maks: 600 }, reps: { min: 1, maks: 200 } } as const;
+
+/** Alasan set tidak bisa disimpan (dalam kg), atau `null` bila sah. */
+export function masalahSet(bebanKg: number | null, reps: number): string | null {
+  if (!Number.isInteger(reps) || reps < RENTANG_SET.reps.min) return 'repetisi tidak sah';
+  if (reps > RENTANG_SET.reps.maks) return `repetisi di atas ${RENTANG_SET.reps.maks}`;
+  if (bebanKg !== null && bebanKg > RENTANG_SET.bebanKg.maks) return `beban di atas ${RENTANG_SET.bebanKg.maks} kg`;
+  return null;
+}
+
 /** Jenis set di Hevy. Pemanasan tetap disimpan, tapi bukan bukti kekuatan. */
 export type JenisSet = 'normal' | 'warmup' | 'dropset' | 'failure';
 

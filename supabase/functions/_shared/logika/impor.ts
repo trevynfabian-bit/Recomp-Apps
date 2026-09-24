@@ -1,6 +1,6 @@
 // BERKAS TURUNAN — jangan diedit. Disalin dari packages/logika/src oleh
 // `npm run salin:logika`; satu-satunya perubahan: akhiran .ts pada impor relatif.
-import type { JenisSet, SesiLatihan, SetLatihan } from './latihan.ts';
+import { masalahSet, type JenisSet, type SesiLatihan, type SetLatihan } from './latihan.ts';
 import { KG_PER_LB } from './satuan.ts';
 import { RENTANG_UKURAN_CM, type BagianUkuran } from './ukuran.ts';
 
@@ -227,6 +227,18 @@ export function uraiCsvHevy(teks: string): HasilImporHevy | { galat: string } {
       dilewati.push({ baris: nomor, alasan: 'beban tidak sah' });
       continue;
     }
+    const beban =
+      bebanMentah === null || bebanMentah === 0
+        ? null
+        : satuanBeban === 'kg'
+          ? bebanMentah
+          : Math.round(bebanMentah * KG_PER_LB * 100) / 100;
+    // Batas database per set: hanya set ini yang dilewati, bukan seluruh sesinya.
+    const masalah = masalahSet(beban, reps);
+    if (masalah) {
+      dilewati.push({ baris: nomor, alasan: masalah });
+      continue;
+    }
 
     const kunci = `${mulai}|${judulSesi}`;
     let sesi = peta.get(kunci);
@@ -248,12 +260,6 @@ export function uraiCsvHevy(teks: string): HasilImporHevy | { galat: string } {
       l = { latihan, sets: [] };
       sesi.latihan.push(l);
     }
-    const beban =
-      bebanMentah === null || bebanMentah === 0
-        ? null
-        : satuanBeban === 'kg'
-          ? bebanMentah
-          : Math.round(bebanMentah * KG_PER_LB * 100) / 100;
     const set: SetLatihan = {
       // Hevy memberi nomor set mulai 0; tanpa kolomnya, urutan kemunculan.
       set_ke: indeks !== null && Number.isInteger(indeks) && indeks >= 0 ? indeks + 1 : l.sets.length + 1,

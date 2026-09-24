@@ -206,6 +206,8 @@ export {
   e1rmEpley,
   formatBeban,
   MAKS_REPS_E1RM,
+  masalahSet,
+  RENTANG_SET,
   ringkasArahKekuatan,
   ringkasLatihan,
   ringkasPekan,

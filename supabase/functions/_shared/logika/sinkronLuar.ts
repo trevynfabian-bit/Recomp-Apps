@@ -1,6 +1,6 @@
 // BERKAS TURUNAN — jangan diedit. Disalin dari packages/logika/src oleh
 // `npm run salin:logika`; satu-satunya perubahan: akhiran .ts pada impor relatif.
-import type { JenisSet, SesiLatihan, SetLatihan } from './latihan.ts';
+import { masalahSet, type JenisSet, type SesiLatihan, type SetLatihan } from './latihan.ts';
 import type { JenisOlahraga } from './tipe.ts';
 
 /**
@@ -325,7 +325,11 @@ export function sesiDariWorkoutHevy(w: WorkoutHevy): SesiHevy {
             reps: st.reps as number,
             jenis: (JENIS_SET as readonly string[]).includes(st.type) ? (st.type as JenisSet) : 'normal',
           }),
-        ),
+        )
+        // Di luar batas database (> 600 kg, > 200 repetisi): set itu saja yang
+        // dilewati. Tanpa ini seluruh sesi ditolak dan, karena kursor sinkron
+        // tetap maju, tidak pernah dicoba lagi.
+        .filter((st) => masalahSet(st.beban_kg, st.reps) === null),
     }))
     .filter((l) => l.sets.length > 0);
 
