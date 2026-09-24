@@ -94,7 +94,7 @@ export function InputChat({ sibuk, onKirim }: Props) {
           <Text
             style={{
               ...typography.title,
-              color: bisaKirim ? colors.bg : colors.textFaint,
+              color: bisaKirim ? colors.diAtasIsian : colors.textFaint,
             }}
           >
             ↑

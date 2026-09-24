@@ -93,7 +93,7 @@ export function SheetRiwayatPercakapan({
                 opacity: pressed ? 0.8 : 1,
               })}
             >
-              <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
+              <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
                 Percakapan baru
               </Text>
             </Pressable>

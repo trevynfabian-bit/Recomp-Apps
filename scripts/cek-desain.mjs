@@ -5,11 +5,14 @@
  *    satu per layar, dan layar data wajib punya satu. Komponen tidak boleh
  *    membawa angka utamanya sendiri — kalau boleh, layar yang memakainya bisa
  *    berakhir dengan dua tanpa ada yang menyadarinya.
- * 2. DARK MODE DARI SATU PALET. Warna hanya dari `src/theme`; heks mentah di
+ * 2. DUA MODE DARI SATU PALET. Warna hanya dari `src/theme`; heks mentah di
  *    layar/komponen berarti warna yang lolos dari pemeriksaan kontras
- *    (`cek:kontras`) dan tidak ikut bila palet berubah. Pengecualian dicatat
- *    di sini dengan alasannya. Konfigurasi app juga harus gelap, supaya
- *    splash, latar sistem, dan papan ketik tidak berkedip terang.
+ *    (`cek:kontras`) dan tidak ikut bila palet atau skema berubah.
+ *    Pengecualian dicatat di sini dengan alasannya. Skema mengikuti sistem
+ *    (`userInterfaceStyle: automatic`); gelap tetap mode utama, jadi splash
+ *    dan latar asli app tetap gelap. `colors` ditukar isinya saat skema
+ *    berganti, sehingga nilainya tidak boleh dibekukan di konstanta tingkat
+ *    modul.
  * 3. TIPOGRAFI DARI SATU SKALA (docs/desain/arah-visual.md bab 2). Ukuran huruf
  *    hanya dari `typography`; ketebalan tidak ditimpa manual setelah
  *    `...typography.x` (pakai varian bernama `labelBiasa`/`bodySedang`/
@@ -20,6 +23,7 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import ts from 'typescript';
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -62,7 +66,7 @@ const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumb
 const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
 cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
 
-console.log('\nDark mode dari satu palet');
+console.log('\nDua mode dari satu palet');
 // Pengecualian heks mentah, masing-masing dengan alasan.
 const BOLEH = [
   { pola: /'#000000AA'/, alasan: 'selubung gelap di belakang sheet (bukan warna palet, tetapi peredup)' },
@@ -82,10 +86,40 @@ for (const p of [...layar, ...berkasTsx('src/components')]) {
 cek('warna layar & komponen hanya dari src/theme', pelanggar.length === 0, pelanggar.slice(0, 5).join(' | '));
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
-cek('app.json: userInterfaceStyle gelap', app.userInterfaceStyle === 'dark');
+cek('app.json: userInterfaceStyle mengikuti sistem', app.userInterfaceStyle === 'automatic');
 cek(`app.json: latar = colors.bg (${bg})`, Boolean(bg) && app.backgroundColor === bg && app.splash?.backgroundColor === bg);
 const tataLetak = readFileSync('app/_layout.tsx', 'utf8');
-cek('status bar terang di atas latar gelap', /<StatusBar style="light" \/>/.test(tataLetak));
+cek(
+  'status bar mengikuti skema (terang di atas gelap, gelap di atas terang)',
+  /<StatusBar style=\{skema === 'gelap' \? 'light' : 'dark'\} \/>/.test(tataLetak),
+);
+cek('akar dibungkus PenyediaSkema', /<PenyediaSkema>/.test(tataLetak));
+cek('navigator dipasang ulang saat skema berganti', /key=\{skema\}/.test(tataLetak));
+
+// `colors.x` di luar fungsi dibaca SEKALI saat modul dimuat, lalu membeku di
+// skema itu. Getter dan fungsi aman karena dibaca ulang setiap kali dipakai.
+function tangkapanModul(berkas) {
+  const sf = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true);
+  const hasil = [];
+  (function kunjungi(n) {
+    if (ts.isPropertyAccessExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 'colors') {
+      let p = n.parent;
+      while (p && !ts.isFunctionLike(p)) p = p.parent;
+      if (!p) hasil.push(`${berkas}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1}`);
+    }
+    ts.forEachChild(n, kunjungi);
+  })(sf);
+  return hasil;
+}
+const berkasTs = (dir) =>
+  readdirSync(dir).flatMap((n) => {
+    const p = join(dir, n);
+    return statSync(p).isDirectory() ? berkasTs(p) : /\.tsx?$/.test(p) ? [p] : [];
+  });
+const beku = [...berkasTs('app'), ...berkasTs('src')]
+  .filter((p) => !p.startsWith(join('src', 'theme')))
+  .flatMap(tangkapanModul);
+cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku.slice(0, 5).join(' | '));
 cek('latar tiap layar dari colors.bg', /contentStyle: \{ backgroundColor: colors\.bg \}/.test(tataLetak));
 
 console.log('\nTipografi dari satu skala');

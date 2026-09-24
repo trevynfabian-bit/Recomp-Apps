@@ -116,23 +116,55 @@ Aturan pakai yang lahir dari verifikasi:
   `KartuBodyFat`, dan `SheetCatatFoto` sudah diperbaiki. Pill bertint hanya di
   atas `latar` (≈5,3:1).
 
-### 1.6 Mode terang (arah, difinalkan di Fase 3)
+### 1.6 Mode terang (mengikuti sistem)
 
-Mode terang memakai peran yang sama dengan nilai berbeda. Titik awal yang sudah
-dihitung rasionya:
+Mode terang memakai **peran yang sama** dengan nilai berbeda (`paletTerang` di
+`src/theme/colors.ts`) dan aktif otomatis saat sistem memakai tampilan terang.
+Gelap tetap mode utama: splash, latar asli app, dan sistem yang tidak menyebut
+pilihannya memakai gelap.
 
-| Peran | Nilai awal | Rasio di permukaan `#FFFFFF` |
+| Peran | Gelap | Terang |
 |---|---|---|
-| `latar` / `permukaan` / `permukaanCekung` | `#F4F5F7` / `#FFFFFF` / `#E9EBEF` | – |
-| `teks` / `teksRedup` / `teksSamar` | `#14151A` / `#4A4F5C` / `#5C6170` | 18,2 / 8,2 / 6,2 |
-| `aksen` teks | `#8F5E00` | 5,6 |
-| `aksenKedua` teks | `#0E7166` | 5,9 |
-| `aksenKetiga` teks | `#B23A10` | 6,0 |
-| `info` teks | `#5B4BC4` | 6,5 |
+| `latar` / `permukaan` / `permukaanCekung` | `#14151A` / `#2A2D36` / `#1C1E25` | `#F4F5F7` / `#FFFFFF` / `#E9EBEF` |
+| `garis` / `garisKontrol` | `#343845` / `#727888` | `#DCDFE5` / `#7D8391` |
+| `teks` / `teksRedup` / `teksSamar` | `#F5F6F8` / `#9BA1AF` / `#8E94A3` | `#14151A` / `#4A4F5C` / `#5C6170` |
+| `aksen` (amber) | `#F0A202` | `#8A5A00` |
+| `aksenKedua` (jade) | isian `#1B998B`, teks `#1DA697` | `#0E7166` |
+| `aksenKetiga` (coral) | isian `#E24E1B`, teks `#E97147` | `#B23A10` |
+| `info` (karbo) | isian `#7C6AE8`, teks `#9587EC` | `#5B4BC4` |
+| sat fat | isian `#D2495B`, teks `#DD7482` | `#B02E42` |
+| `teksDiAtasIsian` | `#14151A` | `#FFFFFF` |
 
-Catatan untuk Fase 3: amber isian `#F0A202` hanya 1,8:1 terhadap track terang,
-sehingga bar kalori di mode terang butuh varian isian yang lebih gelap; `garisKontrol`
-terang harus di bawah `#8A909E` agar lolos 3:1 di atas `permukaanCekung`.
+Keputusan penting:
+
+- **Satu nilai aksen untuk isian dan teks di mode terang.** Amber asli hanya
+  2,1:1 sebagai teks di atas putih dan 1,8:1 sebagai bar di atas track. Aksen
+  digelapkan sampai lolos 4,5:1 sebagai teks; nilai yang sama otomatis lolos
+  3:1 sebagai bar dan cukup gelap untuk label putih di atasnya.
+- **`teksDiAtasIsian` adalah peran sendiri** (`colors.diAtasIsian`). Dulu label
+  di atas tombol memakai `colors.bg`; itu hanya benar di mode gelap. 24
+  pemakaian sudah dipindahkan.
+- **Bayangan kartu** 35% di gelap, 8% di terang (`BAYANGAN_KARTU` membaca skema).
+
+Semua pasangan `cek:kontras` kini diperiksa **untuk kedua mode** dan lulus.
+
+**Cara kerjanya.** `PenyediaSkema` (`src/theme/skema.tsx`) membaca
+`useColorScheme()`, menukar isi `colors` ke palet yang sesuai sebelum anak-anak
+dirender, lalu `app/_layout.tsx` memasang ulang navigator dengan `key={skema}`
+dan menyetel status bar (`light` di gelap, `dark` di terang). Layar tidak perlu
+diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
+
+- `colors.x` tidak boleh disimpan di konstanta tingkat modul (nilainya membeku
+  di skema saat modul dimuat). Pakai getter atau fungsi. `cek:desain` menolak
+  pelanggarannya.
+- Saat skema berganti **sambil app terbuka**, posisi navigasi kembali ke awal.
+  Data per akun tidak hilang karena providernya ada di atas navigator. Pergantian
+  skema umumnya terjadi saat app di latar belakang, jadi biaya ini dipilih
+  dibanding mengubah puluhan layar menjadi pembaca konteks.
+
+Catatan untuk Fase 3: angka hero memakai amber terang-mode `#8A5A00` yang lolos
+AA tetapi terlihat cokelat; karena hero adalah teks besar (ambang 3:1), ada
+ruang memakai amber yang lebih cerah khusus hero.
 
 ---
 

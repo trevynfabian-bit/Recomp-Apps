@@ -46,11 +46,11 @@ export function TombolUtama({
       })}
     >
       {memproses ? (
-        <ActivityIndicator color={colors.bg} />
+        <ActivityIndicator color={colors.diAtasIsian} />
       ) : (
         // Label di atas isian selalu warna latar: teks terang di atas coral hanya
         // 3,64:1, di bawah ambang AA untuk label 16px (lihat docs/desain/arah-visual.md).
-        <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
           {label}
         </Text>
       )}

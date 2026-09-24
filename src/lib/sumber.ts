@@ -8,17 +8,23 @@ export const METADATA_SUMBER: Record<
 > = {
   manual: {
     label: 'Manual',
-    warna: colors.aksenTeks.jade,
+    get warna() {
+      return colors.aksenTeks.jade;
+    },
     penjelasan: 'Anda catat sendiri — data mentah.',
   },
   sinkron: {
     label: 'Sinkron',
-    warna: colors.textMuted,
+    get warna() {
+      return colors.textMuted;
+    },
     penjelasan: 'Ditarik dari perangkat atau layanan — data mentah.',
   },
   estimasi: {
     label: 'Estimasi',
-    warna: colors.amber,
+    get warna() {
+      return colors.amber;
+    },
     penjelasan: 'Hasil perkiraan, bukan catatan asli — periksa bila terasa meleset.',
   },
 };

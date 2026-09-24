@@ -31,7 +31,8 @@ const usulanTipografi = {
 } as const;
 
 /** Palet semantik bab 1: peran → warna isian & warna teks kecil. */
-const PERAN: { nama: string; isian: string; teks: string; arti: string }[] = [
+/** Dibaca saat render: `colors` berganti isi saat skema berganti. */
+const peran = (): { nama: string; isian: string; teks: string; arti: string }[] => [
   { nama: 'aksen', isian: colors.amber, teks: colors.amber, arti: 'CTA, angka hero, tab aktif' },
   { nama: 'sukses', isian: colors.jade, teks: colors.aksenTeks.jade, arti: 'on-track, tersambung' },
   { nama: 'peringatan', isian: colors.amber, teks: colors.amber, arti: 'mendekati batas' },
@@ -39,7 +40,7 @@ const PERAN: { nama: string; isian: string; teks: string; arti: string }[] = [
   { nama: 'info', isian: colors.macro.karbo, teks: colors.macroTeks.karbo, arti: 'estimasi, keterangan' },
 ];
 
-const NETRAL: { nama: string; warna: string }[] = [
+const netral = (): { nama: string; warna: string }[] => [
   { nama: 'latar', warna: colors.bg },
   { nama: 'permukaan', warna: colors.surface },
   { nama: 'permukaanCekung', warna: colors.surfaceSunken },
@@ -118,7 +119,7 @@ export default function ArahVisualScreen() {
       <View>
         <SectionHeader judul="Palet · status" aksi="isian / teks" />
         <Card style={{ gap: spacing.md }}>
-          {PERAN.map((p) => (
+          {peran().map((p) => (
             <View key={p.nama} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <View style={{ width: 32, height: 32, borderRadius: radius.md, backgroundColor: p.isian }} />
               <View style={{ flex: 1, gap: spacing.xxs }}>
@@ -135,7 +136,7 @@ export default function ArahVisualScreen() {
         <SectionHeader judul="Palet · netral" />
         <Card style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            {NETRAL.map((n) => (
+            {netral().map((n) => (
               <View
                 key={n.nama}
                 accessibilityLabel={n.nama}

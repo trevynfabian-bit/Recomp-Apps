@@ -22,9 +22,15 @@ const IKON: Record<ButirStatusPrivasi['nada'], React.ComponentProps<typeof Ionic
 };
 
 const WARNA_STATUS: Record<ButirStatusPrivasi['nada'], string> = {
-  terjaga: colors.aksenTeks.jade,
-  info: colors.textMuted,
-  terlihat: colors.amber,
+  get terjaga() {
+    return colors.aksenTeks.jade;
+  },
+  get info() {
+    return colors.textMuted;
+  },
+  get terlihat() {
+    return colors.amber;
+  },
 };
 
 /**

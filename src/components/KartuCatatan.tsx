@@ -154,7 +154,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
               <Text
                 style={{
                   ...typography.label,
-                  color: menyimpan ? colors.textFaint : colors.bg,
+                  color: menyimpan ? colors.textFaint : colors.diAtasIsian,
                 }}
               >
                 {menyimpan ? 'Menyimpan…' : 'Simpan'}

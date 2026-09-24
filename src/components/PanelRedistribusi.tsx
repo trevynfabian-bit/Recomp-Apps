@@ -172,7 +172,7 @@ export function PanelRedistribusi({
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
-                    <Text style={{ ...typography.label, color: aktif ? colors.bg : colors.textMuted }}>
+                    <Text style={{ ...typography.label, color: aktif ? colors.diAtasIsian : colors.textMuted }}>
                       {hariSingkat(h.tanggal)}
                     </Text>
                   </Pressable>
@@ -241,7 +241,7 @@ export function PanelRedistribusi({
           <Text
             style={{
               ...typography.bodyTebal,
-              color: sudahDipakai ? colors.textFaint : colors.bg,
+              color: sudahDipakai ? colors.textFaint : colors.diAtasIsian,
             }}
           >
             {sudahDipakai ? 'Sudah dipakai minggu ini' : opsi === 'abaikan' ? 'Biarkan apa adanya' : 'Terapkan'}

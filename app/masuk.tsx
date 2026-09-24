@@ -259,12 +259,18 @@ function Isian({ label, children }: { label: string; children: React.ReactNode }
 
 const gayaIsian = {
   ...typography.body,
-  color: colors.text,
+  get color() {
+    return colors.text;
+  },
   minHeight: TAP_MIN,
   paddingHorizontal: spacing.md,
   paddingVertical: spacing.md,
   borderRadius: radius.md,
   borderWidth: 1,
-  borderColor: colors.borderKuat,
-  backgroundColor: colors.surfaceSunken,
+  get borderColor() {
+    return colors.borderKuat;
+  },
+  get backgroundColor() {
+    return colors.surfaceSunken;
+  },
 } as const;

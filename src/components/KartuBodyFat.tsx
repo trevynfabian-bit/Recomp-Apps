@@ -284,7 +284,7 @@ function KartuKosong({
               opacity: pressed ? 0.8 : 1,
             })}
           >
-            <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
+            <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
               Lengkapi profil
             </Text>
           </Pressable>

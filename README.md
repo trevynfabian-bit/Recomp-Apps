@@ -82,7 +82,9 @@ karena bentuk data tiruan sudah meniru baris tabel sebenarnya.
 
 ## Prinsip desain
 
-Dark mode, nuansa athlete dashboard ala WHOOP. Palet: `#14151A` latar, `#2A2D36`
+Dark mode sebagai mode utama, mode terang mengikuti setelan sistem; nuansa
+athlete dashboard ala WHOOP. Keputusan visual lengkap di
+[`docs/desain/arah-visual.md`](docs/desain/arah-visual.md). Palet: `#14151A` latar, `#2A2D36`
 kartu, aksen amber `#F0A202`, coral `#E24E1B`, jade `#1B998B` — biru standar
 dihindari. Satu angka utama per layar, log berat maksimal 2 tap.
 

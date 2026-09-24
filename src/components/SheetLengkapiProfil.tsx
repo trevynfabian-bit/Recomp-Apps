@@ -222,14 +222,14 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
+                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.diAtasIsian} /> : null}
                 {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.bodyTebal, color: colors.bg }}>✓</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>✓</Text>
                 ) : null}
                 <Text
                   style={{
                     ...typography.bodyTebal,
-                    color: status === 'tersimpan' || bisaSimpan ? colors.bg : colors.textFaint,
+                    color: status === 'tersimpan' || bisaSimpan ? colors.diAtasIsian : colors.textFaint,
                   }}
                 >
                   {labelSimpan(status)}

@@ -267,7 +267,7 @@ function TombolUtama({
       })}
     >
       <Text
-        style={{ ...typography.bodyTebal, color: aktif ? colors.bg : colors.textFaint }}
+        style={{ ...typography.bodyTebal, color: aktif ? colors.diAtasIsian : colors.textFaint }}
       >
         {label}
       </Text>

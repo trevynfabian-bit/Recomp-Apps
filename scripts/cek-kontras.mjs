@@ -37,10 +37,10 @@ function muatWarna() {
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
-  return require(join(kerja, 'keluar', 'colors.js')).colors;
+  return require(join(kerja, 'keluar', 'colors.js')).palet;
 }
 
-const c = muatWarna();
+const PALET = muatWarna();
 
 const rgb = (hex) => {
   const h = hex.replace('#', '');
@@ -72,6 +72,8 @@ const kontras = (a, b) => {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 };
 
+/** Semua pasangan untuk satu palet `c` (mode gelap atau terang). */
+function pasangan(c) {
 /** Latar bertint yang benar-benar dipakai di layar. */
 const BANNER_AMBER = campur(c.amber, '14', c.bg);
 const BANNER_CORAL = campur(c.coral, '14', c.bg);
@@ -84,7 +86,7 @@ const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
  * Pasangan yang benar-benar ada di layar. `besar` berarti teksnya ≥24px atau
  * ≥18,7px tebal, sehingga ambangnya 3:1 menurut WCAG.
  */
-const PASANGAN = [
+  return [
   // Teks netral di tiap permukaan
   ['text di bg', c.text, c.bg, false],
   ['text di surface', c.text, c.surface, false],
@@ -152,9 +154,9 @@ const PASANGAN = [
   // Label di atas tombol isian penuh. Aturannya: label di atas isian APA PUN
   // memakai `bg`. `text` di atas coral hanya 3,64:1 — pasangan itu dulu
   // dipakai tombol merusak dan sengaja tidak masuk daftar ini.
-  ['bg di atas amber', c.bg, c.amber, false],
-  ['bg di atas jade', c.bg, c.jade, false],
-  ['bg di atas coral', c.bg, c.coral, false],
+  ['diAtasIsian di atas amber', c.diAtasIsian, c.amber, false],
+  ['diAtasIsian di atas jade', c.diAtasIsian, c.jade, false],
+  ['diAtasIsian di atas coral', c.diAtasIsian, c.coral, false],
 
   // Mark grafik dan tepi KONTROL — ambang 3:1 (WCAG 1.4.11)
   ['garis amber di surface (mark)', c.amber, c.surface, true],
@@ -170,17 +172,20 @@ const PASANGAN = [
   ['borderKuat di surfaceSunken', c.borderKuat, c.surfaceSunken, true],
   ['borderKuat di bg', c.borderKuat, c.bg, true],
 ];
+}
 
 let gagal = 0;
-console.log('\nKontras teks (WCAG 2.1 AA)');
-for (const [label, depan, belakang, besar] of PASANGAN) {
-  const rasio = kontras(depan, belakang);
-  const ambang = besar ? AA_BESAR : AA_KECIL;
-  const lulus = rasio >= ambang;
-  console.log(
-    `${lulus ? '  ok  ' : ' GAGAL'} ${label.padEnd(46)} ${rasio.toFixed(2)}:1 (min ${ambang})`,
-  );
-  if (!lulus) gagal += 1;
+for (const [skema, c] of Object.entries(PALET)) {
+  console.log(`\nKontras teks (WCAG 2.1 AA) — mode ${skema}`);
+  for (const [label, depan, belakang, besar] of pasangan(c)) {
+    const rasio = kontras(depan, belakang);
+    const ambang = besar ? AA_BESAR : AA_KECIL;
+    const lulus = rasio >= ambang;
+    console.log(
+      `${lulus ? '  ok  ' : ' GAGAL'} ${label.padEnd(46)} ${rasio.toFixed(2)}:1 (min ${ambang})`,
+    );
+    if (!lulus) gagal += 1;
+  }
 }
 
 /*
@@ -191,12 +196,14 @@ for (const [label, depan, belakang, besar] of PASANGAN) {
  * di atas. Jadi di sini `border` diperiksa dari sisi sebaliknya: tidak boleh
  * terlalu menonjol.
  */
-const rasioGaris = kontras(c.border, c.surface);
 console.log('\nGaris pemisah dekoratif harus tetap resesif');
-console.log(
-  `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} border vs surface ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
-);
-if (rasioGaris >= 2) gagal += 1;
+for (const [skema, c] of Object.entries(PALET)) {
+  const rasioGaris = kontras(c.border, c.surface);
+  console.log(
+    `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} [${skema}] border vs surface ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
+  );
+  if (rasioGaris >= 2) gagal += 1;
+}
 
 console.log(gagal === 0 ? '\n✓ Semua pasangan lolos AA' : `\n✗ ${gagal} pasangan gagal`);
 process.exit(gagal === 0 ? 0 : 1);

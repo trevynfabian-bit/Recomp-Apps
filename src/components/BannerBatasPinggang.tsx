@@ -156,7 +156,7 @@ function TombolAksi({
       <Text
         style={{
           ...typography.label,
-          color: utama ? colors.bg : colors.textMuted,
+          color: utama ? colors.diAtasIsian : colors.textMuted,
         }}
       >
         {label}

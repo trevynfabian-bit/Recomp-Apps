@@ -8,11 +8,21 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Warna titik status; SELALU disertai label, tidak pernah warna saja. */
 const WARNA: Record<TingkatSinkronApp, string> = {
-  langsung: colors.aksenTeks.jade,
-  menyinkron: colors.textMuted,
-  menyambung: colors.textMuted,
-  perhatian: colors.aksenTeks.coral,
-  terputus: colors.amber,
+  get langsung() {
+    return colors.aksenTeks.jade;
+  },
+  get menyinkron() {
+    return colors.textMuted;
+  },
+  get menyambung() {
+    return colors.textMuted;
+  },
+  get perhatian() {
+    return colors.aksenTeks.coral;
+  },
+  get terputus() {
+    return colors.amber;
+  },
 };
 
 /**

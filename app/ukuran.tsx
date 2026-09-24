@@ -231,7 +231,7 @@ export default function UkuranScreen() {
           opacity: pressed ? 0.8 : 1,
         })}
       >
-        <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
           {labelAksi}
         </Text>
       </Pressable>

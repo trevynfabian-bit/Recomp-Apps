@@ -421,15 +421,15 @@ export function KartuTimbangPagi({
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
+                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.diAtasIsian} /> : null}
                 {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.bodyTebal, color: colors.bg }}>✓</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>✓</Text>
                 ) : null}
                 <Text
                   style={{
                     ...typography.bodyTebal,
                     color:
-                      status === 'tersimpan' || valid ? colors.bg : colors.textFaint,
+                      status === 'tersimpan' || valid ? colors.diAtasIsian : colors.textFaint,
                   }}
                 >
                   {labelTombolSimpan(status, perluKonfirmasi)}

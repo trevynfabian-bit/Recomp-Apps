@@ -29,11 +29,21 @@ const HIT_SLOP_TAUTAN = Math.ceil((TAP_MIN - 18) / 2);
  * warna saja.
  */
 const WARNA_TINGKAT: Record<TingkatKesehatan, string> = {
-  sehat: colors.aksenTeks.jade,
-  menunggu: colors.textMuted,
-  terlambat: colors.amber,
-  bermasalah: colors.aksenTeks.coral,
-  belum: colors.textFaint,
+  get sehat() {
+    return colors.aksenTeks.jade;
+  },
+  get menunggu() {
+    return colors.textMuted;
+  },
+  get terlambat() {
+    return colors.amber;
+  },
+  get bermasalah() {
+    return colors.aksenTeks.coral;
+  },
+  get belum() {
+    return colors.textFaint;
+  },
 };
 
 /**

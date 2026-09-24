@@ -12,19 +12,22 @@ import { PenyediaProfil } from '@/state/profil';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
 import { PenyediaTarget } from '@/state/target';
-import { colors } from '@/theme';
+import { colors, PenyediaSkema, useSkema } from '@/theme';
 
 /**
- * Root layout. Warna dark mode disetel eksplisit lewat `screenOptions`
- * (bukan tema react-navigation) supaya palet PRD berlaku di semua layar.
+ * Root layout. Warna disetel eksplisit lewat `screenOptions` (bukan tema
+ * react-navigation) supaya palet PRD berlaku di semua layar; skemanya
+ * (gelap/terang) mengikuti sistem lewat `PenyediaSkema`.
  */
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <PenyediaSesi>
-        <TumpukanAkar />
-      </PenyediaSesi>
-    </SafeAreaProvider>
+    <PenyediaSkema>
+      <SafeAreaProvider>
+        <PenyediaSesi>
+          <TumpukanAkar />
+        </PenyediaSesi>
+      </SafeAreaProvider>
+    </PenyediaSkema>
   );
 }
 
@@ -36,6 +39,7 @@ export default function RootLayout() {
  */
 function TumpukanAkar() {
   const { status, pengguna } = useSesi();
+  const skema = useSkema();
   const sudahMasuk = status === 'masuk';
 
   // Jadwal pengingat disegarkan saat app dibuka dan setiap kali kembali ke
@@ -65,8 +69,10 @@ function TumpukanAkar() {
           <PenyediaHasilLab>
             <PenyediaEkspor>
               <PenyediaSinkron>
-                <StatusBar style="light" />
+                <StatusBar style={skema === 'gelap' ? 'light' : 'dark'} />
+                {/* key: layar yang sudah terpasang membaca palet baru (lihat PenyediaSkema). */}
                 <Stack
+                  key={skema}
                   screenOptions={{
                     headerShown: false,
                     contentStyle: { backgroundColor: colors.bg },

@@ -81,7 +81,7 @@ export function PemilihTipeHari({
                 <Text
                   style={{
                     ...typography.label,
-                    color: aktif ? colors.bg : colors.textMuted,
+                    color: aktif ? colors.diAtasIsian : colors.textMuted,
                   }}
                 >
                   {dt.nama}
