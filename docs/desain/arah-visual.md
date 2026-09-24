@@ -391,7 +391,8 @@ token resmi.
 | Skrip | Menjaga | Bab |
 |---|---|---|
 | `npm run cek:kontras` | Setiap pasangan teks/latar dan mark/track yang ada di layar, termasuk latar bertint, pill status per peran, dan label di atas isian | 1 |
-| `npm run cek:desain` | Satu angka hero per layar; warna hanya dari `src/theme`; app.json gelap; ukuran huruf hanya dari `typography`; tidak ada penimpaan ketebalan setelah `...typography.x`; ketebalan 500–800; plafon `lineHeight` dan jarak mentah yang hanya boleh turun | 1–3 |
+| `npm run cek:desain` | Prinsip: satu angka hero per layar; skema mengikuti sistem; `colors` tidak dibekukan di modul; token usang tidak dipakai; varian tipografi & tinggi baris; batas HIG 11 pt; area sentuh 44 pt; bab Desain resmi | 1–3 |
+| `npm run cek:hardcode` | Nilai tertanam di layar & komponen: warna (heks, rgb/hsl, nama CSS), jarak, radius, ukuran huruf, tinggi baris, ukuran ikon, aritmetika token. Setiap temuan dicetak `berkas:baris` + saran token terdekat | 1–3 |
 
 Pengecualian selalu dicatat **di dalam skripnya** beserta alasannya, bukan di
 kode layar.

@@ -1,26 +1,24 @@
 /**
  * Penjaga bab Desain PRD (docs/desain/bab-desain-prd.md, acuan resmi).
- * Memeriksa prinsip desain PRD yang mudah rusak diam-diam:
+ * Memeriksa PRINSIP desain yang mudah rusak diam-diam. Nilai yang ditulis
+ * langsung di layar (warna, jarak, radius, huruf, ikon) diperiksa terpisah
+ * oleh `cek:hardcode` (scripts/cek-hardcode.mjs).
  *
  * 1. SATU ANGKA UTAMA PER LAYAR. Angka raksasa (`HeroNumber`) paling banyak
  *    satu per layar, dan layar data wajib punya satu. Komponen tidak boleh
  *    membawa angka utamanya sendiri — kalau boleh, layar yang memakainya bisa
  *    berakhir dengan dua tanpa ada yang menyadarinya.
- * 2. DUA MODE DARI SATU PALET. Warna hanya dari `src/theme`; heks mentah di
- *    layar/komponen berarti warna yang lolos dari pemeriksaan kontras
- *    (`cek:kontras`) dan tidak ikut bila palet atau skema berubah.
- *    Pengecualian dicatat di sini dengan alasannya. Skema mengikuti sistem
+ * 2. DUA MODE DARI SATU PALET. Skema mengikuti sistem
  *    (`userInterfaceStyle: automatic`); gelap tetap mode utama, jadi splash
  *    dan latar asli app tetap gelap. `colors` ditukar isinya saat skema
  *    berganti, sehingga nilainya tidak boleh dibekukan di konstanta tingkat
- *    modul.
- * 3. TIPOGRAFI DARI SATU SKALA (docs/desain/arah-visual.md bab 2). Ukuran huruf
- *    hanya dari `typography`; ketebalan tidak ditimpa manual setelah
- *    `...typography.x` (pakai varian bernama `labelBiasa`/`bodySedang`/
- *    `bodyTebal`); ketebalan di luar 500–800 dilarang.
- * 4. JARAK DARI SATU SKALA (bab 3). Angka mentah untuk jarak dan tinggi baris
- *    dijaga dengan PLAFON: jumlahnya boleh turun, tidak boleh naik. Plafon
- *    diturunkan setiap kali sisa-sisanya dibereskan.
+ *    modul, dan token yang sedang dipensiunkan tidak boleh dipakai.
+ * 3. TIPOGRAFI DARI SATU SKALA (bab 8.4). Ketebalan tidak ditimpa manual
+ *    setelah `...typography.x` (pakai varian bernama); setiap gaya membawa
+ *    tinggi baris, tidak ada yang di bawah 11 pt, dan punya padanan iOS.
+ * 4. AREA SENTUH 44 PT (bab 8.5). Kontrol yang tampil lebih kecil menggenapkan
+ *    area sentuhnya dengan `sisaSentuh()`.
+ * 5. ACUAN RESMI. Bab Desain ada, berstatus resmi, dan punya riwayat versi.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -68,23 +66,6 @@ const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
 cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
 
 console.log('\nDua mode dari satu palet');
-// Pengecualian heks mentah, masing-masing dengan alasan.
-const BOLEH = [
-  { pola: /'#000000AA'/, alasan: 'selubung gelap di belakang sheet (bukan warna palet, tetapi peredup)' },
-  { pola: /shadowColor: '#000'/, alasan: 'warna bayangan iOS' },
-  { berkas: 'src/components/PratinjauWidget.tsx', alasan: 'meniru layar kunci iOS, yang warnanya ditentukan sistem' },
-];
-const pelanggar = [];
-for (const p of [...layar, ...berkasTsx('src/components')]) {
-  if (BOLEH.some((b) => b.berkas === p)) continue;
-  readFileSync(p, 'utf8').split('\n').forEach((baris, i) => {
-    const heks = baris.match(/['"]#[0-9A-Fa-f]{3,8}['"]|['"](white|black)['"]/g);
-    if (!heks) return;
-    if (BOLEH.some((b) => b.pola && b.pola.test(baris))) return;
-    pelanggar.push(`${p}:${i + 1} ${heks.join(' ')}`);
-  });
-}
-cek('warna layar & komponen hanya dari src/theme', pelanggar.length === 0, pelanggar.slice(0, 5).join(' | '));
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
 cek('app.json: userInterfaceStyle mengikuti sistem', app.userInterfaceStyle === 'automatic');
@@ -144,22 +125,10 @@ cek('layar & komponen tidak memakai token usang', namaLama.length === 0, namaLam
 cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku.slice(0, 5).join(' | '));
 cek('latar tiap layar dari colors.latar', /contentStyle: \{ backgroundColor: colors\.latar \}/.test(tataLetak));
 
-console.log('\nTipografi dari satu skala');
-// Ukuran huruf mentah yang sah, masing-masing dengan alasan.
-const UKURAN_BOLEH = [
-  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'angka berat yang bisa diketik: input, bukan HeroNumber' },
-  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'angka batas yang bisa diketik: input, bukan HeroNumber' },
-  { berkas: 'src/components/SheetHubungkanSumber.tsx', alasan: 'glyph centang dekoratif, disembunyikan dari pembaca layar' },
-  { berkas: 'src/components/SheetImporRiwayat.tsx', alasan: 'pratinjau CSV mentah dalam Menlo (teks mesin, bukan UI)' },
-];
-const semuaUi = [...layar, ...berkasTsx('src/components')].filter(
-  (p) => !BOLEH.some((b) => b.berkas === p),
-);
-const ukuranMentah = semuaUi
-  .filter((p) => !UKURAN_BOLEH.some((b) => b.berkas === p))
-  .flatMap((p) => cariBaris(p, /fontSize:\s*\d/));
-cek('ukuran huruf hanya dari typography', ukuranMentah.length === 0, ukuranMentah.slice(0, 5).join(' | '));
+// Berkas UI: layar + komponen, kecuali PratinjauWidget yang meniru layar kunci iOS.
+const semuaUi = [...layar, ...berkasTsx('src/components')].filter((p) => !p.endsWith('PratinjauWidget.tsx'));
 
+console.log('\nTipografi dari satu skala');
 // Ketebalan yang ditimpa tepat setelah gaya tipografi (satu baris maupun banyak baris).
 const timpaBobot = semuaUi.flatMap((p) => {
   const isi = readFileSync(p, 'utf8');
@@ -190,31 +159,6 @@ cek(`tidak ada gaya di bawah ${teksMin}pt (HIG)`, gaya.every((g) => Number(g[2])
   gaya.filter((g) => Number(g[2]) < teksMin).map((g) => g[1]).join(', '));
 const dasar = ['hero', 'display', 'title', 'body', 'label', 'caption'];
 cek('setiap gaya dasar punya padanan iOS di hig.ts', dasar.every((d) => new RegExp(`\\b${d}: '`).test(higTeks)));
-
-console.log('\nJarak dari satu skala (plafon, hanya boleh turun)');
-const PLAFON = { lineHeight: 3, jarak: 0 };
-const tinggiBaris = semuaUi.flatMap((p) => cariBaris(p, /lineHeight: \d/));
-// Nol bukan pelanggaran skala (reset padding bawaan input).
-const jarakMentah = semuaUi.flatMap((p) => cariBaris(p, /\b(gap|rowGap|columnGap|margin\w*|padding\w*): -?[1-9]/));
-const radiusMentah = semuaUi.flatMap((p) => cariBaris(p, /(borderRadius|Radius): \d/));
-cek('radius hanya dari token radius', radiusMentah.length === 0, radiusMentah.slice(0, 5).join(' | '));
-cek(
-  `lineHeight mentah ${tinggiBaris.length} ≤ ${PLAFON.lineHeight}`,
-  tinggiBaris.length <= PLAFON.lineHeight,
-  'tinggi baris baru harus ikut gaya tipografi',
-);
-cek(
-  `jarak mentah ${jarakMentah.length} ≤ ${PLAFON.jarak}`,
-  jarakMentah.length <= PLAFON.jarak,
-  `jarak baru harus dari spacing: ${jarakMentah.slice(-3).join(' | ')}`,
-);
-const ikonMentah = semuaUi.flatMap((p) => cariBaris(p, /<Ionicons\b[^>]*size=\{\d+\}/));
-cek('ukuran ikon dari ukuranIkon', ikonMentah.length === 0, ikonMentah.slice(0, 5).join(' | '));
-const aritmetika = semuaUi.flatMap((p) => cariBaris(p, /spacing\.\w+ [+-] \d/));
-cek('tidak ada aritmetika spacing (pakai token ukuran)', aritmetika.length === 0, aritmetika.slice(0, 5).join(' | '));
-if (tinggiBaris.length < PLAFON.lineHeight || jarakMentah.length < PLAFON.jarak) {
-  console.log('  (plafon bisa diturunkan: ubah PLAFON di scripts/cek-desain.mjs)');
-}
 
 console.log('\nArea sentuh (HIG 44×44 pt)');
 // Kontrol yang tampil lebih kecil dari 44 pt memakai KONTROL_RAPAT/SEGMEN dan

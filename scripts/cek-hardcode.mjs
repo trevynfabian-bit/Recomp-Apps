@@ -1,0 +1,188 @@
+/**
+ * Mencari nilai visual yang DITULIS LANGSUNG di layar & komponen, padahal
+ * seharusnya datang dari token di src/theme (bab Desain 8.2–8.5).
+ *
+ * Nilai tertanam adalah titik yang lolos dari tiga hal sekaligus: tidak ikut
+ * berganti saat mode terang/gelap berganti, tidak ikut diperiksa `cek:kontras`,
+ * dan tidak ikut berubah saat token diubah. Setiap temuan dicetak dengan
+ * `berkas:baris` dan saran token terdekat, jadi perbaikannya bisa langsung
+ * dikerjakan tanpa membuka dokumen desain.
+ *
+ * Yang diperiksa: warna (heks, rgb/rgba/hsl, nama warna CSS), jarak
+ * (gap/margin/padding), radius, ukuran huruf, tinggi baris, ukuran ikon, dan
+ * aritmetika token (`spacing.md + 2`). Pengecualian dicatat di bawah beserta
+ * alasannya — di sini, bukan di kode layar.
+ */
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+
+const require = createRequire(import.meta.url);
+
+// ---------------------------------------------------------------------------
+// Token (dibaca dari sumbernya, supaya saran selalu cocok dengan tema terkini)
+
+/** Palet dikompilasi seperti di cek-kontras: colors.ts tidak bergantung pada apa pun. */
+function muatPalet() {
+  const kerja = mkdtempSync(join(tmpdir(), 'hardcode-'));
+  copyFileSync('src/theme/colors.ts', join(kerja, 'colors.ts'));
+  execFileSync(
+    join(process.cwd(), 'node_modules', '.bin', 'tsc'),
+    ['colors.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+    { cwd: kerja, stdio: 'pipe' },
+  );
+  return require(join(kerja, 'keluar', 'colors.js')).palet;
+}
+
+/** Heks (huruf besar) → jalur token semantik, dari kedua mode. */
+function petaWarna(palet) {
+  const peta = new Map();
+  const jelajah = (objek, jalur) => {
+    for (const [k, v] of Object.entries(objek)) {
+      const j = `${jalur}.${k}`;
+      if (typeof v === 'string') {
+        if (!peta.has(v.toUpperCase())) peta.set(v.toUpperCase(), j);
+      } else jelajah(v, j);
+    }
+  };
+  // Peran semantik didahulukan; warna makro (nama domain) hanya bila tak ada peran.
+  const { macro, macroTeks, ...peranGelap } = palet.gelap;
+  const { macro: m2, macroTeks: mt2, ...peranTerang } = palet.terang;
+  jelajah(peranGelap, 'colors');
+  jelajah(peranTerang, 'colors');
+  jelajah({ macro, macroTeks }, 'colors');
+  jelajah({ macro: m2, macroTeks: mt2 }, 'colors');
+  return peta;
+}
+
+/** `nama: angka` dari satu blok `export const <nama> = { ... }` di tokens.ts. */
+function skalaAngka(teks, nama) {
+  const blok = new RegExp(`export const ${nama} = \\{([\\s\\S]*?)\\n\\}`).exec(teks)?.[1] ?? '';
+  return [...blok.matchAll(/^\s+(\w+): (\d+),/gm)].map((m) => [m[1], Number(m[2])]);
+}
+
+const TOKEN = readFileSync('src/theme/tokens.ts', 'utf8');
+const SPACING = skalaAngka(TOKEN, 'spacing');
+const RADIUS = skalaAngka(TOKEN, 'radius');
+const IKON = skalaAngka(TOKEN, 'ukuranIkon');
+const TIPO = [...TOKEN.matchAll(/^  (\w+): \{ fontSize: (\d+),/gm)].map((m) => [m[1], Number(m[2])]);
+const WARNA = petaWarna(muatPalet());
+
+/** Token dengan nilai paling dekat, mis. `spacing.md (12)`. */
+function terdekat(skala, awalan, nilai) {
+  const [nama, n] = skala.reduce((a, b) => (Math.abs(b[1] - nilai) < Math.abs(a[1] - nilai) ? b : a));
+  return `${awalan}.${nama} (${n})`;
+}
+
+// ---------------------------------------------------------------------------
+// Pengecualian (masing-masing dengan alasan)
+
+const BERKAS_BEBAS = [
+  { berkas: 'src/components/PratinjauWidget.tsx', alasan: 'meniru layar kunci iOS; warna & huruf ditentukan sistem, bukan palet app' },
+];
+const BARIS_BEBAS = [
+  { pola: /'#000000AA'/, alasan: 'selubung peredup di belakang sheet, bukan warna palet' },
+  { pola: /shadowColor: '#000(000)?'/, alasan: 'warna bayangan iOS selalu hitam; kepekatannya yang ikut skema' },
+  { pola: /'transparent'/, alasan: 'bukan warna' },
+];
+const UKURAN_HURUF_BEBAS = [
+  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'angka berat yang bisa diketik: input, bukan HeroNumber' },
+  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'angka batas yang bisa diketik: input, bukan HeroNumber' },
+  { berkas: 'src/components/SheetHubungkanSumber.tsx', alasan: 'glyph centang dekoratif, disembunyikan dari pembaca layar' },
+  { berkas: 'src/components/SheetImporRiwayat.tsx', alasan: 'pratinjau CSV mentah dalam Menlo (teks mesin, bukan UI)' },
+];
+const TINGGI_BARIS_BEBAS = [
+  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'glyph −/+ stepper dipusatkan di tombol bulat 56 pt' },
+  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'glyph −/+ stepper dipusatkan di tombol bulat 56 pt' },
+  { berkas: 'src/components/InputChat.tsx', alasan: 'field chat multiline menghitung tingginya sendiri per baris' },
+];
+
+// ---------------------------------------------------------------------------
+// Aturan
+
+const NAMA_WARNA = 'white|black|red|green|blue|yellow|orange|purple|gray|grey|pink';
+const ATURAN = [
+  {
+    nama: 'warna tertanam',
+    pola: new RegExp(`['"](#[0-9A-Fa-f]{3,8})['"]|\\b(rgba?|hsla?)\\(|['"](${NAMA_WARNA})['"]`, 'g'),
+    saran: (m) => {
+      const heks = m[1]?.toUpperCase();
+      if (heks && WARNA.has(heks)) return `pakai ${WARNA.get(heks)}`;
+      return 'pakai peran di colors (latar/permukaan/teks*/aksen/status.*); warna baru masuk palet + cek:kontras';
+    },
+  },
+  {
+    nama: 'jarak tertanam',
+    pola: /\b(gap|rowGap|columnGap|margin\w*|padding\w*): (-?[1-9]\d*)\b/g,
+    saran: (m) => `pakai ${terdekat(SPACING, 'spacing', Math.abs(Number(m[2])))} atau token ukuran`,
+  },
+  {
+    nama: 'radius tertanam',
+    pola: /\b(border\w*Radius): (\d+)\b/g,
+    saran: (m) => `pakai ${terdekat(RADIUS, 'radius', Number(m[2]))}`,
+  },
+  {
+    nama: 'ukuran huruf tertanam',
+    pola: /\bfontSize: (\d+)\b/g,
+    bebas: UKURAN_HURUF_BEBAS,
+    saran: (m) => `pakai ...${terdekat(TIPO, 'typography', Number(m[1]))}`,
+  },
+  {
+    nama: 'tinggi baris tertanam',
+    pola: /\blineHeight: (\d+)\b/g,
+    bebas: TINGGI_BARIS_BEBAS,
+    saran: () => 'hapus: setiap gaya typography sudah membawa lineHeight',
+  },
+  {
+    nama: 'ukuran ikon tertanam',
+    pola: /<Ionicons\b[^>]*\bsize=\{(\d+)\}/g,
+    saran: (m) => `pakai ${terdekat(IKON, 'ukuranIkon', Number(m[1]))}`,
+  },
+  {
+    nama: 'aritmetika token',
+    pola: /\b(spacing|radius)\.\w+ [+-] \d+/g,
+    saran: () => 'beri nama di token ukuran (src/theme/tokens.ts)',
+  },
+];
+
+// ---------------------------------------------------------------------------
+
+function berkasTsx(dir) {
+  return readdirSync(dir).flatMap((n) => {
+    const p = join(dir, n);
+    return statSync(p).isDirectory() ? berkasTsx(p) : p.endsWith('.tsx') ? [p] : [];
+  });
+}
+
+const temuan = new Map(ATURAN.map((a) => [a.nama, []]));
+const berkas = [...berkasTsx('app'), ...berkasTsx('src/components')].filter(
+  (p) => !BERKAS_BEBAS.some((b) => b.berkas === p),
+);
+
+for (const p of berkas) {
+  readFileSync(p, 'utf8')
+    .split('\n')
+    .forEach((baris, i) => {
+      const kode = baris.replace(/\/\/.*$/, '');
+      if (/^\s*(\*|\/\*)/.test(kode)) return; // komentar blok
+      for (const aturan of ATURAN) {
+        if (aturan.bebas?.some((b) => b.berkas === p)) continue;
+        for (const m of kode.matchAll(aturan.pola)) {
+          if (BARIS_BEBAS.some((b) => b.pola.test(kode))) continue;
+          temuan.get(aturan.nama).push(`${p}:${i + 1}  ${m[0].trim()}  → ${aturan.saran(m)}`);
+        }
+      }
+    });
+}
+
+let gagal = 0;
+console.log(`Nilai tertanam di ${berkas.length} berkas layar & komponen\n`);
+for (const [nama, daftar] of temuan) {
+  console.log(`${daftar.length === 0 ? '✓' : '✗'} ${nama}${daftar.length ? ` (${daftar.length})` : ''}`);
+  for (const t of daftar) console.log(`    ${t}`);
+  gagal += daftar.length;
+}
+console.log(gagal ? `\n${gagal} nilai tertanam — ganti dengan token dari src/theme` : '\nTidak ada nilai tertanam');
+process.exit(gagal ? 1 : 0);

@@ -113,10 +113,11 @@ berubah karena keputusan desain.
 ### 8.8 Penjaga otomatis
 
 - `npm run cek:kontras`: semua pasangan warna yang dipakai layar, kedua mode.
-- `npm run cek:desain`: satu angka hero per layar; warna hanya dari
-  `src/theme`; mode mengikuti sistem; warna tidak dibekukan di modul; ukuran
-  huruf dan ketebalan dari skala; plafon angka mentah untuk jarak dan tinggi
-  baris yang hanya boleh turun.
+- `npm run cek:desain`: prinsip (satu angka hero per layar, mode mengikuti
+  sistem, warna tidak dibekukan di modul, varian tipografi, area sentuh 44 pt).
+- `npm run cek:hardcode`: tidak ada warna, jarak, radius, ukuran huruf, tinggi
+  baris, atau ukuran ikon yang ditulis langsung di layar; setiap temuan disertai
+  saran token terdekat.
 - Pengecualian dicatat di dalam skrip beserta alasannya.
 
 ### 8.9 Di luar lingkup desain
