@@ -1,0 +1,72 @@
+# Peta Navigasi
+
+Titik awal fitur **Navigasi & Tab Konsisten** (Fase 4). Memotret struktur tab,
+rute, dan setiap jalan masuk antar-layar di app Expo seperti adanya sekarang,
+sebelum ditinjau.
+
+## 1. Struktur
+
+```
+app/_layout.tsx                     Stack akar (headerShown: false), dijaga sesi
+├── masuk                           publik: hanya ada saat BELUM masuk (fade)
+└── [dijaga: sudah masuk]
+    ├── (tabs)/_layout.tsx          Tabs (headerShown: false)
+    │   ├── index        "Hari Ini"   today-outline
+    │   ├── tren         "Tren"       trending-up-outline
+    │   ├── budget       "Budget"     wallet-outline
+    │   ├── coach        "Coach"      sparkles-outline
+    │   └── pengaturan   "Setelan"    options-outline
+    ├── ukuran                      slide_from_right
+    ├── sumber-data                 slide_from_right
+    ├── latihan                     slide_from_right
+    ├── impor-riwayat               slide_from_right
+    ├── widget-pengingat            slide_from_right
+    ├── target-harian               slide_from_right   param ?isi=<dayTypeId>
+    ├── privasi                     slide_from_right
+    ├── hasil-lab                   slide_from_right
+    ├── tambah-hasil-lab            slide_from_bottom  param ?id=<hasilLabId>
+    ├── arah-visual                 slide_from_right   (build pengembangan)
+    └── peraga                      slide_from_right   (build pengembangan)
+```
+
+- Tab bar: 5 tab, label `caption`, warna aktif `aksen.teks`, tidak aktif
+  `teksSamar`, latar `latar` dengan garis atas `garis`.
+- Header bawaan navigator **dimatikan di semua tingkat**; setiap layar menggambar
+  kepalanya sendiri (judul `title`, tombol kembali `TombolIkon` di layar tumpukan).
+- Skema berganti → navigator dipasang ulang, `usePulihkanRute` membuka kembali
+  rute terakhir (Fase 3).
+
+## 2. Jalan masuk antar-layar
+
+| Dari | Ke | Pemicu |
+|---|---|---|
+| Hari Ini | Target harian | "Target semua tipe hari ›"; "Isi target" (`?isi=`) saat target kosong |
+| Hari Ini | Sumber data | ketuk `IndikatorSinkron` di kepala layar |
+| Tren | Ukuran | baris "Ukuran tubuh" |
+| Ukuran | **tab** Budget | "Fase & budget" di banner batas pinggang (`/(tabs)/budget`) |
+| Pengaturan | Target harian, Sumber data, Impor riwayat, Hasil lab, Widget & pengingat, Privasi | baris daftar |
+| Pengaturan (dev) | Arah visual, Peraga | baris daftar, hanya `__DEV__` |
+| Sumber data | Latihan, Impor riwayat | tautan di kartu Hevy / kartu impor |
+| Privasi | Sumber data, Widget & pengingat | baris daftar |
+| Hasil lab | Tambah hasil lab (baru / `?id=` ubah) | tombol utama, "Ubah" |
+| Semua layar tumpukan | layar sebelumnya | `TombolIkon` kembali → `router.back()` |
+| Notifikasi | — | **tidak ada**: data notifikasi membawa `jenis`, tetapi ketukan tidak diarahkan; app selalu terbuka di Hari Ini |
+
+Sheet (bukan rute): catat ukuran, batas pinggang, ganti fase, lengkapi profil,
+catat foto, jam timbang, ekspor, hapus akun, keluar, hubungkan/putuskan
+sumber, impor, sunting target, riwayat percakapan.
+
+## 3. Temuan
+
+| # | Temuan | Dampak |
+|---|---|---|
+| N1 | Header ditulis ulang di tiap layar: 11 layar tumpukan menyusun `TombolIkon` + judul + subjudul sendiri; 5 tab menyusun judul sendiri dengan susunan berbeda (sapaan + tanggal + pill, judul + tombol, judul saja). | Jarak, peran header aksesibilitas, dan posisi aksi kanan berbeda-beda. |
+| N2 | 5 dari 11 layar tumpukan tidak memberi `accessibilityRole="header"` pada judulnya (audit token §3 L2). | VoiceOver tidak bisa melompat ke judul. |
+| N3 | Label tab "Setelan" sedangkan judul layarnya "Pengaturan". | Dua nama untuk satu tempat. |
+| N4 | Ikon tab memakai varian `-outline` untuk aktif maupun tidak. | Tab aktif hanya dibedakan warna; HIG menyarankan ikon terisi untuk tab terpilih. |
+| N5 | Ukuran → Budget melompat ke **tab** dari layar tumpukan (`router.push('/(tabs)/budget')`), sehingga tombol kembali tidak membawa ke Ukuran. | Alur kembali tidak bisa ditebak. |
+| N6 | Ketukan notifikasi tidak diarahkan ke layar yang relevan (timbang pagi, ukur pekanan, ringkasan, evaluasi, sumber terputus). | Pengguna harus mencari sendiri layar yang dimaksud notifikasi. |
+| N7 | Transisi: semua tumpukan `slide_from_right`, `tambah-hasil-lab` `slide_from_bottom` (modal), masuk `fade`. Konsisten, tetapi `tambah-hasil-lab` bukan `presentation: 'modal'`, jadi gestur tutupnya tetap geser-kanan. | Animasi dan gestur tidak sepakat. |
+| N8 | Tidak ada tab yang bisa diketuk ulang untuk kembali ke atas/awal tumpukan secara eksplisit (perilaku bawaan navigator). | — (dicatat, bukan masalah) |
+
+Temuan N1–N7 menjadi bahan task berikutnya di fitur ini.
