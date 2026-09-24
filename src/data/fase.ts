@@ -111,6 +111,11 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanFase {
         'Sudah ada periode fase yang berjalan. Muat ulang lalu coba lagi.',
         true,
       );
+    case '23P01': // exclusion_violation — rentang periode bertumpuk
+      return new KesalahanFase(
+        'Tanggal itu bertumpuk dengan periode fase lain. Muat ulang riwayat fase lalu coba lagi.',
+        true,
+      );
     case '23514': // check_violation
       return new KesalahanFase('Nilai target ditolak database.', false);
     case '28000':

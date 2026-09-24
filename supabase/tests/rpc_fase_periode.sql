@@ -102,6 +102,53 @@ begin
   assert v_gagal, 'tanggal di dalam periode tertutup seharusnya ditolak';
 end $$;
 
+-- 6b. Tulisan LANGSUNG ke tabel (PostgREST, web) juga tidak boleh membuat
+--     tanggal dengan dua fase. Riwayat A kini: Lean Gain 19–21 Sep (tertutup),
+--     Cut sejak 22 Sep (berjalan).
+do $$
+declare
+  v_kode text;
+  v_lg uuid := (select id from public.fase_periode where fase = 'Lean Gain' and selesai_tanggal is not null);
+  n integer;
+begin
+  -- Periode tertutup di dalam periode tertutup lain.
+  v_kode := null;
+  begin
+    insert into public.fase_periode (user_id, fase, mulai_tanggal, selesai_tanggal)
+    values ('eeee5555-0000-0000-0000-000000000005', 'Maintenance', date '2026-09-20', date '2026-09-20');
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23P01', format('periode di dalam periode tertutup: %s, seharusnya 23P01', coalesce(v_kode, 'diterima'));
+
+  -- Periode tertutup di dalam periode yang masih berjalan (terbuka ke depan).
+  v_kode := null;
+  begin
+    insert into public.fase_periode (user_id, fase, mulai_tanggal, selesai_tanggal)
+    values ('eeee5555-0000-0000-0000-000000000005', 'Maintenance', date '2026-10-01', date '2026-10-03');
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23P01', format('periode di dalam periode berjalan: %s, seharusnya 23P01', coalesce(v_kode, 'diterima'));
+
+  -- Memperpanjang periode tertutup sampai menabrak periode berikutnya.
+  v_kode := null;
+  begin
+    update public.fase_periode set selesai_tanggal = date '2026-09-25' where id = v_lg;
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23P01', format('perpanjang ke periode berikutnya: %s, seharusnya 23P01', coalesce(v_kode, 'diterima'));
+
+  -- Riwayat lama yang tidak bertumpuk tetap boleh dilengkapi, lalu dihapus lagi.
+  insert into public.fase_periode (user_id, fase, mulai_tanggal, selesai_tanggal)
+  values ('eeee5555-0000-0000-0000-000000000005', 'Maintenance', date '2026-01-01', date '2026-01-31');
+  delete from public.fase_periode where mulai_tanggal = date '2026-01-01';
+
+  -- Mengubah kolom lain (bukan tanggal) tidak terganggu pemicu.
+  update public.fase_periode set berat_awal_kg = berat_awal_kg where id = v_lg;
+
+  select count(*) into n from public.fase_periode;
+  assert n = 2, format('%s periode setelah percobaan, seharusnya tetap 2', n);
+end $$;
+
 -- 7. Isolasi: B tidak melihat periode A.
 set request.jwt.claim.sub = 'eeee6666-0000-0000-0000-000000000006';
 
@@ -129,4 +176,4 @@ begin
 end $$;
 
 reset role;
-select '✓ riwayat fase: periode tertutup tidak pernah berubah, jangkar dari rata-rata 7 hari, isolasi & hak akses terjaga' as hasil;
+select '✓ riwayat fase: periode tertutup tidak pernah berubah, tanpa tumpang tindih (juga lewat tulisan langsung), jangkar dari rata-rata 7 hari, isolasi & hak akses terjaga' as hasil;
