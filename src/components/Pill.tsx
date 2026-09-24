@@ -12,14 +12,16 @@ type Props = {
    * tanpa isian. Di atas `bg` tint aman (≈5,3:1). Dijaga `cek:kontras`.
    */
   diKartu?: boolean;
+  /** Posisi di wadah berkolom; bawaan `awal`. */
+  sejajar?: 'awal' | 'tengah';
 };
 
 /** Badge kecil untuk fase program, tipe hari, atau penanda "estimasi". */
-export function Pill({ label, warna = colors.teksRedup, diKartu = false }: Props) {
+export function Pill({ label, warna = colors.teksRedup, diKartu = false, sejajar = 'awal' }: Props) {
   return (
     <View
       style={{
-        alignSelf: 'flex-start',
+        alignSelf: sejajar === 'tengah' ? 'center' : 'flex-start',
         paddingHorizontal: spacing.md,
         paddingVertical: ukuran.chip.vertikal,
         borderRadius: radius.pill,

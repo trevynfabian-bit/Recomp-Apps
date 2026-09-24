@@ -16,6 +16,7 @@ import {
   Chip,
   DaftarBaris,
   HeaderLayar,
+  HeroPengganti,
   KartuBodyFat,
   KartuHero,
   Pill,
@@ -68,7 +69,9 @@ export default function UkuranScreen() {
   const [sheetProfilTerbuka, setSheetProfilTerbuka] = useState(false);
   const [sheetBatasTerbuka, setSheetBatasTerbuka] = useState(false);
 
-  const terbaru = catatan[catatan.length - 1];
+  // `undefined` saat belum ada pencatatan sama sekali: layar menampilkan
+  // panduan mulai mencatat, bukan angka nol atau layar jatuh.
+  const terbaru: UkuranTubuh | undefined = catatan[catatan.length - 1];
   // Label CTA menyebut apa yang akan terjadi: hari yang sudah terisi diperbarui,
   // bukan ditambah — supaya tidak terkesan membuat baris kedua di tanggal sama.
   /**
@@ -105,11 +108,13 @@ export default function UkuranScreen() {
     });
   }
 
-  const baris: BarisUkuran[] = BAGIAN.map((b) => ({
-    ...b,
-    nilai: terbaru[b.kunci],
-    selisih: sebelumnya ? bulat(terbaru[b.kunci] - sebelumnya[b.kunci]) : null,
-  }));
+  const baris: BarisUkuran[] = terbaru
+    ? BAGIAN.map((b) => ({
+        ...b,
+        nilai: terbaru[b.kunci],
+        selisih: sebelumnya ? bulat(terbaru[b.kunci] - sebelumnya[b.kunci]) : null,
+      }))
+    : [];
 
   return (
     <ScrollView
@@ -124,7 +129,7 @@ export default function UkuranScreen() {
       <HeaderLayar
         kembali
         judul="Ukuran tubuh"
-        subjudul={`Terakhir ${formatTanggalPanjang(terbaru.tanggal)}`}
+        subjudul={terbaru ? `Terakhir ${formatTanggalPanjang(terbaru.tanggal)}` : 'Belum ada pencatatan'}
       />
 
       {/* Pinggang jadi angka utama: ia penanda lemak perut yang paling responsif.
@@ -132,97 +137,113 @@ export default function UkuranScreen() {
           Type (MAKS_SKALA_HERO) ikut berlaku seperti di layar lain. */}
       <KartuHero
         label="Pinggang"
-        nilai={formatDesimal(terbaru.pinggang_cm)}
+        nilai={terbaru ? formatDesimal(terbaru.pinggang_cm) : '—'}
         unit="cm"
         keterangan={
-          pertama
+          terbaru && pertama
             ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
             : undefined
         }
         nada="netral"
+        pengganti={
+          terbaru ? undefined : (
+            <HeroPengganti
+              label="Pinggang"
+              judul="Belum ada ukuran tubuh"
+              keterangan="Ukur pinggang, dada, leher, lengan, dan paha seminggu sekali: pagi hari, sebelum makan, di titik yang sama. Dari pencatatan kedua, arah perubahannya mulai terbaca."
+              aksi={<Tombol label="Catat ukuran pertama" onPress={() => setSheetTerbuka(true)} />}
+            />
+          )
+        }
       >
-        <View style={{ alignItems: 'center', marginTop: spacing.md }}>
-          {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
-              punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
-          <Chip
-            sejajar="tengah"
-            ikon="resize-outline"
-            label={
-              profil.batas_pinggang_cm !== null
-                ? `Batas ${formatDesimal(profil.batas_pinggang_cm)} cm · Ubah`
-                : 'Tetapkan batas pinggang'
-            }
-            aksesLabel={
-              profil.batas_pinggang_cm !== null
-                ? `Batas pinggang ${formatDesimal(profil.batas_pinggang_cm)} sentimeter. Ketuk untuk mengubah.`
-                : 'Batas pinggang belum ditetapkan. Ketuk untuk menetapkan.'
-            }
-            onPress={() => setSheetBatasTerbuka(true)}
-          />
-        </View>
+        {terbaru ? (
+          <View style={{ alignItems: 'center', marginTop: spacing.md }}>
+            {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
+                punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
+            <Chip
+              sejajar="tengah"
+              ikon="resize-outline"
+              label={
+                profil.batas_pinggang_cm !== null
+                  ? `Batas ${formatDesimal(profil.batas_pinggang_cm)} cm · Ubah`
+                  : 'Tetapkan batas pinggang'
+              }
+              aksesLabel={
+                profil.batas_pinggang_cm !== null
+                  ? `Batas pinggang ${formatDesimal(profil.batas_pinggang_cm)} sentimeter. Ketuk untuk mengubah.`
+                  : 'Batas pinggang belum ditetapkan. Ketuk untuk menetapkan.'
+              }
+              onPress={() => setSheetBatasTerbuka(true)}
+            />
+          </View>
+        ) : null}
       </KartuHero>
 
-      {/* Peringatan batas — hanya muncul saat ada yang perlu diputuskan */}
-      <BannerBatasPinggang
-        status={statusBatas}
-        batasCm={profil.batas_pinggang_cm}
-        pinggangCm={terbaru.pinggang_cm}
-        fase={profil.fase_aktif}
-        onUbahBatas={() => setSheetBatasTerbuka(true)}
-        // `navigate`, bukan `push`: kembali ke tab yang sudah ada di bawah tumpukan
-        // (lalu pindah ke Budget), bukan menumpuk salinan tab di atas Ukuran.
-        onLihatFase={() => router.navigate('/(tabs)/budget')}
-      />
+      {terbaru ? (
+        <>
+          {/* Peringatan batas — hanya muncul saat ada yang perlu diputuskan */}
+          <BannerBatasPinggang
+            status={statusBatas}
+            batasCm={profil.batas_pinggang_cm}
+            pinggangCm={terbaru.pinggang_cm}
+            fase={profil.fase_aktif}
+            onUbahBatas={() => setSheetBatasTerbuka(true)}
+            // `navigate`, bukan `push`: kembali ke tab yang sudah ada di bawah tumpukan
+            // (lalu pindah ke Budget), bukan menumpuk salinan tab di atas Ukuran.
+            onLihatFase={() => router.navigate('/(tabs)/budget')}
+          />
 
-      {/* Aksi utama layar: catat ukuran pekan ini */}
-      <Tombol label={labelAksi} onPress={() => setSheetTerbuka(true)} />
+          {/* Aksi utama layar: catat ukuran pekan ini */}
+          <Tombol label={labelAksi} onPress={() => setSheetTerbuka(true)} />
 
-      {/* Estimasi body fat: angka turunan, jadi ditempatkan SETELAH pengukuran
-          dan dengan bobot visual yang lebih kecil daripada hero pinggang */}
-      <KartuBodyFat
-        profil={profil}
-        terbaru={terbaru}
-        pertama={pertama}
-        beratRataRataKg={rataRata7Hari(mockRiwayatBerat, terbaru.tanggal).rataRataKg}
-        onLengkapiProfil={() => setSheetProfilTerbuka(true)}
-      />
+          {/* Estimasi body fat: angka turunan, jadi ditempatkan SETELAH pengukuran
+              dan dengan bobot visual yang lebih kecil daripada hero pinggang */}
+          <KartuBodyFat
+            profil={profil}
+            terbaru={terbaru}
+            pertama={pertama}
+            beratRataRataKg={rataRata7Hari(mockRiwayatBerat, terbaru.tanggal).rataRataKg}
+            onLengkapiProfil={() => setSheetProfilTerbuka(true)}
+          />
 
-      {/* Semua ukuran, dengan perubahan sejak pencatatan sebelumnya */}
-      <View>
-        <SectionHeader
-          judul="Ukuran terbaru"
-          aksi={sebelumnya ? `vs ${formatTanggalPanjang(sebelumnya.tanggal)}` : 'pencatatan pertama'}
-        />
-        <DaftarBaris>
-          {baris.map((b) => (
-            <View
-              key={b.kunci}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: spacing.lg,
-              }}
-            >
-              <Text style={{ ...typography.body, color: colors.teks }}>{b.label}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
-                {b.selisih !== null && b.selisih !== 0 ? (
-                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>
-                    {selisihTeks(b.selisih)}
-                  </Text>
-                ) : null}
-                <Text style={{ ...typography.title, color: colors.teks }}>
-                  {formatDesimal(b.nilai)}
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
-              </View>
-            </View>
-          ))}
-        </DaftarBaris>
-      </View>
+          {/* Semua ukuran, dengan perubahan sejak pencatatan sebelumnya */}
+          <View>
+            <SectionHeader
+              judul="Ukuran terbaru"
+              aksi={sebelumnya ? `vs ${formatTanggalPanjang(sebelumnya.tanggal)}` : 'pencatatan pertama'}
+            />
+            <DaftarBaris>
+              {baris.map((b) => (
+                <View
+                  key={b.kunci}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: spacing.lg,
+                  }}
+                >
+                  <Text style={{ ...typography.body, color: colors.teks }}>{b.label}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
+                    {b.selisih !== null && b.selisih !== 0 ? (
+                      <Text style={{ ...typography.caption, color: colors.teksRedup }}>
+                        {selisihTeks(b.selisih)}
+                      </Text>
+                    ) : null}
+                    <Text style={{ ...typography.title, color: colors.teks }}>
+                      {formatDesimal(b.nilai)}
+                    </Text>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
+                  </View>
+                </View>
+              ))}
+            </DaftarBaris>
+          </View>
 
-      {/* Riwayat perubahan per bagian tubuh */}
-      <RiwayatPerubahan catatan={catatan} bagian={BAGIAN} />
+          {/* Riwayat perubahan per bagian tubuh */}
+          <RiwayatPerubahan catatan={catatan} bagian={BAGIAN} />
+        </>
+      ) : null}
 
       <Card>
         <Text style={{ ...typography.caption, color: colors.teksSamar }}>
@@ -233,9 +254,7 @@ export default function UkuranScreen() {
         </Text>
       </Card>
 
-      <View style={{ alignItems: 'center' }}>
-        <Pill label="Data tiruan · estimasi body fat memakai metode Navy" />
-      </View>
+      <Pill sejajar="tengah" label="Data tiruan · estimasi body fat memakai metode Navy" />
 
       <SheetCatatUkuran
         terbuka={sheetTerbuka}
@@ -244,14 +263,17 @@ export default function UkuranScreen() {
         onSimpan={simpanUkuran}
       />
 
-      <SheetBatasPinggang
-        terbuka={sheetBatasTerbuka}
-        onTutup={() => setSheetBatasTerbuka(false)}
-        batasCm={profil.batas_pinggang_cm}
-        pinggangSekarangCm={terbaru.pinggang_cm}
-        pinggangAwalCm={pertama?.pinggang_cm ?? null}
-        onSimpan={(batas) => perbaruiProfil({ batas_pinggang_cm: batas })}
-      />
+      {/* Batas pinggang baru bermakna setelah ada ukuran pinggang pertama. */}
+      {terbaru ? (
+        <SheetBatasPinggang
+          terbuka={sheetBatasTerbuka}
+          onTutup={() => setSheetBatasTerbuka(false)}
+          batasCm={profil.batas_pinggang_cm}
+          pinggangSekarangCm={terbaru.pinggang_cm}
+          pinggangAwalCm={pertama?.pinggang_cm ?? null}
+          onSimpan={(batas) => perbaruiProfil({ batas_pinggang_cm: batas })}
+        />
+      ) : null}
 
       <SheetLengkapiProfil
         terbuka={sheetProfilTerbuka}

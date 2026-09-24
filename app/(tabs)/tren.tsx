@@ -26,11 +26,13 @@ import {
   DaftarBaris,
   GrafikTren,
   HeaderLayar,
+  HeroPengganti,
   KartuHero,
   LabelSinyalArah,
   PenandaSumber,
   Pill,
   SectionHeader,
+  Tombol,
 } from '@/components';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
@@ -118,26 +120,40 @@ export default function TrenScreen() {
             : 'belum ada timbangan dalam sepekan terakhir'
         }
         nada="netral"
-        stat={[
-          {
-            label: 'Arah sepekan',
-            nilai: sinyal.perubahanKg !== null ? formatSelisih(sinyal.perubahanKg) : '—',
-            unit: sinyal.perubahanKg !== null ? 'kg' : undefined,
-            warna: warnaArah,
-          },
-          {
-            label: 'Sepekan lalu',
-            nilai: sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—',
-            unit: 'kg',
-            warna: colors.teksRedup,
-          },
-          {
-            label: 'Terakhir',
-            nilai: terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—',
-            unit: 'kg',
-            warna: colors.teksRedup,
-          },
-        ]}
+        pengganti={
+          riwayat.length === 0 ? (
+            <HeroPengganti
+              label={`Rata-rata ${JENDELA_HARI} hari`}
+              judul="Belum ada timbangan"
+              keterangan="Timbang pagi setelah bangun dan ke kamar kecil, sebelum makan. Rata-rata 7 hari mulai terbaca dari timbangan pertama, dan arahnya setelah sepekan."
+              aksi={<Tombol label="Catat berat di Hari Ini" onPress={() => router.navigate('/(tabs)')} />}
+            />
+          ) : undefined
+        }
+        stat={
+          riwayat.length === 0
+            ? undefined
+            : [
+                {
+                  label: 'Arah sepekan',
+                  nilai: sinyal.perubahanKg !== null ? formatSelisih(sinyal.perubahanKg) : '—',
+                  unit: sinyal.perubahanKg !== null ? 'kg' : undefined,
+                  warna: warnaArah,
+                },
+                {
+                  label: 'Sepekan lalu',
+                  nilai: sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—',
+                  unit: 'kg',
+                  warna: colors.teksRedup,
+                },
+                {
+                  label: 'Terakhir',
+                  nilai: terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—',
+                  unit: 'kg',
+                  warna: colors.teksRedup,
+                },
+              ]
+        }
       />
 
       {/* Grafik: rata-rata 7 hari sebagai garis, timbangan harian sebagai titik */}
@@ -250,9 +266,7 @@ export default function TrenScreen() {
         </DaftarBaris>
       </View>
 
-      <View style={{ alignItems: 'center' }}>
-        <Pill label="Data tiruan · grafik & koridor menyusul" />
-      </View>
+      <Pill sejajar="tengah" label="Data tiruan · grafik & koridor menyusul" />
     </ScrollView>
   );
 }

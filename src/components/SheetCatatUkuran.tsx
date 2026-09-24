@@ -142,6 +142,11 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
           valid: angka !== null && angka >= rentang.min && angka <= rentang.maks,
           selisih: angka !== null && lama !== null ? bulat(angka - lama) : null,
           diubah: disentuh[f.kunci] === true && angka !== null && angka !== terisi,
+          // Merah hanya untuk angka yang sudah diisi/disentuh: kolom kosong di
+          // pencatatan pertama belum salah, baru belum diisi.
+          tampilGalat:
+            (disentuh[f.kunci] === true || (draf[f.kunci] ?? '') !== '') &&
+            !(angka !== null && angka >= rentang.min && angka <= rentang.maks),
         };
       }),
     [draf, disentuh, pembanding, dasar],
@@ -235,7 +240,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
             nilai={draf[b.kunci] ?? ''}
             lama={b.lama}
             selisih={b.selisih}
-            valid={b.valid}
+            valid={!b.tampilGalat}
             onUbah={(t) => ubah(b.kunci, t)}
           />
         ))}
@@ -257,7 +262,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
         </Text>
       </Panel>
 
-      {!semuaValid ? (
+      {baris.some((b) => b.tampilGalat) ? (
         <Keterangan nada="coral">
           Periksa angka yang ditandai merah — ada yang di luar rentang masuk akal untuk
           bagian tubuh itu.
