@@ -13,6 +13,7 @@ import {
 } from '@recomp/logika';
 import type { BarisDilewati } from '@recomp/logika';
 import { Isian } from './Isian';
+import { KeadaanGagal } from './Keadaan';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { PilihanSegmen } from './PilihanSegmen';
 import { Tombol } from './Tombol';
@@ -84,6 +85,8 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
   /** Nama berkas yang dipilih; `null` bila isinya ditempel atau contoh. */
   const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
   const [memilih, setMemilih] = useState(false);
+  /** Berkas pilihan yang ditolak parser: nama + alasan, ditampilkan sebagai keadaan gagal. */
+  const [tolak, setTolak] = useState<{ nama: string; alasan: string } | null>(null);
   const router = useRouter();
   const [galat, setGalat] = useState<string | null>(null);
   const [rentang, setRentang] = useState<(typeof RENTANG_APPLE_HEALTH)[number]['kunci']>('365');
@@ -93,6 +96,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
     setLangkah({ jenis: 'masukan' });
     setTeks('');
     setNamaBerkas(null);
+    setTolak(null);
     setGalat(null);
     setRentang('365');
   }, [sumber]);
@@ -119,7 +123,8 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       setTeks(isi);
       setNamaBerkas(aset.name);
       setGalat(null);
-      periksa(isi);
+      setTolak(null);
+      periksa(isi, aset.name);
     } catch {
       setGalat('Berkas belum bisa dibaca. Coba pilih lagi, atau tempel isinya di kolom di bawah.');
     } finally {
@@ -127,7 +132,13 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
     }
   }
 
-  function periksa(isiTeks: string = teks) {
+  /** Galat urai: berkas pilihan jadi keadaan "ditolak", isi tempelan jadi galat kolom. */
+  function gagalUrai(alasan: string, nama: string | null) {
+    if (nama) setTolak({ nama, alasan });
+    else setGalat(alasan);
+  }
+
+  function periksa(isiTeks: string = teks, nama: string | null = null) {
     if (sumber === null) return;
     if (sumber === 'apple_health') {
       const r = RENTANG_APPLE_HEALTH.find((x) => x.kunci === rentang)!;
@@ -151,8 +162,8 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
 
     if (sumber === 'hevy_csv') {
       const h = uraiCsvHevy(isiTeks);
-      if ('galat' in h) return setGalat(h.galat);
-      if (h.sesi.length === 0) return setGalat('Tidak ada satu pun set yang bisa diimpor.');
+      if ('galat' in h) return gagalUrai(h.galat, nama);
+      if (h.sesi.length === 0) return gagalUrai('Tidak ada satu pun set yang bisa diimpor.', nama);
       const dari = tanggalDariWaktu(h.sesi[0].mulai);
       const sampai = tanggalDariWaktu(h.sesi[h.sesi.length - 1].mulai);
       setLangkah({
@@ -170,8 +181,8 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
     }
 
     const u = uraiCsvUkuran(isiTeks, tanggalHariIni());
-    if ('galat' in u) return setGalat(u.galat);
-    if (u.baris.length === 0) return setGalat('Tidak ada satu pun baris ukuran yang bisa diimpor.');
+    if ('galat' in u) return gagalUrai(u.galat, nama);
+    if (u.baris.length === 0) return gagalUrai('Tidak ada satu pun baris ukuran yang bisa diimpor.', nama);
     setLangkah({
       jenis: 'pratinjau',
       p: {
@@ -243,8 +254,19 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                 ? 'Di Hevy: Profil › Settings › Export & Import Data › Export Workouts, lalu pilih berkas CSV-nya di sini.'
                 : 'Tabel ukuran lama: satu baris per tanggal, kolom Tanggal lalu Pinggang, Dada, Leher, Lengan kiri/kanan, Paha kiri/kanan (cm). Simpan dari Excel sebagai CSV.'}
             </Teks>
+            {tolak ? (
+              <KeadaanGagal
+                tampilan="polos"
+                judul={`${tolak.nama} ditolak`}
+                keterangan={`${tolak.alasan} ${
+                  sumber === 'hevy_csv'
+                    ? 'Yang diterima: ekspor "Export Workouts" dari Hevy, dengan kolom title, start_time, exercise_title, set_index, dan reps.'
+                    : 'Yang diterima: CSV dengan kolom Tanggal dan minimal satu kolom ukuran (Pinggang, Dada, Leher, Lengan, Paha).'
+                } Tidak ada data yang diubah.`}
+              />
+            ) : null}
             <Tombol
-              label="Pilih berkas CSV"
+              label={tolak ? 'Pilih berkas lain' : 'Pilih berkas CSV'}
               ikon="document-attach-outline"
               memproses={memilih}
               onPress={() => void pilihBerkas()}
@@ -257,6 +279,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               onChangeText={(t) => {
                 setTeks(t);
                 setNamaBerkas(null);
+                setTolak(null);
                 if (galat) setGalat(null);
               }}
               placeholder="Tempel isi CSV di sini"
@@ -283,7 +306,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
         <>
           <View style={{ gap: spacing.xs }}>
             <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-              Akan diimpor
+              Akan diimpor{namaBerkas ? ` dari ${namaBerkas}` : ''}
             </Text>
             <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{langkah.p.ringkas}</Text>
           </View>
