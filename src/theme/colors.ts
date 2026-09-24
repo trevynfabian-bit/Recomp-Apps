@@ -131,7 +131,41 @@ type Peran = { isian: string; teks: string };
  */
 function lengkapi(d: Dasar) {
   return {
-    ...d,
+    // --- Token lama: tetap ada selama peralihan, JANGAN dipakai di kode baru.
+    // Satu baris `@deprecated Pakai …` per token; `cek:desain` membacanya untuk
+    // menyarankan pengganti, dan editor mencoretnya.
+    /** @deprecated Pakai `colors.latar`. */
+    bg: d.bg,
+    /** @deprecated Pakai `colors.permukaan`. */
+    surface: d.surface,
+    /** @deprecated Pakai `colors.permukaanCekung`. */
+    surfaceSunken: d.surfaceSunken,
+    /** @deprecated Pakai `colors.garis`. */
+    border: d.border,
+    /** @deprecated Pakai `colors.garisKontrol`. */
+    borderKuat: d.borderKuat,
+    /** @deprecated Pakai `colors.aksen.isian`/`colors.aksen.teks`, atau `colors.status.peringatan` bila maknanya peringatan. */
+    amber: d.amber,
+    /** @deprecated Pakai `colors.status.bahaya.isian`. */
+    coral: d.coral,
+    /** @deprecated Pakai `colors.status.sukses.isian`. */
+    jade: d.jade,
+    /** @deprecated Pakai `colors.status.sukses.teks` atau `colors.status.bahaya.teks`. */
+    aksenTeks: d.aksenTeks,
+    /** @deprecated Pakai `colors.teks`. */
+    text: d.text,
+    /** @deprecated Pakai `colors.teksRedup`. */
+    textMuted: d.textMuted,
+    /** @deprecated Pakai `colors.teksSamar`. */
+    textFaint: d.textFaint,
+
+    // --- Token yang tetap berlaku.
+    /** Label & ikon di atas ISIAN aksen/status. Di gelap = latar, di terang putih. */
+    diAtasIsian: d.diAtasIsian,
+    /** Warna per makro untuk ISIAN bar (nama domain, bukan nama warna). */
+    macro: d.macro,
+    /** Warna per makro untuk TEKS KECIL. */
+    macroTeks: d.macroTeks,
 
     /** Latar layar, splash, tab bar. */
     latar: d.bg,

@@ -122,11 +122,25 @@ const beku = [...berkasTs('app'), ...berkasTs('src')]
   .flatMap(tangkapanModul);
 // Layar & komponen memakai lapis SEMANTIK (bab Desain 8.2); nama warna mentah
 // hanya boleh dibaca di src/theme.
-const NAMA_LAMA = /colors\.(bg|surface|surfaceSunken|border|borderKuat|text|textMuted|textFaint|amber|coral|jade|aksenTeks)\b/;
+// Daftar token usang dibaca dari tanda `@deprecated Pakai …` di colors.ts,
+// jadi menandai token baru sebagai usang otomatis ikut dijaga di sini.
+const USANG = new Map(
+  [...readFileSync('src/theme/colors.ts', 'utf8').matchAll(/\/\*\* @deprecated Pakai (.+?)\. \*\/\n\s*(\w+):/g)].map(
+    (m) => [m[2], m[1]],
+  ),
+);
+cek(`token usang tercatat di colors.ts (${USANG.size})`, USANG.size > 0);
+const NAMA_LAMA = new RegExp(`colors\\.(${[...USANG.keys()].join('|')})\\b`);
 const namaLama = [...berkasTs('app'), ...berkasTs('src')]
   .filter((p) => !p.startsWith(join('src', 'theme')))
-  .flatMap((p) => cariBaris(p, NAMA_LAMA));
-cek('layar & komponen memakai nama warna semantik', namaLama.length === 0, namaLama.slice(0, 5).join(' | '));
+  .flatMap((p) =>
+    cariBaris(p, NAMA_LAMA).map((lokasi) => {
+      const [berkas, baris] = [lokasi.slice(0, lokasi.lastIndexOf(':')), Number(lokasi.slice(lokasi.lastIndexOf(':') + 1))];
+      const token = NAMA_LAMA.exec(readFileSync(berkas, 'utf8').split('\n')[baris - 1])[1];
+      return `${lokasi} colors.${token} → ${USANG.get(token)}`;
+    }),
+  );
+cek('layar & komponen tidak memakai token usang', namaLama.length === 0, namaLama.slice(0, 5).join(' | '));
 cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku.slice(0, 5).join(' | '));
 cek('latar tiap layar dari colors.latar', /contentStyle: \{ backgroundColor: colors\.latar \}/.test(tataLetak));
 

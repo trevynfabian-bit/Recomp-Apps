@@ -93,8 +93,25 @@ palet dasar sehingga setiap heks hanya ditulis sekali:
 | aksen | `colors.aksen.isian` / `colors.aksen.teks` |
 | sukses, peringatan, bahaya, info | `colors.status.<peran>.isian` / `.teks` |
 
-Nama lama (`bg`, `surface`, `amber`, `aksenTeks`, …) tetap ada selama masa
-peralihan dan dipensiunkan di task "Pembersihan Token Lama".
+**Token usang** (ditandai `@deprecated` di `colors.ts`, dicoret editor, ditolak
+`cek:desain` di luar `src/theme`):
+
+| Token lama | Pengganti |
+|---|---|
+| `colors.bg` | `colors.latar` |
+| `colors.surface` | `colors.permukaan` |
+| `colors.surfaceSunken` | `colors.permukaanCekung` |
+| `colors.border` | `colors.garis` |
+| `colors.borderKuat` | `colors.garisKontrol` |
+| `colors.text` / `textMuted` / `textFaint` | `colors.teks` / `teksRedup` / `teksSamar` |
+| `colors.amber` | `colors.aksen.isian` / `aksen.teks`, atau `colors.status.peringatan` bila bermakna peringatan |
+| `colors.coral` | `colors.status.bahaya.isian` |
+| `colors.jade` | `colors.status.sukses.isian` |
+| `colors.aksenTeks.coral` / `.jade` | `colors.status.bahaya.teks` / `colors.status.sukses.teks` |
+
+Yang **tetap berlaku**: `diAtasIsian`, `macro.*`, `macroTeks.*` (nama domain,
+bukan nama warna). Token usang dihapus dari palet setelah pemakaian terakhirnya
+di `src/theme` dan `scripts/cek-kontras.mjs` ikut dipindahkan.
 
 ### 1.5 Verifikasi kontras (WCAG 2.1 AA)
 
