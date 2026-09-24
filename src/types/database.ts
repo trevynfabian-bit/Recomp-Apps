@@ -594,7 +594,10 @@ export type Evaluasi4MingguanRow = {
       akhir_kg: number | null;
       selisih_kg: number | null;
       ambang_kg: number;
-      jumlah_timbangan: [number | null, number | null];
+      /** Timbangan penopang rata-rata di pekan pertama & terakhir; 0 bila tidak ada. */
+      jumlah_timbangan: [number, number];
+      /** Terisi hanya bila `belum jelas`: apa yang perlu dicatat. */
+      sebab: string | null;
     };
     pinggang: {
       arah: ArahMetrikDb;
@@ -603,6 +606,8 @@ export type Evaluasi4MingguanRow = {
       selisih_cm: number | null;
       ambang_cm: number;
       jumlah_pencatatan: number;
+      /** Terisi hanya bila `belum jelas`: apa yang perlu dicatat. */
+      sebab: string | null;
     };
     /** Dari e1RM gerakan yang diulang dalam periode (`arah_kekuatan_periode`). */
     kekuatan: {

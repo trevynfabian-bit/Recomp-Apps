@@ -139,6 +139,8 @@ begin
     format('hitungan gerakan %s, seharusnya 1 naik, 1 datar', k);
   assert (k->>'jumlah_gerakan')::int = 2, format('jumlah gerakan %s, seharusnya 2 (OHP sekali tidak ikut)', k->>'jumlah_gerakan');
   assert k->>'sebab' is null, 'sebab seharusnya kosong saat kekuatan terbaca';
+  assert e->'sumbu'->'berat'->>'sebab' is null and e->'sumbu'->'pinggang'->>'sebab' is null,
+    'sebab berat/pinggang seharusnya kosong saat sumbunya terbaca';
   assert e->>'kode' = public.kode_evaluasi((e->>'fase')::public.fase_program, e->'sumbu'->'berat'->>'arah',
     e->'sumbu'->'pinggang'->>'arah', k->>'arah', (e->>'pekan_data')::int)->>'kode', 'kode tidak lewat pohon keputusan';
   assert e->>'keyakinan' = 'tinggi', format('keyakinan %s, seharusnya tinggi saat ketiga sumbu terbaca', e->>'keyakinan');
@@ -247,6 +249,30 @@ begin
   assert (e->>'fase') = 'Maintenance', 'pengguna B mewarisi fase pengguna A';
   assert (e->'sumbu'->'pinggang'->>'jumlah_pencatatan')::int = 0,
     'pengguna B membaca ukuran pengguna A';
+end $$;
+
+-- 8b. Data kosong (pengguna C baru, belum mencatat apa pun): jawaban lengkap tanpa
+--     galat, setiap sumbu `belum jelas` DENGAN sebabnya, hitungan 0 (bukan
+--     null), dan verdict `data-kurang` berkeyakinan rendah.
+reset role;
+insert into auth.users (id, email) values ('cccc4444-0000-0000-0000-000000000044', 'eval-kosong@contoh.test');
+set request.jwt.claim.sub = 'cccc4444-0000-0000-0000-000000000044';
+set role authenticated;
+do $$
+declare e jsonb; s jsonb;
+begin
+  e := public.evaluasi_4_mingguan();
+  s := e->'sumbu';
+  assert e->>'kode' = 'data-kurang', format('kode %s, seharusnya data-kurang', e->>'kode');
+  assert e->>'keyakinan' = 'rendah', format('keyakinan %s, seharusnya rendah', e->>'keyakinan');
+  assert (e->>'pekan_data')::int = 0, format('pekan_data %s', e->>'pekan_data');
+  assert s->'berat'->>'arah' = 'belum jelas' and s->'pinggang'->>'arah' = 'belum jelas'
+     and s->'kekuatan'->>'arah' = 'belum jelas', format('sumbu %s', s);
+  assert s->'berat'->'jumlah_timbangan' = '[0, 0]'::jsonb, format('jumlah timbangan %s, seharusnya [0, 0]', s->'berat'->'jumlah_timbangan');
+  assert (s->'pinggang'->>'jumlah_pencatatan')::int = 0, 'jumlah pencatatan pinggang';
+  assert s->'berat'->>'sebab' is not null, 'sebab berat belum jelas tidak disebut';
+  assert s->'pinggang'->>'sebab' is not null, 'sebab pinggang belum jelas tidak disebut';
+  assert s->'kekuatan'->>'sebab' is not null, 'sebab kekuatan belum jelas tidak disebut';
 end $$;
 
 -- 9. Tanpa sesi & peran anon.
