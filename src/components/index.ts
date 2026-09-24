@@ -7,6 +7,7 @@ export { DaftarRujukan } from './DaftarRujukan';
 export { GelembungMengetik, GelembungPesan, PemisahTanggal } from './GelembungPesan';
 export { GrafikTren } from './GrafikTren';
 export { GrafikUkuran } from './GrafikUkuran';
+export { HeaderLayar } from './HeaderLayar';
 export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { IndikatorSinkron } from './IndikatorSinkron';

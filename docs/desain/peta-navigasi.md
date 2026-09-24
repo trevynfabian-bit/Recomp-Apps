@@ -111,3 +111,18 @@ menjaga jumlah tab 1–5 dan bahwa judul setiap layar tab diawali label tabnya
   glyph terisi, dan garis aksen 20×3 pt yang menempel di tepi atas tab bar
   (`ukuran.penandaTab`). Pembaca layar mendapat keadaan terpilih dari tab bar
   (`aria-selected`), dan label tab tetap terbaca oleh VoiceOver.
+
+## 6. Header layar
+
+`HeaderLayar` (`src/components/HeaderLayar.tsx`) menggantikan header yang
+disusun ulang di tiap layar (N1, N2):
+
+| Bagian | Aturan |
+|---|---|
+| Kembali | `TombolIkon` bulat `chevron-back`, hanya di layar tumpukan; `kembali={fungsi}` bila perlu konfirmasi dulu |
+| Judul | `title`, **selalu** `accessibilityRole="header"`; layar tab diawali label tabnya |
+| Subjudul | satu baris `label` `teksSamar`: tanggal, sumber, atau jumlah |
+| Aksi | paling banyak satu di kanan: `Pill` fase, `Tombol ukuran="kecil"`, atau `TombolIkon` |
+| Bawah | slot opsional di bawah subjudul (mis. `IndikatorSinkron` di Hari Ini) |
+
+Jarak ke isi di bawahnya dipegang kerangka layar (`gap: xl`), bukan header.

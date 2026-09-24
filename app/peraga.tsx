@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   DaftarBaris,
+  HeaderLayar,
   InputAngka,
   InputTarget,
   KartuHero,
@@ -74,6 +75,17 @@ export default function PeragaScreen() {
           </Text>
         </View>
       </View>
+
+      <Bagian judul="Header layar">
+        <Card style={{ gap: spacing.xl }}>
+          <HeaderLayar judul="Tren berat" subjudul="Selasa, 22 September" aksi={<Pill diKartu label="Lean Gain" warna={colors.status.sukses.teks} />} />
+          <HeaderLayar judul="Hasil lab" subjudul="3 hasil tersimpan" kembali={() => undefined} />
+          <HeaderLayar
+            judul="Coach"
+            aksi={<Tombol label="Riwayat" varian="bertepi" ukuran="kecil" onPress={() => undefined} />}
+          />
+        </Card>
+      </Bagian>
 
       <Bagian judul="Tombol & aksi">
         <Card style={{ gap: spacing.md }}>
