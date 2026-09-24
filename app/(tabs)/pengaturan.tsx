@@ -315,6 +315,19 @@ export default function PengaturanScreen() {
         ) : null}
       </View>
 
+      {/* Layar acuan desain: hanya di build pengembangan, tidak pernah sampai ke pengguna. */}
+      {__DEV__ ? (
+        <Card flat>
+          <BarisPengaturan
+            ikon="color-palette-outline"
+            judul="Arah visual"
+            nilai="Layar acuan palet, tipografi, dan jarak"
+            petunjuk="Membuka layar contoh arah visual"
+            onPress={() => router.push('/arah-visual')}
+          />
+        </Card>
+      ) : null}
+
       <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
         Recomp Coach {Constants.expoConfig?.version ?? ''} · bergabung {formatTanggalPanjang(mockAkun.bergabung).split(', ')[1]}
       </Text>

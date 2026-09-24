@@ -83,6 +83,7 @@ function TumpukanAkar() {
                     <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
                     <Stack.Screen name="hasil-lab" options={{ animation: 'slide_from_right' }} />
                     <Stack.Screen name="tambah-hasil-lab" options={{ animation: 'slide_from_bottom' }} />
+                    <Stack.Screen name="arah-visual" options={{ animation: 'slide_from_right' }} />
                   </Stack.Protected>
                   <Stack.Protected guard={!sudahMasuk}>
                     <Stack.Screen name="masuk" options={{ animation: 'fade' }} />

@@ -261,3 +261,17 @@ Aturan: radius elemen di dalam kartu harus **lebih kecil** dari radius kartunya
   (`TAP_MIN`, 71 pemakaian). Tinggi mentah lain yang ditemukan (14, 24, 36, 72,
   96, 140) adalah area grafik/pratinjau, bukan kontrol, dan dijadikan token
   ukuran bernama di Fase 2.
+
+---
+
+## 4. Layar contoh
+
+`app/arah-visual.tsx` menaruh seluruh keputusan di atas dalam satu layar:
+komposisi hero + baris makro, palet status (isian, teks, pill), palet netral,
+tangga tipografi dengan tinggi barisnya, token jarak dan radius, serta tiga
+varian tombol. Dibuka dari **Pengaturan → Arah visual**, hanya pada build
+pengembangan (`__DEV__`). Data dari `src/mocks/dailyLog.ts`.
+
+Varian tipografi di layar ini masih didefinisikan lokal (`usulanTipografi`);
+Fase 2 memindahkannya ke `src/theme/tokens.ts` dan layar contoh ikut memakai
+token resmi.
