@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.3 (24 September 2026) |
+| **Versi** | 1.4 (24 September 2026) |
 | **Penjaga** | `npm run cek:desain`, `npm run cek:kontras` |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
@@ -97,8 +97,13 @@ berubah karena keputusan desain.
 
 ### 8.6 Komposisi layar
 
-- Satu angka hero per layar data (Hari Ini, Tren, Budget, Ukuran, Latihan,
-  Sumber data, Target harian); komponen tidak membawa angka hero sendiri.
+- **Aturan satu angka hero (dipertahankan dan dipertegas, Fase 4).** Tepat
+  satu angka hero di setiap layar data (Hari Ini, Tren, Budget, Ukuran,
+  Latihan, Sumber data, Target harian), tidak ada di layar lain (Setelan,
+  Coach, Privasi, …), selalu lewat `KartuHero`, dan tidak pernah dirakit sendiri
+  dengan gaya `hero`. Alasan dipertahankan: aturan ini yang membuat setiap layar
+  data menjawab satu pertanyaan sekali lirik; tidak ada layar yang terbukti
+  butuh dua. Angka pendukung memakai `AngkaStat`.
 - Judul layar tab dan tumpukan memakai `title` dengan peran header aksesibilitas.
 - Kolom isian: satu komponen `Isian` (label di atas, satuan di kanan,
   keterangan/galat di bawah). Keadaan dibaca dari tepi kolom: biasa
@@ -165,3 +170,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | 1.1 | 24 September 2026 | Lapis semantik diwujudkan di `src/theme/colors.ts` (`latar`, `permukaan`, `teks*`, `aksen`, `status.*`); `info` dibatasi ke teks/bar/mark. |
 | 1.2 | 24 September 2026 | Token Fase 2 terpusat: lapis semantik satu-satunya nama warna di luar `src/theme` (nama lama dihapus); tipografi membawa tinggi baris; token `ukuran`, `ukuranIkon`, `bobot`, `radius.xs`; kontrol rapat 36/40 pt dengan area sentuh 44 pt. |
 | 1.3 | 24 September 2026 | Mode terang: pilihan manual di Pengaturan, angka hero `aksen.besar`, tint & bayangan per mode. Varian teks kecil mode gelap dinaikkan agar lolos AA di dalam pill bertint (≥4,6:1). |
+| 1.4 | 24 September 2026 | Navigasi: tab final "Setelan", ikon terisi + garis penanda untuk tab terpilih, `HeaderLayar` di semua layar, pola transisi dorong/modal, kembali satu langkah. Aturan angka hero dipertegas: hanya layar data, selalu `KartuHero`. |

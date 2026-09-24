@@ -2,7 +2,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatAngka } from '@recomp/logika';
-import { Card, HeaderLayar, HeroNumber, MacroRow, Pill, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import { Card, HeaderLayar, KartuHero, MacroRow, Pill, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -64,19 +64,18 @@ export default function ArahVisualScreen() {
       />
 
       {/* Komposisi: satu angka hero, lalu kartu pendukung dengan kepadatan rapat. */}
-      <Card style={{ paddingVertical: spacing.xl, gap: spacing.xl }}>
-        <HeroNumber
-          label="Sisa kalori hari ini"
-          nilai={formatAngka(sisa)}
-          unit="kcal"
-          keterangan={`dari target ${formatAngka(target.target_kalori)} kcal`}
-        />
+      <KartuHero
+        label="Sisa kalori hari ini"
+        nilai={formatAngka(sisa)}
+        unit="kcal"
+        keterangan={`dari target ${formatAngka(target.target_kalori)} kcal`}
+      >
         <View style={{ gap: spacing.lg }}>
           {makro.map((m) => (
             <MacroRow key={m.key} macro={m} mode="sisa" />
           ))}
         </View>
-      </Card>
+      </KartuHero>
 
       <View>
         <SectionHeader judul="Palet · status" aksi="isian / teks" />

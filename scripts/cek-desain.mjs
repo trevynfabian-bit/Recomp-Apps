@@ -62,6 +62,20 @@ const LAYAR_DATA = [
   'app/target-harian.tsx', // target kalori hari ini
 ];
 for (const p of LAYAR_DATA) cek(`layar data ${p} punya angka utama`, hitung(p) === 1, `${hitung(p)} angka utama`);
+// Keputusan Fase 4 (docs/desain/bab-desain-prd.md 8.6): aturan dipertahankan
+// dan dipertegas. Angka utama hanya di layar data (plus dua layar acuan), dan
+// selalu lewat KartuHero supaya bingkainya sama di semua layar.
+const HERO_BOLEH = [...LAYAR_DATA, 'app/arah-visual.tsx', 'app/peraga.tsx'];
+const heroLiar = layar.filter((p) => hitung(p) > 0 && !HERO_BOLEH.includes(p));
+cek('angka utama hanya di layar data (dan layar acuan)', heroLiar.length === 0, heroLiar.join(', '));
+const heroTelanjang = layar.filter((p) => /<HeroNumber\b/.test(readFileSync(p, 'utf8')));
+cek('layar memakai KartuHero, bukan HeroNumber telanjang', heroTelanjang.length === 0, heroTelanjang.join(', '));
+// Angka hero rakitan sendiri: gaya `hero` di luar komponen angka utama & PemilihAngka.
+const HERO_GAYA_BOLEH = ['HeroNumber.tsx', 'KartuHero.tsx', 'Pemilih.tsx'];
+const heroRakitan = [...layar, ...berkasTsx('src/components')]
+  .filter((p) => !HERO_GAYA_BOLEH.some((b) => p.endsWith(b)))
+  .flatMap((p) => cariBaris(p, /typography\.hero\b/));
+cek('tidak ada angka hero rakitan sendiri (typography.hero)', heroRakitan.length === 0, heroRakitan.join(' | '));
 const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumber.tsx') && !p.endsWith('KartuHero.tsx'));
 const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
 cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
