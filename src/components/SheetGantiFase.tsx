@@ -108,7 +108,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
   return (
     <KerangkaSheet terbuka onTutup={onTutup} label="Ganti fase">
       <Text style={{ ...typography.title, color: colors.text }}>Ganti ke {calon}?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         Mulai hari ini, {tanggalRingkas(tanggal)}. Hari yang sudah lewat tetap memakai target {profil.fase_aktif}.
       </Text>
 

@@ -50,7 +50,7 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
   return (
     <KerangkaSheet terbuka onTutup={status === 'memproses' ? null : onTutup} label="Hapus akun">
       <Text style={{ ...typography.title, color: colors.text }}>Hapus akun & semua data?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         Profil, catatan harian, makanan, ukuran, latihan, data dari perangkat, percakapan coach, dan hasil lab
         dihapus dari server. Tidak bisa dibatalkan.
       </Text>

@@ -143,7 +143,7 @@ export function KartuBodyFat({
       ) : null}
 
       {komposisi ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Dihitung dari rata-rata berat 7 hari {formatDesimal(beratRataRataKg!)} kg, bukan timbangan
           satu pagi. Keduanya ikut menanggung ketidakpastian persennya: ±
           {formatDesimal(hasil.ketidakpastian, 0)} poin di sini berarti sekitar ±
@@ -153,7 +153,7 @@ export function KartuBodyFat({
 
       {/* Kenapa angka ini tidak boleh dibaca sebagai hasil pengukuran. */}
       <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Metode Navy menghitungnya dari lingkar pinggang dan leher plus tinggi badan — bukan dari
           lemak yang benar-benar diukur. Galat bakunya sekitar ±
           {formatDesimal(hasil.ketidakpastian, 0)} poin terhadap DXA, jadi ANGKANYA jangan dipakai
@@ -161,7 +161,7 @@ export function KartuBodyFat({
           sebagian besar saling meniadakan saat Anda membandingkannya dengan diri sendiri.
         </Text>
         {hasil.sensitivitasPinggang !== null ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
             Pada ukuran Anda, meteran pinggang yang meleset 1 cm menggeser estimasi ini{' '}
             {formatDesimal(Math.abs(hasil.sensitivitasPinggang))} poin — itulah kenapa titik ukur
             yang konsisten lebih menentukan daripada ketelitian angkanya.
@@ -261,7 +261,7 @@ function KartuKosong({
         <Pill diKartu label="ESTIMASI" warna={colors.textMuted} />
       </View>
       <Text style={{ ...typography.body, color: colors.textMuted }}>Belum bisa dihitung</Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>
         {alasan ?? 'Data yang dibutuhkan rumus Navy belum lengkap.'}
       </Text>
 
@@ -288,7 +288,7 @@ function KartuKosong({
               Lengkapi profil
             </Text>
           </Pressable>
-          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
             Cukup sekali isi. Ukuran yang sudah Anda catat tetap tersimpan dan tidak perlu
             diulang — estimasinya langsung muncul begitu datanya lengkap.
           </Text>

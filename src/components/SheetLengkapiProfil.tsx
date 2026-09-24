@@ -106,7 +106,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
           >
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               Dua data ini dipakai rumus Navy dan disimpan di profil, jadi cukup diisi sekali.
               Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
             </Text>
@@ -147,7 +147,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                 />
                 <Text style={{ ...typography.label, color: colors.textFaint }}>cm</Text>
               </View>
-              <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 {tinggi !== '' && !tinggiValid
                   ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.`
                   : 'Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda.'}
@@ -170,7 +170,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   />
                 ))}
               </View>
-              <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 Rumus Navy memakai konstanta yang berbeda untuk pria dan wanita. Versi wanita juga
                 butuh lingkar pinggul, yang belum dicatat app ini — jadi untuk sekarang estimasinya
                 baru bisa dihitung untuk pria.
@@ -193,7 +193,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Isian Anda masih ada di layar ini. Coba lagi.
                 </Text>
               </View>

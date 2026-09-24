@@ -56,7 +56,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
           </Text>
         </View>
 
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {proteksi.utuh
             ? sudahRedistribusi
               ? 'Redistribusi tadi hanya menggeser kalori. Target protein tiap hari tetap sama persis.'
@@ -136,7 +136,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
           })}
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Protein dijaga karena ia yang menahan otot saat kalori dikurangi. Memotongnya untuk
           menutup kelebihan kalori justru membuang hal yang sedang dibangun.
         </Text>

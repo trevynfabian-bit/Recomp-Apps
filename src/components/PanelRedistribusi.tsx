@@ -50,7 +50,7 @@ export function PanelRedistribusi({
   if (!adaYangPerlu) {
     return (
       <Card>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {mendatang.length === 0
             ? 'Minggu ini sudah habis — tidak ada hari tersisa untuk diatur.'
             : 'Jatah minggu ini sudah pas dengan rencana. Tidak ada yang perlu dipindah.'}
@@ -63,7 +63,7 @@ export function PanelRedistribusi({
     <Card>
       <View style={{ gap: spacing.lg }}>
         {/* Duduk perkaranya dulu, baru pilihannya */}
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {perlu < 0
             ? `Bila sisa minggu dijalani sesuai rencana, minggu ini tutup ${formatAngka(Math.abs(perlu))} kcal di atas jatah.`
             : `Masih ada ${formatAngka(perlu)} kcal jatah menganggur sampai akhir minggu.`}
@@ -77,7 +77,7 @@ export function PanelRedistribusi({
               backgroundColor: colors.surfaceSunken,
             }}
           >
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               Redistribusi minggu ini sudah dipakai. Jatahnya satu kali per minggu, supaya
               target tidak terus bergeser sepanjang pekan.
             </Text>
@@ -213,7 +213,7 @@ export function PanelRedistribusi({
                 </View>
               ))}
 
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               {hasil.alasan} Target dibulatkan ke {KELIPATAN_KCAL} kcal, tidak pernah turun di
               bawah {formatAngka(batasBawahKalori)} kcal, dan protein tidak ikut dipotong.
             </Text>

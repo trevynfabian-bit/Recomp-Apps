@@ -71,7 +71,7 @@ export function DaftarRujukan({ rujukan }: Props) {
       ))}
 
       {adaEstimasi ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           {METADATA_SUMBER.estimasi.penjelasan}
         </Text>
       ) : null}

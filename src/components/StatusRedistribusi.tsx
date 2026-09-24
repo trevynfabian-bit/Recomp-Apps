@@ -51,7 +51,7 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
           </Text>
         </View>
 
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {formatAngka(Math.abs(hasil.terserap))} kcal {arah} ke {berubah.length} hari.
           Target di bawah sudah memakai angka baru ini.
         </Text>
@@ -87,12 +87,12 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
         </View>
 
         {hasil.tersisa !== 0 || hasil.dibatasiLantai ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
             {hasil.alasan}
           </Text>
         ) : null}
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Jatah redistribusi satu kali per minggu sudah terpakai. Ia akan kembali tersedia
           Senin depan, supaya target tidak terus bergeser sepanjang pekan.
         </Text>

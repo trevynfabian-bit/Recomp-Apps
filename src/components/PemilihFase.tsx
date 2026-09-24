@@ -90,7 +90,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
           })}
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Fase {terpilih} menargetkan laju {persen(laju.min)} s/d {persen(laju.maks)} berat badan
           per minggu. Menggantinya mengubah target harian tiap tipe hari, koridor di layar Tren,
           dan budget mingguan sekaligus.

@@ -74,16 +74,18 @@ export const ukuranIkon = {
 } as const;
 
 /**
- * Skala tipografi. `hero` khusus untuk SATU angka utama per layar,
- * sesuai prinsip desain di PRD.
+ * Tangga tipografi (bab Desain 8.4). Enam ukuran, masing-masing MEMBAWA tinggi
+ * baris sendiri, jadi layar tidak menulis `lineHeight` manual. `hero` khusus
+ * untuk SATU angka utama per layar. Padanan gaya teks iOS dan aturan HIG-nya
+ * ada di `hig.ts`.
  */
 export const typography = {
-  hero: { fontSize: 64, fontWeight: '800', letterSpacing: -2 },
-  display: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8 },
-  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
-  body: { fontSize: 16, fontWeight: '500' },
-  label: { fontSize: 13, fontWeight: '600' },
-  caption: { fontSize: 11, fontWeight: '600', letterSpacing: 0.6 },
+  hero: { fontSize: 64, fontWeight: '800', letterSpacing: -2, lineHeight: 68 },
+  display: { fontSize: 34, fontWeight: '700', letterSpacing: -0.8, lineHeight: 40 },
+  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3, lineHeight: 26 },
+  body: { fontSize: 16, fontWeight: '500', lineHeight: 24 },
+  label: { fontSize: 13, fontWeight: '600', lineHeight: 19 },
+  caption: { fontSize: 11, fontWeight: '600', letterSpacing: 0.6, lineHeight: 16 },
 
   // Varian bernama (docs/desain/arah-visual.md bab 2.3). Menggantikan penimpaan
   // `fontWeight`/`lineHeight` manual setelah `...typography.x`.

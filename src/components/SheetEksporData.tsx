@@ -58,7 +58,7 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
   return (
     <KerangkaSheet terbuka onTutup={menyerahkan ? null : onTutup} label="Ekspor data">
       <Text style={{ ...typography.title, color: colors.text }}>Ekspor data saya</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         Satu berkas ZIP berisi CSV per jenis data dan satu JSON lengkap — terbaca di spreadsheet mana pun, tanpa
         app ini.
       </Text>
@@ -112,7 +112,7 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
         </Text>
       ) : null}
       {galatSerah ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral, lineHeight: 19 }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
           Berkas belum bisa {web ? 'diunduh' : 'dibagikan'}. Berkasnya masih siap; coba lagi.
         </Text>
       ) : null}

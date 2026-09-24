@@ -44,7 +44,7 @@ export function CatatanKecukupan({ kecukupan, untuk }: Props) {
           marginTop: 5,
         }}
       />
-      <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
         {pesan}
       </Text>
     </View>

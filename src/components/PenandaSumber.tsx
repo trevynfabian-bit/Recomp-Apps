@@ -63,7 +63,7 @@ export function LegendaSumber() {
               }}
             />
           </View>
-          <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
             <Text style={{ color: METADATA_SUMBER[jenis].warna }}>
               {METADATA_SUMBER[jenis].label}
             </Text>

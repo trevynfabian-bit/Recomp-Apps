@@ -134,7 +134,7 @@ export default function TambahHasilLabScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
         <Text style={{ ...typography.title, color: colors.text }}>Hasil lab ini tidak ditemukan</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
         </Text>
         <TombolBertepi label="Kembali ke riwayat" onPress={() => router.back()} />
@@ -290,7 +290,7 @@ export default function TambahHasilLabScreen() {
 
       <KerangkaSheet terbuka={konfirmasiBatal} onTutup={() => setKonfirmasiBatal(false)} label="Isian belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {asal
             ? 'Perubahan belum disimpan. Entri yang tersimpan tetap seperti sebelumnya.'
             : 'Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.'}

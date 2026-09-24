@@ -119,7 +119,7 @@ export function PemilihTipeHari({
         <View style={{ gap: spacing.sm }}>
           {override ? (
             <View style={{ gap: spacing.md }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 Diubah manual.{' '}
                 {deteksi.nama
                   ? `Dari workout, tipe hari ini terbaca ${deteksi.nama} — ${alasan}.`
@@ -148,7 +148,7 @@ export function PemilihTipeHari({
               </Pressable>
             </View>
           ) : (
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               {deteksi.dasar.length > 0
                 ? `Terdeteksi otomatis dari workout · ${alasan}`
                 : `${alasan} · dianggap ${deteksi.nama ?? 'Rest'}`}

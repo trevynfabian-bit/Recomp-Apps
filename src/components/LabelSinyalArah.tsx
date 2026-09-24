@@ -77,7 +77,7 @@ export function LabelSinyalArah({ sinyal, fase, tampilan = 'penuh' }: Props) {
         ) : null}
       </View>
 
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         {kalimatSinyal(sinyal)}
       </Text>
     </View>

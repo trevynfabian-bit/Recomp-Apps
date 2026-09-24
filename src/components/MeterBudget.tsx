@@ -79,7 +79,7 @@ export function MeterBudget({ budget, laju }: Props) {
         </Text>
       </View>
 
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         {kalimatLaju(laju)}
       </Text>
     </View>

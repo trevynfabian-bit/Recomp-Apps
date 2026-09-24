@@ -16,19 +16,8 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * dibuka dari Pengaturan pada build pengembangan. Data dari `src/mocks`.
  */
 
-// Tinggi baris gaya dasar (bab 2.2) masuk ke `src/theme/tokens.ts` di Fase 2;
-// sampai saat itu layar contoh menambahkannya di sini. Varian bernama
-// (`bodySedang`, `bodyTebal`, `labelBiasa`) sudah resmi.
-const usulanTipografi = {
-  display: { ...typography.display, lineHeight: 40 },
-  title: { ...typography.title, lineHeight: 26 },
-  body: { ...typography.body, lineHeight: 24 },
-  bodySedang: typography.bodySedang,
-  bodyTebal: typography.bodyTebal,
-  label: { ...typography.label, lineHeight: 19 },
-  labelBiasa: typography.labelBiasa,
-  caption: { ...typography.caption, lineHeight: 16 },
-} as const;
+// Semua gaya kini resmi di `src/theme/tokens.ts`, tinggi baris sudah dibawa tokennya.
+const usulanTipografi = typography;
 
 /** Palet semantik bab 1: peran → warna isian & warna teks kecil. */
 /** Dibaca saat render: `colors` berganti isi saat skema berganti. */

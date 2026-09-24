@@ -289,7 +289,7 @@ export default function BudgetScreen() {
 
       {/* Kenapa angkanya begitu — perhitungannya bisa ditelusuri */}
       <Card>
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Budget mingguan adalah JUMLAH target harian sepanjang minggu, jadi minggu dengan
           lebih banyak hari latihan memang punya jatah lebih besar — itu bukan kebocoran.
           Target harian sendiri mengikuti tipe hari pada fase {profil.fase_aktif}.

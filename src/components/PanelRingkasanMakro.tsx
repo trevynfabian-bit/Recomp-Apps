@@ -43,7 +43,7 @@ export function PanelRingkasanMakro({ macros, jumlahEstimasi = 0 }: Props) {
               </Text>
             </View>
           ) : null}
-          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
             Sat fat dihitung sebagai BATAS, bukan sasaran. Karbo sengaja tidak
             ditargetkan — hanya dicatat.
           </Text>

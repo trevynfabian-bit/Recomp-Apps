@@ -118,7 +118,6 @@ export function GelembungPesan({
             color: colors.text,
             // 24px pada teks 16px: jawaban coach sering lima kalimat, dan
             // lineHeight rapat membuatnya terbaca seperti dinding.
-            lineHeight: 24,
           }}
         >
           {pesan.teks}

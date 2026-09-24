@@ -70,7 +70,6 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
               style={{
                 ...typography.body,
                 color: catatan ? colors.textMuted : colors.textFaint,
-                lineHeight: 24,
               }}
             >
               {catatan ?? 'Belum ada catatan untuk hari ini.'}
@@ -100,7 +99,6 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
           style={{
             ...typography.body,
             color: colors.text,
-            lineHeight: 24,
             minHeight: 96,
             textAlignVertical: 'top',
             backgroundColor: colors.surfaceSunken,
@@ -112,7 +110,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
         />
 
         {galat ? (
-          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral }}>
             {galat}
           </Text>
         ) : null}

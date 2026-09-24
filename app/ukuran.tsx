@@ -286,7 +286,7 @@ export default function UkuranScreen() {
       <RiwayatPerubahan catatan={catatan} bagian={BAGIAN} />
 
       <Card>
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Ukuran melengkapi berat, bukan menggantikannya. Berat bisa datar sementara pinggang
           mengecil dan lengan membesar — itu justru rekomposisi yang berhasil, dan tidak akan
           terlihat sama sekali dari timbangan. Lengan dan paha dicatat kiri dan kanan terpisah

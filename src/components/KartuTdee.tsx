@@ -32,7 +32,7 @@ export function KartuTdee({ tdee, perbandingan }: Props) {
   if (tdee.min === null || tdee.maks === null) {
     return (
       <Card>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {tdee.alasanKeyakinan}
         </Text>
       </Card>
@@ -73,7 +73,7 @@ export function KartuTdee({ tdee, perbandingan }: Props) {
           </View>
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           {tdee.alasanKeyakinan}
         </Text>
 
@@ -102,12 +102,12 @@ export function KartuTdee({ tdee, perbandingan }: Props) {
         </View>
 
         {perbandingan ? (
-          <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+          <Text style={{ ...typography.body, color: colors.textMuted }}>
             {perbandingan}
           </Text>
         ) : null}
 
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           Rumus populasi bisa meleset 10–15% pada individu. Yang paling dipercaya adalah metode
           berbasis data Anda sendiri, dan ia membaik seiring catatan bertambah.
         </Text>

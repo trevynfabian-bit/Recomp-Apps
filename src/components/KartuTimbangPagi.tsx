@@ -314,7 +314,7 @@ export function KartuTimbangPagi({
                   />
                 </View>
                 {jenisSumber === 'sinkron' ? (
-                  <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
                     Angka ini ditarik dari Apple Health. Menyimpan di sini akan
                     menggantinya dengan catatan manual Anda.
                   </Text>
@@ -371,7 +371,7 @@ export function KartuTimbangPagi({
                 <Text style={{ ...typography.label, color: colors.amber }}>
                   Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
                   lanjutkan bila memang benar.
                 </Text>
@@ -392,7 +392,7 @@ export function KartuTimbangPagi({
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Angka Anda masih tersimpan di layar ini. Coba lagi.
                 </Text>
               </View>

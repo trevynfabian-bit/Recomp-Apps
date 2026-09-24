@@ -35,7 +35,7 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
   return (
     <KerangkaSheet terbuka onTutup={memproses ? null : onTutup} label="Keluar dari akun">
       <Text style={{ ...typography.title, color: colors.text }}>Keluar dari akun?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         Semua data tetap tersimpan di akun Anda dan kembali utuh saat masuk lagi.
       </Text>
 

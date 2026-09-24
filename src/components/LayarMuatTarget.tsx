@@ -42,7 +42,7 @@ export function LayarMuatTarget({ pesanGagal, onCobaLagi, onKeluar }: Props) {
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
               Target harian belum termuat
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>{pesanGagal}</Text>
+            <Text style={{ ...typography.body, color: colors.textMuted }}>{pesanGagal}</Text>
           </View>
           <View style={{ gap: spacing.sm }}>
             <TombolUtama label="Coba lagi" onPress={onCobaLagi} />

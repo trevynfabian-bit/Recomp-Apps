@@ -39,7 +39,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
         </Text>
       </View>
 
-      <Text style={{ ...typography.body, color: colors.text, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.text }}>
         {penolakan.alasan}
       </Text>
 
@@ -50,7 +50,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
         {penolakan.bisaDibantu.map((b) => (
           <View key={b} style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Text style={{ ...typography.caption, color: colors.textFaint }}>·</Text>
-            <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }}>
               {b}
             </Text>
           </View>
@@ -59,7 +59,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
 
       {/* Kata pemicunya disebut: kalau penolakannya salah tangkap, pengguna
           perlu tahu kata mana yang harus ia hindari saat menulis ulang. */}
-      <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>
         Ditolak karena pertanyaan Anda memuat kata “{penolakan.pemicu}”. Kalau maksud Anda bukan
         soal obat atau kondisi medis, coba tulis ulang tanpa kata itu.
       </Text>

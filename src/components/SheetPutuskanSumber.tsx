@@ -66,7 +66,7 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
     >
       <Text style={{ ...typography.title, color: colors.text }}>Putuskan {profil.nama}?</Text>
 
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted }}>
         {kapital(gabung(profil.membawa))} yang baru dari {profil.nama} berhenti masuk. Yang sudah
         tercatat tetap tersimpan, kecuali Anda memilih menghapusnya.
       </Text>
@@ -102,7 +102,7 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
       {hapusData ? (
         <Text
           accessibilityLiveRegion="polite"
-          style={{ ...typography.label, color: colors.aksenTeks.coral, lineHeight: 20 }}
+          style={{ ...typography.label, color: colors.aksenTeks.coral }}
         >
           Tidak bisa dibatalkan. Rata-rata 7 hari, tren, dan budget dihitung ulang tanpa data ini.
         </Text>

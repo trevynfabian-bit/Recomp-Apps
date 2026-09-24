@@ -174,7 +174,7 @@ export default function HasilLabScreen() {
         {akanDihapus ? (
           <>
             <Text style={{ ...typography.title, color: colors.text }}>Hapus hasil lab ini?</Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+            <Text style={{ ...typography.body, color: colors.textMuted }}>
               {akanDihapus.nama}, {formatTanggalPanjang(akanDihapus.tanggal).split(', ')[1]} {akanDihapus.tanggal.slice(0, 4)} ·{' '}
               {akanDihapus.penanda.length} penanda. Coach tidak lagi membacanya sebagai konteks, dan penghapusan ini tidak
               bisa dibatalkan.

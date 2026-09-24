@@ -28,7 +28,7 @@ export function Placeholder({ judul, keterangan, fase }: Props) {
         {fase}
       </Text>
       <Text style={{ ...typography.display, color: colors.text }}>{judul}</Text>
-      <Text style={{ ...typography.body, color: colors.textFaint, textAlign: 'center', lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.textFaint, textAlign: 'center' }}>
         {keterangan}
       </Text>
     </View>

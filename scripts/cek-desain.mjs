@@ -155,8 +155,23 @@ cek('ketebalan tidak ditimpa setelah typography (pakai varian bernama)', timpaBo
 const bobotTerlarang = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '(100|200|300|400|900)'/));
 cek('ketebalan hanya 500, 600, 700, 800', bobotTerlarang.length === 0, bobotTerlarang.slice(0, 5).join(' | '));
 
+// Tangga tipografi sendiri: setiap gaya membawa tinggi baris, tidak ada yang
+// di bawah batas HIG, dan setiap gaya punya padanan iOS yang tercatat.
+const tokenTeks = readFileSync('src/theme/tokens.ts', 'utf8');
+const higTeks = readFileSync('src/theme/hig.ts', 'utf8');
+const teksMin = Number(/TEKS_MIN = (\d+)/.exec(higTeks)?.[1]);
+const gaya = [...tokenTeks.matchAll(/^  (\w+): \{ fontSize: (\d+),[^}]*\},?$/gm)].map((g) => [
+  g[0], g[1], g[2], /lineHeight: (\d+)/.exec(g[0])?.[1],
+]);
+cek('setiap gaya tipografi membawa lineHeight ≥ fontSize', gaya.length > 0 && gaya.every((g) => g[3] && Number(g[3]) >= Number(g[2])),
+  gaya.filter((g) => !g[3] || Number(g[3]) < Number(g[2])).map((g) => g[1]).join(', '));
+cek(`tidak ada gaya di bawah ${teksMin}pt (HIG)`, gaya.every((g) => Number(g[2]) >= teksMin),
+  gaya.filter((g) => Number(g[2]) < teksMin).map((g) => g[1]).join(', '));
+const dasar = ['hero', 'display', 'title', 'body', 'label', 'caption'];
+cek('setiap gaya dasar punya padanan iOS di hig.ts', dasar.every((d) => new RegExp(`\\b${d}: '`).test(higTeks)));
+
 console.log('\nJarak dari satu skala (plafon, hanya boleh turun)');
-const PLAFON = { lineHeight: 88, jarak: 9 };
+const PLAFON = { lineHeight: 3, jarak: 9 };
 const tinggiBaris = semuaUi.flatMap((p) => cariBaris(p, /lineHeight: \d/));
 const jarakMentah = semuaUi.flatMap((p) => cariBaris(p, /\b(gap|rowGap|columnGap|margin\w*|padding\w*): \d/));
 cek(

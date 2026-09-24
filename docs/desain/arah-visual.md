@@ -218,6 +218,14 @@ Tinggi baris dipilih dari nilai yang **sudah paling sering** ditulis manual
 (`label` 19 ×47, `caption` 16 ×46, `body` 24 ×15) supaya penerapannya tidak
 menggeser tata letak. `body` 23 (×12) dibulatkan ke 24.
 
+**Terwujud di kode:** setiap gaya dasar di `src/theme/tokens.ts` membawa
+`lineHeight`-nya; `lineHeight` mentah di layar turun dari 139 ke 3 (glyph −/+
+stepper dan field chat, sengaja). Aturan HIG ada di `src/theme/hig.ts`:
+`TEKS_MIN` 11pt, `PADANAN_IOS` (display ≈ Large Title, title ≈ Title 3, body ≈
+Callout, label ≈ Footnote, caption ≈ Caption 2), `TAP_MIN` 44, dan
+`MAKS_SKALA_HERO` 1,3. `cek:desain` memastikan setiap gaya membawa tinggi baris
+≥ ukurannya, tidak ada gaya di bawah 11pt, dan setiap gaya dasar punya padanan iOS.
+
 ### 2.3 Aturan ketebalan
 
 Hanya empat ketebalan yang boleh ada: **500, 600, 700, 800**.

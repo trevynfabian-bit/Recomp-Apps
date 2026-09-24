@@ -176,7 +176,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                   <View style={{ flex: 1 }} />
                 </View>
 
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Angka di atas adalah tebakan dari foto. Periksa dan koreksi bila perlu —
                   entri ini akan disimpan bertanda estimasi.
                 </Text>

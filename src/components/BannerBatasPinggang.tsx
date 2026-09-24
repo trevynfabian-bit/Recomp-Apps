@@ -70,7 +70,7 @@ export function BannerBatasPinggang({
         </Text>
       </View>
 
-      <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>
         Pinggang terakhir {formatDesimal(pinggangCm)} cm, batas yang Anda tetapkan{' '}
         {formatDesimal(batasCm)} cm.
         {status.lajuPerPekan !== null && status.lajuPerPekan !== 0
@@ -83,7 +83,7 @@ export function BannerBatasPinggang({
           : ''}
       </Text>
 
-      <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>
         {pesanKeputusan(lewat, fase)}
       </Text>
 

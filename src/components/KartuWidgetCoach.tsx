@@ -75,7 +75,7 @@ function IsiAngka({ widget }: { widget: Extract<WidgetCoach, { jenis: 'angka' }>
       ) : null}
 
       {widget.keterangan ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           {widget.keterangan}
         </Text>
       ) : null}

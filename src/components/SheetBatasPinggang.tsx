@@ -211,7 +211,7 @@ export function SheetBatasPinggang({
                       ? `Sudah ${formatDesimal(Math.abs(sisa!))} cm di atas batas ini`
                       : `Sisa ${formatDesimal(sisa!)} cm sampai batas`}
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Pinggang terakhir Anda {formatDesimal(pinggangSekarangCm)} cm.
                   {sudahLewat
                     ? ' Menetapkan batas di bawah angka sekarang boleh saja — artinya sinyalnya aktif sejak hari ini.'
@@ -255,7 +255,7 @@ export function SheetBatasPinggang({
             </View>
 
             {/* Apa arti batas ini, supaya tidak terbaca sebagai target. */}
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               Batas ini bukan target dan bukan penilaian atas tubuh Anda — ia garis keputusan. Saat
               Lean Gain, sebagian kenaikan berat memang lemak; yang perlu diputuskan adalah berapa
               banyak yang masih bersedia Anda terima sebelum beralih ke Cut. Menetapkannya SEKARANG,
@@ -277,7 +277,7 @@ export function SheetBatasPinggang({
                 <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+                <Text style={{ ...typography.caption, color: colors.textFaint }}>
                   Angka Anda masih ada di layar ini. Coba lagi.
                 </Text>
               </View>

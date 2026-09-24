@@ -210,7 +210,7 @@ export default function CoachScreen() {
         {/* Disclaimer berdiri TETAP di kepala layar, bukan hanya muncul saat
             menolak: batas itu perlu diketahui sebelum pertanyaannya diketik,
             bukan sesudah pengguna telanjur mengetiknya. */}
-        <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint }}>
           {DISCLAIMER_COACH}
         </Text>
       </View>
@@ -239,7 +239,6 @@ export default function CoachScreen() {
                 ...typography.caption,
                 color: colors.textFaint,
                 textAlign: 'center',
-                lineHeight: 16,
               }}
             >
               Coach membaca log harian, tren berat, ukuran tubuh, dan budget mingguan Anda —

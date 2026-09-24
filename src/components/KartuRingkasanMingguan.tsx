@@ -61,7 +61,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
         ))}
       </View>
 
-      <Text style={{ ...typography.body, color: colors.text, lineHeight: 24 }}>
+      <Text style={{ ...typography.body, color: colors.text }}>
         {ringkasan.bacaan}
       </Text>
 

@@ -164,7 +164,7 @@ export default function LogHarianScreen() {
             <Text style={{ ...typography.title, color: colors.text }}>
               Target {dayType.nama} · {fase} belum diisi
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+            <Text style={{ ...typography.body, color: colors.textMuted }}>
               Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
               tetap tersimpan seperti biasa.
             </Text>

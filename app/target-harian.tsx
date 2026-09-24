@@ -454,7 +454,7 @@ export default function TargetHarianScreen() {
 
       <KerangkaSheet terbuka={konfirmasiKeluar} onTutup={() => setKonfirmasiKeluar(false)} label="Perubahan belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>Buang perubahan?</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted }}>
           {berubah.length === 1 ? 'Satu target' : `${berubah.length} target`} belum disimpan. Target yang berlaku tetap
           seperti sebelumnya.
         </Text>

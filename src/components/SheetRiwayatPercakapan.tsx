@@ -105,7 +105,6 @@ export function SheetRiwayatPercakapan({
                   color: colors.textFaint,
                   textAlign: 'center',
                   paddingVertical: spacing.xl,
-                  lineHeight: 16,
                 }}
               >
                 Belum ada percakapan tersimpan.

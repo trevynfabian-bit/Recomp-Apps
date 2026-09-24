@@ -185,7 +185,7 @@ export default function TrenScreen() {
               </Text>
             </View>
             {posisi.bawahKg !== null && posisi.atasKg !== null && kecukupan.cukupRataRata ? (
-              <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+              <Text style={{ ...typography.body, color: colors.textMuted }}>
                 Rentang hari ini {formatDesimal(posisi.bawahKg)}–{formatDesimal(posisi.atasKg)} kg;
                 rata-rata Anda {rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'} kg
                 {posisi.selisihKg !== null && posisi.selisihKg !== 0
@@ -193,13 +193,13 @@ export default function TrenScreen() {
                   : '.'}
               </Text>
             ) : (
-              <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+              <Text style={{ ...typography.body, color: colors.textMuted }}>
                 {faseBaruDimulai && jangkar
                   ? `Fase ${profil.fase_aktif} dimulai ${formatTanggalPanjang(jangkar.tanggal)}; posisinya terbaca mulai timbangan berikutnya.`
                   : 'Belum cukup data untuk menilai posisi terhadap koridor.'}
               </Text>
             )}
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               {jangkar && jangkar.beratKg !== null
                 ? `Koridor memakai laju ${persenLaju(profil.fase_aktif)} berat badan per minggu sejak fase dimulai (${formatTanggalPanjang(jangkar.tanggal)}, ${formatDesimal(jangkar.beratKg)} kg). Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.`
                 : `Koridor fase ${profil.fase_aktif} digambar setelah timbangan pertama di fase ini.`}
@@ -215,7 +215,7 @@ export default function TrenScreen() {
           <View style={{ gap: spacing.md }}>
             <LabelSinyalArah sinyal={sinyal} fase={profil.fase_aktif} />
             <CatatanKecukupan kecukupan={kecukupan} untuk="arah" />
-            <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+            <Text style={{ ...typography.caption, color: colors.textFaint }}>
               Dihitung dari rata-rata {JENDELA_HARI} hari dibanding rata-rata {JENDELA_HARI} hari
               sebelumnya — rata-rata lawan rata-rata, supaya satu hari yang aneh tidak
               mengubah kesimpulan.

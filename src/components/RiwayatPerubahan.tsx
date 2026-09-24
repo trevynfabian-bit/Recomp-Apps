@@ -156,7 +156,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
             ))}
           </View>
         ) : (
-          <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+          <Text style={{ ...typography.caption, color: colors.textFaint }}>
             Perubahan baru bisa dihitung setelah ada pencatatan kedua. Catat lagi pekan depan dan
             baris perbandingannya muncul di sini.
           </Text>

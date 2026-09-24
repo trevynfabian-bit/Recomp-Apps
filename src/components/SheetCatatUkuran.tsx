@@ -326,7 +326,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                   ? 'Pencatatan pertama'
                   : `${jumlahDiubah} dari ${FIELD.length} ukuran diubah`}
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 {dasar === null
                   ? 'Angka ini jadi titik nol Anda — pencatatan berikutnya dibandingkan dengannya.'
                   : mode === 'perbarui'
@@ -373,7 +373,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
               <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
                 Supaya angkanya bisa dibandingkan
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+              <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 Ukur pagi sebelum makan, otot rileks, meteran rata dan tidak menekan kulit.
                 Pinggang di ketinggian pusar, leher di bawah jakun, lengan di titik tertebal.
                 Yang paling menentukan bukan akurasinya, tapi memakai titik ukur yang SAMA tiap
@@ -577,7 +577,7 @@ function Keterangan({
   const warna =
     nada === 'amber' ? colors.amber : nada === 'coral' ? colors.aksenTeks.coral : colors.textFaint;
   return (
-    <Text style={{ ...typography.caption, color: warna, lineHeight: 16 }}>{children}</Text>
+    <Text style={{ ...typography.caption, color: warna }}>{children}</Text>
   );
 }
 
@@ -608,7 +608,7 @@ function Kotak({
       }}
     >
       <Text style={{ ...typography.label, color: teks }}>{judul}</Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>
+      <Text style={{ ...typography.caption, color: colors.textFaint }}>
         {children}
       </Text>
     </View>

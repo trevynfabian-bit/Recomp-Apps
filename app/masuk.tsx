@@ -91,7 +91,7 @@ export default function MasukScreen() {
           <Text accessibilityRole="header" style={{ ...typography.display, color: colors.text }}>
             Recomp Coach
           </Text>
-          <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
+          <Text style={{ ...typography.body, color: colors.textMuted }}>
             Masuk dengan akun yang sama dengan web.
           </Text>
         </View>
