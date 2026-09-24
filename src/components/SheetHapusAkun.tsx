@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { KerangkaSheet } from './KerangkaSheet';
 import { TombolBertepi, TombolUtama } from './Tombol';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
+import { Isian } from './Isian';
 
 type Props = {
   terbuka: boolean;
@@ -60,31 +61,15 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
 
       <TombolBertepi label="Ekspor data dulu" onPress={onEksporDulu} nonaktif={status === 'memproses'} />
 
-      <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.label, color: colors.teksRedup }}>
-          Ketik &ldquo;{KATA_KONFIRMASI_HAPUS}&rdquo; untuk melanjutkan
-        </Text>
-        <TextInput
-          value={ketik}
-          onChangeText={setKetik}
-          editable={status !== 'memproses'}
-          autoCapitalize="none"
-          autoCorrect={false}
-          accessibilityLabel={`Ketik ${KATA_KONFIRMASI_HAPUS} untuk melanjutkan`}
-          placeholder={KATA_KONFIRMASI_HAPUS}
-          placeholderTextColor={colors.teksSamar}
-          style={{
-            ...typography.body,
-            color: colors.teks,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.md,
-            borderRadius: radius.md,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            backgroundColor: colors.permukaanCekung,
-          }}
-        />
-      </View>
+      <Isian
+        label={`Ketik “${KATA_KONFIRMASI_HAPUS}” untuk melanjutkan`}
+        value={ketik}
+        onChangeText={setKetik}
+        nonaktif={status === 'memproses'}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder={KATA_KONFIRMASI_HAPUS}
+      />
 
       {status === 'gagal' ? (
         <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>

@@ -78,8 +78,15 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    pembulatan di satu tempat) menggantikan stepper di `KartuTimbangPagi` dan
    `SheetBatasPinggang`; `PemilihTanggal` (‹ tanggal ›, tombol di batas rentang
    nonaktif) menggantikan penggeser tanggal di `SheetCatatUkuran`. Pengecualian
-   ukuran huruf 52 pt kini hanya di `Pemilih.tsx`. Sisa: pindahkan `TextInput`
-   langsung.
+   ukuran huruf 52 pt kini hanya di `Pemilih.tsx`. Diterapkan: `InputAngka` dan
+   `InputTarget` kini pembungkus `Isian`; kolom di `masuk` (email, sandi dengan
+   tombol tampilkan sebagai `ekor`), `tambah-hasil-lab`, `SheetCatatFoto`,
+   `SheetHapusAkun`, `SheetHubungkanSumber` (kunci API), `SheetLengkapiProfil`
+   (tinggi), dan `KartuCatatan` (multibaris) memakai `Isian`; `gayaIsian` dan
+   `Isian` lokal di `masuk` dihapus. Sengaja tetap khusus (3): `InputChat`
+   (penyusun pesan dengan tombol kirim), `SheetImporRiwayat` (tempel CSV dalam
+   Menlo), dan baris ukuran ringkas di `SheetCatatUkuran` (tabel 7 ukuran
+   rata kanan dengan selisih).
 4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.
 5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
 

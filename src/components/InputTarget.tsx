@@ -1,5 +1,5 @@
-import { Text, TextInput, View } from 'react-native';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { View } from 'react-native';
+import { Isian } from './Isian';
 
 /**
  * Satu kolom angka pada form target (kalori, protein, lemak, batas sat fat).
@@ -31,34 +31,22 @@ export function InputTarget({
 }) {
   return (
     // Dua kolom per baris; lebar minimum menjaga label panjang tidak terpotong.
-    <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: 130, gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.teksRedup }}>{label}</Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.xs,
-          backgroundColor: colors.permukaanCekung,
-          borderRadius: radius.md,
-          borderWidth: ditandai ? 2 : 1,
-          borderColor: ditandai ? colors.status.bahaya.isian : colors.garisKontrol,
-          paddingHorizontal: spacing.md,
-        }}
-      >
-        <TextInput
-          value={nilai}
-          onChangeText={onUbah}
-          onBlur={onTinggalkan}
-          editable={!nonaktif}
-          keyboardType={unit === 'kcal' ? 'number-pad' : 'decimal-pad'}
-          inputMode={unit === 'kcal' ? 'numeric' : 'decimal'}
-          selectTextOnFocus
-          accessibilityLabel={aksesLabel}
-          accessibilityHint={ditandai ? 'Isian ini perlu diperbaiki; keterangannya di bawah kartu' : undefined}
-          style={{ ...typography.body, flex: 1, minWidth: 0, minHeight: TAP_MIN, color: colors.teks, paddingVertical: spacing.sm }}
-        />
-        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
-      </View>
+    <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: 130 }}>
+      <Isian
+        label={label}
+        unit={unit}
+        angka
+        value={nilai}
+        onChangeText={onUbah}
+        onBlur={onTinggalkan}
+        nonaktif={nonaktif}
+        ditandai={ditandai}
+        aksesLabel={aksesLabel}
+        accessibilityHint={ditandai ? 'Isian ini perlu diperbaiki; keterangannya di bawah kartu' : undefined}
+        keyboardType={unit === 'kcal' ? 'number-pad' : 'decimal-pad'}
+        inputMode={unit === 'kcal' ? 'numeric' : 'decimal'}
+        selectTextOnFocus
+      />
     </View>
   );
 }

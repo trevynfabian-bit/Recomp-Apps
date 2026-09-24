@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -13,12 +13,12 @@ import {
   TEMPLAT_PANEL_LAB,
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
-import { Card, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
+import { Card, Isian, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
+import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, typography, ukuranIkon } from '@/theme';
 
 type GalatLab = Extract<HasilPeriksaLab, { sah: false }>['galat'];
 
@@ -369,31 +369,18 @@ function Kolom({
   nonaktif: boolean;
 }) {
   return (
-    <View style={{ gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.teksRedup }}>{label}</Text>
-      <TextInput
-        value={nilai}
-        onChangeText={onUbah}
-        editable={!nonaktif}
-        placeholder={placeholder}
-        placeholderTextColor={colors.teksSamar}
-        keyboardType={keyboardType}
-        autoCorrect={false}
-        accessibilityLabel={aksesLabel ?? label}
-        accessibilityHint={galat}
-        style={{
-          ...typography.body,
-          color: colors.teks,
-          minHeight: TAP_MIN,
-          paddingHorizontal: spacing.md,
-          borderRadius: radius.md,
-          borderWidth: galat ? 2 : 1,
-          borderColor: galat ? colors.status.bahaya.isian : colors.garisKontrol,
-          backgroundColor: colors.permukaanCekung,
-        }}
-      />
-      {galat ? <TeksGalat teks={galat} /> : null}
-    </View>
+    <Isian
+      label={label}
+      aksesLabel={aksesLabel}
+      value={nilai}
+      onChangeText={onUbah}
+      nonaktif={nonaktif}
+      placeholder={placeholder}
+      keyboardType={keyboardType}
+      autoCorrect={false}
+      angka={keyboardType === 'decimal-pad'}
+      galat={galat}
+    />
   );
 }
 

@@ -68,6 +68,8 @@ export const ukuran = {
   tombolLangkah: 56,
   /** Lebar kolom angka besar di pemilih angka (cukup untuk "120,5"). */
   kolomAngka: 140,
+  /** Tinggi minimum kolom isian multibaris (catatan harian). */
+  isianPanjang: 96,
 } as const;
 
 /**

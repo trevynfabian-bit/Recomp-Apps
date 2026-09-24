@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { formatMakro } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
+import { Isian } from './Isian';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
 const TINGGI_MIN = 100;
@@ -113,48 +114,21 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
               Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
             </Text>
 
-            {/* Tinggi badan */}
-            <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.body, color: colors.teks }}>Tinggi badan</Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.sm,
-                  paddingHorizontal: spacing.lg,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: tinggi === '' || tinggiValid ? colors.garisKontrol : colors.status.bahaya.isian,
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
-                <TextInput
-                  value={tinggi}
-                  onChangeText={setTinggi}
-                  keyboardType="decimal-pad"
-                  inputMode="decimal"
-                  selectTextOnFocus
-                  // Sengaja tanpa placeholder angka: angka contoh di field kosong
-                  // terbaca seperti nilai yang sudah terisi, dan tinggi badan
-                  // adalah persis jenis data yang orang anggap sudah benar.
-                  accessibilityLabel="Tinggi badan dalam sentimeter"
-                  style={{
-                    ...typography.title,
-                    // Lebar eksplisit: tanpa ini input di web memakai lebar
-                    // bawaannya dan mendorong unit keluar baris.
-                    width: 96,
-                    paddingVertical: spacing.md,
-                    color: tinggi === '' || tinggiValid ? colors.teks : colors.status.bahaya.teks,
-                  }}
-                />
-                <Text style={{ ...typography.label, color: colors.teksSamar }}>cm</Text>
-              </View>
-              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                {tinggi !== '' && !tinggiValid
-                  ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.`
-                  : 'Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda.'}
-              </Text>
-            </View>
+            {/* Tinggi badan. Sengaja tanpa placeholder angka: angka contoh di
+                kolom kosong terbaca seperti nilai yang sudah terisi. */}
+            <Isian
+              label="Tinggi badan"
+              unit="cm"
+              angka
+              value={tinggi}
+              onChangeText={setTinggi}
+              keyboardType="decimal-pad"
+              inputMode="decimal"
+              selectTextOnFocus
+              aksesLabel="Tinggi badan dalam sentimeter"
+              galat={tinggi !== '' && !tinggiValid ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.` : null}
+              keterangan="Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda."
+            />
 
             {/* Jenis kelamin */}
             <View style={{ gap: spacing.sm }}>

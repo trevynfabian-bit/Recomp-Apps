@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { analisisFotoStub, type HasilAnalisisFoto } from '@/mocks/fotoAi';
 import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import type { FoodLog } from '@/types/domain';
+import { Isian } from './Isian';
 
 /** Entri makanan baru yang siap disimpan (tanpa id & relasi, diisi pemanggil). */
 export type EntriMakananBaru = Omit<FoodLog, 'id' | 'daily_log_id'>;
@@ -144,24 +135,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                   />
                 </View>
 
-                <View style={{ gap: spacing.xs }}>
-                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>Nama makanan</Text>
-                  <TextInput
-                    value={nama}
-                    onChangeText={setNama}
-                    accessibilityLabel="Nama makanan"
-                    style={{
-                      ...typography.body,
-                      color: colors.teks,
-                      backgroundColor: colors.permukaanCekung,
-                      borderRadius: radius.md,
-                      borderWidth: 1,
-                      borderColor: colors.garisKontrol,
-                      paddingHorizontal: spacing.md,
-                      paddingVertical: spacing.md,
-                    }}
-                  />
-                </View>
+                <Isian label="Nama makanan" value={nama} onChangeText={setNama} />
 
                 <View style={{ flexDirection: 'row', gap: spacing.md }}>
                   <InputAngka label="Kalori" unit="kcal" nilai={kalori} onUbah={setKalori} warna={colors.macroTeks.kalori} />

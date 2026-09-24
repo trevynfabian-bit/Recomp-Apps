@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { emailSah } from '@recomp/logika';
-import { TombolUtama } from '@/components';
+import { Isian, TombolIkon, TombolUtama } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { KesalahanAturUlang, KesalahanMasuk, useSesi } from '@/state/sesi';
 import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -116,71 +116,51 @@ export default function MasukScreen() {
         ) : null}
 
         <View style={{ gap: spacing.lg }}>
-          <Isian label="Email">
-            <TextInput
-              value={email}
-              onChangeText={(t) => {
-                setEmail(t);
-                setGalat(null);
-                setAturUlang('idle');
-              }}
-              editable={!memproses}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              textContentType="username"
-              keyboardType="email-address"
-              returnKeyType="next"
-              onSubmitEditing={() => refSandi.current?.focus()}
-              accessibilityLabel="Email"
-              placeholder="nama@contoh.id"
-              placeholderTextColor={colors.teksSamar}
-              style={gayaIsian}
-            />
-          </Isian>
+          <Isian
+            label="Email"
+            value={email}
+            onChangeText={(t) => {
+              setEmail(t);
+              setGalat(null);
+              setAturUlang('idle');
+            }}
+            nonaktif={memproses}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="username"
+            keyboardType="email-address"
+            returnKeyType="next"
+            onSubmitEditing={() => refSandi.current?.focus()}
+            placeholder="nama@contoh.id"
+          />
 
-          <Isian label="Kata sandi">
-            <View style={{ justifyContent: 'center' }}>
-              <TextInput
-                ref={refSandi}
-                autoFocus={Boolean(pemulihan.email)}
-                value={sandi}
-                onChangeText={(t) => {
-                  setSandi(t);
-                  setGalat(null);
-                }}
-                editable={!memproses}
-                secureTextEntry={!tampilSandi}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="password"
-                textContentType="password"
-                returnKeyType="go"
-                onSubmitEditing={() => void kirim()}
-                accessibilityLabel="Kata sandi"
-                style={{ ...gayaIsian, paddingRight: TAP_MIN + spacing.xs }}
+          <Isian
+            ref={refSandi}
+            label="Kata sandi"
+            autoFocus={Boolean(pemulihan.email)}
+            value={sandi}
+            onChangeText={(t) => {
+              setSandi(t);
+              setGalat(null);
+            }}
+            nonaktif={memproses}
+            secureTextEntry={!tampilSandi}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="password"
+            textContentType="password"
+            returnKeyType="go"
+            onSubmitEditing={() => void kirim()}
+            ekor={
+              <TombolIkon
+                bentuk="polos"
+                ikon={tampilSandi ? 'eye-off-outline' : 'eye-outline'}
+                aksesLabel={tampilSandi ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                onPress={() => setTampilSandi((t) => !t)}
               />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={tampilSandi ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-                onPress={() => {
-                  ketukRingan();
-                  setTampilSandi((t) => !t);
-                }}
-                hitSlop={4}
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  width: TAP_MIN,
-                  height: TAP_MIN,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name={tampilSandi ? 'eye-off-outline' : 'eye-outline'} size={ukuranIkon.sedang} color={colors.teksRedup} />
-              </Pressable>
-            </View>
-          </Isian>
+            }
+          />
 
           {galat ? (
             <View
@@ -248,29 +228,3 @@ export default function MasukScreen() {
   );
 }
 
-function Isian({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <View style={{ gap: spacing.xs }}>
-      <Text style={{ ...typography.label, color: colors.teksRedup }}>{label}</Text>
-      {children}
-    </View>
-  );
-}
-
-const gayaIsian = {
-  ...typography.body,
-  get color() {
-    return colors.teks;
-  },
-  minHeight: TAP_MIN,
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.md,
-  borderRadius: radius.md,
-  borderWidth: 1,
-  get borderColor() {
-    return colors.garisKontrol;
-  },
-  get backgroundColor() {
-    return colors.permukaanCekung;
-  },
-} as const;

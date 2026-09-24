@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TextInput, View, type TextInputProps } from 'react-native';
-import { angkaTabular, colors, radius, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
+import { angkaTabular, colors, radius, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
 
 type Props = Omit<TextInputProps, 'style' | 'editable' | 'placeholderTextColor'> & {
   /** Label di atas kolom; juga label pembaca layar bila `aksesLabel` kosong. */
@@ -96,7 +96,8 @@ export function Isian({
             ...(angka ? angkaTabular : null),
             flex: 1,
             minWidth: 0,
-            minHeight: TAP_MIN,
+            minHeight: inputProps.multiline ? ukuran.isianPanjang : TAP_MIN,
+            textAlignVertical: inputProps.multiline ? 'top' : 'center',
             color: colors.teks,
             paddingVertical: spacing.sm,
             // Fokus sudah ditandai tepi aksen kolom; garis fokus bawaan browser

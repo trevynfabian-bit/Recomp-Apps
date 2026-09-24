@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { pesanGagalHubungkan, PROFIL_SUMBER, samarkanKunci, validasiKunciHevy } from '@recomp/logika';
 import type { HasilHubungkan, SumberData } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
+import { Isian } from './Isian';
 
 type Langkah =
   | { jenis: 'penjelasan' }
@@ -131,52 +132,32 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
           </Text>
 
           {profil.otorisasi === 'kunci_api' ? (
-            <View style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-                <TextInput
-                  value={kunci}
-                  onChangeText={(t) => {
-                    setKunci(t);
-                    if (galatKunci) setGalatKunci(null);
-                  }}
-                  placeholder="Tempel kunci API Hevy"
-                  placeholderTextColor={colors.teksSamar}
-                  accessibilityLabel="Kunci API Hevy"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  spellCheck={false}
-                  secureTextEntry={!tampilkanKunci}
-                  textContentType="none"
-                  onSubmitEditing={mulai}
-                  style={{
-                    flex: 1,
-                    minHeight: TAP_MIN,
-                    paddingHorizontal: spacing.md,
-                    borderRadius: radius.md,
-                    borderWidth: 1,
-                    borderColor: galatKunci ? colors.status.bahaya.isian : colors.garisKontrol,
-                    backgroundColor: colors.permukaanCekung,
-                    color: colors.teks,
-                    ...typography.body,
-                  }}
-                />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={tampilkanKunci ? 'Sembunyikan kunci' : 'Tampilkan kunci'}
+            <Isian
+              label="Kunci API Hevy"
+              value={kunci}
+              onChangeText={(t) => {
+                setKunci(t);
+                if (galatKunci) setGalatKunci(null);
+              }}
+              placeholder="Tempel kunci API Hevy"
+              autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
+              secureTextEntry={!tampilkanKunci}
+              textContentType="none"
+              onSubmitEditing={mulai}
+              galat={galatKunci}
+              ekor={
+                <Tombol
+                  varian="teks"
+                  nada="netral"
+                  ukuran="kecil"
+                  label={tampilkanKunci ? 'Sembunyikan' : 'Tampilkan'}
+                  aksesLabel={tampilkanKunci ? 'Sembunyikan kunci' : 'Tampilkan kunci'}
                   onPress={() => setTampilkanKunci((v) => !v)}
-                  style={{ minHeight: TAP_MIN, minWidth: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <Text style={{ ...typography.label, color: colors.teksRedup }}>
-                    {tampilkanKunci ? 'Sembunyikan' : 'Tampilkan'}
-                  </Text>
-                </Pressable>
-              </View>
-              {galatKunci ? (
-                <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-                  {galatKunci}
-                </Text>
-              ) : null}
-            </View>
+                />
+              }
+            />
           ) : null}
 
           <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>

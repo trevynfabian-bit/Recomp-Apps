@@ -4,6 +4,7 @@ import { Card } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import { Tombol } from './Tombol';
+import { Isian } from './Isian';
 
 /** Batas panjang catatan; cukup untuk konteks sehari, tidak untuk jurnal. */
 const MAKS_KARAKTER = 500;
@@ -87,34 +88,17 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
   return (
     <Card>
       <View style={{ gap: spacing.md }}>
-        <TextInput
+        <Isian
           ref={inputRef}
+          label="Catatan hari ini"
           value={draf}
           onChangeText={setDraf}
           multiline
           autoFocus
           maxLength={MAKS_KARAKTER}
           placeholder="Tidur, energi, cedera, atau apa pun yang menjelaskan angka hari ini…"
-          placeholderTextColor={colors.teksSamar}
-          accessibilityLabel="Catatan hari ini"
-          style={{
-            ...typography.body,
-            color: colors.teks,
-            minHeight: 96,
-            textAlignVertical: 'top',
-            backgroundColor: colors.permukaanCekung,
-            borderRadius: radius.md,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            padding: spacing.md,
-          }}
+          galat={galat}
         />
-
-        {galat ? (
-          <Text style={{ ...typography.caption, color: colors.status.bahaya.teks }}>
-            {galat}
-          </Text>
-        ) : null}
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>
