@@ -39,6 +39,8 @@ export { PemilihTipeHari } from './PemilihTipeHari';
 export { PemilihAngka, PemilihTanggal, uraiAngka } from './Pemilih';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
+export { PilihanSegmen, type OpsiSegmen } from './PilihanSegmen';
+export { Sisipan } from './Sisipan';
 export { Placeholder } from './Placeholder';
 export { PratinjauWidget } from './PratinjauWidget';
 export { RiwayatPerubahan } from './RiwayatPerubahan';

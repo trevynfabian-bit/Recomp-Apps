@@ -252,7 +252,15 @@ console.log('\nPerlindungan sesi');
 const tataLetak = readFileSync('app/_layout.tsx', 'utf8');
 const blok = (guard) => {
   const m = tataLetak.match(new RegExp(`<Stack\\.Protected guard=\\{${guard}\\}>([\\s\\S]*?)</Stack\\.Protected>`));
-  return m ? [...m[1].matchAll(/<Stack\.Screen name="([^"]+)"/g)].map((x) => x[1]) : null;
+  if (!m) return null;
+  const nama = [...m[1].matchAll(/<Stack\.Screen name="([^"]+)"/g)].map((x) => x[1]);
+  // Layar tumpukan dibuat dari tabel `RUTE_TUMPUKAN` (nama + jenis transisi)
+  // yang di-map DI DALAM blok ini; namanya dibaca dari tabel itu.
+  if (/RUTE_TUMPUKAN\.map\(/.test(m[1])) {
+    const tabel = tataLetak.match(/const RUTE_TUMPUKAN[^=]*= \[([\s\S]*?)\n\];/);
+    if (tabel) nama.push(...[...tabel[1].matchAll(/nama: '([^']+)'/g)].map((x) => x[1]));
+  }
+  return nama;
 };
 const terlindung = blok('sudahMasuk');
 const tamu = blok('!sudahMasuk');

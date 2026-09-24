@@ -21,6 +21,7 @@ import {
   Card,
   DaftarBaris,
   HeaderLayar,
+  PilihanSegmen,
   SectionHeader,
   SheetBatasPinggang,
   SheetEksporData,
@@ -197,7 +198,7 @@ export default function PengaturanScreen() {
               </Text>
             </View>
           </View>
-          <PilihSegmen opsi={SATUAN} aksesAwalan="Satuan" terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
+          <PilihanSegmen opsi={SATUAN} aksesAwalan="Satuan" terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
           <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Contoh: berat {formatDesimal(tampilkanBerat(contohBeratKg, profil.satuan), 1)} {labelBerat(profil.satuan)}
             {profil.tinggi_cm !== null ? ` · tinggi ${panjang(profil.tinggi_cm)}` : ''}
@@ -213,7 +214,7 @@ export default function PengaturanScreen() {
               </Text>
             </View>
           </View>
-          <PilihSegmen opsi={TAMPILAN} aksesAwalan="Tampilan" terpilih={tampilan.pilihan} onPilih={tampilan.pilih} />
+          <PilihanSegmen opsi={TAMPILAN} aksesAwalan="Tampilan" terpilih={tampilan.pilihan} onPilih={tampilan.pilih} />
           <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {tampilan.pilihan === 'sistem'
               ? `Mengikuti setelan HP: sekarang ${skema === 'gelap' ? 'gelap' : 'terang'}.`
@@ -399,61 +400,6 @@ const TAMPILAN: { nilai: PilihanTampilan; label: string }[] = [
   { nilai: 'gelap', label: 'Gelap' },
 ];
 
-/** Kontrol segmen: satu pilihan dari beberapa, dibaca pembaca layar sebagai grup radio. */
-function PilihSegmen<T extends string>({
-  opsi,
-  terpilih,
-  onPilih,
-  aksesAwalan,
-}: {
-  opsi: { nilai: T; label: string }[];
-  terpilih: T;
-  onPilih: (nilai: T) => void;
-  /** Awalan label aksesibilitas, mis. "Satuan" → "Satuan kg · cm". */
-  aksesAwalan: string;
-}) {
-  return (
-    <View
-      accessibilityRole="radiogroup"
-      style={{
-        flexDirection: 'row',
-        padding: ukuran.sisipanSegmen,
-        borderRadius: radius.pill,
-        backgroundColor: colors.permukaanCekung,
-      }}
-    >
-      {opsi.map((s) => {
-        const aktif = s.nilai === terpilih;
-        return (
-          <Pressable
-            key={s.nilai}
-            hitSlop={{ top: sisaSentuh(KONTROL_SEGMEN), bottom: sisaSentuh(KONTROL_SEGMEN) }}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: aktif }}
-            accessibilityLabel={`${aksesAwalan} ${s.label}`}
-            onPress={() => {
-              if (aktif) return;
-              ketukRingan();
-              onPilih(s.nilai);
-            }}
-            style={{
-              flex: 1,
-              minHeight: KONTROL_SEGMEN,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: radius.pill,
-              backgroundColor: aktif ? colors.permukaan : 'transparent',
-              borderWidth: aktif ? 1 : 0,
-              borderColor: colors.garisKontrol,
-            }}
-          >
-            <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>{s.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 function BarisPengaturan({
   ikon,
