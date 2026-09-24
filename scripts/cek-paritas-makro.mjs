@@ -7,8 +7,9 @@
  * bisa menjalankan paket TS. Dua tempat berarti dua aturan yang bisa
  * menyimpang diam-diam — skrip ini yang menahannya.
  *
- * Caranya: satu daftar kasus uji dijalankan lewat fungsi SQL dan lewat
- * `hitungMakro` dari src/lib/makro.ts, lalu hasilnya dibandingkan.
+ * Caranya: kasus uji dijalankan lewat fungsi SQL ASLI dari migrasi (atas
+ * baris sungguhan, bukan salinan aturannya) dan lewat fungsi @recomp/logika,
+ * lalu hasilnya dibandingkan.
  */
 import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -22,18 +23,6 @@ const PGROOT = process.env.PGROOT ?? '/var/tmp/recomp-paritas';
 const PGBIN = process.env.PGBIN ?? '/usr/lib/postgresql/16/bin';
 const PORT = process.env.PORT ?? '55433';
 
-/** Kasus uji: batas bawah, batas atas, persis sama, pecahan, dan nol. */
-const KASUS = [
-  { label: 'di bawah target', terpakai: 1980, target: 2850, isBatas: false },
-  { label: 'persis di target', terpakai: 2850, target: 2850, isBatas: false },
-  { label: 'melewati target', terpakai: 3100, target: 2850, isBatas: false },
-  { label: 'belum makan', terpakai: 0, target: 2850, isBatas: false },
-  { label: 'protein pecahan', terpakai: 128.5, target: 180, isBatas: false },
-  { label: 'sat fat di bawah batas', terpakai: 17, target: 25, isBatas: true },
-  { label: 'sat fat persis di batas', terpakai: 25, target: 25, isBatas: true },
-  { label: 'sat fat melewati batas', terpakai: 29, target: 25, isBatas: true },
-  { label: 'sat fat pecahan lewat', terpakai: 25.1, target: 25, isBatas: true },
-];
 
 /** `diam`: galat yang MEMANG diharapkan (penolakan) tidak dicetak ke stderr. */
 function sql(query, { diam = false } = {}) {
@@ -166,61 +155,76 @@ function pasangSkema() {
 
 mulaiPostgres();
 try {
-  // Aturan SQL-nya disalin apa adanya dari migrasi ringkasan_sisa_harian.
-  const nilai = KASUS.map(
-    (k) => `(${k.terpakai}::numeric, ${k.target}::numeric, ${k.isBatas})`,
-  ).join(',');
-  const keluaran = sql(`
-    select string_agg(
-      (target - terpakai)::text || '|' ||
-      (case when is_batas then (terpakai > target) else (terpakai > target) end)::text,
-      E'\\n' order by urutan)
-    from (
-      select row_number() over () as urutan, *
-      from (values ${nilai}) as t(terpakai, target, is_batas)
-    ) s;`);
+  // Skema lengkap (harness + semua migrasi) dipasang sekali di awal.
+  pasangSkema();
 
-  const barisSql = keluaran.split('\n').map((b) => {
-    const [sisa, terlampaui] = b.split('|');
-    return { sisa: Number(sisa), terlampaui: terlampaui === 'true' };
-  });
-
+  // Fungsi ASLI `ringkasan_sisa_harian` atas baris sungguhan, bukan salinan
+  // aturannya: perubahan di migrasi langsung tertangkap di sini. Satu tanggal
+  // per kasus; tiap tanggal membawa terpakai & target keempat makro.
   const { hitungMakro } = muatLogikaTs();
+  const UID_MAKRO = '99999999-1111-1111-1111-999999999998';
+  const KALORI = [[0, 2850], [1980, 2850], [2849, 2850], [2850, 2850], [2851, 2850], [3100, 2850]];
+  const PROTEIN = [[0, 180], [128.5, 180], [179.9, 180], [180, 180], [180.1, 180], [250, 180]];
+  const LEMAK = [[0, 75], [70.4, 75], [75, 75], [75.1, 75]];
+  const SAT_FAT = [[0, 22], [21.9, 22], [22, 22], [22.1, 22], [30, 25]];
+  const HARI = Array.from({ length: 24 }, (_, i) => ({
+    tanggal: new Date(Date.UTC(2026, 6, 1 + i)).toISOString().slice(0, 10),
+    kalori: KALORI[i % KALORI.length],
+    protein: PROTEIN[i % PROTEIN.length],
+    lemak: LEMAK[i % LEMAK.length],
+    satFat: SAT_FAT[i % SAT_FAT.length],
+  }));
+  sql(`insert into auth.users (id, email) values ('${UID_MAKRO}', 'paritas-makro@contoh.test');`);
+  sql(`set request.jwt.claim.sub = '${UID_MAKRO}';
+    do $$ declare v_rest uuid := (select id from public.day_types where user_id = '${UID_MAKRO}' and nama = 'Rest'); begin
+    ${HARI.map((h) => `perform public.setel_tipe_hari(date '${h.tanggal}', v_rest);
+      update public.daily_logs set kalori = ${h.kalori[0]}, protein_g = ${h.protein[0]}, lemak_g = ${h.lemak[0]}, sat_fat_g = ${h.satFat[0]},
+        target_kalori = ${h.kalori[1]}, target_protein_g = ${h.protein[1]}, target_lemak_g = ${h.lemak[1]}, batas_sat_fat_g = ${h.satFat[1]}
+       where user_id = '${UID_MAKRO}' and tanggal = date '${h.tanggal}';`).join('\n')}
+    end $$;`);
+  const dariSql = JSON.parse(sql(`set request.jwt.claim.sub = '${UID_MAKRO}';
+    select json_agg(json_build_object('tanggal', d, 'r', (select row_to_json(x) from public.ringkasan_sisa_harian(d) x)) order by d)
+      from unnest(array[${HARI.map((h) => `date '${h.tanggal}'`).join(', ')}]) d;`).split('\n').pop());
 
+  const MAKRO = [
+    ['kalori', 'kalori', 'sisa_kalori', 'kalori_terlampaui', 'kcal', false],
+    ['protein', 'protein', 'sisa_protein_g', null, 'g', false],
+    ['lemak', 'lemak', 'sisa_lemak_g', null, 'g', false],
+    ['satFat', 'satFat', 'sisa_sat_fat_g', 'sat_fat_terlampaui', 'g', true],
+  ];
   let gagal = 0;
-  console.log('kasus                          SQL sisa   TS sisa   SQL lewat  TS lewat');
-  console.log('─'.repeat(76));
-  KASUS.forEach((k, i) => {
-    const macro = {
-      key: k.isBatas ? 'satFat' : 'kalori',
-      label: k.label,
-      terpakai: k.terpakai,
-      target: k.target,
-      unit: k.isBatas ? 'g' : 'kcal',
-      isBatas: k.isBatas,
-    };
-    const ts = hitungMakro(macro, 'sisa');
-    // `hitungMakro` memutlakkan angkanya; tandanya dibawa `terlampaui`.
-    const tsSisa = ts.terlampaui ? -ts.nilaiUtama : ts.nilaiUtama;
-    const s = barisSql[i];
-    const cocok = Math.abs(tsSisa - s.sisa) < 1e-9 && ts.terlampaui === s.terlampaui;
-    if (!cocok) gagal += 1;
-    console.log(
-      `${cocok ? '✓' : '✗'} ${k.label.padEnd(28)} ${String(s.sisa).padStart(8)}  ${String(tsSisa).padStart(8)}` +
-        `  ${String(s.terlampaui).padStart(9)}  ${String(ts.terlampaui).padStart(8)}`,
-    );
+  let nKasus = 0;
+  console.log('tanggal     makro    terpakai  target   SQL sisa  TS sisa   SQL lewat  TS lewat');
+  console.log('─'.repeat(82));
+  HARI.forEach((h, i) => {
+    const r = dariSql[i].r;
+    for (const [kunci, prop, kolomSisa, kolomLewat, unit, isBatas] of MAKRO) {
+      const [terpakai, target] = h[prop];
+      const ts = hitungMakro({ key: kunci, label: kunci, terpakai, target, unit, isBatas }, 'sisa');
+      // `hitungMakro` memutlakkan angkanya; tandanya dibawa `terlampaui`.
+      const tsSisa = ts.terlampaui ? -ts.nilaiUtama : ts.nilaiUtama;
+      const sqlSisa = Number(r[kolomSisa]);
+      const sqlLewat = kolomLewat ? r[kolomLewat] : sqlSisa < 0;
+      const cocok = Math.abs(tsSisa - sqlSisa) < 1e-9 && ts.terlampaui === sqlLewat;
+      nKasus += 1;
+      if (!cocok) gagal += 1;
+      if (!cocok || i < 6) {
+        console.log(`${cocok ? '✓' : '✗'} ${h.tanggal}  ${kunci.padEnd(7)} ${String(terpakai).padStart(8)}  ${String(target).padStart(6)}` +
+          `  ${String(sqlSisa).padStart(8)}  ${String(tsSisa).padStart(7)}  ${String(sqlLewat).padStart(9)}  ${String(ts.terlampaui).padStart(8)}`);
+      }
+    }
   });
+  sql(`delete from auth.users where id = '${UID_MAKRO}';`);
 
   console.log();
   if (gagal > 0) {
-    console.error(`✗ ${gagal} kasus BERBEDA antara SQL dan TypeScript (aturan sisa).`);
+    console.error(`✗ ${gagal} dari ${nKasus} kasus BERBEDA antara ringkasan_sisa_harian dan hitungMakro.`);
     process.exit(1);
   }
-  console.log(`✓ ${KASUS.length} kasus cocok — aturan sisa di SQL dan TypeScript sejalan.`);
+  console.log(`✓ ${nKasus} kasus cocok (${HARI.length} hari × 4 makro) — ringkasan_sisa_harian (fungsi asli) dan hitungMakro sejalan.`);
 
   // === Bagian 2: aturan deteksi tipe hari ==================================
   console.log();
-  pasangSkema();
 
   const UID = '99999999-9999-9999-9999-999999999999';
   sql(`insert into auth.users (id, email) values ('${UID}', 'paritas@contoh.test');`);

@@ -60,7 +60,7 @@ const PASANGAN: PasanganParitas[] = [
     aturan: 'Sisa & kelebihan makro harian',
     ts: 'hitungMakro',
     sql: 'ringkasan_sisa_harian',
-    kasus: 9,
+    kasus: 96,
     keadaan: 'sama',
   },
   {
