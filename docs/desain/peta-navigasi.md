@@ -94,3 +94,16 @@ Temuan N1–N7 menjadi bahan task berikutnya di fitur ini.
 Diwujudkan sebagai data di `app/(tabs)/_layout.tsx` (`TAB`). `cek:desain`
 menjaga jumlah tab 1–5 dan bahwa judul setiap layar tab diawali label tabnya
 (sehingga "Setelan" vs "Pengaturan" tidak bisa terulang tanpa ketahuan).
+
+## 5. Tab bar
+
+- **Ikon terisi untuk tab terpilih, garis untuk yang lain** (N4): tab terpilih
+  terbaca dari bentuk, bukan dari warna saja. `TAB[].ikon` menyimpan nama dasar
+  Ionicons; tab bar menambah `-outline` untuk tab yang tidak terpilih.
+- **Set ikon:** Hari Ini `today` (kalender), Tren `analytics` (garis tren
+  bertitik; `trending-up` diganti karena versi terisi dan garisnya identik),
+  Budget `wallet`, Coach `sparkles`, Setelan `settings` (roda gigi, glyph
+  setelan yang dikenali; `options` diganti).
+- Warna: terpilih `aksen.teks`, lainnya `teksSamar`; latar `latar`, garis atas
+  `garis`. Ukuran ikon dari tab bar (ukuran sistem), label `caption` tanpa
+  tracking.

@@ -7,7 +7,12 @@ type Tab = {
   rute: string;
   /** Label tab: judul layarnya atau bentuk pendeknya ("Tren" untuk "Tren berat"). */
   judul: string;
-  ikon: React.ComponentProps<typeof Ionicons>['name'];
+  /**
+   * Nama ikon Ionicons TANPA akhiran: tab terpilih memakai glyph terisi
+   * (`today`), tab lain garis (`today-outline`). Terpilih jadi terbaca dari
+   * bentuk, bukan dari warna saja (HIG: Tab bars).
+   */
+  ikon: 'today' | 'analytics' | 'wallet' | 'sparkles' | 'settings';
 };
 
 /**
@@ -20,11 +25,11 @@ type Tab = {
  * supaya satu tempat punya satu nama (dijaga `cek:desain`).
  */
 export const TAB: Tab[] = [
-  { rute: 'index', judul: 'Hari Ini', ikon: 'today-outline' },
-  { rute: 'tren', judul: 'Tren', ikon: 'trending-up-outline' },
-  { rute: 'budget', judul: 'Budget', ikon: 'wallet-outline' },
-  { rute: 'coach', judul: 'Coach', ikon: 'sparkles-outline' },
-  { rute: 'pengaturan', judul: 'Setelan', ikon: 'options-outline' },
+  { rute: 'index', judul: 'Hari Ini', ikon: 'today' },
+  { rute: 'tren', judul: 'Tren', ikon: 'analytics' },
+  { rute: 'budget', judul: 'Budget', ikon: 'wallet' },
+  { rute: 'coach', judul: 'Coach', ikon: 'sparkles' },
+  { rute: 'pengaturan', judul: 'Setelan', ikon: 'settings' },
 ];
 
 /** Tab bar utama. */
@@ -49,7 +54,9 @@ export default function TabsLayout() {
           name={t.rute}
           options={{
             title: t.judul,
-            tabBarIcon: ({ color, size }) => <Ionicons name={t.ikon} size={size} color={color} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons name={focused ? t.ikon : `${t.ikon}-outline`} size={size} color={color} />
+            ),
           }}
         />
       ))}
