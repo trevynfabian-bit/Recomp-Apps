@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useColorScheme, View, type ColorSchemeName } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, terapkanSkema, type Skema } from './colors';
@@ -58,22 +58,32 @@ export function skemaDariSistem(sistem: ColorSchemeName | 'unspecified' | undefi
 export function PenyediaSkema({ children }: { children: React.ReactNode }) {
   const sistem = useColorScheme();
   const [pilihan, setPilihan] = useState<PilihanTampilan>('sistem');
+  // Sampai pilihan tersimpan terbaca, app belum digambar: tanpa ini pengguna
+  // yang memaksa terang melihat kilasan gelap lalu navigator dipasang ulang.
+  const [siap, setSiap] = useState(false);
+  // Pilihan yang dibuat SEBELUM bacaan selesai menang atas nilai tersimpan.
+  const sudahMemilih = useRef(false);
 
   useEffect(() => {
     let batal = false;
     AsyncStorage.getItem(KUNCI_PILIHAN)
       .then((nilai) => {
         const p = pilihanSah(nilai);
-        if (!batal && p) setPilihan(p);
+        if (!batal && p && !sudahMemilih.current) setPilihan(p);
       })
-      .catch(() => undefined); // gagal membaca = ikuti sistem
+      .catch(() => undefined) // gagal membaca = ikuti sistem
+      .finally(() => {
+        if (!batal) setSiap(true);
+      });
     return () => {
       batal = true;
     };
   }, []);
 
   const pilih = useCallback((p: PilihanTampilan) => {
+    sudahMemilih.current = true;
     setPilihan(p);
+    // Gagal menyimpan tidak menggagalkan pilihan: berlaku sampai app ditutup.
     void AsyncStorage.setItem(KUNCI_PILIHAN, p).catch(() => undefined);
   }, []);
 
@@ -85,7 +95,7 @@ export function PenyediaSkema({ children }: { children: React.ReactNode }) {
     <KonteksSkema.Provider value={{ skema, pilihan, pilih }}>
       {/* Latar akar: terlihat sekejap saat navigator dipasang ulang dan di balik
           layar yang belum selesai digambar, jadi ikut skema juga. */}
-      <View style={{ flex: 1, backgroundColor: colors.latar }}>{children}</View>
+      <View style={{ flex: 1, backgroundColor: colors.latar }}>{siap ? children : null}</View>
     </KonteksSkema.Provider>
   );
 }

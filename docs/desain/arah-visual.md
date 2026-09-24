@@ -218,6 +218,10 @@ diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
   di luar cadangan per akun, jadi tidak hilang saat keluar) lewat
   `usePilihanTampilan()`. Skema yang berlaku = `skemaBerlakuDari(pilihan,
   sistem)`. Kontrol segmennya sama dengan pemilih satuan (`PilihSegmen`).
+  App baru digambar setelah pilihan tersimpan terbaca, supaya pengguna yang
+  memaksa terang tidak melihat kilasan gelap dan navigator tidak dipasang ulang
+  saat app dibuka. Pilihan yang dibuat sebelum bacaan selesai menang atas nilai
+  tersimpan; gagal menyimpan tidak membatalkan pilihan untuk sesi itu.
 
 **Angka hero di mode terang (Fase 3).** Amber teks kecil `#8A5A00` terlihat
 cokelat pada ukuran 64 px. Karena hero adalah teks besar (ambang 3:1), peran
