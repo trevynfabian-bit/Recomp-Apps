@@ -44,6 +44,7 @@ export default function MasukScreen() {
   // Galat format email baru tampil setelah kolomnya ditinggalkan: tombol Masuk
   // yang nonaktif tanpa alasan membuat orang menebak apa yang salah.
   const [emailDitinggalkan, setEmailDitinggalkan] = useState(false);
+  const [kredensialSalah, setKredensialSalah] = useState(false);
   const galatEmail =
     emailDitinggalkan && email.trim().length > 0 && !emailSah(email)
       ? 'Format email belum benar, mis. nama@contoh.id.'
@@ -59,7 +60,13 @@ export default function MasukScreen() {
       await masuk(email.trim(), sandi);
     } catch (e) {
       setGalat(e instanceof KesalahanMasuk ? e.message : 'Belum bisa masuk. Coba lagi sebentar lagi.');
+      // Kredensial salah: kedua kolom ditandai (pesannya sengaja tidak menyebut
+      // yang mana, supaya tidak membocorkan apakah email itu terdaftar), dan
+      // sandi dipilih untuk diketik ulang.
+      setKredensialSalah(e instanceof KesalahanMasuk && e.kode === 'kredensial');
       setMemproses(false);
+      // Setelah kolom aktif lagi (selama memproses ia nonaktif dan menolak fokus).
+      if (e instanceof KesalahanMasuk && e.kode === 'kredensial') setTimeout(() => refSandi.current?.focus(), 50);
     }
   }
 
@@ -129,12 +136,14 @@ export default function MasukScreen() {
             onChangeText={(t) => {
               setEmail(t);
               setGalat(null);
+              setKredensialSalah(false);
               setAturUlang('idle');
               // Mengetik ulang menghapus galat format sampai kolomnya ditinggalkan lagi.
               if (emailDitinggalkan && emailSah(t)) setEmailDitinggalkan(false);
             }}
             onBlur={() => setEmailDitinggalkan(true)}
             galat={galatEmail}
+            ditandai={kredensialSalah}
             nonaktif={memproses}
             autoCapitalize="none"
             autoCorrect={false}
@@ -154,9 +163,12 @@ export default function MasukScreen() {
             onChangeText={(t) => {
               setSandi(t);
               setGalat(null);
+              setKredensialSalah(false);
             }}
             nonaktif={memproses}
             secureTextEntry={!tampilSandi}
+            ditandai={kredensialSalah}
+            selectTextOnFocus
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="password"
