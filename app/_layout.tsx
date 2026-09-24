@@ -9,6 +9,7 @@ import { PenyediaEkspor } from '@/state/ekspor';
 import { PenyediaHariIni } from '@/state/hariIni';
 import { PenyediaHasilLab } from '@/state/hasilLab';
 import { PenyediaProfil } from '@/state/profil';
+import { PenyediaRedistribusi } from '@/state/redistribusi';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
 import { PenyediaTarget } from '@/state/target';
@@ -93,37 +94,39 @@ function TumpukanAkar() {
   return (
     <PenyediaProfil key={pengguna?.id ?? 'tamu'}>
       <PenyediaTarget>
-        <PenyediaHariIni>
-          <PenyediaHasilLab>
-            <PenyediaEkspor>
-              <PenyediaSinkron>
-                <StatusBar style={skema === 'gelap' ? 'light' : 'dark'} />
-                {/* key: layar yang sudah terpasang membaca palet baru (lihat PenyediaSkema). */}
-                <Stack
-                  key={skema}
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: colors.latar },
-                  }}
-                >
-                  <Stack.Protected guard={sudahMasuk}>
-                    <Stack.Screen name="(tabs)" />
-                    {RUTE_TUMPUKAN.map((r) => (
-                      <Stack.Screen key={r.nama} name={r.nama} options={OPSI_TRANSISI[r.jenis]} />
-                    ))}
-                  </Stack.Protected>
-                  <Stack.Protected guard={!sudahMasuk}>
-                    <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
-                  </Stack.Protected>
-                </Stack>
-                {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
-                {sudahMasuk ? <BannerDataMasuk /> : null}
-                {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
-                {sudahMasuk ? <BannerEksporSiap /> : null}
-              </PenyediaSinkron>
-            </PenyediaEkspor>
-          </PenyediaHasilLab>
-        </PenyediaHariIni>
+        <PenyediaRedistribusi>
+          <PenyediaHariIni>
+            <PenyediaHasilLab>
+              <PenyediaEkspor>
+                <PenyediaSinkron>
+                  <StatusBar style={skema === 'gelap' ? 'light' : 'dark'} />
+                  {/* key: layar yang sudah terpasang membaca palet baru (lihat PenyediaSkema). */}
+                  <Stack
+                    key={skema}
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.latar },
+                    }}
+                  >
+                    <Stack.Protected guard={sudahMasuk}>
+                      <Stack.Screen name="(tabs)" />
+                      {RUTE_TUMPUKAN.map((r) => (
+                        <Stack.Screen key={r.nama} name={r.nama} options={OPSI_TRANSISI[r.jenis]} />
+                      ))}
+                    </Stack.Protected>
+                    <Stack.Protected guard={!sudahMasuk}>
+                      <Stack.Screen name="masuk" options={{ animation: 'fade' }} />
+                    </Stack.Protected>
+                  </Stack>
+                  {/* Di atas semua layar: kiriman Realtime bisa tiba di layar mana pun. */}
+                  {sudahMasuk ? <BannerDataMasuk /> : null}
+                  {/* Berkas ekspor yang selesai setelah sheet-nya ditutup. */}
+                  {sudahMasuk ? <BannerEksporSiap /> : null}
+                </PenyediaSinkron>
+              </PenyediaEkspor>
+            </PenyediaHasilLab>
+          </PenyediaHariIni>
+        </PenyediaRedistribusi>
       </PenyediaTarget>
     </PenyediaProfil>
   );

@@ -41,6 +41,7 @@ import {
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
+import { useRedistribusi } from '@/state/redistribusi';
 import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
@@ -169,6 +170,11 @@ export default function TargetHarianScreen() {
     return p ? [{ ...b, peringatan: p, nama: tipeHari.find((d) => d.id === b.dayTypeId)?.nama ?? '' }] : [];
   });
   const [proteinDisetujui, setProteinDisetujui] = useState(false);
+  const { hasil: redistribusi } = useRedistribusi();
+  const hariRedistribusi =
+    redistribusi && redistribusi.opsi !== 'abaikan'
+      ? redistribusi.hari.filter((h) => h.selisih !== 0)
+      : [];
   const faseDiubah = new Set(berubah.map((b) => b.fase));
   const menyimpan = status.jenis === 'menyimpan';
 
@@ -313,6 +319,25 @@ export default function TargetHarianScreen() {
               </Card>
             </View>
           </View>
+        ) : null}
+
+        {/* Redistribusi pekan ini mengganti target KALORI beberapa hari mendatang;
+            tabel di bawah tetap rencana dasarnya. Dikatakan di sini supaya dua
+            angka yang berbeda untuk hari yang sama tidak membingungkan. */}
+        {!menyunting && hariRedistribusi.length > 0 ? (
+          <Panel nada="aksen">
+            <View style={{ gap: spacing.xs }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>Redistribusi pekan ini</Text>
+              {hariRedistribusi.map((h) => (
+                <Text key={h.tanggal} style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+                  {formatTanggalPanjang(h.tanggal)} · {h.namaTipeHari}: {formatAngka(h.targetBaru)} kcal (rencana {formatAngka(h.targetLama)})
+                </Text>
+              ))}
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+                Hanya kalori; protein, lemak, dan sat fat tetap. Tabel di bawah adalah rencana dasarnya.
+              </Text>
+            </View>
+          </Panel>
         ) : null}
 
         {!menyunting ? (

@@ -36,6 +36,7 @@ import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
+import { useRedistribusi } from '@/state/redistribusi';
 import { useTarget } from '@/state/target';
 import { colors, spacing, tint, typography } from '@/theme';
 import { formatSelisih } from '@/lib/formatTampilan';
@@ -68,7 +69,7 @@ export default function BudgetScreen() {
    * `redistribusi_terpakai`, `redistribusi_diterapkan_pada`) dipasang di task
    * backend tanpa mengubah bentuk data di sini.
    */
-  const [redistribusi, setRedistribusi] = useState<HasilRedistribusi | null>(null);
+  const { hasil: redistribusi, terapkan: setRedistribusi, lepas: lepasRedistribusi } = useRedistribusi();
 
   // Target hari mendatang memakai hasil redistribusi bila sudah diterapkan —
   // tanpa ini panelnya terkunci tapi angka di bawahnya tidak berubah sama sekali.
@@ -86,7 +87,7 @@ export default function BudgetScreen() {
   const [catatanRedistribusi, setCatatanRedistribusi] = useState<string | null>(null);
   useEffect(() => {
     if (!basi) return;
-    setRedistribusi(null);
+    lepasRedistribusi();
     setCatatanRedistribusi(
       'Target berubah setelah redistribusi diterapkan, jadi redistribusi pekan ini dilepas. Angkanya kini berangkat dari target baru; pilih lagi bila perlu.',
     );

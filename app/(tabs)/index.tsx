@@ -24,6 +24,7 @@ import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHar
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
 import { useProfil } from '@/state/profil';
+import { useRedistribusi } from '@/state/redistribusi';
 import { useHariIni } from '@/state/hariIni';
 import { useTarget } from '@/state/target';
 import { simpanCatatanHarian } from '@/data/catatan';
@@ -66,7 +67,13 @@ export default function LogHarianScreen() {
   // Aturan bersama (`tipeHariBerlaku`); tipe pertama hanya jaring terakhir
   // bila akun tidak punya tipe bawaan sama sekali.
   const dayType = tipeHariBerlaku(tipeHari, dayTypeId) ?? tipeHari[0];
-  const target = cariTarget(dayTypeId, fase);
+  const { kaloriUntuk } = useRedistribusi();
+  const targetTabel = cariTarget(dayTypeId, fase);
+  // Hari yang terkena redistribusi pekan ini memakai kalori hasilnya (protein,
+  // lemak, dan sat fat tidak pernah ikut bergeser); sama dengan angka di Budget.
+  const kaloriRedistribusi = kaloriUntuk(log.tanggal);
+  const target =
+    targetTabel && kaloriRedistribusi !== null ? { ...targetTabel, target_kalori: kaloriRedistribusi } : targetTabel;
   const macros = susunMacros(log, target);
 
   // Target belum diisi (mis. tipe hari baru): tidak ada "sisa" untuk dihitung.
@@ -148,7 +155,11 @@ export default function LogHarianScreen() {
         label="Sisa kalori hari ini"
         nilai={sisaKalori !== null ? formatAngka(sisaKalori) : '—'}
         unit="kcal"
-        keterangan={target ? `${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal` : undefined}
+        keterangan={
+          target
+            ? `${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal${kaloriRedistribusi !== null ? ' · setelah redistribusi' : ''}`
+            : undefined
+        }
         nada={sisaKalori !== null && sisaKalori < 0 ? 'bahaya' : 'aksen'}
         pengganti={
           target && sisaKalori !== null ? undefined : (
