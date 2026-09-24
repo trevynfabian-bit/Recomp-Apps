@@ -4,8 +4,9 @@ import { Pressable, Text, View } from 'react-native';
 import { formatAngka, formatBeban, formatJam, ringkasSesi } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
 import { Card, Pemisah } from './Card';
+import { EstimasiE1rm } from './EstimasiE1rm';
 import { ketukRingan } from '@/lib/haptics';
-import { METADATA_SUMBER } from '@/lib/sumber';
+
 import { colors, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
 
 type Props = {
@@ -30,7 +31,6 @@ type Props = {
  */
 export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
   const r = ringkasSesi(sesi);
-  const estimasi = METADATA_SUMBER.estimasi;
 
   return (
     <Card flat>
@@ -100,12 +100,7 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
                     {l.set}
                   </Text>
                 </View>
-                {l.e1rmKg !== null ? (
-                  <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
-                    <Text style={{ ...typography.label, color: colors.teks }}>≈ {formatBeban(l.e1rmKg)}</Text>
-                    <Text style={{ ...typography.caption, color: estimasi.warna }}>e1RM · estimasi</Text>
-                  </View>
-                ) : null}
+                <EstimasiE1rm e1rmKg={l.e1rmKg} setTerbaik={l.setTerbaik} />
               </View>
             </Fragment>
           ))}

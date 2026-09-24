@@ -40,6 +40,7 @@ export { PemilihAngka, PemilihTanggal, uraiAngka } from './Pemilih';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { BarisTautan } from './BarisTautan';
 export { Chip } from './Chip';
+export { EstimasiE1rm } from './EstimasiE1rm';
 export { Pill } from './Pill';
 export { PilihanSegmen, type OpsiSegmen } from './PilihanSegmen';
 export { Sisipan } from './Sisipan';
