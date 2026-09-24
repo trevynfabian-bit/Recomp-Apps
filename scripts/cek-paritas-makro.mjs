@@ -103,12 +103,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/targetHarian.ts', join(kerja, 'targetHarian.ts'));
   copyFileSync('packages/logika/src/targetBerlaku.ts', join(kerja, 'targetBerlaku.ts'));
   copyFileSync('packages/logika/src/hasilLab.ts', join(kerja, 'hasilLab.ts'));
+  copyFileSync('packages/logika/src/latihan.ts', join(kerja, 'latihan.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', 'hasilLab.ts', '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', 'hasilLab.ts', 'latihan.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -128,6 +129,7 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'targetHarian.js')),
     ...require(join(kerja, 'keluar', 'targetBerlaku.js')),
     ...require(join(kerja, 'keluar', 'hasilLab.js')),
+    ...require(join(kerja, 'keluar', 'latihan.js')),
   };
 }
 
@@ -1898,6 +1900,28 @@ try {
   }
   console.log(`✓ Hasil lab: ${KASUS_LAB.length} kasus (${nLabSah} sah, ${KASUS_LAB.length - nLabSah} ditolak) sama di form dan tabel.`);
   console.log();
+
+  // --- e1RM Epley: e1rm_epley (SQL) = e1rmEpley (TS) ------------------------
+  // Kisi beban × repetisi, termasuk pecahan yang biner tidak bisa simpan tepat
+  // (6,75 kg × 8), tanpa beban, nol, dan repetisi di luar 1–12.
+  {
+    const { e1rmEpley } = muatLogikaTs();
+    const beban = [null, 0, 0.5, 1.25, 2.5, 6.75, 20, 22.5, 47.5, 60, 61.25, 80, 82.5, 100, 102.25, 140, 187.5, 225, 272.5, 600];
+    const reps = [0, 1, 2, 3, 5, 6, 8, 10, 12, 13, 15];
+    const kasus = beban.flatMap((b) => reps.map((r) => [b, r]));
+    const nilai = kasus.map(([b, r]) => `(${b === null ? 'null::numeric' : b}, ${r})`).join(', ');
+    const hasilSql = JSON.parse(sql(`select json_agg(public.e1rm_epley(b, r)::float8 order by i)
+      from (select row_number() over () as i, b, r from (values ${nilai}) v(b, r)) x;`));
+    const beda = kasus.filter(([b, r], i) => (hasilSql[i] ?? null) !== e1rmEpley(b, r));
+    for (const [b, r] of beda.slice(0, 5)) console.log(`✗ e1RM ${b} kg × ${r}: SQL ${hasilSql[kasus.findIndex(([x, y]) => x === b && y === r)]}, TS ${e1rmEpley(b, r)}`);
+    const nLayak = kasus.filter(([b, r]) => e1rmEpley(b, r) !== null).length;
+    if (beda.length > 0 || nLayak === 0 || nLayak === kasus.length) {
+      console.error(`✗ e1RM Epley: ${beda.length} dari ${kasus.length} kasus berbeda (atau kasusnya tidak menguji kedua sisi).`);
+      process.exit(1);
+    }
+    console.log(`✓ e1RM Epley: ${kasus.length} kasus beban × repetisi (${nLayak} terhitung, ${kasus.length - nLayak} tidak layak) sama di SQL dan TypeScript.`);
+    console.log();
+  }
 
   // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
   // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak

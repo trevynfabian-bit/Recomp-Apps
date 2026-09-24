@@ -176,6 +176,22 @@ begin
   assert (select count(*) from public.workout_sets) = 0, 'B seharusnya tidak melihat set A';
 end $$;
 
+-- e1RM tersimpan per set, sama dengan rumus bersama; berat badan tanpa e1RM.
+reset role;
+do $$
+declare n_terisi integer; n_beda integer;
+begin
+  select count(*) filter (where e1rm_kg is not null),
+         count(*) filter (where e1rm_kg is distinct from public.e1rm_epley(beban_kg, reps))
+    into n_terisi, n_beda
+    from public.workout_sets where user_id = 'c1d1e1f1-0000-0000-0000-000000000001';
+  assert n_terisi > 0, 'tidak ada set dengan e1RM setelah sinkron';
+  assert n_beda = 0, format('%s set dengan e1rm_kg berbeda dari e1rm_epley', n_beda);
+  assert public.e1rm_epley(80, 8) = 101.3, format('80 kg × 8 = %s, seharusnya 101,3', public.e1rm_epley(80, 8));
+  assert public.e1rm_epley(6.75, 8) = 8.6, format('6,75 kg × 8 = %s, seharusnya 8,6', public.e1rm_epley(6.75, 8));
+  assert public.e1rm_epley(null, 8) is null and public.e1rm_epley(100, 13) is null, 'berat badan / 13 reps seharusnya null';
+end $$;
+
 -- Set milik sesi orang lain ditolak, bahkan dari jalur server: RLS set
 -- memakai user_id-nya sendiri, jadi set ber-user_id B pada sesi milik A
 -- akan tampil di akun B. Dijaga pemicu `workout_sets_sesuai_pemilik` (23514).

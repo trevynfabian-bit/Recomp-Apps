@@ -863,6 +863,8 @@ export type WorkoutSetRow = {
   /** `null` = berat badan tanpa beban tambahan. */
   beban_kg: number | null;
   reps: number;
+  /** e1RM Epley set ini (kolom turunan, sama dengan `e1rmEpley`); `null` bila tidak layak. */
+  e1rm_kg: number | null;
   created_at: string;
 };
 
