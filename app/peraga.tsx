@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   DaftarBaris,
+  GelembungPesan,
   HeaderLayar,
   HeroPengganti,
   InputAngka,
@@ -236,6 +237,15 @@ export default function PeragaScreen() {
             aksi={{ label: 'Coba lagi', onPress: () => undefined }}
           />
         </View>
+      </Bagian>
+
+      <Bagian judul="Pesan Coach">
+        {/* Jalur gagal tidak bisa dipicu di mode tiruan (balasan tiruan tidak pernah gagal). */}
+        <GelembungPesan
+          pesan={{ id: 'peraga-gagal', peran: 'pengguna', teks: 'Laju saya wajar tidak minggu ini?', waktu: new Date().toISOString(), status: 'gagal' }}
+          tampilkanJam={false}
+          onCobaLagi={() => undefined}
+        />
       </Bagian>
 
       <Bagian judul="Angka & makro">

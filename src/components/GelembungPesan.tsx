@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { formatJam } from '@recomp/logika';
 import { DaftarRujukan } from './DaftarRujukan';
@@ -6,7 +7,7 @@ import { KartuPenolakanMedis } from './KartuPenolakanMedis';
 import { KartuVerdictEvaluasi } from './KartuVerdictEvaluasi';
 import { KartuWidgetCoach } from './KartuWidgetCoach';
 import type { PesanCoach } from '@/types/domain';
-import { colors, radius, spacing, tint, typography } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuranIkon } from '@/theme';
 import { Tombol } from './Tombol';
 
 type Props = {
@@ -92,7 +93,7 @@ export function GelembungPesan({
     >
       <View
         accessibilityRole="text"
-        accessibilityLabel={`${dariPengguna ? 'Anda' : 'Coach'}: ${pesan.teks}`}
+        accessibilityLabel={`${dariPengguna ? 'Anda' : 'Coach'}: ${pesan.teks}${gagal ? '. Gagal terkirim.' : ''}`}
         style={{
           maxWidth: '88%',
           paddingHorizontal: spacing.lg,
@@ -143,7 +144,10 @@ export function GelembungPesan({
       ) : null}
 
       {gagal ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+          {/* Ikon + kata, bukan warna saja; pesannya tetap di daftar supaya
+              tidak perlu diketik ulang. */}
+          <Ionicons name="alert-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
           <Text style={{ ...typography.caption, color: colors.status.bahaya.teks }}>
             Gagal terkirim
           </Text>
