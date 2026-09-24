@@ -106,6 +106,10 @@ berubah karena keputusan desain.
 - Pemilih: `PemilihAngka` (− angka +, tombol 56 pt karena ditekan berulang)
   untuk angka yang dicatat dengan satu tangan; `PemilihTanggal` (‹ tanggal ›)
   untuk tanggal pencatatan yang hampir selalu hari ini atau beberapa hari lalu.
+- Keadaan memuat/kosong/gagal memakai `KeadaanMemuat` / `KeadaanKosong` /
+  `KeadaanGagal`: memuat menyebut apa yang dimuat; kosong bernada netral dan
+  memberi jalan mengisinya; gagal menyebut apa yang gagal, sebabnya, dan jalan
+  keluarnya (Coba lagi), dengan ikon — tidak pernah warna saja.
 - Kontainer: `Card` (kartu standar; `nada` memberi tepi bertint untuk kartu yang
   perlu dilihat lebih dulu), `DaftarBaris` (baris-baris dalam satu kartu dengan
   pemisah otomatis), `Panel` (area cekung di dalam kartu), `Pemisah` (garis

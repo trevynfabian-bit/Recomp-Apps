@@ -87,7 +87,11 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    (penyusun pesan dengan tombol kirim), `SheetImporRiwayat` (tempel CSV dalam
    Menlo), dan baris ukuran ringkas di `SheetCatatUkuran` (tabel 7 ukuran
    rata kanan dengan selisih).
-4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.
+4. **Umpan balik status** ✓ `KeadaanMemuat` (spinner + apa yang dimuat),
+   `KeadaanKosong` (netral: apa yang akan tampil + cara mengisinya),
+   `KeadaanGagal` (ikon + apa yang gagal + sebab + Coba lagi); masing-masing
+   dalam tampilan `kartu`, `polos`, atau `layar`. `LayarMuatTarget` kini
+   tersusun dari keduanya.
 5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
 
 Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).

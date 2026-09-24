@@ -8,6 +8,9 @@ import {
   InputAngka,
   InputTarget,
   Isian,
+  KeadaanGagal,
+  KeadaanKosong,
+  KeadaanMemuat,
   KerangkaSheet,
   MacroRow,
   PemilihAngka,
@@ -209,6 +212,23 @@ export default function PeragaScreen() {
           />
           <PemilihTanggal tanggal={tanggal} onUbah={setTanggal} hariIni={tanggalHariIni()} mundurMaks={7} />
         </Card>
+      </Bagian>
+
+      <Bagian judul="Umpan balik status">
+        <View style={{ gap: spacing.md }}>
+          <KeadaanMemuat label="Memuat hasil lab…" tampilan="kartu" />
+          <KeadaanKosong
+            ikon="flask-outline"
+            judul="Belum ada hasil lab"
+            keterangan="Hasil lab yang Anda tambahkan akan tampil di sini, dikelompokkan per tahun."
+            aksi={{ label: 'Tambah hasil lab', onPress: () => undefined }}
+          />
+          <KeadaanGagal
+            judul="Hasil lab belum termuat"
+            keterangan="Tidak bisa terhubung. Periksa koneksi, lalu coba lagi."
+            aksi={{ label: 'Coba lagi', onPress: () => undefined }}
+          />
+        </View>
       </Bagian>
 
       <Bagian judul="Angka & makro">
