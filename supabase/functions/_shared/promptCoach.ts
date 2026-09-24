@@ -161,6 +161,23 @@ export type KonteksCoach = {
   body_fat: Record<string, unknown>;
   tdee: Record<string, unknown>;
   evaluasi_terakhir: Record<string, unknown> | null;
+  /** e1RM per gerakan 28 hari terakhir (`e1rm_per_gerakan`), tanpa deret titiknya. */
+  kekuatan: {
+    periode_dari: string;
+    periode_sampai: string;
+    naik: number;
+    turun: number;
+    datar: number;
+    gerakan: {
+      latihan: string;
+      arah: 'naik' | 'turun' | 'datar' | null;
+      awal_kg: number;
+      akhir_kg: number;
+      selisih_kg: number | null;
+      terbaik_kg: number;
+      jumlah_sesi: number;
+    }[];
+  };
   ringkasan_terakhir: Record<string, unknown> | null;
   aturan: Record<string, unknown>;
   /**
@@ -407,6 +424,20 @@ export const TOOLS_COACH = [
     },
   },
   {
+    name: 'ambil_kekuatan',
+    description:
+      'Kekuatan 28 hari terakhir per gerakan: e1RM (Epley) sesi pertama & terakhir, ' +
+      'selisih, dan arahnya (naik/turun/datar, ambang 2%). Pakai ini untuk pertanyaan ' +
+      'tentang kekuatan atau beban latihan, alih-alih menebak dari berat badan.',
+    strict: true,
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+  },
+  {
     name: 'ambil_deret_berat',
     description:
       'Deret rata-rata 7 hari beserta timbangan hariannya, untuk melihat arah. ' +
@@ -537,6 +568,30 @@ export function jalankanTool(
       return {
         ok: true,
         data: { sumber: 'manual', rincian, laju: (konteks.budget as { laju?: unknown }).laju },
+      };
+    }
+
+    case 'ambil_kekuatan': {
+      const k = konteks.kekuatan;
+      if (!k || k.gerakan.length === 0) {
+        return {
+          ok: false,
+          alasan: 'Belum ada latihan berbeban dalam 28 hari terakhir. Kekuatan dibaca dari set Hevy yang tersinkron atau diimpor.',
+        };
+      }
+      const berarah = k.gerakan.filter((g) => g.arah !== null);
+      return {
+        ok: true,
+        data: {
+          sumber: 'sinkron',
+          periode: { dari: k.periode_dari, sampai: k.periode_sampai },
+          naik: k.naik,
+          turun: k.turun,
+          datar: k.datar,
+          // Satu titik tidak punya arah; disebut terpisah supaya tidak dibaca "datar".
+          gerakan: berarah,
+          baru_sekali: k.gerakan.filter((g) => g.arah === null).map((g) => g.latihan),
+        },
       };
     }
 

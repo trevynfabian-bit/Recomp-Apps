@@ -219,6 +219,31 @@ begin
     'batas pinggang dari profil tidak terbaca';
 end $$;
 
+-- 7b. Kekuatan ikut dibawa: e1RM per gerakan 28 hari terakhir, tanpa deret titik.
+reset role;
+do $$
+declare u uuid := 'bbbb7777-0000-0000-0000-000000000007'; w1 uuid; w2 uuid;
+begin
+  insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+  values (u, (now() at time zone 'Asia/Jakarta')::date - 10, 'Push', 'angkat_beban', 'hevy', 'konteks-1') returning id into w1;
+  insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+  values (u, (now() at time zone 'Asia/Jakarta')::date - 3, 'Push', 'angkat_beban', 'hevy', 'konteks-2') returning id into w2;
+  insert into public.workout_sets (workout_id, user_id, latihan, latihan_ke, set_ke, beban_kg, reps)
+  values (w1, u, 'Bench Press', 1, 1, 80, 8), (w2, u, 'Bench Press', 1, 1, 85, 8);
+end $$;
+set request.jwt.claim.sub = 'bbbb7777-0000-0000-0000-000000000007';
+set role authenticated;
+do $$
+declare k jsonb;
+begin
+  k := public.konteks_coach()->'kekuatan';
+  assert (k->>'naik')::int = 1 and jsonb_array_length(k->'gerakan') = 1, format('kekuatan di konteks %s', k);
+  assert k->'gerakan'->0->>'latihan' = 'Bench Press' and k->'gerakan'->0->>'arah' = 'naik', format('gerakan %s', k->'gerakan'->0);
+  assert not (k->'gerakan'->0 ? 'titik'), 'deret titik tidak perlu ikut ke konteks';
+end $$;
+reset role;
+delete from public.workouts where external_id like 'konteks-%';
+
 -- 8. Isolasi: konteks pengguna lain tidak memuat sepotong pun data pengguna A.
 reset role;
 set request.jwt.claim.sub = 'bbbb8888-0000-0000-0000-000000000008';
@@ -236,6 +261,7 @@ begin
   assert (k->'ringkasan_terakhir') = 'null'::jsonb, 'pengguna B membaca ringkasan orang lain';
   assert (k->'ukuran'->>'jumlah')::int = 0, 'pengguna B membaca ukuran orang lain';
   assert (k->>'fase') = 'Maintenance', 'pengguna B mewarisi fase pengguna A';
+  assert jsonb_array_length(k->'kekuatan'->'gerakan') = 0 and (k->'kekuatan'->>'naik')::int = 0, 'pengguna B membaca latihan pengguna A';
 end $$;
 
 -- 9. Tanpa sesi & peran anon.

@@ -150,6 +150,17 @@ function konteksTiruan(n) {
     body_fat: { persen: 16.4, kurang: null },
     tdee: { tengah: 2680, keyakinan: 'sedang' },
     evaluasi_terakhir: null,
+    kekuatan:
+      n === 1
+        ? {
+            periode_dari: '2026-08-28', periode_sampai: '2026-09-24', naik: 1, turun: 0, datar: 1,
+            gerakan: [
+              { latihan: 'Bench Press', arah: 'naik', awal_kg: 101.3, akhir_kg: 107.7, selisih_kg: 6.4, terbaik_kg: 107.7, jumlah_sesi: 3 },
+              { latihan: 'Squat', arah: 'datar', awal_kg: 116.7, akhir_kg: 117.5, selisih_kg: 0.8, terbaik_kg: 118, jumlah_sesi: 2 },
+              { latihan: 'Overhead Press', arah: null, awal_kg: 63.3, akhir_kg: 63.3, selisih_kg: null, terbaik_kg: 63.3, jumlah_sesi: 1 },
+            ],
+          }
+        : { periode_dari: '2026-08-28', periode_sampai: '2026-09-24', naik: 0, turun: 0, datar: 0, gerakan: [] },
     ringkasan_terakhir: null,
     aturan: { wajib_rata_rata_7_hari: true },
     // Sengaja yang LAMA lebih dulu: urutannya harus dibuat fungsi, bukan
@@ -259,7 +270,7 @@ for (const t of TOOLS_COACH) {
   );
   cek(`${t.name}: punya deskripsi`, (t.description ?? '').length > 20);
 }
-cek(`delapan fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 8);
+cek(`sembilan fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 9);
 
 console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
 {
@@ -269,6 +280,15 @@ console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
 
   const est = jalankanTool('ambil_angka', { kunci: 'tdee' }, a);
   cek('TDEE tetap bertanda estimasi', est.ok && est.data.sumber === 'estimasi');
+
+  const kuat = jalankanTool('ambil_kekuatan', {}, a);
+  cek('ambil_kekuatan: gerakan berarah dari konteks, sumber sinkron',
+    kuat.ok && kuat.data.sumber === 'sinkron' && kuat.data.gerakan.length === 2 && kuat.data.naik === 1);
+  cek('ambil_kekuatan: gerakan satu sesi disebut terpisah, bukan dibaca datar',
+    kuat.ok && kuat.data.baru_sekali.join() === 'Overhead Press' && !kuat.data.gerakan.some((g) => g.latihan === 'Overhead Press'));
+  const kuatKosong = jalankanTool('ambil_kekuatan', {}, b);
+  cek('ambil_kekuatan tanpa latihan berbeban: bukan "datar", tapi alasan yang jelas',
+    !kuatKosong.ok && /Belum ada latihan berbeban/.test(kuatKosong.alasan));
 
   // Kunci yang tidak ada TIDAK boleh mengembalikan nol: "sisa budget 0 kcal"
   // adalah kalimat yang salah dengan cara yang berbahaya.
