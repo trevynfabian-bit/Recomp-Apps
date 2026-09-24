@@ -179,6 +179,68 @@ begin
   end;
 end $$;
 
+-- 9. Endpoint target per pengguna × tanggal: hanya milik pemanggil.
+--    Pengguna lain yang meminta tanggal yang SAMA mendapat target miliknya
+--    sendiri (tipe hari bawaannya), tidak pernah baris milik Eka.
+reset role;
+insert into auth.users (id, email) values ('55555555-0000-0000-0000-00000000000b', 'lain@contoh.test');
+set request.jwt.claim.sub = '55555555-0000-0000-0000-00000000000b';
+set role authenticated;
+do $$
+declare r record; n integer;
+begin
+  select count(*) into n from public.ambil_target_harian(date '2026-09-22');
+  assert n = 1, format('%s baris untuk pengguna lain, seharusnya 1 (miliknya sendiri)', n);
+  select * into r from public.ambil_target_harian(date '2026-09-22');
+  assert r.day_type_id in (select id from public.day_types where user_id = '55555555-0000-0000-0000-00000000000b'),
+    'pengguna lain menerima tipe hari yang bukan miliknya';
+  assert r.override = false, 'pengguna lain mewarisi pilihan manual Eka';
+end $$;
+
+-- 9b. Tanggal kosong: tidak ada target yang dikarang.
+do $$
+declare n integer;
+begin
+  select count(*) into n from public.ambil_target_harian(null) where target_kalori is not null;
+  assert n = 0, format('tanggal null mengembalikan %s target', n);
+end $$;
+
+-- 9b'. Kembaran jalur server juga tidak menjawab tanggal kosong.
+reset role;
+do $$
+declare n integer;
+begin
+  select count(*) into n from public.target_harian_pengguna('55555555-5555-5555-5555-555555555555', null)
+   where target_kalori is not null;
+  assert n = 0, format('target_harian_pengguna tanggal null mengembalikan %s target', n);
+  select count(*) into n from public.target_harian_pengguna(null, date '2026-09-22')
+   where target_kalori is not null;
+  assert n = 0, format('target_harian_pengguna pengguna null mengembalikan %s target', n);
+end $$;
+set role authenticated;
+
+-- 9c. Tanpa sesi: tidak ada baris sama sekali.
+set request.jwt.claim.sub = '';
+do $$
+declare n integer;
+begin
+  select count(*) into n from public.ambil_target_harian(date '2026-09-22');
+  assert n = 0, format('tanpa sesi mengembalikan %s baris', n);
+end $$;
+
+-- 9d. anon tidak boleh memanggilnya.
+reset role;
+set role anon;
+do $$
+declare v_ditolak boolean := false;
+begin
+  begin
+    perform * from public.ambil_target_harian(date '2026-09-22');
+  exception when insufficient_privilege then v_ditolak := true;
+  end;
+  assert v_ditolak, 'anon bisa memanggil ambil_target_harian';
+end $$;
+
 reset role;
 
 \echo 'Tipe hari & target OK — snapshot disegarkan, kolom lain utuh, hari lama kebal ganti fase'
