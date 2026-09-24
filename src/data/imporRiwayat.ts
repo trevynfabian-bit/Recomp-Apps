@@ -1,7 +1,7 @@
 import { potongBatch, UKURAN_BATCH_IMPOR } from '@recomp/logika';
 import type { BarisDilewati, BarisUkuranImpor, SesiLatihan } from '@recomp/logika';
 import { supabase } from '@/lib/supabase';
-import type { ImportJobRow, KirimanHealthKit } from '@/types/database';
+import type { ImportJobRow, KirimanHealthKit, StatusPekerjaanRow } from '@/types/database';
 
 /**
  * Jalankan impor riwayat sekali terhadap `import_jobs`.
@@ -99,4 +99,23 @@ export async function imporTerakhir(): Promise<ImportJobRow[]> {
   const { data, error } = await supabase.rpc('impor_terakhir');
   if (error) throw error;
   return data ?? [];
+}
+
+/**
+ * Status impor terakhir per sumber, sinkron per koneksi, dan cara ekspor
+ * disusun, dalam satu panggilan (`status_pekerjaan_saya`). Impor yang ditinggal
+ * di tengah jalan dilaporkan `terhenti`, bukan berputar selamanya.
+ */
+export async function statusPekerjaan(): Promise<StatusPekerjaanRow> {
+  const { data, error } = await supabase.rpc('status_pekerjaan_saya');
+  if (error) {
+    const sesi = error.code === '28000' || error.code === 'PGRST301';
+    throw new KesalahanImpor(
+      sesi
+        ? 'Sesi Anda berakhir. Masuk lagi untuk melihat status.'
+        : 'Status impor dan sinkron belum bisa dimuat. Coba lagi sebentar lagi.',
+      null,
+    );
+  }
+  return data as StatusPekerjaanRow;
 }

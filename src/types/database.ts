@@ -1179,6 +1179,39 @@ export type WorkoutRow = {
   created_at: string;
 };
 
+/** Hasil `status_pekerjaan_saya`. */
+export type StatusPekerjaanRow = {
+  diperiksa_pada: string;
+  /** Impor terakhir per sumber, terbaru lebih dulu. */
+  impor: {
+    id: string;
+    sumber: ImportJobRow['sumber'];
+    /** `terhenti`: berjalan tetapi diam lebih dari 10 menit (impor baru boleh dimulai). */
+    status: 'berjalan' | 'selesai' | 'gagal' | 'terhenti';
+    total: number;
+    selesai: number;
+    persen: number;
+    ringkas: string;
+    hasil: ImportJobRow['hasil'];
+    galat: string | null;
+    dibuat_pada: string;
+    diperbarui_pada: string;
+    selesai_pada: string | null;
+  }[];
+  sinkron: {
+    sumber: HealthConnectionRow['sumber'];
+    mekanisme: HealthConnectionRow['mekanisme'];
+    status: HealthConnectionRow['status'];
+    keadaan: 'baik' | 'galat' | 'belum_sinkron' | 'terputus';
+    terhubung_pada: string;
+    sinkron_terakhir: string | null;
+    galat_terakhir: string | null;
+    galat_pada: string | null;
+  }[];
+  /** Ekspor disusun di perangkat dari `ekspor_data_saya`; tidak ada pekerjaan di server. */
+  ekspor: { disusun_di: 'perangkat'; sumber: 'ekspor_data_saya' };
+};
+
 /** Hasil `putuskan_sumber`: status baru dan berapa yang ikut dihapus. */
 export type PutuskanSumberRow = {
   sumber: HealthConnectionRow['sumber'];
@@ -1548,6 +1581,10 @@ export type Database = {
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
         Returns: RiwayatUkuranRow;
+      };
+      status_pekerjaan_saya: {
+        Args: Record<string, never>;
+        Returns: StatusPekerjaanRow;
       };
       putuskan_sumber: {
         Args: { p_sumber: string; p_hapus_data?: boolean };
