@@ -141,6 +141,15 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
     ...(nama === 'info' ? [] : [[`peran ${nama}: diAtasIsian di isian`, c.diAtasIsian, p.isian, false]]),
   ]),
 
+  // Teks status di dalam pill/label bertint WARNANYA SENDIRI di atas kartu
+  // (PenandaSumber, StatusRedistribusi, LabelSinyalArah, KartuTdee,
+  // IndikatorProteinTerlindungi) dan di chip aktif bertint aksen.
+  ...[['sukses', c.status.sukses.teks], ['bahaya', c.status.bahaya.teks], ['peringatan', c.status.peringatan.teks],
+      ['info', c.status.info.teks], ['teksRedup', c.teksRedup]].flatMap(([nama, w]) => [
+    [`${nama} di pill ${nama} atas permukaan`, w, campur(w, c.alfa.pill, c.permukaan), false],
+    [`${nama} di chip aktif (aksen ${c.alfa.aktif}) atas permukaan`, w, campur(c.aksen.isian, c.alfa.aktif, c.permukaan), false],
+  ]),
+
   // Angka hero (teks besar, 3:1) di kartu dan latar.
   ['aksen.besar (hero) di permukaan', c.aksen.besar, c.permukaan, true],
   ['aksen.besar (hero) di latar', c.aksen.besar, c.latar, true],

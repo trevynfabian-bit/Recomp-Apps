@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.2 (24 September 2026) |
+| **Versi** | 1.3 (24 September 2026) |
 | **Penjaga** | `npm run cek:desain`, `npm run cek:kontras` |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
@@ -44,12 +44,12 @@ berubah karena keputusan desain.
 | Peran | Gelap | Terang |
 |---|---|---|
 | latar / permukaan / permukaan cekung | `#14151A` / `#2A2D36` / `#1C1E25` | `#F4F5F7` / `#FFFFFF` / `#E9EBEF` |
-| teks / redup / samar | `#F5F6F8` / `#9BA1AF` / `#8E94A3` | `#14151A` / `#4A4F5C` / `#5C6170` |
+| teks / redup / samar | `#F5F6F8` / `#A5AAB7` / `#9197A6` | `#14151A` / `#4A4F5C` / `#5C6170` |
 | aksen (amber) | `#F0A202` | `#8A5A00` |
 | aksen besar (angka hero) | `#F0A202` | `#B37700` |
-| sukses (jade) | `#1B998B` isian, `#1DA697` teks | `#0E7166` |
-| bahaya (coral) | `#E24E1B` isian, `#E97147` teks | `#B23A10` |
-| info (karbo) | `#7C6AE8` isian, `#9587EC` teks | `#5B4BC4` |
+| sukses (jade) | `#1B998B` isian, `#51BAAF` teks | `#0E7166` |
+| bahaya (coral) | `#E24E1B` isian, `#EE9373` teks | `#B23A10` |
+| info (karbo) | `#7C6AE8` isian, `#ABA0F0` teks | `#5B4BC4` |
 | teks di atas isian | `#14151A` | `#FFFFFF` |
 
 ### 8.3 Aksesibilitas warna
@@ -141,3 +141,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | 1.0 | 24 September 2026 | Bab pertama: palet semantik dua mode, tipografi dengan tinggi baris dan varian bernama, kepadatan & radius, komposisi layar, penjaga otomatis. |
 | 1.1 | 24 September 2026 | Lapis semantik diwujudkan di `src/theme/colors.ts` (`latar`, `permukaan`, `teks*`, `aksen`, `status.*`); `info` dibatasi ke teks/bar/mark. |
 | 1.2 | 24 September 2026 | Token Fase 2 terpusat: lapis semantik satu-satunya nama warna di luar `src/theme` (nama lama dihapus); tipografi membawa tinggi baris; token `ukuran`, `ukuranIkon`, `bobot`, `radius.xs`; kontrol rapat 36/40 pt dengan area sentuh 44 pt. |
+| 1.3 | 24 September 2026 | Mode terang: pilihan manual di Pengaturan, angka hero `aksen.besar`, tint & bayangan per mode. Varian teks kecil mode gelap dinaikkan agar lolos AA di dalam pill bertint (≥4,6:1). |

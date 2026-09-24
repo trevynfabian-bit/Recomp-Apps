@@ -35,8 +35,8 @@ dihindari.
 | Peran | Isian | Teks kecil | Pemakaian |
 |---|---|---|---|
 | `aksen` (merek utama) | amber `#F0A202` | amber `#F0A202` | CTA utama, angka hero default, tab aktif, pilihan terpilih |
-| `aksenKedua` | jade `#1B998B` | `#1DA697` | Fase aktif, protein, hal positif |
-| `aksenKetiga` | coral `#E24E1B` | `#E97147` | Batas terlampaui, tindakan merusak |
+| `aksenKedua` | jade `#1B998B` | `#51BAAF` | Fase aktif, protein, hal positif |
+| `aksenKetiga` | coral `#E24E1B` | `#EE9373` | Batas terlampaui, tindakan merusak |
 
 Amber dipertahankan sebagai satu-satunya warna yang boleh menarik mata tanpa
 alasan status: ia adalah "suara" merek. Jade dan coral hanya muncul bila ada
@@ -46,10 +46,10 @@ makna.
 
 | Status | Isian | Teks kecil | Arti | Contoh saat ini |
 |---|---|---|---|---|
-| `sukses` | jade `#1B998B` | `#1DA697` | on-track, tersambung, tersimpan | `IndikatorSinkron` segar, fase aktif |
+| `sukses` | jade `#1B998B` | `#51BAAF` | on-track, tersambung, tersimpan | `IndikatorSinkron` segar, fase aktif |
 | `peringatan` | amber `#F0A202` | `#F0A202` | mendekati batas, perlu perhatian, angka perkiraan | `BannerBatasPinggang` "mendekati", sumber terlambat, penanda estimasi, keyakinan sedang/rendah, arah berlawanan fase |
-| `bahaya` | coral `#E24E1B` | `#E97147` | batas terlampaui, galat, hapus | `BannerBatasPinggang` "lewat", `TombolUtama merusak` |
-| `info` | karbo `#7C6AE8` | `#9587EC` | keterangan netral yang perlu dibedakan dari teks biasa | belum dipakai di luar makro karbo; disiapkan untuk catatan netral |
+| `bahaya` | coral `#E24E1B` | `#EE9373` | batas terlampaui, galat, hapus | `BannerBatasPinggang` "lewat", `TombolUtama merusak` |
+| `info` | karbo `#7C6AE8` | `#ABA0F0` | keterangan netral yang perlu dibedakan dari teks biasa | belum dipakai di luar makro karbo; disiapkan untuk catatan netral |
 
 `peringatan` sengaja berbagi hue dengan `aksen`. Membedakannya dengan warna
 keempat (kuning) akan menambah suara di layar gelap yang sudah punya tiga
@@ -65,8 +65,8 @@ aksen hangat; pembedanya adalah ikon dan label, sesuai prinsip 1.1.3.
 | `garis` | `#343845` | Pemisah dekoratif (sengaja resesif, <2:1) |
 | `garisKontrol` | `#727888` | Tepi kontrol (≥3:1, WCAG 1.4.11) |
 | `teks` | `#F5F6F8` | Teks utama |
-| `teksRedup` | `#9BA1AF` | Teks pendukung |
-| `teksSamar` | `#8E94A3` | Label, unit, keterangan |
+| `teksRedup` | `#A5AAB7` | Teks pendukung |
+| `teksSamar` | `#9197A6` | Label, unit, keterangan |
 | `teksDiAtasIsian` | `#14151A` | Label di atas tombol/pill berisi warna aksen **atau status** |
 
 Nilai heks mode gelap **tidak berubah** dari `src/theme/colors.ts` saat ini:
@@ -155,6 +155,18 @@ Aturan pakai yang lahir dari verifikasi:
   `KartuBodyFat`, dan `SheetCatatFoto` sudah diperbaiki. Pill bertint hanya di
   atas `latar` (≈5,3:1).
 
+**Koreksi Fase 3 (teks di atas tint).** Varian teks kecil mode gelap semula
+hanya 4,53–4,55:1 di atas `permukaan`. Itu cukup untuk teks di kartu, tetapi
+lima komponen (`PenandaSumber`, `StatusRedistribusi`, `LabelSinyalArah`,
+`KartuTdee`, `IndikatorProteinTerlindungi`) menaruh teks status di dalam pill
+bertint warnanya sendiri di atas kartu, dan di sana rasionya jatuh ke 3,9–4,45:1.
+Varian teks dinaikkan dengan hue yang sama (jade `#1DA697` → `#51BAAF`, coral
+`#E97147` → `#EE9373`, karbo `#9587EC` → `#ABA0F0`, sat fat `#DD7482` →
+`#E5949F`, `teksRedup` `#9BA1AF` → `#A5AAB7`, `teksSamar` `#8E94A3` →
+`#9197A6`). Kini ≥4,6:1 di pill bertint, ~5,9:1 di kartu, dan tidak ada pasangan
+yang lulus dengan margin di bawah 0,1. Warna isian (bar, tombol) tidak berubah.
+Tabel di bab ini sudah memakai nilai baru.
+
 ### 1.6 Mode terang (mengikuti sistem)
 
 Mode terang memakai **peran yang sama** dengan nilai berbeda (`paletTerang` di
@@ -166,13 +178,13 @@ pilihannya memakai gelap.
 |---|---|---|
 | `latar` / `permukaan` / `permukaanCekung` | `#14151A` / `#2A2D36` / `#1C1E25` | `#F4F5F7` / `#FFFFFF` / `#E9EBEF` |
 | `garis` / `garisKontrol` | `#343845` / `#727888` | `#DCDFE5` / `#7D8391` |
-| `teks` / `teksRedup` / `teksSamar` | `#F5F6F8` / `#9BA1AF` / `#8E94A3` | `#14151A` / `#4A4F5C` / `#5C6170` |
+| `teks` / `teksRedup` / `teksSamar` | `#F5F6F8` / `#A5AAB7` / `#9197A6` | `#14151A` / `#4A4F5C` / `#5C6170` |
 | `aksen` (amber) | `#F0A202` | `#8A5A00` |
 | `aksen.besar` (angka hero, teks ≥24 px) | `#F0A202` | `#B37700` |
-| `aksenKedua` (jade) | isian `#1B998B`, teks `#1DA697` | `#0E7166` |
-| `aksenKetiga` (coral) | isian `#E24E1B`, teks `#E97147` | `#B23A10` |
-| `info` (karbo) | isian `#7C6AE8`, teks `#9587EC` | `#5B4BC4` |
-| sat fat | isian `#D2495B`, teks `#DD7482` | `#B02E42` |
+| `aksenKedua` (jade) | isian `#1B998B`, teks `#51BAAF` | `#0E7166` |
+| `aksenKetiga` (coral) | isian `#E24E1B`, teks `#EE9373` | `#B23A10` |
+| `info` (karbo) | isian `#7C6AE8`, teks `#ABA0F0` | `#5B4BC4` |
+| sat fat | isian `#D2495B`, teks `#E5949F` | `#B02E42` |
 | `teksDiAtasIsian` | `#14151A` | `#FFFFFF` |
 
 Keputusan penting:

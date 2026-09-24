@@ -38,10 +38,15 @@ const dasarGelap = {
   /** Positif / protein / on-track. Untuk ISIAN; teks kecil pakai aksenTeks.jade. */
   jade: '#1B998B',
 
-  /** Varian aksen khusus TEKS KECIL (≥4.5:1 di atas surface). */
+  /**
+   * Varian aksen khusus TEKS KECIL. Dinaikkan (Fase 3) dari #E97147/#1DA697 yang
+   * hanya 4,53:1 di atas surface: teks status juga dipakai di dalam pill bertint
+   * warnanya sendiri di atas kartu, dan di sana nilai lama jatuh ke ~3,9:1.
+   * Nilai sekarang ≥4,6:1 di pill bertint dan ~5,9:1 di surface.
+   */
   aksenTeks: {
-    coral: '#E97147',
-    jade: '#1DA697',
+    coral: '#EE9373',
+    jade: '#51BAAF',
   },
 
   /**
@@ -80,9 +85,12 @@ const dasarGelap = {
   /** Teks paling menonjol. */
   text: '#F5F6F8',
   /** Teks pendukung. */
-  textMuted: '#9BA1AF',
-  /** Teks paling redup: label, unit, keterangan. Dinaikkan dari #6B7283 (2.9:1). */
-  textFaint: '#8E94A3',
+  textMuted: '#A5AAB7',
+  /**
+   * Teks paling redup: label, unit, keterangan. Dinaikkan dari #6B7283 (2.9:1),
+   * lalu dari #8E94A3 (4,53:1, terlalu tipis) ke 4,70:1 di Fase 3.
+   */
+  textFaint: '#9197A6',
 
   /** Warna per makro untuk ISIAN bar. */
   macro: {
@@ -96,10 +104,10 @@ const dasarGelap = {
   /** Warna per makro untuk TEKS KECIL (label & angka). */
   macroTeks: {
     kalori: '#F0A202',
-    protein: '#1DA697',
-    lemak: '#E97147',
-    karbo: '#9587EC',
-    satFat: '#DD7482',
+    protein: '#51BAAF',
+    lemak: '#EE9373',
+    karbo: '#ABA0F0',
+    satFat: '#E5949F',
   },
 };
 
