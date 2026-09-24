@@ -199,7 +199,7 @@ export default function BudgetScreen() {
       {/* Rincian tujuh hari */}
       <View>
         <SectionHeader judul="Minggu ini" aksi="sisa berjalan" />
-        <DaftarBaris>
+        <DaftarBaris daftar>
           {rincian.map((h) => (
             <BarisHari key={h.tanggal} hari={h} />
           ))}
@@ -303,6 +303,20 @@ export default function BudgetScreen() {
 function BarisHari({ hari }: { hari: BarisKumulatif }) {
   const iniHariIni = hari.status === 'hari ini';
 
+  // Satu kalimat per baris untuk pembaca layar, urutannya sama dengan mata:
+  // hari, tipe, kalori, selisih terhadap target, lalu sisa berjalan.
+  const aksesLabel = [
+    `${namaHariSingkat(hari.tanggal)}${iniHariIni ? ', hari ini' : ''}`,
+    hari.namaTipeHari,
+    `${formatAngka(hari.nilaiKalori)} kilokalori${hari.proyeksi ? ', proyeksi' : ''}`,
+    !hari.proyeksi && hari.selisih !== null && hari.selisih !== 0
+      ? `${formatAngka(Math.abs(hari.selisih))} ${hari.selisih > 0 ? 'di atas' : 'di bawah'} target`
+      : null,
+    `sisa berjalan ${hari.sisaBerjalan < 0 ? 'minus ' : ''}${formatAngka(Math.abs(hari.sisaBerjalan))}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   const warnaSelisih =
     hari.selisih === null
       ? colors.teksSamar
@@ -312,6 +326,8 @@ function BarisHari({ hari }: { hari: BarisKumulatif }) {
 
   return (
     <View
+      accessible
+      accessibilityLabel={aksesLabel}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
