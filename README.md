@@ -86,6 +86,8 @@ karena bentuk data tiruan sudah meniru baris tabel sebenarnya.
 (bab 8 PRD). Setiap perubahan tampilan di `app/`, `src/theme/`, dan
 `src/components/` mengikuti bab itu; alasan dan angka pengukurannya ada di
 [`docs/desain/arah-visual.md`](docs/desain/arah-visual.md).
+Panduan singkat tanpa istilah teknis:
+[`docs/desain/panduan-token.md`](docs/desain/panduan-token.md).
 
 Ringkasnya: gelap sebagai mode utama dan mode terang mengikuti sistem; satu
 angka utama per layar; aksen amber/coral/jade, biru standar dihindari; warna,
@@ -95,5 +97,5 @@ area sentuh minimal 44×44 pt (`src/theme/hig.ts`); log berat maksimal 2 tap.
 **Mengubah acuan desain.** Bab Desain berubah lewat satu PR yang sekaligus
 memperbarui (1) `docs/desain/bab-desain-prd.md` beserta riwayat versinya,
 (2) token di `src/theme`, dan (3) penjaga `scripts/cek-desain.mjs` /
-`scripts/cek-kontras.mjs` bila aturannya ikut berubah. `npm run cek:desain` dan
-`npm run cek:kontras` (bagian dari `cek:semua`) harus lulus sebelum digabung.
+`scripts/cek-kontras.mjs` / `scripts/cek-hardcode.mjs` bila aturannya ikut
+berubah. `npm run cek:desain`, `npm run cek:kontras`, dan `npm run cek:hardcode` (bagian dari `cek:semua`) harus lulus sebelum digabung.
