@@ -254,7 +254,7 @@ export default function UkuranScreen() {
         </Text>
       </Card>
 
-      <Pill sejajar="tengah" label="Data tiruan · estimasi body fat memakai metode Navy" />
+      <Pill sejajar="tengah" label="Data tiruan · estimasi lemak tubuh memakai metode Navy" />
 
       <SheetCatatUkuran
         terbuka={sheetTerbuka}

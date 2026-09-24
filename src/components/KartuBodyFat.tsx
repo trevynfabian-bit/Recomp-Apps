@@ -96,7 +96,7 @@ export function KartuBodyFat({
     <Card style={{ gap: spacing.lg }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-          Body fat
+          Lemak tubuh
         </Text>
         <Pill diKartu label="ESTIMASI" warna={colors.aksen.teks} />
       </View>
@@ -249,7 +249,7 @@ function KartuKosong({
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-          Body fat
+          Lemak tubuh
         </Text>
         <Pill diKartu label="ESTIMASI" warna={colors.teksRedup} />
       </View>

@@ -119,7 +119,7 @@ export function susunStatusPrivasi(m: MasukanStatusPrivasi): ButirStatusPrivasi[
 export const DATA_TERSIMPAN: { judul: string; isi: string }[] = [
   { judul: 'Profil & program', isi: 'Tinggi, jenis kelamin, tanggal lahir, fase, dan target tiap tipe hari.' },
   { judul: 'Catatan harian', isi: 'Berat pagi, makanan, kalori dan makro, tipe hari, serta catatan Anda.' },
-  { judul: 'Ukuran tubuh', isi: 'Pinggang, dada, lengan, paha, dan leher, beserta estimasi body fat.' },
+  { judul: 'Ukuran tubuh', isi: 'Pinggang, dada, lengan, paha, dan leher, beserta estimasi lemak tubuh.' },
   { judul: 'Dari sumber data', isi: 'Latihan, langkah, tidur, recovery, dan energi aktif dari sumber yang Anda sambungkan.' },
   { judul: 'Coach', isi: 'Percakapan dengan coach, ringkasan mingguan, dan evaluasi empat pekan.' },
   { judul: 'Hasil lab', isi: 'Yang Anda tambahkan sendiri; dibaca coach sebagai konteks, bukan dasar saran dosis.' },

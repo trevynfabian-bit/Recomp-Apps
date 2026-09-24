@@ -150,7 +150,7 @@ export default function PengaturanScreen() {
               </Text>
             ) : (
               <Text style={{ ...typography.labelBiasa, color: colors.aksen.teks }}>
-                Lengkapi tinggi & jenis kelamin untuk estimasi body fat
+                Lengkapi tinggi & jenis kelamin untuk estimasi lemak tubuh
               </Text>
             )}
           </View>

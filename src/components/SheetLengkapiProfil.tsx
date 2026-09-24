@@ -72,7 +72,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
   }
 
   return (
-    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Data untuk estimasi body fat">
+    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Data untuk estimasi lemak tubuh">
       <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         Dua data ini dipakai rumus Navy dan disimpan di profil, jadi cukup diisi sekali.
         Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
