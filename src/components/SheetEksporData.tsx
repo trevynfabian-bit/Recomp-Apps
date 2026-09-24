@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { formatAngka, formatUkuranBerkas } from '@recomp/logika';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
+import { StatusProses } from './StatusProses';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
@@ -80,17 +81,20 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       </View>
 
       {status.jenis === 'memproses' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-          Berkas sedang disiapkan. Sheet ini boleh ditutup; ada pemberitahuan saat berkasnya siap.
-        </Text>
+        <StatusProses
+          keadaan="berjalan"
+          judul="Berkas sedang disiapkan…"
+          keterangan="Sheet ini boleh ditutup; ada pemberitahuan saat berkasnya siap."
+        />
       ) : null}
 
       {status.jenis === 'siap' ? (
-        <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
-          <Text style={{ ...typography.bodySedang, color: colors.teks }}>Berkas siap</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-            {status.namaBerkas} · {formatUkuranBerkas(status.ukuranByte)} · disiapkan pukul {jam(status.dibuatPada)}
-          </Text>
+        <View style={{ gap: spacing.xs }}>
+          <StatusProses
+            keadaan="berhasil"
+            judul="Berkas siap"
+            keterangan={`${status.namaBerkas} · ${formatUkuranBerkas(status.ukuranByte)} · disiapkan pukul ${jam(status.dibuatPada)}`}
+          />
           <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Berkas ini berisi data kesehatan Anda. Setelah {web ? 'diunduh' : 'dibagikan'}, penjagaannya mengikuti
             tempat tujuannya.
@@ -99,22 +103,22 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       ) : null}
 
       {status.jenis === 'diserahkan' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.sukses.teks }}>
-          {status.cara === 'diunduh'
-            ? 'Berkas sudah diunduh.'
-            : 'Berkas sudah dibagikan. Salinan sementaranya di perangkat ini sudah dihapus.'}
-        </Text>
+        <StatusProses
+          keadaan="berhasil"
+          judul={status.cara === 'diunduh' ? 'Berkas sudah diunduh' : 'Berkas sudah dibagikan'}
+          keterangan={status.cara === 'diunduh' ? undefined : 'Salinan sementaranya di perangkat ini sudah dihapus.'}
+        />
       ) : null}
 
       {status.jenis === 'gagal' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-          Berkas belum bisa disiapkan. Periksa koneksi lalu coba lagi.
-        </Text>
+        <StatusProses keadaan="gagal" judul="Berkas belum bisa disiapkan" keterangan="Periksa koneksi lalu coba lagi." />
       ) : null}
       {galatSerah ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-          Berkas belum bisa {web ? 'diunduh' : 'dibagikan'}. Berkasnya masih siap; coba lagi.
-        </Text>
+        <StatusProses
+          keadaan="gagal"
+          judul={`Berkas belum bisa ${web ? 'diunduh' : 'dibagikan'}`}
+          keterangan="Berkasnya masih siap; coba lagi."
+        />
       ) : null}
 
       <View style={{ gap: spacing.sm }}>

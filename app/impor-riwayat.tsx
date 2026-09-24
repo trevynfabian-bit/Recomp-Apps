@@ -3,7 +3,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatWaktuRelatif } from '@recomp/logika';
-import { Card, HeaderLayar, SectionHeader, SheetEksporData, SheetImporRiwayat, type SumberImpor, Tombol } from '@/components';
+import {
+  Card,
+  HeaderLayar,
+  SectionHeader,
+  SheetEksporData,
+  SheetImporRiwayat,
+  StatusProses,
+  type SumberImpor,
+  Tombol,
+} from '@/components';
 import { colors, spacing, typography, ukuranIkon } from '@/theme';
 import { useEkspor } from '@/state/ekspor';
 
@@ -114,11 +123,11 @@ export default function ImporRiwayatScreen() {
             </Text>
           </View>
           {ekspor.status.jenis === 'siap' ? (
-            <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>
-              Berkas siap: {ekspor.status.namaBerkas}
-            </Text>
+            <StatusProses ringkas keadaan="berhasil" judul={`Berkas siap: ${ekspor.status.namaBerkas}`} />
           ) : ekspor.status.jenis === 'memproses' ? (
-            <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>Berkas sedang disiapkan…</Text>
+            <StatusProses ringkas keadaan="berjalan" judul="Berkas sedang disiapkan…" />
+          ) : ekspor.status.jenis === 'gagal' ? (
+            <StatusProses ringkas keadaan="gagal" judul="Berkas terakhir gagal disiapkan; coba lagi." />
           ) : null}
           <Tombol varian="bertepi" label="Ekspor data saya" onPress={() => setEksporTerbuka(true)} />
         </Card>

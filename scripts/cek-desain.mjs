@@ -162,7 +162,7 @@ bagian('Keadaan layar');
  * bukan teks "Belum ada …" atau spinner yang dirakit per layar. Spinner hanya
  * boleh di komponen yang memang menggambar keadaan sibuk.
  */
-const SPINNER_BOLEH = ['Keadaan.tsx', 'Tombol.tsx', 'IndikatorSinkron.tsx'];
+const SPINNER_BOLEH = ['Keadaan.tsx', 'Tombol.tsx', 'IndikatorSinkron.tsx', 'StatusProses.tsx'];
 const keadaanRakitan = [...layar, ...berkasTsx('src/components')]
   .filter((p) => !p.endsWith('Keadaan.tsx') && !p.endsWith('peraga.tsx'))
   .flatMap((p) => {

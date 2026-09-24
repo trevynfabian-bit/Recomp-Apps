@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 import {
@@ -14,6 +14,7 @@ import {
 import type { BarisDilewati } from '@recomp/logika';
 import { Isian } from './Isian';
 import { KeadaanGagal } from './Keadaan';
+import { StatusProses } from './StatusProses';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { PilihanSegmen } from './PilihanSegmen';
 import { Tombol } from './Tombol';
@@ -27,7 +28,7 @@ import {
   mockJalankanImpor,
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
-import { colors, radius, spacing, typography, ukuran, ukuranIkon } from '@/theme';
+import { colors, spacing, typography, ukuran } from '@/theme';
 import { Panel } from './Card';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
@@ -340,36 +341,18 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       ) : null}
 
       {langkah.jenis === 'proses' ? (
-        <View style={{ gap: spacing.md, paddingVertical: spacing.md }}>
-          <View
-            accessibilityRole="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={langkah.p.jumlah}
-            aria-valuenow={langkah.selesai}
-            style={{ height: ukuran.trackTebal, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung, overflow: 'hidden' }}
-          >
-            <View
-              style={{
-                width: `${langkah.p.jumlah === 0 ? 100 : (langkah.selesai / langkah.p.jumlah) * 100}%`,
-                height: '100%',
-                backgroundColor: colors.aksen.isian,
-              }}
-            />
-          </View>
-          <Text style={{ ...typography.label, color: colors.teksRedup }}>
-            Mengimpor… {formatAngka(langkah.selesai)} dari {formatAngka(langkah.p.jumlah)} {langkah.p.satuan}
-          </Text>
+        <View style={{ paddingVertical: spacing.md }}>
+          <StatusProses
+            keadaan="berjalan"
+            judul={`Mengimpor… ${formatAngka(langkah.selesai)} dari ${formatAngka(langkah.p.jumlah)} ${langkah.p.satuan}`}
+            progres={{ selesai: langkah.selesai, total: langkah.p.jumlah }}
+          />
         </View>
       ) : null}
 
       {langkah.jenis === 'selesai' ? (
         <>
-          <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <Ionicons name="checkmark-circle" size={ukuranIkon.sedang} color={colors.status.sukses.teks} />
-            <Text style={{ ...typography.bodyTebal, color: colors.status.sukses.teks, flex: 1 }}>
-              {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
-            </Text>
-          </View>
+          <StatusProses keadaan="berhasil" judul={`${formatAngka(langkah.p.jumlah)} ${langkah.p.satuan} diimpor`} />
           {/* Ringkasan hasil: apa yang masuk, dari mana, dan apa yang tidak. */}
           <Panel style={{ gap: spacing.sm }}>
             {namaBerkas ? <BarisRingkas label="Berkas" nilai={namaBerkas} /> : null}

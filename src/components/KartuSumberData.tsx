@@ -1,11 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
+
 import { Text, View } from 'react-native';
 import { formatAngka, PROFIL_SUMBER } from '@recomp/logika';
 import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/logika';
 import { Card } from './Card';
+import { StatusProses } from './StatusProses';
 import { Tombol } from './Tombol';
 
-import { colors, radius, spacing, tint, typography, ukuran, ukuranIkon } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   koneksi: KoneksiSumber;
@@ -113,11 +114,10 @@ export function KartuSumberData({
 
       {/* Hasil sinkron manual: dikatakan juga saat tidak ada yang baru, supaya
           "sudah diperiksa" tidak dikira "belum jalan". */}
-      {sinkron?.hasil ? (
-        <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-          <Ionicons name="checkmark-circle" size={ukuranIkon.kecil} color={colors.status.sukses.teks} />
-          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup, flex: 1 }}>{sinkron.hasil}</Text>
-        </View>
+      {sinkron?.berjalan ? (
+        <StatusProses ringkas keadaan="berjalan" judul={`Menyinkron ${profil.nama}…`} />
+      ) : sinkron?.hasil ? (
+        <StatusProses ringkas keadaan="berhasil" judul={sinkron.hasil} />
       ) : null}
 
       <AksiKartu

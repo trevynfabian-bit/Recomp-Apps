@@ -44,6 +44,7 @@ export { EstimasiE1rm } from './EstimasiE1rm';
 export { Pill } from './Pill';
 export { PilihanSegmen, type OpsiSegmen } from './PilihanSegmen';
 export { Sisipan } from './Sisipan';
+export { StatusProses, type KeadaanProses } from './StatusProses';
 export { Placeholder } from './Placeholder';
 export { PratinjauWidget } from './PratinjauWidget';
 export { RiwayatPerubahan } from './RiwayatPerubahan';
