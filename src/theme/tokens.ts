@@ -108,7 +108,7 @@ export const typography = {
  * `typography` (mis. " · bawaan" yang sengaja lebih ringan dari nama tebal di
  * depannya). Gaya utuh tetap memakai varian `typography`, bukan penimpaan.
  */
-export const bobot = { biasa: '500', sedang: '600', tebal: '700', hero: '800' } as const;
+export const bobot = { biasa: '500' } as const;
 
 /**
  * Digit selebar sama untuk angka yang berubah di tempat (hero, nilai makro,

@@ -125,41 +125,16 @@ type Peran = { isian: string; teks: string };
 
 /**
  * Lapis SEMANTIK (bab Desain 8.2): nama menurut MAKNA, dibentuk dari palet
- * dasar sehingga setiap heks tetap hanya ditulis sekali. Layar & komponen
- * memakai lapis ini; nama warna mentah (`amber`, `surface`, …) adalah token
- * lama yang dipensiunkan bertahap (task "Pembersihan Token Lama").
+ * dasar sehingga setiap heks tetap hanya ditulis sekali. Hanya lapis ini yang
+ * keluar dari src/theme; nama warna mentah (`amber`, `surface`, …) sudah
+ * dipensiunkan dan hanya hidup di palet dasar di atas.
+ *
+ * Mempensiunkan token berikutnya: tambahkan dulu sebagai alias dengan satu
+ * baris `/** @deprecated Pakai …. *\/` di atasnya (cek:desain menolak
+ * pemakaiannya dan menyarankan pengganti), pindahkan pemakaiannya, lalu hapus.
  */
 function lengkapi(d: Dasar) {
   return {
-    // --- Token lama: tetap ada selama peralihan, JANGAN dipakai di kode baru.
-    // Satu baris `@deprecated Pakai …` per token; `cek:desain` membacanya untuk
-    // menyarankan pengganti, dan editor mencoretnya.
-    /** @deprecated Pakai `colors.latar`. */
-    bg: d.bg,
-    /** @deprecated Pakai `colors.permukaan`. */
-    surface: d.surface,
-    /** @deprecated Pakai `colors.permukaanCekung`. */
-    surfaceSunken: d.surfaceSunken,
-    /** @deprecated Pakai `colors.garis`. */
-    border: d.border,
-    /** @deprecated Pakai `colors.garisKontrol`. */
-    borderKuat: d.borderKuat,
-    /** @deprecated Pakai `colors.aksen.isian`/`colors.aksen.teks`, atau `colors.status.peringatan` bila maknanya peringatan. */
-    amber: d.amber,
-    /** @deprecated Pakai `colors.status.bahaya.isian`. */
-    coral: d.coral,
-    /** @deprecated Pakai `colors.status.sukses.isian`. */
-    jade: d.jade,
-    /** @deprecated Pakai `colors.status.sukses.teks` atau `colors.status.bahaya.teks`. */
-    aksenTeks: d.aksenTeks,
-    /** @deprecated Pakai `colors.teks`. */
-    text: d.text,
-    /** @deprecated Pakai `colors.teksRedup`. */
-    textMuted: d.textMuted,
-    /** @deprecated Pakai `colors.teksSamar`. */
-    textFaint: d.textFaint,
-
-    // --- Token yang tetap berlaku.
     /** Label & ikon di atas ISIAN aksen/status. Di gelap = latar, di terang putih. */
     diAtasIsian: d.diAtasIsian,
     /** Warna per makro untuk ISIAN bar (nama domain, bukan nama warna). */

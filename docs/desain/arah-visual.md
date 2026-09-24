@@ -93,8 +93,9 @@ palet dasar sehingga setiap heks hanya ditulis sekali:
 | aksen | `colors.aksen.isian` / `colors.aksen.teks` |
 | sukses, peringatan, bahaya, info | `colors.status.<peran>.isian` / `.teks` |
 
-**Token usang** (ditandai `@deprecated` di `colors.ts`, dicoret editor, ditolak
-`cek:desain` di luar `src/theme`):
+**Token usang yang sudah dihapus** dari `colors` (dulu ditandai `@deprecated`,
+lalu pemakaiannya dipindahkan, lalu dihapus; nilainya tetap hidup di palet
+dasar internal `colors.ts`):
 
 | Token lama | Pengganti |
 |---|---|
@@ -109,14 +110,13 @@ palet dasar sehingga setiap heks hanya ditulis sekali:
 | `colors.jade` | `colors.status.sukses.isian` |
 | `colors.aksenTeks.coral` / `.jade` | `colors.status.bahaya.teks` / `colors.status.sukses.teks` |
 
-**Status peralihan:** pemakaian token usang di `app/`, `src/`, dan
-`scripts/` sudah **nol** (layar dipindahkan lewat codemod; `cek-kontras.mjs`
-kini memakai nama semantik yang sama). Token usang hanya tersisa sebagai alias
-di `colors.ts`.
+**Status:** selesai. Pemakaian di `app/`, `src/`, dan `scripts/` dipindahkan
+lewat codemod, lalu aliasnya dihapus; memakai nama lama kini gagal di
+`typecheck`. Pola yang sama (alias `@deprecated` → pindahkan → hapus) dipakai
+untuk mempensiunkan token berikutnya, dan `cek:desain` otomatis menjaganya.
 
 Yang **tetap berlaku**: `diAtasIsian`, `macro.*`, `macroTeks.*` (nama domain,
-bukan nama warna). Token usang dihapus dari palet setelah pemakaian terakhirnya
-di `src/theme` dan `scripts/cek-kontras.mjs` ikut dipindahkan.
+bukan nama warna).
 
 ### 1.5 Verifikasi kontras (WCAG 2.1 AA)
 

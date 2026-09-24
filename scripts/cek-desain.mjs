@@ -129,8 +129,8 @@ const USANG = new Map(
     (m) => [m[2], m[1]],
   ),
 );
-cek(`token usang tercatat di colors.ts (${USANG.size})`, USANG.size > 0);
-const NAMA_LAMA = new RegExp(`colors\\.(${[...USANG.keys()].join('|')})\\b`);
+// Saat tidak ada token yang sedang dipensiunkan, pola ini tidak cocok apa pun.
+const NAMA_LAMA = USANG.size ? new RegExp(`colors\\.(${[...USANG.keys()].join('|')})\\b`) : /(?!)/;
 const namaLama = [...berkasTs('app'), ...berkasTs('src')]
   .filter((p) => !p.startsWith(join('src', 'theme')))
   .flatMap((p) =>
