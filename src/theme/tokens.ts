@@ -70,6 +70,8 @@ export const ukuran = {
   kolomAngka: 140,
   /** Tinggi minimum kolom isian multibaris (catatan harian). */
   isianPanjang: 96,
+  /** Garis penanda di atas ikon tab terpilih. */
+  penandaTab: { lebar: 20, tinggi: 3, jarakAtas: 6 },
 } as const;
 
 /**

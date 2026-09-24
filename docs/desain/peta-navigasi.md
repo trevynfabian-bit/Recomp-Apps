@@ -107,3 +107,7 @@ menjaga jumlah tab 1–5 dan bahwa judul setiap layar tab diawali label tabnya
 - Warna: terpilih `aksen.teks`, lainnya `teksSamar`; latar `latar`, garis atas
   `garis`. Ukuran ikon dari tab bar (ukuran sistem), label `caption` tanpa
   tracking.
+- **Penanda tab terpilih** — tiga penanda yang saling menguatkan: warna aksen,
+  glyph terisi, dan garis aksen 20×3 pt yang menempel di tepi atas tab bar
+  (`ukuran.penandaTab`). Pembaca layar mendapat keadaan terpilih dari tab bar
+  (`aria-selected`), dan label tab tetap terbaca oleh VoiceOver.

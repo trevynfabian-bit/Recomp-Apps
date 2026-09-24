@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { View, type ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
-import { colors, typography } from '@/theme';
+import { colors, radius, typography, ukuran } from '@/theme';
 
 type Tab = {
   /** Nama berkas rute di `app/(tabs)/`. */
@@ -54,12 +55,47 @@ export default function TabsLayout() {
           name={t.rute}
           options={{
             title: t.judul,
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons name={focused ? t.ikon : `${t.ikon}-outline`} size={size} color={color} />
-            ),
+            tabBarIcon: ({ color, size, focused }) => <IkonTab ikon={t.ikon} terpilih={focused} warna={color} ukuranIkon={size} />,
           }}
         />
       ))}
     </Tabs>
+  );
+}
+
+/**
+ * Ikon tab dengan tiga penanda terpilih yang saling menguatkan: warna aksen,
+ * glyph terisi, dan garis aksen pendek di tepi atas tab. Pembaca layar
+ * mendapat keadaan terpilih dari tab bar (`aria-selected`).
+ */
+function IkonTab({
+  ikon,
+  terpilih,
+  warna,
+  ukuranIkon,
+}: {
+  ikon: Tab['ikon'];
+  terpilih: boolean;
+  warna: ColorValue;
+  ukuranIkon: number;
+}) {
+  return (
+    <View style={{ alignItems: 'center' }}>
+      {terpilih ? (
+        <View
+          style={{
+            position: 'absolute',
+            // Menempel ke tepi atas tab: padding tab bawaan diimbangi.
+            top: -ukuran.penandaTab.jarakAtas,
+            width: ukuran.penandaTab.lebar,
+            height: ukuran.penandaTab.tinggi,
+            borderBottomLeftRadius: radius.pill,
+            borderBottomRightRadius: radius.pill,
+            backgroundColor: colors.aksen.isian,
+          }}
+        />
+      ) : null}
+      <Ionicons name={terpilih ? ikon : `${ikon}-outline`} size={ukuranIkon} color={warna} />
+    </View>
   );
 }
