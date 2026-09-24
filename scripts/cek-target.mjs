@@ -332,14 +332,14 @@ console.log('\nPeringatan protein sebelum simpan');
   cek('tepat 1,6 g/kg tidak dianggap rendah', peringatanProtein(120, null, 75) === null);
 }
 
-console.log('\nPesan galat data target, tipe hari, dan fase');
+console.log('\nPesan galat lapisan data (target, tipe hari, fase, berat, ukuran, tren)');
 {
   // Setiap kalimat yang dilempar lapisan data ke layar: literal string di
   // dalam `new Kesalahan*(...)`, dibaca lewat parser TypeScript. Kalimat itu
   // tampil apa adanya, jadi harus netral, tanpa istilah teknis, dan lengkap.
   const TEKNIS = /\b(database|server tidak mengembalikan|rpc|sql|postgres|null|undefined|error|gagal memuat)\b/i;
   const kalimat = [];
-  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts']) {
+  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts', 'src/data/beratPagi.ts', 'src/data/ukuran.ts', 'src/data/tren.ts']) {
     const sumber = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true);
     (function jelajah(n, dalam) {
       const baru = dalam || (ts.isNewExpression(n) && /^Kesalahan/.test(n.expression.getText(sumber)));
@@ -347,7 +347,7 @@ console.log('\nPesan galat data target, tipe hari, dan fase');
       ts.forEachChild(n, (a) => jelajah(a, baru));
     })(sumber, false);
   }
-  cek('ada kalimat galat untuk diperiksa', kalimat.length >= 20, `hanya ${kalimat.length}`);
+  cek('ada kalimat galat untuk diperiksa', kalimat.length >= 50, `hanya ${kalimat.length}`);
   for (const [berkas, t] of kalimat) {
     const nada = pelanggaranNada(t);
     const label = `${berkas.split('/').pop()}: "${t.length > 60 ? `${t.slice(0, 57)}...` : t}"`;

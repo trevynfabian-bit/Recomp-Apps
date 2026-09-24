@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { lajuTerkini, ringkasPerubahan, statusBatasPinggang } from '@recomp/logika';
+import { formatDesimal, lajuTerkini, ringkasPerubahan, statusBatasPinggang } from '@recomp/logika';
 import type { RingkasanPerubahan, StatusBatasPinggang, TitikUkuran } from '@recomp/logika';
 import type {
   AlertPinggangHasilRow,
@@ -114,8 +114,8 @@ export async function simpanUkuran(ukuran: UkuranBaru): Promise<PencatatanUkuran
     p_catatan: ukuran.catatan ?? null,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan pencatatan.', true);
+  if (error) throw terjemahkan(error, 'simpan');
+  if (!data) throw new KesalahanUkuran('Ukuran belum tersimpan. Coba lagi sebentar lagi.', true);
   return kePencatatanTs(data as BodyMeasurementRow);
 }
 
@@ -123,7 +123,7 @@ export async function simpanUkuran(ukuran: UkuranBaru): Promise<PencatatanUkuran
 export async function hapusUkuran(tanggal: string): Promise<boolean> {
   const { data, error } = await supabase.rpc('hapus_ukuran', { p_tanggal: tanggal });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'simpan');
   return data === true;
 }
 
@@ -142,13 +142,11 @@ export async function hapusUkuran(tanggal: string): Promise<boolean> {
  * sama, dan menyamakan keduanya jadi "tidak bisa dihitung" membuat orang
  * memperbaiki hal yang salah.
  */
-export async function estimasiBodyFat(
-  tanggal: string | null = null,
-): Promise<BuktiBodyFat> {
+export async function estimasiBodyFat(tanggal: string | null = null): Promise<BuktiBodyFat> {
   const { data, error } = await supabase.rpc('estimasi_body_fat', { p_tanggal: tanggal });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan estimasi.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data) throw new KesalahanUkuran('Perkiraan lemak tubuh belum bisa dihitung. Coba lagi sebentar lagi.', true);
 
   const j = data as EstimasiBodyFatRow;
   const angka = (n: number | null) => (n === null ? null : Number(n));
@@ -156,9 +154,7 @@ export async function estimasiBodyFat(
   return {
     metode: j.metode,
     persen: angka(j.persen),
-    rentang: j.rentang
-      ? { bawah: Number(j.rentang.bawah), atas: Number(j.rentang.atas) }
-      : null,
+    rentang: j.rentang ? { bawah: Number(j.rentang.bawah), atas: Number(j.rentang.atas) } : null,
     ketidakpastian: j.ketidakpastian,
     sensitivitasPinggang: angka(j.sensitivitas_pinggang),
     kurang: j.kurang,
@@ -188,10 +184,8 @@ export async function riwayatUkuran(batas = 52): Promise<PencatatanUkuran[]> {
     .order('tanggal', { ascending: false })
     .limit(batas);
 
-  if (error) throw terjemahkan(error);
-  return ((data ?? []) as BodyMeasurementRow[])
-    .map(kePencatatanTs)
-    .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+  if (error) throw terjemahkan(error, 'muat');
+  return ((data ?? []) as BodyMeasurementRow[]).map(kePencatatanTs).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
 }
 
 /**
@@ -219,8 +213,8 @@ export async function riwayatDanDelta(
     p_maks_titik_laju: maksTitikLaju,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan riwayat.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data) throw new KesalahanUkuran('Riwayat ukuran belum bisa dimuat. Coba lagi sebentar lagi.', true);
   return data as RiwayatUkuranRow;
 }
 
@@ -250,8 +244,8 @@ export async function periksaAlertPinggang(
     p_catat: catat,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanUkuran('Server tidak mengembalikan keadaan batas.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data) throw new KesalahanUkuran('Keadaan batas pinggang belum bisa dimuat. Coba lagi sebentar lagi.', true);
   return data as AlertPinggangHasilRow;
 }
 
@@ -263,7 +257,7 @@ export async function riwayatAlertPinggang(batas = 20): Promise<AlertPinggangRow
     .order('urutan', { ascending: false })
     .limit(batas);
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
@@ -274,20 +268,12 @@ export async function riwayatAlertPinggang(batas = 20): Promise<AlertPinggangRow
  * seluruh grafik dan seluruh laju per pekan salah, dan salahnya terlihat
  * dramatis justru karena datanya tidak ada.
  */
-export function deretBagian(
-  catatan: PencatatanUkuran[],
-  bagian: BagianTubuh,
-): TitikUkuran[] {
-  return catatan
-    .filter((c) => c[bagian] !== null)
-    .map((c) => ({ tanggal: c.tanggal, nilai: c[bagian] as number }));
+export function deretBagian(catatan: PencatatanUkuran[], bagian: BagianTubuh): TitikUkuran[] {
+  return catatan.filter((c) => c[bagian] !== null).map((c) => ({ tanggal: c.tanggal, nilai: c[bagian] as number }));
 }
 
 /** Riwayat perubahan satu bagian tubuh, memakai aturan @recomp/logika. */
-export function perubahanBagian(
-  catatan: PencatatanUkuran[],
-  bagian: BagianTubuh,
-): RingkasanPerubahan {
+export function perubahanBagian(catatan: PencatatanUkuran[], bagian: BagianTubuh): RingkasanPerubahan {
   return ringkasPerubahan(deretBagian(catatan, bagian));
 }
 
@@ -299,10 +285,7 @@ export function perubahanBagian(
  * (dehidrasi, meteran bergeser sesentimeter) akan mengubah kesimpulannya
  * seluruhnya.
  */
-export function statusPinggang(
-  catatan: PencatatanUkuran[],
-  batasCm: number | null,
-): StatusBatasPinggang | null {
+export function statusPinggang(catatan: PencatatanUkuran[], batasCm: number | null): StatusBatasPinggang | null {
   const deret = deretBagian(catatan, 'pinggangCm');
   const terakhir = deret[deret.length - 1];
   if (!terakhir) return null;
@@ -328,30 +311,61 @@ function kePencatatanTs(r: BodyMeasurementRow): PencatatanUkuran {
 /**
  * Ubah kesalahan Postgres/PostgREST menjadi pesan berbahasa Indonesia.
  * Kode SQLSTATE-nya sengaja dicocokkan dengan yang di-`raise` oleh RPC.
+ * `untuk` membedakan memuat dari menyimpan, supaya riwayat yang gagal dimuat
+ * tidak dilaporkan sebagai ukuran yang gagal disimpan.
  */
-function terjemahkan(error: { code?: string; message: string }): KesalahanUkuran {
+function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 'simpan'): KesalahanUkuran {
+  if (/fetch|network|jaringan/i.test(error.message)) {
+    return new KesalahanUkuran(
+      untuk === 'muat'
+        ? 'Ukuran belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+        : 'Ukuran belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.',
+      true,
+    );
+  }
   switch (error.code) {
-    case '22003':
-      // Dua sebab memakai kode ini: satu bagian di luar rentang, dan batas
-      // jumlah pencatatan di luar 1–260. Pesan RPC-nya sudah menyebut mana yang
-      // terjadi beserta angkanya, jadi ia lebih menolong daripada kalimat umum
-      // apa pun yang bisa ditulis di sini.
-      return new KesalahanUkuran(error.message, false);
+    case '22003': {
+      // simpan_ukuran menyebut bagian, nilai, dan rentangnya ("Pinggang 170.0 cm
+      // di luar rentang wajar (50–160 cm)"); ditulis ulang dengan koma desimal.
+      const m = /^(.+?) ([\d.]+) cm di luar rentang wajar \((\d+)–(\d+) cm\)/.exec(error.message);
+      if (m) {
+        return new KesalahanUkuran(
+          `${m[1]} ${formatDesimal(Number(m[2]), 1)} cm di luar rentang wajar (${m[3]}–${m[4]} cm). Periksa lagi angkanya.`,
+          false,
+        );
+      }
+      // Batas jumlah pencatatan (1–260): salah panggil dari app, bukan isian pengguna.
+      return new KesalahanUkuran('Riwayat ukuran belum bisa dimuat. Coba lagi sebentar lagi.', true);
+    }
     case '22004': // null_value_not_allowed — pencatatan baru tanpa ukuran
       return new KesalahanUkuran('Isi setidaknya satu ukuran sebelum menyimpan.', false);
     case '22007': // invalid_datetime_format — tanggal masa depan
-      return new KesalahanUkuran('Tanggal itu masih di masa depan.', false);
+      return new KesalahanUkuran('Tanggal itu masih di masa depan. Pilih hari ini atau sebelumnya.', false);
     case '23505': // unique_violation — dua pencatatan di tanggal sama
-      return new KesalahanUkuran(
-        'Tanggal itu sudah punya pencatatan. Muat ulang lalu coba lagi.',
-        true,
-      );
-    case '23514': // check_violation — catatan kepanjangan
-      return new KesalahanUkuran('Catatan maksimal 500 karakter.', false);
+      return new KesalahanUkuran('Tanggal itu sudah punya pencatatan. Muat ulang lalu coba lagi.', true);
+    case '23514': {
+      // check_violation: dari simpan_ukuran (catatan) atau CHECK tabel bila
+      // ditulis langsung; nama aturannya menentukan kalimatnya.
+      if (/catatan/i.test(error.message)) return new KesalahanUkuran('Catatan maksimal 500 karakter.', false);
+      if (/ukuran_ada_isinya/.test(error.message)) {
+        return new KesalahanUkuran('Isi setidaknya satu ukuran sebelum menyimpan.', false);
+      }
+      return new KesalahanUkuran('Salah satu ukuran di luar rentang wajar. Periksa lagi angkanya.', false);
+    }
     case '28000':
     case 'PGRST301':
-      return new KesalahanUkuran('Sesi Anda berakhir. Masuk lagi untuk mencatat ukuran.', false);
+      return new KesalahanUkuran(
+        untuk === 'muat'
+          ? 'Sesi Anda berakhir. Masuk lagi untuk melihat ukuran.'
+          : 'Sesi Anda berakhir. Masuk lagi untuk mencatat ukuran.',
+        false,
+      );
     default:
-      return new KesalahanUkuran('Gagal menyimpan ukuran. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanUkuran(
+        untuk === 'muat'
+          ? 'Ukuran belum bisa dimuat. Coba lagi sebentar lagi.'
+          : 'Ukuran belum tersimpan. Coba lagi sebentar lagi.',
+        true,
+      );
   }
 }

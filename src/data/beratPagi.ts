@@ -1,3 +1,4 @@
+import { RENTANG_BERAT_KG } from '@recomp/logika';
 import { supabase } from '@/lib/supabase';
 import type { DailyLogRow, SumberBeratDb } from '@/types/database';
 
@@ -37,9 +38,9 @@ export async function simpanBeratPagi(
     p_sumber: sumber,
   });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'simpan');
   if (!data) {
-    throw new KesalahanSimpanBerat('Server tidak mengembalikan data', true);
+    throw new KesalahanSimpanBerat('Berat belum tersimpan. Coba lagi sebentar lagi.', true);
   }
   return data;
 }
@@ -54,7 +55,7 @@ export async function ambilBeratPagi(
     .eq('tanggal', tanggal)
     .maybeSingle();
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? null;
 }
 
@@ -74,29 +75,50 @@ export async function riwayatBerat(
     .order('tanggal', { ascending: false })
     .limit(batas);
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
 /**
  * Ubah kesalahan Postgres/PostgREST menjadi pesan berbahasa Indonesia.
- * Kode SQLSTATE-nya sengaja dicocokkan dengan yang di-`raise` oleh RPC.
+ * `untuk` membedakan memuat dari menyimpan.
  */
-function terjemahkan(error: { code?: string; message: string }): KesalahanSimpanBerat {
+function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 'simpan'): KesalahanSimpanBerat {
+  const rentang = `Berat di luar rentang wajar (${RENTANG_BERAT_KG.min}–${RENTANG_BERAT_KG.maks} kg). Periksa lagi angkanya.`;
+  if (/fetch|network|jaringan/i.test(error.message)) {
+    return new KesalahanSimpanBerat(
+      untuk === 'muat'
+        ? 'Berat belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+        : 'Berat belum tersimpan. Periksa koneksi, lalu coba lagi.',
+      true,
+    );
+  }
   switch (error.code) {
     case '28000': // invalid_authorization_specification
-      return new KesalahanSimpanBerat('Sesi Anda berakhir. Masuk lagi untuk menyimpan.', false);
+    case 'PGRST301': // JWT kedaluwarsa di PostgREST
+      return new KesalahanSimpanBerat(
+        untuk === 'muat'
+          ? 'Sesi Anda berakhir. Masuk lagi untuk melihat berat.'
+          : 'Sesi Anda berakhir. Masuk lagi untuk menyimpan.',
+        false,
+      );
     case '22003': // numeric_value_out_of_range
-      return new KesalahanSimpanBerat('Berat di luar rentang wajar (30–250 kg).', false);
+      return new KesalahanSimpanBerat(rentang, false);
     case '22004': // null_value_not_allowed
       return new KesalahanSimpanBerat('Berat tidak boleh kosong.', false);
-    case '23514': // check_violation
-      return new KesalahanSimpanBerat('Nilai berat ditolak database.', false);
-    case 'PGRST301': // JWT kedaluwarsa di PostgREST
-      return new KesalahanSimpanBerat('Sesi Anda berakhir. Masuk lagi untuk menyimpan.', false);
+    case '23514': // check_violation — daily_logs_berat_masuk_akal bila ditulis langsung
+      return new KesalahanSimpanBerat(
+        /berat_masuk_akal/.test(error.message) ? rentang : 'Berat ini belum bisa disimpan. Periksa lagi angkanya.',
+        false,
+      );
     default:
       // Sisanya diperlakukan sebagai gangguan sementara — tombol "Coba lagi"
       // di kartu Timbang Pagi memang untuk kasus ini.
-      return new KesalahanSimpanBerat('Gagal menyimpan. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanSimpanBerat(
+        untuk === 'muat'
+          ? 'Berat belum bisa dimuat. Coba lagi sebentar lagi.'
+          : 'Berat belum tersimpan. Periksa koneksi, lalu coba lagi.',
+        true,
+      );
   }
 }

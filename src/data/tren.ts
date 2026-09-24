@@ -96,14 +96,14 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanTren {
     case '22004': // null_value_not_allowed
       return new KesalahanTren('Rentang tanggal tidak boleh kosong.', false);
     case '22007': // invalid_datetime_format — dipakai untuk rentang terbalik
-      return new KesalahanTren('Tanggal awal melewati tanggal akhir.', false);
+      return new KesalahanTren('Tanggal awal melewati tanggal akhir. Tukar urutannya.', false);
     case '22003': // numeric_value_out_of_range — dipakai untuk rentang terlalu panjang
-      return new KesalahanTren('Rentang terlalu panjang. Pilih periode yang lebih pendek.', false);
+      return new KesalahanTren('Rentangnya lebih panjang dari yang bisa ditampilkan. Pilih periode yang lebih pendek.', false);
     case '28000':
     case 'PGRST301':
       return new KesalahanTren('Sesi Anda berakhir. Masuk lagi untuk melihat tren.', false);
     default:
-      return new KesalahanTren('Gagal memuat tren. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanTren('Tren belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
 }
 
@@ -143,7 +143,7 @@ export async function snapshotTren(sampai: string, hari = 14): Promise<SnapshotT
   });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanTren('Server tidak mengembalikan data tren.', true);
+  if (!data) throw new KesalahanTren('Tren belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const j = data as TrenSnapshotRow;
   const angka = (n: number | null) => (n === null ? null : Number(n));
