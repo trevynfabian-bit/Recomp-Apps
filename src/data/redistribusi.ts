@@ -109,8 +109,8 @@ export async function pratinjauRedistribusi(
     p_hari_ini: hariIni,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanRedistribusi('Server tidak mengembalikan tawaran.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data) throw new KesalahanRedistribusi('Tawaran budget belum bisa dimuat. Coba lagi sebentar lagi.', true);
   return keBentukTs(data as HasilRedistribusiRow);
 }
 
@@ -140,8 +140,8 @@ export async function terapkanRedistribusiPekan(
     p_alasan: alasan,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanRedistribusi('Server tidak mengembalikan hasil.', true);
+  if (error) throw terjemahkan(error, 'simpan');
+  if (!data) throw new KesalahanRedistribusi('Budget belum diatur. Coba lagi sebentar lagi.', true);
   return keBentukTs(data as HasilRedistribusiRow);
 }
 
@@ -164,8 +164,9 @@ export async function proteksiProtein(
     p_hari_ini: hariIni,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanRedistribusi('Server tidak mengembalikan bukti proteksi.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data)
+    throw new KesalahanRedistribusi('Bukti protein terlindungi belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const j = data as ProteksiProteinRow;
   return {
@@ -198,21 +199,19 @@ export async function riwayatRedistribusi(batas = 12): Promise<RedistribusiMingg
     .order('minggu_mulai', { ascending: false })
     .limit(batas);
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
 /** Perubahan per hari dari satu penerapan. */
-export async function rincianPenerapan(
-  redistribusiId: string,
-): Promise<RedistribusiHariRow[]> {
+export async function rincianPenerapan(redistribusiId: string): Promise<RedistribusiHariRow[]> {
   const { data, error } = await supabase
     .from('redistribusi_hari')
     .select('*')
     .eq('redistribusi_id', redistribusiId)
     .order('tanggal', { ascending: true });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
@@ -244,8 +243,18 @@ function keBentukTs(j: HasilRedistribusiRow): TawaranRedistribusi {
 /**
  * Ubah kesalahan Postgres/PostgREST menjadi pesan berbahasa Indonesia.
  * Kode SQLSTATE-nya sengaja dicocokkan dengan yang di-`raise` oleh RPC.
+ * `untuk` membedakan memuat (tawaran, bukti proteksi, riwayat) dari
+ * menerapkan, supaya tawaran yang gagal dimuat tidak terbaca "gagal mengatur".
  */
-function terjemahkan(error: { code?: string; message: string }): KesalahanRedistribusi {
+function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 'simpan'): KesalahanRedistribusi {
+  if (/fetch|network|jaringan/i.test(error.message)) {
+    return new KesalahanRedistribusi(
+      untuk === 'muat'
+        ? 'Tawaran budget belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+        : 'Budget belum diatur. Periksa koneksi, lalu coba lagi.',
+      true,
+    );
+  }
   switch (error.code) {
     case '23505': // unique_violation — kuota sekali per pekan
       return new KesalahanRedistribusi(
@@ -253,20 +262,35 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanRedist
         false,
       );
     case '23502': // not_null_violation — profil belum lengkap
-      return new KesalahanRedistribusi('Profil belum punya batas bawah kalori.', false);
+      return new KesalahanRedistribusi(
+        'Batas bawah kalori harian belum ada di profil, jadi budget belum bisa diatur.',
+        false,
+      );
     case '23503': // foreign_key_violation — belum punya tipe hari bawaan
-      return new KesalahanRedistribusi('Profil belum punya tipe hari bawaan.', false);
-    case '23514': // check_violation
-      return new KesalahanRedistribusi('Nilai yang diminta ditolak database.', false);
+      return new KesalahanRedistribusi(
+        'Akun ini belum punya tipe hari bawaan. Muat ulang target, lalu coba lagi.',
+        false,
+      );
+    case '23514': // check_violation — penjaga protein atau bentuk penerapan
+      return new KesalahanRedistribusi(
+        /protein/i.test(error.message)
+          ? 'Target protein tidak bisa diturunkan pada hari yang kalorinya sudah diatur ulang.'
+          : 'Pembagian kalori ini belum utuh. Muat ulang budget, lalu coba lagi.',
+        false,
+      );
     case '28000':
     case 'PGRST301':
       return new KesalahanRedistribusi(
-        'Sesi Anda berakhir. Masuk lagi untuk mengatur budget.',
+        untuk === 'muat'
+          ? 'Sesi Anda berakhir. Masuk lagi untuk melihat budget.'
+          : 'Sesi Anda berakhir. Masuk lagi untuk mengatur budget.',
         false,
       );
     default:
       return new KesalahanRedistribusi(
-        'Gagal mengatur budget. Periksa koneksi lalu coba lagi.',
+        untuk === 'muat'
+          ? 'Tawaran budget belum bisa dimuat. Coba lagi sebentar lagi.'
+          : 'Budget belum diatur. Coba lagi sebentar lagi.',
         true,
       );
   }
