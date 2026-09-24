@@ -126,6 +126,14 @@ export default function LatihanScreen() {
             </View>
           </Card>
         </View>
+      ) : sesi.length > 0 ? (
+        // Ada sesi, tapi belum ada gerakan yang tercatat di dua sesi: arahnya
+        // belum bisa dibaca. Dikatakan, bukan disembunyikan diam-diam.
+        <KeadaanKosong
+          ikon="trending-up-outline"
+          judul="Arah kekuatan belum terbaca"
+          keterangan="Arah dibaca dari gerakan yang sama di dua sesi atau lebih (dengan set ≤ 12 repetisi). Setelah gerakan pertama terulang, kartunya muncul di sini."
+        />
       ) : null}
 
       {kelompok.length === 0 ? (
