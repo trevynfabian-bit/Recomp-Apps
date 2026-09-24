@@ -53,51 +53,62 @@ export function SheetRiwayatPercakapan({
           />
         </View>
       ) : (
-        urut.map((p) => {
-          const aktif = p.id === aktifId;
-          const tanggal = tanggalDariWaktu(p.diperbaruiPada);
-          return (
-            <Pressable
-              key={p.id}
-              accessibilityRole="button"
-              aria-selected={aktif}
-              accessibilityLabel={`Buka percakapan: ${p.judul}`}
-              onPress={() => {
-                ketukRingan();
-                onPilih(p.id);
-              }}
-              style={({ pressed }) => ({
-                gap: spacing.xs,
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                padding: spacing.md,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                backgroundColor: aktif ? tint(colors.aksen.isian, 'pilih') : colors.permukaanCekung,
-                opacity: pressed ? 0.7 : 1,
-              })}
+        // Dikelompokkan per hari (terbaru dulu), jam di tiap baris: tanggal yang
+        // sama tidak diulang di setiap percakapan.
+        kelompokkan(urut, hariIni).map((grup) => (
+          <View key={grup.tanggal} style={{ gap: spacing.sm }}>
+            <Text
+              accessibilityRole="header"
+              style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase', marginTop: spacing.sm }}
             >
-              <Text
-                numberOfLines={2}
-                style={{ ...typography.body, color: aktif ? colors.teks : colors.teksRedup }}
+              {grup.label}
+            </Text>
+            {grup.percakapan.map((p) => {
+            const aktif = p.id === aktifId;
+            return (
+              <Pressable
+                key={p.id}
+                accessibilityRole="button"
+                aria-selected={aktif}
+                accessibilityLabel={`Buka percakapan: ${p.judul}, ${grup.label} pukul ${formatJam(p.diperbaruiPada)}, ${p.pesan.length} pesan${aktif ? ', sedang dibuka' : ''}`}
+                onPress={() => {
+                  ketukRingan();
+                  onPilih(p.id);
+                }}
+                style={({ pressed }) => ({
+                  gap: spacing.xs,
+                  minHeight: TAP_MIN,
+                  justifyContent: 'center',
+                  padding: spacing.md,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                  backgroundColor: aktif ? tint(colors.aksen.isian, 'pilih') : colors.permukaanCekung,
+                  opacity: pressed ? 0.7 : 1,
+                })}
               >
-                {p.judul}
-              </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text style={{ ...typography.caption, color: colors.teksRedup }}>
-                  {labelTanggalRelatif(tanggal, hariIni)} · {formatJam(p.diperbaruiPada)}
+                <Text
+                  numberOfLines={2}
+                  style={{ ...typography.body, color: aktif ? colors.teks : colors.teksRedup }}
+                >
+                  {p.judul}
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.teksRedup }}>
-                  · {p.pesan.length} pesan
-                </Text>
-                {aktif ? (
-                  <Text style={{ ...typography.caption, color: colors.aksen.teks }}>· dibuka</Text>
-                ) : null}
-              </View>
-            </Pressable>
-          );
-        })
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>
+                    {formatJam(p.diperbaruiPada)}
+                  </Text>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>
+                    · {p.pesan.length} pesan
+                  </Text>
+                  {aktif ? (
+                    <Text style={{ ...typography.caption, color: colors.aksen.teks }}>· dibuka</Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            );
+          })}
+          </View>
+        ))
       )}
 
       <Tombol
@@ -110,4 +121,16 @@ export function SheetRiwayatPercakapan({
       />
     </KerangkaSheet>
   );
+}
+
+/** Percakapan (sudah urut terbaru dulu) dikelompokkan per tanggal Jakarta. */
+function kelompokkan(urut: Percakapan[], hariIni: string) {
+  const grup: { tanggal: string; label: string; percakapan: Percakapan[] }[] = [];
+  for (const p of urut) {
+    const tanggal = tanggalDariWaktu(p.diperbaruiPada);
+    const akhir = grup[grup.length - 1];
+    if (akhir && akhir.tanggal === tanggal) akhir.percakapan.push(p);
+    else grup.push({ tanggal, label: labelTanggalRelatif(tanggal, hariIni), percakapan: [p] });
+  }
+  return grup;
 }
