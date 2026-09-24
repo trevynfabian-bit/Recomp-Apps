@@ -1,5 +1,6 @@
 /**
- * Memeriksa dua prinsip desain PRD yang mudah rusak diam-diam:
+ * Penjaga bab Desain PRD (docs/desain/bab-desain-prd.md, acuan resmi).
+ * Memeriksa prinsip desain PRD yang mudah rusak diam-diam:
  *
  * 1. SATU ANGKA UTAMA PER LAYAR. Angka raksasa (`HeroNumber`) paling banyak
  *    satu per layar, dan layar data wajib punya satu. Komponen tidak boleh
@@ -171,6 +172,16 @@ cek(
 if (tinggiBaris.length < PLAFON.lineHeight || jarakMentah.length < PLAFON.jarak) {
   console.log('  (plafon bisa diturunkan: ubah PLAFON di scripts/cek-desain.mjs)');
 }
+
+console.log('\nAcuan resmi');
+let bab = '';
+try {
+  bab = readFileSync('docs/desain/bab-desain-prd.md', 'utf8');
+} catch {
+  // ditangani cek di bawah
+}
+cek('bab Desain PRD ada dan berstatus resmi', /\*\*Status\*\* \| \*\*Resmi/.test(bab));
+cek('bab Desain punya riwayat versi', /## Riwayat & perubahan/.test(bab));
 
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan desain lulus');
 process.exit(gagal ? 1 : 0);

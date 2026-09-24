@@ -1,9 +1,16 @@
 # Bab Desain untuk PRD
 
-> Bab ini disusun untuk ditempel ke PRD plan **Rombak Sistem Desain App** sebagai
-> bab baru setelah "7. Tech Stack". Rincian, angka pengukuran, dan alasan tiap
-> keputusan ada di [`arah-visual.md`](./arah-visual.md); titik awalnya di
-> [`audit-token-layar.md`](./audit-token-layar.md).
+| | |
+|---|---|
+| **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
+| **Versi** | 1.0 (24 September 2026) |
+| **Penjaga** | `npm run cek:desain`, `npm run cek:kontras` |
+| **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
+
+> Bab ini adalah bab 8 PRD plan **Rombak Sistem Desain App**, setelah
+> "7. Tech Stack". Bila isi bab ini dan kode berbeda, bab ini yang benar dan
+> kodenya yang diperbaiki. Bila bab ini perlu berubah, ubah lewat proses di
+> bagian "Riwayat & perubahan" di bawah, bukan langsung di layar.
 
 ## 8. Desain
 
@@ -114,3 +121,15 @@ berubah karena keputusan desain.
 
 Dashboard web Next.js, backend, dan paket `@recomp/logika`. Tidak ada angka,
 formula, atau perilaku data yang berubah.
+
+---
+
+## Riwayat & perubahan
+
+Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
+`src/theme`, dan penjaganya sekaligus, lalu menambah baris di tabel ini.
+`cek:desain` dan `cek:kontras` harus lulus.
+
+| Versi | Tanggal | Perubahan |
+|---|---|---|
+| 1.0 | 24 September 2026 | Bab pertama: palet semantik dua mode, tipografi dengan tinggi baris dan varian bernama, kepadatan & radius, komposisi layar, penjaga otomatis. |

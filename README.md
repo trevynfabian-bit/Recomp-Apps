@@ -82,19 +82,18 @@ karena bentuk data tiruan sudah meniru baris tabel sebenarnya.
 
 ## Prinsip desain
 
-Dark mode sebagai mode utama, mode terang mengikuti setelan sistem; nuansa
-athlete dashboard ala WHOOP. Keputusan visual lengkap di
-[`docs/desain/arah-visual.md`](docs/desain/arah-visual.md). Palet: `#14151A` latar, `#2A2D36`
-kartu, aksen amber `#F0A202`, coral `#E24E1B`, jade `#1B998B` — biru standar
-dihindari. Satu angka utama per layar, log berat maksimal 2 tap.
+**Acuan resmi: [`docs/desain/bab-desain-prd.md`](docs/desain/bab-desain-prd.md)**
+(bab 8 PRD). Setiap perubahan tampilan di `app/`, `src/theme/`, dan
+`src/components/` mengikuti bab itu; alasan dan angka pengukurannya ada di
+[`docs/desain/arah-visual.md`](docs/desain/arah-visual.md).
 
-**Aturan warna (kontras):** nilai aksen di PRD dipakai apa adanya untuk ISIAN
-besar (bar, tombol, pill). Sebagian di antaranya tidak lolos WCAG AA 4.5:1 untuk
-TEKS KECIL di atas `surface`, jadi `src/theme/colors.ts` menyediakan
-`aksenTeks` dan `macroTeks` — varian hue yang sama, sedikit lebih terang. Isian
-pakai warna dasar, teks kecil pakai varian teks.
+Ringkasnya: gelap sebagai mode utama dan mode terang mengikuti sistem; satu
+angka utama per layar; aksen amber/coral/jade, biru standar dihindari; warna,
+tipografi, dan jarak hanya dari token di `src/theme`; WCAG AA di kedua mode;
+area sentuh minimal 44×44 pt (`src/theme/hig.ts`); log berat maksimal 2 tap.
 
-**Apple HIG:** konstanta di `src/theme/hig.ts`. Setiap kontrol memenuhi area
-sentuh minimum 44×44 pt; angka hero dibatasi `MAKS_SKALA_HERO` agar tata letak
-satu-angka-per-layar tidak pecah pada Dynamic Type ekstrem, sementara teks isi
-tetap menskala penuh.
+**Mengubah acuan desain.** Bab Desain berubah lewat satu PR yang sekaligus
+memperbarui (1) `docs/desain/bab-desain-prd.md` beserta riwayat versinya,
+(2) token di `src/theme`, dan (3) penjaga `scripts/cek-desain.mjs` /
+`scripts/cek-kontras.mjs` bila aturannya ikut berubah. `npm run cek:desain` dan
+`npm run cek:kontras` (bagian dari `cek:semua`) harus lulus sebelum digabung.
