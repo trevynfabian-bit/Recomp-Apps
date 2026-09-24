@@ -218,6 +218,20 @@ export function PenyediaTarget({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Termuat tapi tanpa tipe hari satu pun (seed akun baru gagal, atau data
+  // rusak): tidak ada tipe hari untuk dihitung targetnya. Katakan apa adanya,
+  // jangan biarkan Hari Ini jatuh karena daftar kosong.
+  if (data.tipeHari.length === 0) {
+    return (
+      <LayarMuatTarget
+        kosong
+        pesanGagal={null}
+        onCobaLagi={() => void muatDariServer(false)}
+        onKeluar={() => void keluar()}
+      />
+    );
+  }
+
   return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>;
 }
 

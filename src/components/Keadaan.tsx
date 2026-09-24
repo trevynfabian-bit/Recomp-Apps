@@ -113,12 +113,19 @@ export function KeadaanKosong({
   return (
     <Bingkai tampilan={tampilan}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        {ikon ? <Ionicons name={ikon} size={ukuranIkon.kecil} color={colors.teksRedup} /> : null}
-        <Text accessibilityRole="header" style={{ ...typography.bodySedang, color: colors.teks, flex: 1 }}>
+        {ikon ? <Ionicons name={ikon} size={tampilan === 'layar' ? ukuranIkon.sedang : ukuranIkon.kecil} color={colors.teksRedup} /> : null}
+        <Text
+          accessibilityRole="header"
+          style={{ ...(tampilan === 'layar' ? typography.title : typography.bodySedang), color: colors.teks, flex: 1 }}
+        >
           {judul}
         </Text>
       </View>
-      {keterangan ? <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{keterangan}</Text> : null}
+      {keterangan ? (
+        <Text style={{ ...(tampilan === 'layar' ? typography.body : typography.labelBiasa), color: colors.teksRedup }}>
+          {keterangan}
+        </Text>
+      ) : null}
       <DeretAksi aksi={aksi} aksiKedua={aksiKedua} utamaBertepi={false} />
     </Bingkai>
   );
