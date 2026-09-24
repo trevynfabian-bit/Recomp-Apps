@@ -48,7 +48,9 @@ export function TombolUtama({
       {memproses ? (
         <ActivityIndicator color={colors.bg} />
       ) : (
-        <Text style={{ ...typography.body, fontWeight: '700', color: merusak ? colors.text : colors.bg }}>
+        // Label di atas isian selalu warna latar: teks terang di atas coral hanya
+        // 3,64:1, di bawah ambang AA untuk label 16px (lihat docs/desain/arah-visual.md).
+        <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>
           {label}
         </Text>
       )}

@@ -76,10 +76,42 @@ sudah lulus tetap berlaku.
 **Koreksi yang ditemukan saat menyusun palet:** `TombolUtama merusak` menaruh
 `text` (`#F5F6F8`) di atas coral, rasionya **3,64:1**, di bawah 4,5:1 untuk
 label 16px tebal. Aturan resmi: label di atas isian apa pun memakai
-`teksDiAtasIsian` (`#14151A` di atas coral = **4,64:1**). Diterapkan pada task
-Tombol & Aksi (Fase 3) dan dipasangkan di `cek:kontras`.
+`teksDiAtasIsian` (`#14151A` di atas coral = **4,64:1**). Sudah diperbaiki di
+`src/components/Tombol.tsx` saat verifikasi (1.6).
 
-### 1.5 Mode terang (arah, difinalkan di Fase 3)
+### 1.5 Verifikasi kontras (WCAG 2.1 AA)
+
+Dijalankan dengan `npm run cek:kontras`. Ambang: 4,5:1 teks kecil, 3:1 teks
+besar, mark grafik, dan tepi kontrol. Semua pasangan mode gelap **lulus**.
+
+| Peran | Pasangan terlemah | Rasio | Margin |
+|---|---|---|---|
+| `teks` | di `permukaan` | 12,7 | lebar |
+| `teksSamar` | di `permukaan` | 4,53 | **paling tipis** bersama `aksenKetiga`: jangan digelapkan lagi |
+| `aksen` teks | di `permukaan` | 6,5 | lebar |
+| `aksenKedua` teks | di `permukaan` | 4,55 | tipis |
+| `aksenKetiga` teks (`bahaya`) | di `permukaan` | 4,53 | **paling tipis**: setiap penggelapan `permukaan` harus diikuti penerangan varian ini |
+| `info` teks | di `permukaan` | 4,55 | tipis |
+| `teksDiAtasIsian` | di atas coral | 4,64 | tipis |
+| `garisKontrol` | di `permukaan` | 3,12 | pas di ambang |
+| bar makro | vs track `permukaanCekung` | ≥3,0 | lulus |
+| `garis` (dekoratif) | vs `permukaan` | 1,18 | sengaja <2,0 |
+
+Pasangan yang ditambahkan ke `cek:kontras` pada verifikasi ini: `info` di `latar`
+dan `permukaanCekung`, `aksenKedua`/`aksenKetiga` teks di `latar`. Pasangan
+`teks` di atas coral **tidak** didaftarkan karena gagal (3,64:1), dan aturan
+`teksDiAtasIsian` membuatnya tidak dipakai lagi.
+
+Aturan pakai yang lahir dari verifikasi:
+
+- Teks status di dalam banner bertint dihitung terhadap **warna campuran**, bukan
+  latar dasarnya (sudah dilakukan `cek:kontras`).
+- Sub-label di atas latar pilihan terpilih memakai `teksRedup`, bukan
+  `teksSamar` (3,94:1, gagal).
+- Pasangan baru di layar wajib ditambahkan ke `cek:kontras` bersamaan dengan
+  kodenya.
+
+### 1.6 Mode terang (arah, difinalkan di Fase 3)
 
 Mode terang memakai peran yang sama dengan nilai berbeda. Titik awal yang sudah
 dihitung rasionya:

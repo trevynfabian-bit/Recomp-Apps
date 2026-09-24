@@ -127,7 +127,15 @@ const PASANGAN = [
   ['text di gelembung pengguna', c.text, GELEMBUNG_PENGGUNA, false],
   ['textFaint di gelembung pengguna', c.textFaint, GELEMBUNG_PENGGUNA, false],
 
-  // Label di atas tombol isian penuh
+  // Warna status `info` (ungu karbo) sebagai teks kecil
+  ['macroTeks.karbo di bg', c.macroTeks.karbo, c.bg, false],
+  ['macroTeks.karbo di surfaceSunken', c.macroTeks.karbo, c.surfaceSunken, false],
+  ['aksenTeks.coral di bg', c.aksenTeks.coral, c.bg, false],
+  ['aksenTeks.jade di bg', c.aksenTeks.jade, c.bg, false],
+
+  // Label di atas tombol isian penuh. Aturannya: label di atas isian APA PUN
+  // memakai `bg`. `text` di atas coral hanya 3,64:1 — pasangan itu dulu
+  // dipakai tombol merusak dan sengaja tidak masuk daftar ini.
   ['bg di atas amber', c.bg, c.amber, false],
   ['bg di atas jade', c.bg, c.jade, false],
   ['bg di atas coral', c.bg, c.coral, false],
