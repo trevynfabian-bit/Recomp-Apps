@@ -661,6 +661,8 @@ export type PesanCoachRow = {
   created_at: string;
   /** Benar bila disisipkan server (service role); diisi pemicu. Hanya jawaban coach seperti ini yang diputar ulang ke model. */
   ditulis_server: boolean;
+  /** Penanda kiriman dari app (sekali per pertanyaan, dipakai ulang saat mencoba lagi); unik per pengguna. */
+  id_klien: string | null;
 };
 
 /** alert_pinggang — jejak keadaan batas pinggang. */

@@ -158,11 +158,16 @@ export type HasilTanya =
  *
  * Kuota harian yang habis datang sebagai `KesalahanCoach` yang TIDAK bisa
  * diulang: mencoba lagi dalam semenit tidak mengubah apa pun sampai besok.
+ *
+ * `idKlien`: buat SEKALI per pertanyaan (mis. `crypto.randomUUID()`) dan kirim
+ * lagi yang sama saat mencoba ulang. Server lalu mengembalikan jawaban yang
+ * sudah ada alih-alih menyimpan & menjawab (dan menagih kuota) dua kali.
  */
 export async function tanyakanKeCoach(
   pertanyaan: string,
   percakapanId: string | null = null,
   persenLemak: number | null = null,
+  idKlien: string | null = null,
 ): Promise<HasilTanya> {
   // Batas yang sama dengan server & CHECK `pesan_teks_wajar`: ditolak di sini
   // dengan kalimat yang jelas, bukan setelah perjalanan ke server.
@@ -184,7 +189,7 @@ export async function tanyakanKeCoach(
   }
 
   const { data, error } = await supabase.functions.invoke('coach-chat', {
-    body: { pertanyaan, percakapan_id: percakapanId, persen_lemak: persenLemak },
+    body: { pertanyaan, percakapan_id: percakapanId, persen_lemak: persenLemak, id_klien: idKlien },
   });
 
   if (error) {
@@ -197,6 +202,11 @@ export async function tanyakanKeCoach(
     }
     if (status === 404) {
       throw new KesalahanCoach('Percakapan ini sudah tidak ada. Mulai percakapan baru.', false);
+    }
+    if (status === 409) {
+      // Kiriman sebelumnya dengan idKlien yang sama masih diproses: mencoba
+      // lagi SEBENTAR kemudian (dengan idKlien yang sama) akan mendapat jawabannya.
+      throw new KesalahanCoach('Pertanyaan ini masih diproses. Tunggu sebentar, lalu coba lagi.', true);
     }
     if (status === 400) {
       throw new KesalahanCoach('Pertanyaan ini belum bisa dikirim. Periksa isinya, lalu kirim lagi.', false);

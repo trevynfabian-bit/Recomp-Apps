@@ -65,6 +65,7 @@ import {
   MODEL_COACH,
   susunSystem,
   TOOLS_COACH,
+  putuskanKirimUlang,
   UPAYA_COACH,
   type KonteksCoach,
 } from '../_shared/promptCoach.ts';
@@ -103,11 +104,17 @@ Deno.serve(async (req: Request) => {
     return jawab({ galat: 'Coach belum siap. Coba lagi nanti.' }, 503);
   }
 
-  let badan: { pertanyaan?: unknown; percakapan_id?: unknown; persen_lemak?: unknown };
+  let badan: { pertanyaan?: unknown; percakapan_id?: unknown; persen_lemak?: unknown; id_klien?: unknown };
   try {
     badan = await req.json();
   } catch {
     return jawab({ galat: 'Badan permintaan bukan JSON' }, 400);
+  }
+
+  // Penanda kiriman dari app: sama untuk percobaan ulang pertanyaan yang sama.
+  const idKlien = badan.id_klien == null ? null : String(badan.id_klien);
+  if (idKlien !== null && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idKlien)) {
+    return jawab({ galat: 'Penanda kiriman tidak sah' }, 400);
   }
 
   const pertanyaan = typeof badan.pertanyaan === 'string' ? badan.pertanyaan.trim() : '';
@@ -165,6 +172,60 @@ Deno.serve(async (req: Request) => {
   if (!userId) return jawab({ galat: 'Sesi tidak sah' }, 401);
 
   let percakapanId = typeof badan.percakapan_id === 'string' ? badan.percakapan_id : null;
+
+  // --- Kiriman ulang (id_klien yang sama) -----------------------------------
+  // Jawaban yang sudah ada dikembalikan tanpa memanggil model dan tanpa
+  // jatah kuota baru; pertanyaan yang tertinggal tanpa jawaban dijawab tanpa
+  // disimpan ulang.
+  let sudahTersimpan = false;
+  if (idKlien !== null) {
+    const { data: lama } = await supabase
+      .from('pesan_coach')
+      .select('id, percakapan_id, urutan, waktu')
+      .eq('id_klien', idKlien)
+      .maybeSingle();
+    const { data: balasan } = lama
+      ? await supabase
+          .from('pesan_coach')
+          .select('id, teks, rujukan, widget, penolakan')
+          .eq('percakapan_id', lama.percakapan_id)
+          .eq('peran', 'coach')
+          .gt('urutan', lama.urutan)
+          .order('urutan', { ascending: true })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
+    const keputusan = putuskanKirimUlang(lama ? { waktu: lama.waktu as string } : null, !!balasan);
+    if (keputusan === 'kembalikan' && lama && balasan) {
+      if (balasan.penolakan) {
+        return jawab({
+          ditolak: true,
+          sumber_penolakan: 'jawaban',
+          penolakan: balasan.penolakan,
+          percakapan_id: lama.percakapan_id,
+          pesan_id: balasan.id,
+          diulang: true,
+        });
+      }
+      return jawab({
+        ditolak: false,
+        percakapan_id: lama.percakapan_id,
+        pesan_id: balasan.id,
+        teks: balasan.teks,
+        rujukan: balasan.rujukan ?? [],
+        widget: balasan.widget ?? [],
+        diulang: true,
+      });
+    }
+    if (keputusan === 'diproses') {
+      return jawab({ galat: 'Pertanyaan ini masih diproses. Tunggu sebentar, lalu coba lagi.', diproses: true }, 409);
+    }
+    if (keputusan === 'lanjutkan' && lama) {
+      percakapanId = lama.percakapan_id as string;
+      sudahTersimpan = true;
+    }
+  }
+
   const utasBaru = !percakapanId;
   if (!percakapanId) {
     // Judulnya diturunkan dari pertanyaan pertama, dipotong sesuai batas kolom.
@@ -181,13 +242,21 @@ Deno.serve(async (req: Request) => {
     percakapanId = baru.id as string;
   }
 
-  const { error: galatPesan } = await supabase.from('pesan_coach').insert({
-    percakapan_id: percakapanId,
-    user_id: userId,
-    peran: 'pengguna',
-    teks: pertanyaan,
-  });
+  const { error: galatPesan } = sudahTersimpan
+    ? { error: null }
+    : await supabase.from('pesan_coach').insert({
+        percakapan_id: percakapanId,
+        user_id: userId,
+        peran: 'pengguna',
+        teks: pertanyaan,
+        id_klien: idKlien,
+      });
   if (galatPesan) {
+    // Dua kiriman dengan id_klien yang sama berpapasan: yang kalah menunggu.
+    if (galatPesan.code === '23505') {
+      if (utasBaru) await supabase.from('percakapan').delete().eq('id', percakapanId);
+      return jawab({ galat: 'Pertanyaan ini masih diproses. Tunggu sebentar, lalu coba lagi.', diproses: true }, 409);
+    }
     // 54000: kuota harian habis (pemicu `pesan_coach_kuota_harian`). Bukan
     // galat server; model tidak dipanggil dan tidak ada yang dibayar.
     if (galatPesan.code === '54000') {

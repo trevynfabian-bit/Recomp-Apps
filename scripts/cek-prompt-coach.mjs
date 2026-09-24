@@ -66,6 +66,8 @@ const {
   formatNilai,
   indeksHasilLab,
   jalankanTool,
+  putuskanKirimUlang,
+  JEDA_DIPROSES_MS,
   keBudgetBersama,
   makroHariIni,
   susunKonteks,
@@ -271,6 +273,16 @@ for (const t of TOOLS_COACH) {
   cek(`${t.name}: punya deskripsi`, (t.description ?? '').length > 20);
 }
 cek(`sembilan fungsi tersedia: ${NAMA_TOOLS.join(', ')}`, NAMA_TOOLS.length === 9);
+
+console.log('\nKirim ulang pertanyaan (id_klien)');
+{
+  const t0 = Date.parse('2026-09-24T07:00:00Z');
+  const tanya = { waktu: '2026-09-24T07:00:00Z' };
+  cek('belum pernah tersimpan → baru', putuskanKirimUlang(null, false, t0) === 'baru');
+  cek('sudah dijawab → kembalikan (tanpa model, tanpa kuota)', putuskanKirimUlang(tanya, true, t0 + 10 * 60_000) === 'kembalikan');
+  cek('tanpa jawaban, baru saja → diproses (409)', putuskanKirimUlang(tanya, false, t0 + JEDA_DIPROSES_MS - 1) === 'diproses');
+  cek('tanpa jawaban, sudah lama → lanjutkan tanpa menyimpan ulang', putuskanKirimUlang(tanya, false, t0 + JEDA_DIPROSES_MS) === 'lanjutkan');
+}
 
 console.log('\nFungsi dijawab dari konteks, bukan dihitung ulang');
 {
@@ -604,6 +616,14 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
       readFileSync('src/data/coach.ts', 'utf8').includes('MAKS_PERTANYAAN_COACH'));
     cek('utas hilang/milik orang lain/id cacat → 404 yang sama, bukan 502',
       /galatPesan\.code === '23503' \|\| galatPesan\.code === '42501' \|\| galatPesan\.code === '22P02'[\s\S]{0,200}404/.test(src));
+  }
+  {
+    // Kirim ulang dengan id_klien yang sama.
+    cek('kiriman ulang: pertanyaan disimpan dengan id_klien, tabrakan → 409, jawaban lama dikembalikan tanpa model',
+      /peran: 'pengguna',\s*teks: pertanyaan,\s*id_klien: idKlien/.test(src) &&
+      /galatPesan\.code === '23505'[\s\S]{0,400}409/.test(src) &&
+      src.indexOf("keputusan === 'kembalikan'") < src.indexOf('messages.stream') &&
+      readFileSync('src/data/coach.ts', 'utf8').includes('id_klien: idKlien'));
   }
   cek(
     'kunci API tidak pernah ikut ke jawaban maupun log',

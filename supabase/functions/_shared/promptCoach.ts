@@ -743,3 +743,30 @@ export function jalankanTool(
 
 /** Nama semua fungsi yang tersedia; dipakai pemeriksaan & pencatatan widget. */
 export const NAMA_TOOLS = TOOLS_COACH.map((t) => t.name);
+
+// ---------------------------------------------------------------------------
+// Kirim ulang pertanyaan (id_klien)
+// ---------------------------------------------------------------------------
+
+/** Pertanyaan tanpa jawaban yang lebih muda dari ini dianggap masih diproses. */
+export const JEDA_DIPROSES_MS = 2 * 60_000;
+
+/**
+ * Apa yang dilakukan coach-chat saat pertanyaan dengan `id_klien` yang sama
+ * datang lagi:
+ * - `baru`: belum pernah tersimpan → proses seperti biasa;
+ * - `kembalikan`: jawabannya sudah ada → kembalikan tanpa memanggil model;
+ * - `diproses`: tersimpan tanpa jawaban, baru saja → minta menunggu (409),
+ *   supaya dua permintaan tidak sama-sama membayar model;
+ * - `lanjutkan`: tersimpan tanpa jawaban, sudah lama (percobaan sebelumnya
+ *   gagal di tengah) → jawab pertanyaan yang SAMA tanpa menyimpannya lagi.
+ */
+export function putuskanKirimUlang(
+  pertanyaan: { waktu: string } | null,
+  adaJawaban: boolean,
+  sekarangMs: number = Date.now(),
+): 'baru' | 'kembalikan' | 'diproses' | 'lanjutkan' {
+  if (!pertanyaan) return 'baru';
+  if (adaJawaban) return 'kembalikan';
+  return sekarangMs - Date.parse(pertanyaan.waktu) < JEDA_DIPROSES_MS ? 'diproses' : 'lanjutkan';
+}

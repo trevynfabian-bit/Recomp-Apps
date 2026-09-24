@@ -305,4 +305,32 @@ begin
 end $$;
 reset role;
 
+-- 12. id_klien unik per pengguna: kiriman ulang yang sama ditolak (23505),
+--     pengguna lain boleh memakai nilai yang sama.
+set request.jwt.claim.sub = 'bbbb3333-0000-0000-0000-000000000003';
+set role authenticated;
+do $$
+declare v text;
+begin
+  insert into public.pesan_coach (percakapan_id, user_id, peran, teks, id_klien)
+  values (current_setting('uji.utas_penulis')::uuid, 'bbbb3333-0000-0000-0000-000000000003', 'pengguna', 'Tanya sekali',
+          '11111111-2222-3333-4444-555555555555');
+  begin
+    insert into public.pesan_coach (percakapan_id, user_id, peran, teks, id_klien)
+    values (current_setting('uji.utas_penulis')::uuid, 'bbbb3333-0000-0000-0000-000000000003', 'pengguna', 'Tanya sekali',
+            '11111111-2222-3333-4444-555555555555');
+  exception when others then v := sqlstate;
+  end;
+  assert v = '23505', format('id_klien ganda untuk pengguna yang sama: %s', coalesce(v, 'diterima'));
+end $$;
+set request.jwt.claim.sub = 'bbbb4444-0000-0000-0000-000000000004';
+do $$
+declare v_utas uuid;
+begin
+  insert into public.percakapan (user_id, judul) values ('bbbb4444-0000-0000-0000-000000000004', 'Utas B') returning id into v_utas;
+  insert into public.pesan_coach (percakapan_id, user_id, peran, teks, id_klien)
+  values (v_utas, 'bbbb4444-0000-0000-0000-000000000004', 'pengguna', 'Tanya B', '11111111-2222-3333-4444-555555555555');
+end $$;
+reset role;
+
 select '✓ percakapan & pesan: kartu hanya milik coach, pesan tidak bisa nyelip ke utas orang lain, urutan tidak tertukar, hanya jawaban server bertanda ditulis_server' as hasil;
