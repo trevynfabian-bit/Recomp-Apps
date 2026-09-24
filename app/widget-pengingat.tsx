@@ -247,7 +247,7 @@ export default function WidgetPengingatScreen() {
       {izin === 'ditolak' && aktif.length > 0 ? (
         <Card style={{ gap: spacing.sm }}>
           <Text style={{ ...typography.label, color: colors.text }}>Notifikasi dimatikan di iPhone</Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Pengingat di atas baru terkirim setelah notifikasi untuk Recomp diizinkan di Pengaturan.
           </Text>
           <Pressable
@@ -275,7 +275,7 @@ export default function WidgetPengingatScreen() {
           </View>
         ) : (
           <Card>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
               Tidak ada notifikasi yang dikirim. Widget layar kunci tetap diperbarui seperti biasa.
             </Text>
           </Card>
@@ -284,7 +284,7 @@ export default function WidgetPengingatScreen() {
 
       <Card style={{ gap: spacing.xs }}>
         <Text style={{ ...typography.label, color: colors.text }}>Nada selalu netral, tanpa angka</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Tidak ada notifikasi &ldquo;melebihi target&rdquo; atau peringatan berwarna. Berat, kalori, dan
           ukuran tubuh juga tidak pernah ikut di notifikasi — layar kunci bisa dibaca orang lain. Angkanya
           dibaca di app, tanpa penilaian.
@@ -304,7 +304,7 @@ export default function WidgetPengingatScreen() {
             onUbah={(v) => ubah({ widgetTampilkanAngka: v })}
             tanpaPadding
           />
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Memasang widget: tahan layar kunci › Sesuaikan › Layar Kunci › ketuk area widget › pilih Recomp.
           </Text>
         </Card>
@@ -342,9 +342,9 @@ function BarisSakelar({
         padding: tanpaPadding ? 0 : spacing.lg,
       }}
     >
-      <View style={{ flex: 1, gap: 2 }}>
-        <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{judul}</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 18 }}>
+      <View style={{ flex: 1, gap: spacing.xxs }}>
+        <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
           {keterangan}
         </Text>
       </View>
@@ -434,7 +434,7 @@ function PratinjauNotif({ waktu, judul, isi }: { waktu: string; judul: string; i
         backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
-        gap: 2,
+        gap: spacing.xxs,
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -442,7 +442,7 @@ function PratinjauNotif({ waktu, judul, isi }: { waktu: string; judul: string; i
         <Text style={{ ...typography.caption, color: colors.textFaint }}>{waktu}</Text>
       </View>
       <Text style={{ ...typography.label, color: colors.text }}>{judul}</Text>
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{isi}</Text>
+      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{isi}</Text>
     </View>
   );
 }

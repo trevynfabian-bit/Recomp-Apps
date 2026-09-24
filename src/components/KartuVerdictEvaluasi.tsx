@@ -36,11 +36,11 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
         borderColor: colors.border,
       }}
     >
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: spacing.xxs }}>
         <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
           Evaluasi {PEKAN_EVALUASI} mingguan
         </Text>
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
           {formatRentangTanggal(evaluasi.periode.dari, evaluasi.periode.sampai)}
         </Text>
       </View>
@@ -57,7 +57,7 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
             <Text style={{ ...typography.title, color: colors.textMuted, width: 20 }}>
               {panah(s.arah)}
             </Text>
-            <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ flex: 1, gap: spacing.xxs }}>
               <Text style={{ ...typography.label, color: colors.text }}>
                 {s.label} {kataArah(s.arah)}
               </Text>

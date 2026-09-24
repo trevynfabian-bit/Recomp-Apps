@@ -45,7 +45,7 @@ export function DaftarRujukan({ rujukan }: Props) {
       </Text>
 
       {rujukan.map((r) => (
-        <View key={`${r.label}-${r.nilai}`} style={{ gap: 2 }}>
+        <View key={`${r.label}-${r.nilai}`} style={{ gap: spacing.xxs }}>
           <View
             style={{
               flexDirection: 'row',

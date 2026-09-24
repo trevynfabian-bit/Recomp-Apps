@@ -100,7 +100,7 @@ export default function TrenScreen() {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Tren berat</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             {formatTanggalPanjang(hariIni)}
           </Text>
         </View>
@@ -233,7 +233,7 @@ export default function TrenScreen() {
       >
         <Card>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ gap: 3, flex: 1 }}>
+            <View style={{ gap: spacing.xxs, flex: 1 }}>
               <Text style={{ ...typography.label, color: colors.text }}>Ukuran tubuh</Text>
               <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 Pinggang, dada, lengan, paha, leher — yang tidak terlihat dari timbangan
@@ -261,7 +261,7 @@ export default function TrenScreen() {
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ flex: 1, gap: 3 }}>
+              <View style={{ flex: 1, gap: spacing.xxs }}>
                 <Text style={{ ...typography.label, color: colors.text }}>
                   {formatTanggalPanjang(t.tanggal)}
                 </Text>
@@ -347,7 +347,7 @@ function StatKecil({
       >
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
         <Text style={{ ...typography.title, color: warna }}>{nilai}</Text>
         {unit ? <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text> : null}
       </View>

@@ -109,7 +109,7 @@ export function PemilihTipeHari({
         ) : (
           // Belum diisi: dikatakan apa adanya, bukan diisi angka tipe hari lain.
           <View style={{ paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
               Target {daftar.find((d) => d.id === terpilihId)?.nama ?? 'tipe hari ini'} untuk fase {fase} belum diisi.
             </Text>
           </View>
@@ -179,8 +179,8 @@ function TargetRingkas({
   return (
     <View style={{ flex: 1, gap: spacing.xs }}>
       <Text style={{ ...typography.caption, color: colors.textFaint }}>{label}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2 }}>
-        <Text style={{ ...typography.body, fontWeight: '700', color: warna }}>{nilai}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
+        <Text style={{ ...typography.bodyTebal, color: warna }}>{nilai}</Text>
         <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
       </View>
     </View>

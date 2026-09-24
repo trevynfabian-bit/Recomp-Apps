@@ -91,7 +91,7 @@ export default function MasukScreen() {
           <Text accessibilityRole="header" style={{ ...typography.display, color: colors.text }}>
             Recomp Coach
           </Text>
-          <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+          <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
             Masuk dengan akun yang sama dengan web.
           </Text>
         </View>
@@ -109,7 +109,7 @@ export default function MasukScreen() {
             }}
           >
             <Ionicons name="time-outline" size={18} color={colors.textMuted} />
-            <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+            <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
               {info}
             </Text>
           </View>
@@ -188,7 +188,7 @@ export default function MasukScreen() {
               style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}
             >
               <Ionicons name="information-circle-outline" size={18} color={colors.aksenTeks.coral} />
-              <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
                 {galat}
               </Text>
             </View>
@@ -211,7 +211,7 @@ export default function MasukScreen() {
               opacity: pressed || aturUlang === 'mengirim' ? 0.6 : 1,
             })}
           >
-            <Text style={{ ...typography.body, fontWeight: '600', color: colors.amber }}>
+            <Text style={{ ...typography.bodySedang, color: colors.amber }}>
               {aturUlang === 'mengirim' ? 'Mengirim tautan…' : 'Lupa kata sandi?'}
             </Text>
           </Pressable>
@@ -220,10 +220,8 @@ export default function MasukScreen() {
             <Text
               accessibilityLiveRegion="polite"
               style={{
-                ...typography.label,
-                fontWeight: '500',
+                ...typography.labelBiasa,
                 color: aturUlang === 'terkirim' ? colors.textMuted : colors.aksenTeks.coral,
-                lineHeight: 19,
                 textAlign: 'center',
               }}
             >
@@ -235,12 +233,12 @@ export default function MasukScreen() {
         </View>
 
         <View style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19, textAlign: 'center' }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint, textAlign: 'center' }}>
             Belum punya akun? Akun dibuat di web Recomp Coach, lalu dipakai di sini.
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center', alignItems: 'center' }}>
             <Ionicons name="lock-closed-outline" size={14} color={colors.textFaint} />
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
               Data kesehatan hanya terbaca oleh akun Anda.
             </Text>
           </View>

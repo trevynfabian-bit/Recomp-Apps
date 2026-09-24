@@ -245,7 +245,7 @@ export default function TargetHarianScreen() {
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
               Target per tipe hari
             </Text>
-            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
               Angka absolut, berlaku mulai hari ini
             </Text>
           </View>
@@ -290,11 +290,11 @@ export default function TargetHarianScreen() {
                 onKembalikanAuto={kembalikanAuto}
               />
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flex: 1, gap: spacing.xxs }}>
                   <Text style={{ ...typography.caption, color: colors.textMuted }}>FASE AKTIF</Text>
-                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{profil.fase_aktif}</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.text }}>{profil.fase_aktif}</Text>
                   {faseMulai ? (
-                    <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+                    <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
                       sejak {formatTanggalPanjang(faseMulai).split(', ')[1]}
                     </Text>
                   ) : null}
@@ -348,7 +348,7 @@ export default function TargetHarianScreen() {
 
         <View style={{ gap: spacing.sm, display: matriks ? 'none' : 'flex' }}>
           <PilihFase terpilih={fase} aktif={profil.fase_aktif} diubah={faseDiubah} onPilih={setFase} />
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             {fase === profil.fase_aktif
               ? `${fase} adalah fase aktif; angka ini yang dipakai Hari Ini.`
               : `${fase} belum aktif. Angka ini dipakai saat Anda berpindah ke ${fase}.`}
@@ -387,7 +387,7 @@ export default function TargetHarianScreen() {
 
         <View style={{ gap: spacing.sm }}>
           {status.jenis === 'tersimpan' ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.jade, lineHeight: 19 }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
               {status.jumlah === 1 ? 'Satu target tersimpan' : `${status.jumlah} target tersimpan`}. Berlaku mulai hari ini; hari
               yang sudah lewat tetap memakai target saat itu.
               {status.hariDiredistribusiTetap > 0
@@ -396,12 +396,12 @@ export default function TargetHarianScreen() {
             </Text>
           ) : null}
           {status.jenis === 'gagal' ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
               {status.pesan}
             </Text>
           ) : null}
           {cobaSimpan && adaTidakSah ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
               Ada isian yang perlu diperbaiki sebelum disimpan.
             </Text>
           ) : null}
@@ -429,7 +429,7 @@ export default function TargetHarianScreen() {
               }}
             />
           )}
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Karbo tidak ditargetkan: yang tersisa dari kalori setelah protein dan lemak ditampilkan sebagai gambaran.
           </Text>
         </View>
@@ -454,7 +454,7 @@ export default function TargetHarianScreen() {
 
       <KerangkaSheet terbuka={konfirmasiKeluar} onTutup={() => setKonfirmasiKeluar(false)} label="Perubahan belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>Buang perubahan?</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
           {berubah.length === 1 ? 'Satu target' : `${berubah.length} target`} belum disimpan. Target yang berlaku tetap
           seperti sebelumnya.
         </Text>
@@ -495,7 +495,7 @@ function KartuTargetBaca({
         style={{ gap: spacing.md }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>
             {dayType.nama}
             {dayType.is_default ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · bawaan</Text> : null}
           </Text>
@@ -503,14 +503,14 @@ function KartuTargetBaca({
         </View>
         {/* Angka kartu sengaja sekunder: angka utama layar ini ada di atas. */}
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
           <Text style={{ ...typography.label, color: colors.textFaint }}>kcal</Text>
         </View>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Protein {formatMakro(target.target_protein_g)} g · Lemak {formatMakro(target.target_lemak_g)} g · Sat fat ≤
           {formatMakro(target.batas_sat_fat_g)} g · sisa karbo {formatAngka(karboTersisaG(target))} g
         </Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </View>
@@ -554,14 +554,14 @@ function KartuTargetKosong({
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{dayType.nama}</Text>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{dayType.nama}</Text>
           {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
         </View>
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.textMuted }}>Belum diisi</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.textMuted }}>Belum diisi</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Hari bertipe {dayType.nama} di fase {fase} belum punya target, jadi Hari Ini belum bisa menghitung sisanya.
         </Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </View>
@@ -638,7 +638,7 @@ function PilihFase({
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'row',
-              gap: 6,
+              gap: spacing.xs,
               borderRadius: radius.pill,
               backgroundColor: dipilih ? colors.surface : 'transparent',
               borderWidth: dipilih ? 1 : 0,
@@ -689,7 +689,7 @@ function BarisTarget({
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
           {dayType.nama}
           {dayType.is_default ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · bawaan</Text> : null}
         </Text>
@@ -733,14 +733,14 @@ function BarisTarget({
       {galatTampil.length > 0 ? (
         <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
           {galatTampil.map((k) => (
-            <Text key={k.kunci} style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+            <Text key={k.kunci} style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
               {galat[k.kunci]}
             </Text>
           ))}
         </View>
       ) : null}
 
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
         {hasil.sah
           ? `Sisa untuk karbo ${formatAngka(hasil.karboG)} g${diubah && tersimpan ? ` · tersimpan ${formatAngka(tersimpan.target_kalori)} kcal, protein ${formatMakro(tersimpan.target_protein_g)} g` : ''}`
           : 'Sisa untuk karbo muncul setelah isian lengkap.'}

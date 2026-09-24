@@ -128,7 +128,7 @@ export function PanelRedistribusi({
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.amber }} />
                   ) : null}
                 </View>
-                <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flex: 1, gap: spacing.xxs }}>
                   <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
                     {o.judul}
                   </Text>
@@ -240,8 +240,7 @@ export function PanelRedistribusi({
         >
           <Text
             style={{
-              ...typography.body,
-              fontWeight: '700',
+              ...typography.bodyTebal,
               color: sudahDipakai ? colors.textFaint : colors.bg,
             }}
           >

@@ -71,7 +71,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
             {terbaru.map((p) => (
               <View key={`${p.fase}-${p.mulai}`} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md }}>
                 <Text style={{ ...typography.label, color: p.selesai === null ? colors.text : colors.textMuted }}>{p.fase}</Text>
-                <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+                <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
                   {p.selesai === null
                     ? `sejak ${tanggalRingkas(p.mulai)}`
                     : `${tanggalRingkas(p.mulai)} – ${tanggalRingkas(p.selesai)}`}
@@ -108,7 +108,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
   return (
     <KerangkaSheet terbuka onTutup={onTutup} label="Ganti fase">
       <Text style={{ ...typography.title, color: colors.text }}>Ganti ke {calon}?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
         Mulai hari ini, {tanggalRingkas(tanggal)}. Hari yang sudah lewat tetap memakai target {profil.fase_aktif}.
       </Text>
 
@@ -126,7 +126,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
                 style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md }}
               >
                 <Text style={{ ...typography.label, color: colors.text }}>{d.nama}</Text>
-                <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, textAlign: 'right' }}>
+                <Text style={{ ...typography.labelBiasa, color: colors.textMuted, textAlign: 'right' }}>
                   {lama || baru
                     ? `${lama ? formatAngka(lama.target_kalori) : '–'} → ${baru ? formatAngka(baru.target_kalori) : '–'} kcal · P ${lama ? formatMakro(lama.target_protein_g) : '–'} → ${baru ? formatMakro(baru.target_protein_g) : '–'} g`
                     : 'belum diisi'}
@@ -170,7 +170,7 @@ function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
       <Ionicons name={ikon} size={20} color={colors.textMuted} />
-      <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+      <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
         {children}
       </Text>
     </View>

@@ -50,11 +50,11 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
   return (
     <KerangkaSheet terbuka onTutup={status === 'memproses' ? null : onTutup} label="Hapus akun">
       <Text style={{ ...typography.title, color: colors.text }}>Hapus akun & semua data?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
         Profil, catatan harian, makanan, ukuran, latihan, data dari perangkat, percakapan coach, dan hasil lab
         dihapus dari server. Tidak bisa dibatalkan.
       </Text>
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 20 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
         Izin Apple Health di iPhone dan kunci API di Hevy tetap ada di tempatnya sampai Anda mencabutnya di sana.
       </Text>
 

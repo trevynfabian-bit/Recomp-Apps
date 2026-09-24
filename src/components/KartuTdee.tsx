@@ -80,7 +80,7 @@ export function KartuTdee({ tdee, perbandingan }: Props) {
         {/* Tiap metode beserta dasarnya — angkanya bisa ditelusuri */}
         <View style={{ gap: spacing.md, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }}>
           {tdee.metode.map((m) => (
-            <View key={m.nama} style={{ gap: 3 }}>
+            <View key={m.nama} style={{ gap: spacing.xxs }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}>
                   <Text style={{ ...typography.label, color: colors.text }}>{m.nama}</Text>

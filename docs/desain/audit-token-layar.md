@@ -100,3 +100,14 @@ grep -rhoE "\+ '[0-9A-Fa-f]{2}'" app src/components | sort | uniq -c
 grep -rhoE "size=\{[0-9]+\}" app src/components | sort | uniq -c
 grep -rn "accessibilityLabel=\"Kembali\"" app
 ```
+
+## 5. Setelah penerapan arah visual (Fase 1)
+
+Diukur ulang setelah task "Terapkan arah visual ke seluruh layar":
+
+| Temuan | Sebelum | Sesudah | Keterangan |
+|---|---|---|---|
+| T1 `fontWeight` manual | 152 | 8 (di luar `PratinjauWidget`) | Kini `labelBiasa` ×94, `bodyTebal` ×35, `bodySedang` ×12. Sisa: 3 span sisipan " · bawaan/aktif" di `target-harian` (sengaja lebih ringan dari baris induknya) dan 5 sel padat `MatriksTarget` (dibahas Fase 5). |
+| T2 `lineHeight` mentah | 139 | 88 | Semua yang ikut varian bernama hilang; `body` 23 → 24. Sisanya (`caption` 16, `body` 24) hilang saat gaya dasar membawa `lineHeight` (Fase 2). |
+| T3 jarak mentah | 67 | 11 | `spacing.xxs` (2) ditambahkan; `gap`/`marginTop` 2–3 memakai token. Sisa: inset kontrol segmen (`padding: 3`), offset optis garis dasar (3, 5), dan `padding: 0` pada input. |
+| L3 judul tab | `display` di Pengaturan | `title` di semua tab | Pengaturan kini juga membawa `accessibilityRole="header"`. |

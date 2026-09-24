@@ -66,12 +66,12 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
     >
       <Text style={{ ...typography.title, color: colors.text }}>Putuskan {profil.nama}?</Text>
 
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
         {kapital(gabung(profil.membawa))} yang baru dari {profil.nama} berhenti masuk. Yang sudah
         tercatat tetap tersimpan, kecuali Anda memilih menghapusnya.
       </Text>
 
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 20 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
         {akibatLain}
       </Text>
 

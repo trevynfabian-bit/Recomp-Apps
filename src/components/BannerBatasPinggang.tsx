@@ -65,7 +65,7 @@ export function BannerBatasPinggang({
           oleh yang bisa membedakan coral dari amber. */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Text style={{ ...typography.body, color: teksJudul }}>{lewat ? '▲' : '●'}</Text>
-        <Text style={{ ...typography.body, fontWeight: '700', color: teksJudul, flex: 1 }}>
+        <Text style={{ ...typography.bodyTebal, color: teksJudul, flex: 1 }}>
           {judul}
         </Text>
       </View>

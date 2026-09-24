@@ -123,7 +123,7 @@ export default function TambahHasilLabScreen() {
   if (id && !asal && statusMuat === 'memuat') {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg }}>
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Memuat hasil lab…
         </Text>
       </View>
@@ -134,7 +134,7 @@ export default function TambahHasilLabScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
         <Text style={{ ...typography.title, color: colors.text }}>Hasil lab ini tidak ditemukan</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
           Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
         </Text>
         <TombolBertepi label="Kembali ke riwayat" onPress={() => router.back()} />
@@ -180,13 +180,13 @@ export default function TambahHasilLabScreen() {
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
               {asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
             </Text>
-            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>Salin dari kertas hasilnya</Text>
+            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>Salin dari kertas hasilnya</Text>
           </View>
         </View>
 
         <View style={{ gap: spacing.sm }}>
           <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} tampilan="pill" />
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Tulis angka dan rentang rujukan persis seperti tercetak; tersimpan sebagai data mentah, tanpa dibulatkan.
             Rentang rujukan boleh dikosongkan bila tidak ada di kertasnya; app tidak mengisinya sendiri.
           </Text>
@@ -290,7 +290,7 @@ export default function TambahHasilLabScreen() {
 
       <KerangkaSheet terbuka={konfirmasiBatal} onTutup={() => setKonfirmasiBatal(false)} label="Isian belum disimpan">
         <Text style={{ ...typography.title, color: colors.text }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+        <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
           {asal
             ? 'Perubahan belum disimpan. Entri yang tersimpan tetap seperti sebelumnya.'
             : 'Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.'}
@@ -419,7 +419,7 @@ function Kolom({
 
 function TeksGalat({ teks }: { teks: string }) {
   return (
-    <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+    <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
       {teks}
     </Text>
   );

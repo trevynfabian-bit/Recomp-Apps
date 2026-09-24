@@ -129,7 +129,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                   borderTopColor: colors.border,
                 }}
               >
-                <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flex: 1, gap: spacing.xxs }}>
                   <Text style={{ ...typography.label, color: colors.text }}>
                     {formatTanggalPanjang(p.ke)}
                   </Text>
@@ -137,7 +137,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                     {p.jarakHari} hari dari {formatTanggalPanjang(p.dari)}
                   </Text>
                 </View>
-                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
                     <Text style={{ ...typography.title, color: colors.text }}>
                       {teksSelisih(p.selisih)}

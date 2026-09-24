@@ -117,7 +117,7 @@ export default function PrivasiScreen() {
           <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
             Privasi
           </Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Apa yang disimpan, dan siapa yang bisa membacanya
           </Text>
         </View>
@@ -142,9 +142,9 @@ export default function PrivasiScreen() {
               >
                 <Ionicons name={IKON[b.nada]} size={22} color={WARNA_STATUS[b.nada]} />
                 <View style={{ flex: 1, gap: spacing.xs }}>
-                  <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{b.judul}</Text>
+                  <Text style={{ ...typography.bodySedang, color: colors.text }}>{b.judul}</Text>
                   <Text style={{ ...typography.label, color: WARNA_STATUS[b.nada] }}>{b.status}</Text>
-                  <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+                  <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
                     {b.penjelasan}
                   </Text>
                 </View>
@@ -158,12 +158,12 @@ export default function PrivasiScreen() {
         <SectionHeader judul="Yang disimpan di akun" />
         <Card style={{ gap: spacing.md }}>
           {DATA_TERSIMPAN.map((d) => (
-            <View key={d.judul} style={{ gap: 2 }}>
+            <View key={d.judul} style={{ gap: spacing.xxs }}>
               <Text style={{ ...typography.label, color: colors.text }}>{d.judul}</Text>
-              <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>{d.isi}</Text>
+              <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{d.isi}</Text>
             </View>
           ))}
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Semuanya disimpan di database Supabase milik app ini. App tidak memuat iklan atau pelacak analitik pihak
             ketiga; selain ekspor yang Anda minta sendiri, data hanya dikirim keluar ke penyedia model AI saat coach,
             ringkasan mingguan, atau foto makanan dipakai.
@@ -205,7 +205,7 @@ export default function PrivasiScreen() {
         {pesanTiruan ? (
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, marginTop: spacing.sm }}
+            style={{ ...typography.labelBiasa, color: colors.textFaint, marginTop: spacing.sm }}
           >
             {pesanTiruan}
           </Text>
@@ -259,9 +259,9 @@ function BarisKendali({
       })}
     >
       <Ionicons name={ikon} size={22} color={colors.textMuted} />
-      <View style={{ flex: 1, gap: 2 }}>
-        <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{judul}</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{keterangan}</Text>
+      <View style={{ flex: 1, gap: spacing.xxs }}>
+        <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{keterangan}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
     </Pressable>

@@ -126,7 +126,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
             ))}
           </View>
 
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 20 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             {profil.caraHubungkan}
           </Text>
 
@@ -179,7 +179,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
             </View>
           ) : null}
 
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Data tersimpan di akun Anda dan hanya bisa dibaca akun Anda. Kalori dari beberapa
             perangkat tidak pernah dijumlahkan.
           </Text>
@@ -237,13 +237,13 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
               {profil.nama} terhubung
             </Text>
           </View>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 20 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             {profil.mekanisme === 'webhook'
               ? `Data pertama masuk saat ada aktivitas baru di ${profil.nama}.`
               : 'Data pertama sedang ditarik. Statusnya terlihat di halaman Sumber data.'}
           </Text>
           {profil.otorisasi === 'healthkit' ? (
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 20 }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
               iOS tidak memberi tahu app jenis data mana yang tidak Anda izinkan. Kalau salah satunya
               tidak pernah muncul, ubah izinnya di Pengaturan › Kesehatan › Akses Data & Perangkat.
             </Text>
@@ -291,7 +291,7 @@ function GagalHubungkan({
       >
         {pesan.judul}
       </Text>
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 20 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
         {pesan.keterangan}
       </Text>
       <View style={{ gap: spacing.sm }}>

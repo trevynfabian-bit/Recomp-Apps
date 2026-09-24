@@ -304,12 +304,11 @@ export function SheetBatasPinggang({
               >
                 {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
                 {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>✓</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.bg }}>✓</Text>
                 ) : null}
                 <Text
                   style={{
-                    ...typography.body,
-                    fontWeight: '700',
+                    ...typography.bodyTebal,
                     color: status === 'tersimpan' || valid ? colors.bg : colors.textFaint,
                   }}
                 >

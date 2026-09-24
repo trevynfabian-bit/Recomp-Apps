@@ -139,7 +139,7 @@ export default function UkuranScreen() {
         </Pressable>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Ukuran tubuh</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Terakhir {formatTanggalPanjang(terbaru.tanggal)}
           </Text>
         </View>
@@ -231,7 +231,7 @@ export default function UkuranScreen() {
           opacity: pressed ? 0.8 : 1,
         })}
       >
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
           {labelAksi}
         </Text>
       </Pressable>

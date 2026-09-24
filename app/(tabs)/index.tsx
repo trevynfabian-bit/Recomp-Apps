@@ -137,7 +137,7 @@ export default function LogHarianScreen() {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Hai, {profil.nama}</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             {formatTanggalPanjang(log.tanggal)}
           </Text>
           {/* Seberapa segar angka di bawahnya; ketuk untuk membuka Sumber data. */}
@@ -164,7 +164,7 @@ export default function LogHarianScreen() {
             <Text style={{ ...typography.title, color: colors.text }}>
               Target {dayType.nama} · {fase} belum diisi
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
               Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
               tetap tersimpan seperti biasa.
             </Text>
@@ -254,7 +254,7 @@ export default function LogHarianScreen() {
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ flex: 1, gap: 4, paddingRight: spacing.md }}>
+              <View style={{ flex: 1, gap: spacing.xs, paddingRight: spacing.md }}>
                 <Text style={{ ...typography.body, color: colors.text }} numberOfLines={1}>
                   {food.nama_makanan}
                 </Text>
@@ -355,7 +355,7 @@ function StatKecil({
       <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
         <Text style={{ ...(kecil ? typography.body : typography.title), color: warna }}>{nilai}</Text>
         {unit ? <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text> : null}
       </View>

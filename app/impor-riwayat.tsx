@@ -85,7 +85,7 @@ export default function ImporRiwayatScreen() {
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={{ ...typography.title, color: colors.text }}>Impor riwayat</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Sekali saja, supaya tren tidak mulai dari nol
           </Text>
         </View>
@@ -97,17 +97,17 @@ export default function ImporRiwayatScreen() {
           return (
             <Card key={k.sumber} style={{ gap: spacing.md }}>
               <View style={{ gap: spacing.xs }}>
-                <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{k.judul}</Text>
-                <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+                <Text style={{ ...typography.bodyTebal, color: colors.text }}>{k.judul}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
                   {k.isi}
                 </Text>
               </View>
               {s ? (
-                <View style={{ gap: 2 }}>
+                <View style={{ gap: spacing.xxs }}>
                   <Text style={{ ...typography.label, color: colors.aksenTeks.jade }}>
                     ✓ Diimpor {formatWaktuRelatif(s.selesaiPada, sekarang)}
                   </Text>
-                  <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{s.ringkas}</Text>
+                  <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{s.ringkas}</Text>
                 </View>
               ) : null}
               {s ? (

@@ -266,7 +266,7 @@ function TombolUtama({
       })}
     >
       <Text
-        style={{ ...typography.body, fontWeight: '700', color: aktif ? colors.bg : colors.textFaint }}
+        style={{ ...typography.bodyTebal, color: aktif ? colors.bg : colors.textFaint }}
       >
         {label}
       </Text>
@@ -291,7 +291,7 @@ function TombolSekunder({ label, onPress }: { label: string; onPress: () => void
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.bodySedang, color: colors.text }}>{label}</Text>
     </Pressable>
   );
 }

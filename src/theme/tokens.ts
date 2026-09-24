@@ -1,7 +1,11 @@
 import type { TextStyle } from 'react-native';
 
-/** Skala spasi 4pt — dipakai untuk padding, gap, dan margin. */
+/**
+ * Skala spasi 4pt — dipakai untuk padding, gap, dan margin. `xxs` (2) satu-satunya
+ * langkah di bawah 4: label ↔ nilai yang menempel (judul + subjudul header).
+ */
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,

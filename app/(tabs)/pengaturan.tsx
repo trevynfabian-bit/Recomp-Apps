@@ -101,7 +101,9 @@ export default function PengaturanScreen() {
         gap: spacing.xl,
       }}
     >
-      <Text style={{ ...typography.display, color: colors.text }}>Pengaturan</Text>
+      <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+        Pengaturan
+      </Text>
 
       {/* --- Profil ----------------------------------------------------------- */}
       <Pressable
@@ -129,11 +131,11 @@ export default function PengaturanScreen() {
           >
             <Text style={{ ...typography.title, color: colors.text }}>{profil.nama.charAt(0).toUpperCase()}</Text>
           </View>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{profil.nama}</Text>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{email}</Text>
+          <View style={{ flex: 1, gap: spacing.xxs }}>
+            <Text style={{ ...typography.bodyTebal, color: colors.text }}>{profil.nama}</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{email}</Text>
             {profilLengkap ? (
-              <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+              <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
                 {[
                   profil.jenis_kelamin === 'pria' ? 'Pria' : 'Wanita',
                   usia !== null ? `${usia} tahun` : null,
@@ -143,7 +145,7 @@ export default function PengaturanScreen() {
                   .join(' · ')}
               </Text>
             ) : (
-              <Text style={{ ...typography.label, fontWeight: '500', color: colors.amber }}>
+              <Text style={{ ...typography.labelBiasa, color: colors.amber }}>
                 Lengkapi tinggi & jenis kelamin untuk estimasi body fat
               </Text>
             )}
@@ -188,15 +190,15 @@ export default function PengaturanScreen() {
         <Card style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
             <Ionicons name="options-outline" size={22} color={colors.textMuted} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>Satuan</Text>
-              <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+            <View style={{ flex: 1, gap: spacing.xxs }}>
+              <Text style={{ ...typography.bodySedang, color: colors.text }}>Satuan</Text>
+              <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
                 Hanya tampilan; data selalu disimpan dalam kg & cm.
               </Text>
             </View>
           </View>
           <PilihSatuan terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
-          <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Contoh: berat {formatDesimal(tampilkanBerat(contohBeratKg, profil.satuan), 1)} {labelBerat(profil.satuan)}
             {profil.tinggi_cm !== null ? ` · tinggi ${panjang(profil.tinggi_cm)}` : ''}
           </Text>
@@ -270,10 +272,10 @@ export default function PengaturanScreen() {
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <Ionicons name="lock-closed-outline" size={22} color={colors.aksenTeks.jade} />
             <View style={{ flex: 1, gap: spacing.xs }}>
-              <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>
+              <Text style={{ ...typography.bodySedang, color: colors.text }}>
                 Data kesehatan hanya untuk akun Anda
               </Text>
-              <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+              <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
                 Setiap baris dikunci ke akun pemiliknya di database, bukan hanya disembunyikan di app. Token sumber
                 data tidak pernah terbaca oleh app.
               </Text>
@@ -308,7 +310,7 @@ export default function PengaturanScreen() {
         {pesanTiruan ? (
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, marginTop: spacing.sm }}
+            style={{ ...typography.labelBiasa, color: colors.textFaint, marginTop: spacing.sm }}
           >
             {pesanTiruan}
           </Text>
@@ -448,9 +450,9 @@ function BarisPengaturan({
       })}
     >
       <Ionicons name={ikon} size={22} color={colors.textMuted} />
-      <View style={{ flex: 1, gap: 2 }}>
-        <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{judul}</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{nilai}</Text>
+      <View style={{ flex: 1, gap: spacing.xxs }}>
+        <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{nilai}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
     </Pressable>

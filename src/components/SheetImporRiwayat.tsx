@@ -289,7 +289,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
             <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
               Akan diimpor
             </Text>
-            <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{langkah.p.ringkas}</Text>
+            <Text style={{ ...typography.bodyTebal, color: colors.text }}>{langkah.p.ringkas}</Text>
           </View>
           {langkah.p.catatan.map((c) => (
             <Teks key={c}>{c}</Teks>
@@ -297,7 +297,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           {langkah.p.dilewati.length > 0 ? <DaftarDilewati dilewati={langkah.p.dilewati} /> : null}
           <Teks redup>Mengimpor ulang tidak menggandakan data, dan tidak menimpa yang sudah tercatat di app.</Teks>
           {galat ? (
-            <Text accessibilityRole="alert" style={{ ...typography.label, fontWeight: '500', color: colors.text }}>
+            <Text accessibilityRole="alert" style={{ ...typography.labelBiasa, color: colors.text }}>
               {galat}
             </Text>
           ) : null}
@@ -345,7 +345,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
         <>
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.body, fontWeight: '700', color: colors.aksenTeks.jade }}
+            style={{ ...typography.bodyTebal, color: colors.aksenTeks.jade }}
           >
             ✓ {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
           </Text>
@@ -376,12 +376,12 @@ function DaftarDilewati({ dilewati }: { dilewati: BarisDilewati[] }) {
         {dilewati.length} baris dilewati
       </Text>
       {tampil.map((d) => (
-        <Text key={`${d.baris}-${d.alasan}`} style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+        <Text key={`${d.baris}-${d.alasan}`} style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Baris {d.baris} — {d.alasan}
         </Text>
       ))}
       {sisa > 0 ? (
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>dan {sisa} lainnya</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>dan {sisa} lainnya</Text>
       ) : null}
     </View>
   );
@@ -391,10 +391,8 @@ function Teks({ children, redup = false }: { children: React.ReactNode; redup?: 
   return (
     <Text
       style={{
-        ...typography.label,
-        fontWeight: '500',
+        ...typography.labelBiasa,
         color: redup ? colors.textFaint : colors.textMuted,
-        lineHeight: 20,
       }}
     >
       {children}

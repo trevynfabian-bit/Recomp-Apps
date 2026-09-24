@@ -58,7 +58,7 @@ export function BannerEksporSiap() {
         }}
       >
         <Ionicons name="document-attach-outline" size={22} color={colors.textMuted} />
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: spacing.xxs }}>
           <Text style={{ ...typography.label, color: colors.text }}>{NOTIF_EKSPOR_SIAP.judul}</Text>
           <Text style={{ ...typography.caption, color: gagal ? colors.aksenTeks.coral : colors.textMuted }}>
             {gagal ? `Belum bisa ${web ? 'diunduh' : 'dibagikan'}; coba lagi.` : 'Berisi data kesehatan Anda.'}

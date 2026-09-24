@@ -224,12 +224,11 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
               >
                 {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
                 {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>✓</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.bg }}>✓</Text>
                 ) : null}
                 <Text
                   style={{
-                    ...typography.body,
-                    fontWeight: '700',
+                    ...typography.bodyTebal,
                     color: status === 'tersimpan' || bisaSimpan ? colors.bg : colors.textFaint,
                   }}
                 >

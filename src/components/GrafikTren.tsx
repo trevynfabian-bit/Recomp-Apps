@@ -172,7 +172,7 @@ export function GrafikTren({
       {/* Baris pemeriksa: isinya berubah saat grafik disentuh */}
       <View style={{ minHeight: 36, justifyContent: 'center' }}>
         {sorot ? (
-          <View style={{ gap: 2 }}>
+          <View style={{ gap: spacing.xxs }}>
             <Text style={{ ...typography.caption, color: colors.textFaint }}>
               {formatTanggalPanjang(sorot.tanggal)}
             </Text>

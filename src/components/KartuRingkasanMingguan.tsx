@@ -35,11 +35,11 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
         borderColor: colors.amber + '55',
       }}
     >
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: spacing.xxs }}>
         <Text style={{ ...typography.caption, color: colors.amber, textTransform: 'uppercase' }}>
           Ringkasan mingguan
         </Text>
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
           {formatRentangTanggal(ringkasan.periode.dari, ringkasan.periode.sampai)}
         </Text>
         <Text style={{ ...typography.caption, color: colors.textFaint }}>
@@ -50,7 +50,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
       {/* Angka dulu. Dua kolom supaya empat poin muat tanpa menggulung. */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
         {ringkasan.poin.map((p) => (
-          <View key={p.label} style={{ flexBasis: '46%', flexGrow: 1, gap: 2 }}>
+          <View key={p.label} style={{ flexBasis: '46%', flexGrow: 1, gap: spacing.xxs }}>
             <Text style={{ ...typography.caption, color: colors.textFaint }}>{p.label}</Text>
             <Text style={{ ...typography.title, color: colors.text }}>{p.nilai}</Text>
             {p.delta ? (

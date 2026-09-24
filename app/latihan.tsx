@@ -97,7 +97,7 @@ export default function LatihanScreen() {
         </Pressable>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Latihan</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Dibaca dari Hevy · dicatat di Hevy, bukan di sini
           </Text>
         </View>
@@ -112,10 +112,10 @@ export default function LatihanScreen() {
 
       {kelompok.length === 0 ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>
+          <Text style={{ ...typography.bodySedang, color: colors.text }}>
             Belum ada latihan dari Hevy
           </Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Latihan yang Anda catat di Hevy masuk otomatis setiap jam setelah Hevy dihubungkan di
             Sumber data.
           </Text>
@@ -135,7 +135,7 @@ export default function LatihanScreen() {
 
       <Card style={{ gap: spacing.sm }}>
         <Text style={{ ...typography.label, color: colors.text }}>Tentang e1RM</Text>
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Perkiraan beban maksimal untuk satu repetisi, dihitung dengan rumus Epley dari set terbaik
           tiap latihan. Hanya set dengan paling banyak {MAKS_REPS_E1RM} repetisi yang dipakai; di atas
           itu, perkiraannya terlalu jauh dari beban sebenarnya. Latihan berat badan (BB) tidak

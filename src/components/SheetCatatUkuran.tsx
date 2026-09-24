@@ -268,7 +268,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                   <Text style={{ ...typography.body, color: colors.text }}>
                     {formatTanggalPanjang(tanggal)}
                   </Text>
-                  <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: 2 }}>
+                  <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.xxs }}>
                     {tanggal === hariIni ? 'hari ini' : 'tanggal pencatatan'}
                   </Text>
                 </View>
@@ -407,12 +407,11 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
               >
                 {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.bg} /> : null}
                 {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>✓</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.bg }}>✓</Text>
                 ) : null}
                 <Text
                   style={{
-                    ...typography.body,
-                    fontWeight: '700',
+                    ...typography.bodyTebal,
                     color: status === 'tersimpan' || bisaSimpan ? colors.bg : colors.textFaint,
                   }}
                 >
@@ -471,7 +470,7 @@ function BarisInput({
     >
       <View style={{ flex: 1 }}>
         <Text style={{ ...typography.body, color: colors.text }}>{label}</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: 2 }}>
+        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.xxs }}>
           {/*
             Keterangan diturunkan dari SELISIH, bukan dari apakah field sudah
             disentuh: di mode perbarui angka yang belum disentuh pun sudah

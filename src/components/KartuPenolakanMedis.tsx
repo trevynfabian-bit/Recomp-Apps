@@ -34,7 +34,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Text style={{ ...typography.body, color: colors.amber }}>▲</Text>
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.amber, flex: 1 }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.amber, flex: 1 }}>
           {penolakan.judul}
         </Text>
       </View>

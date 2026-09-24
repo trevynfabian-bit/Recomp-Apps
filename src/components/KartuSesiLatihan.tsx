@@ -50,14 +50,14 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>{sesi.nama}</Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+        <View style={{ flex: 1, gap: spacing.xxs }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{sesi.nama}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             {formatJam(sesi.mulai)} · {sesi.durasi_menit} menit · {r.jumlahLatihan} latihan · {r.jumlahSet} set
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>
             {formatAngka(r.volumeKg)} kg
           </Text>
           <Text style={{ ...typography.caption, color: colors.textFaint }}>volume</Text>
@@ -86,12 +86,12 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ flex: 1, gap: 2 }}>
+              <View style={{ flex: 1, gap: spacing.xxs }}>
                 <Text style={{ ...typography.label, color: colors.text }}>{l.latihan}</Text>
-                <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{l.set}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{l.set}</Text>
               </View>
               {l.e1rmKg !== null ? (
-                <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
                   <Text style={{ ...typography.label, color: colors.text }}>≈ {formatBeban(l.e1rmKg)}</Text>
                   <Text style={{ ...typography.caption, color: estimasi.warna }}>e1RM · estimasi</Text>
                 </View>

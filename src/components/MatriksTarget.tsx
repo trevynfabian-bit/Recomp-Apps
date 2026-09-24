@@ -84,7 +84,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
                 borderTopColor: colors.border,
               }}
             >
-              <View style={{ width: LEBAR_NAMA, gap: 2 }}>
+              <View style={{ width: LEBAR_NAMA, gap: spacing.xxs }}>
                 <Text style={{ ...typography.label, color: colors.text }}>{b.nama}</Text>
                 {hariIni ? <Text style={{ ...typography.caption, fontWeight: '500', color: colors.amber }}>hari ini</Text> : null}
               </View>
@@ -136,7 +136,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
         })}
       </Card>
 
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
         Angka atas: kalori (kcal). P: protein (g). Ketuk nama fase untuk melihat rinciannya, atau angka untuk menyuntingnya.
         {baris.some((b) => b.sel.some((s) => s.target === null)) ? ' Tanda – berarti target belum diisi.' : ''}
       </Text>
@@ -144,7 +144,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
       {janggal.length > 0 ? (
         <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
           <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
-          <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
             {janggal.map((j) => j.kalimat).join(' ')} Periksa lagi bila tidak disengaja.
           </Text>
         </View>

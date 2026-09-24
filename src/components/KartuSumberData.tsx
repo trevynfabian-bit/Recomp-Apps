@@ -74,7 +74,7 @@ export function KartuSumberData({
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text, flexShrink: 1 }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text, flexShrink: 1 }}>
             {profil.nama}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 2 }}>
@@ -85,12 +85,12 @@ export function KartuSumberData({
 
         <Text style={{ ...typography.caption, color: colors.textFaint }}>{profil.jalur}</Text>
 
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           {kesehatan.keterangan}
         </Text>
 
         {koneksi.status === 'terhubung' && koneksi.masukHariIni.length > 0 ? (
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Hari ini: {koneksi.masukHariIni.map((m) => `${formatAngka(m.jumlah)} ${m.label}`).join(' · ')}
           </Text>
         ) : null}

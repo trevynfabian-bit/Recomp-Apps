@@ -99,7 +99,7 @@ export default function HasilLabScreen() {
           <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
             Hasil lab
           </Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             {statusMuat === 'memuat'
               ? 'Memuat…'
               : statusMuat === 'gagal'
@@ -113,7 +113,7 @@ export default function HasilLabScreen() {
 
       <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
         <Ionicons name="flask-outline" size={20} color={colors.textMuted} />
-        <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
           Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis. Semua angka di sini data mentah yang
           Anda salin; app tidak memperkirakan atau membulatkannya. Rentang rujukan adalah milik laboratorium yang
           memeriksa; artinya dibicarakan dengan dokter.
@@ -122,8 +122,8 @@ export default function HasilLabScreen() {
 
       {statusMuat === 'gagal' ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>Hasil lab belum termuat</Text>
-          <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>Hasil lab belum termuat</Text>
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             {pesanGagal}
           </Text>
           <TombolBertepi label="Coba lagi" onPress={muatUlang} />
@@ -132,15 +132,15 @@ export default function HasilLabScreen() {
 
       {statusMuat === 'siap' && kelompok.length === 0 ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.body, fontWeight: '700', color: colors.text }}>Belum ada hasil lab</Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.text }}>Belum ada hasil lab</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Hasil lab yang Anda tambahkan akan tampil di sini, dikelompokkan per tahun, dan dibaca coach sebagai konteks.
           </Text>
         </Card>
       ) : null}
 
       {statusHapus === 'terhapus' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.jade }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
           Hasil lab dihapus.
         </Text>
       ) : null}
@@ -174,13 +174,13 @@ export default function HasilLabScreen() {
         {akanDihapus ? (
           <>
             <Text style={{ ...typography.title, color: colors.text }}>Hapus hasil lab ini?</Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
               {akanDihapus.nama}, {formatTanggalPanjang(akanDihapus.tanggal).split(', ')[1]} {akanDihapus.tanggal.slice(0, 4)} ·{' '}
               {akanDihapus.penanda.length} penanda. Coach tidak lagi membacanya sebagai konteks, dan penghapusan ini tidak
               bisa dibatalkan.
             </Text>
             {statusHapus === 'gagal' ? (
-              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral }}>
+              <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
                 {pesanGagalHapus}
               </Text>
             ) : null}
@@ -209,18 +209,18 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
-          <Text style={{ flex: 1, ...typography.body, fontWeight: '700', color: colors.text }}>{hasil.nama}</Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{tanggal}</Text>
+          <Text style={{ flex: 1, ...typography.bodyTebal, color: colors.text }}>{hasil.nama}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{tanggal}</Text>
         </View>
         {hasil.laboratorium ? (
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>{hasil.laboratorium}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{hasil.laboratorium}</Text>
         ) : null}
         <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} />
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{ringkasan}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{ringkasan}</Text>
         {r.diLuarRentang.length > 0 ? (
-          <View style={{ gap: 2 }}>
+          <View style={{ gap: spacing.xxs }}>
             {r.diLuarRentang.map((p) => (
-              <Text key={p.nama} style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+              <Text key={p.nama} style={{ ...typography.labelBiasa, color: colors.textMuted }}>
                 · {p.nama}: {posisiPenanda(p)} rujukan
               </Text>
             ))}
@@ -282,9 +282,9 @@ function DataMentahLab({ hasil }: { hasil: HasilLab }) {
       <Text style={{ ...typography.caption, color: colors.textFaint }}>DATA MENTAH · SEPERTI TERTULIS DI HASIL LAB</Text>
       <View accessibilityRole="list" style={{ gap: spacing.sm }}>
         {barisDataMentahLab(hasil).map((b) => (
-          <View key={b.nama} accessible accessibilityLabel={b.aksesLabel} style={{ gap: 2 }}>
+          <View key={b.nama} accessible accessibilityLabel={b.aksesLabel} style={{ gap: spacing.xxs }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
-              <Text style={{ flex: 1, ...typography.label, fontWeight: '500', color: colors.textMuted }}>{b.nama}</Text>
+              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>{b.nama}</Text>
               <Text style={{ ...typography.label, color: colors.text }}>{b.nilai}</Text>
             </View>
             <Text style={{ ...typography.caption, color: colors.textFaint }}>

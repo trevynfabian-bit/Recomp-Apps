@@ -58,13 +58,13 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
   return (
     <KerangkaSheet terbuka onTutup={menyerahkan ? null : onTutup} label="Ekspor data">
       <Text style={{ ...typography.title, color: colors.text }}>Ekspor data saya</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>
+      <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
         Satu berkas ZIP berisi CSV per jenis data dan satu JSON lengkap — terbaca di spreadsheet mana pun, tanpa
         app ini.
       </Text>
 
       {isi === null ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textFaint }}>
           {isiGagal
             ? 'Isi berkas belum bisa dihitung sekarang; berkasnya tetap bisa disiapkan.'
             : 'Menghitung isi berkas…'}
@@ -73,25 +73,25 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       <View accessibilityRole="list" style={{ gap: spacing.xs }}>
         {(isi ?? []).map((b) => (
           <View key={b.label} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{b.label}</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{b.label}</Text>
             <Text style={{ ...typography.label, color: colors.text }}>{formatAngka(b.jumlah)}</Text>
           </View>
         ))}
       </View>
 
       {status.jenis === 'memproses' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
           Berkas sedang disiapkan. Sheet ini boleh ditutup; ada pemberitahuan saat berkasnya siap.
         </Text>
       ) : null}
 
       {status.jenis === 'siap' ? (
         <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
-          <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>Berkas siap</Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>
+          <Text style={{ ...typography.bodySedang, color: colors.text }}>Berkas siap</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             {status.namaBerkas} · {formatUkuranBerkas(status.ukuranByte)} · disiapkan pukul {jam(status.dibuatPada)}
           </Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
             Berkas ini berisi data kesehatan Anda. Setelah {web ? 'diunduh' : 'dibagikan'}, penjagaannya mengikuti
             tempat tujuannya.
           </Text>
@@ -99,7 +99,7 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       ) : null}
 
       {status.jenis === 'diserahkan' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.jade, lineHeight: 19 }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
           {status.cara === 'diunduh'
             ? 'Berkas sudah diunduh.'
             : 'Berkas sudah dibagikan. Salinan sementaranya di perangkat ini sudah dihapus.'}

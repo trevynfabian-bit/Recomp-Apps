@@ -54,7 +54,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
   return (
     <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Pengingat timbang">
       <Text style={{ ...typography.title, color: colors.text }}>Jam pengingat</Text>
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 20 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
         Pengingat hanya muncul di pagi yang belum ada timbangannya. Pilih jam sedikit sesudah Anda
         biasanya timbang.
       </Text>
@@ -68,7 +68,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
             backgroundColor: colors.surfaceSunken,
           }}
         >
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Biasanya Anda timbang sekitar {formatJamMenit(saran.kebiasaanMenit)} ({saran.dasar} pagi terakhir).
           </Text>
           <Pressable

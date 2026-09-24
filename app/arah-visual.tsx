@@ -47,10 +47,7 @@ const NETRAL: { nama: string; warna: string }[] = [
   { nama: 'garisKontrol', warna: colors.borderKuat },
 ];
 
-const JARAK = [
-  { nama: 'xxs', nilai: 2 },
-  ...Object.entries(spacing).map(([nama, nilai]) => ({ nama, nilai })),
-];
+const JARAK = Object.entries(spacing).map(([nama, nilai]) => ({ nama, nilai }));
 
 export default function ArahVisualScreen() {
   const insets = useSafeAreaInsets();
@@ -93,7 +90,7 @@ export default function ArahVisualScreen() {
         >
           <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
         </Pressable>
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: spacing.xxs }}>
           <Text accessibilityRole="header" style={{ ...usulanTipografi.title, color: colors.text }}>
             Arah visual
           </Text>
@@ -124,7 +121,7 @@ export default function ArahVisualScreen() {
           {PERAN.map((p) => (
             <View key={p.nama} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <View style={{ width: 32, height: 32, borderRadius: radius.md, backgroundColor: p.isian }} />
-              <View style={{ flex: 1, gap: 2 }}>
+              <View style={{ flex: 1, gap: spacing.xxs }}>
                 <Text style={{ ...usulanTipografi.bodySedang, color: p.teks }}>{p.nama}</Text>
                 <Text style={{ ...usulanTipografi.labelBiasa, color: colors.textFaint }}>{p.arti}</Text>
               </View>

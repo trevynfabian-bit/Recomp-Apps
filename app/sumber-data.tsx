@@ -128,7 +128,7 @@ export default function SumberDataScreen() {
         </Pressable>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Sumber data</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Apple Health, WHOOP, Strava, Hevy
           </Text>
         </View>
@@ -178,9 +178,9 @@ export default function SumberDataScreen() {
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>Impor riwayat lama</Text>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+          <View style={{ flex: 1, gap: spacing.xxs }}>
+            <Text style={{ ...typography.bodySedang, color: colors.text }}>Impor riwayat lama</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
               Sekali saja: Hevy CSV, Apple Health, ukuran tubuh
             </Text>
           </View>
@@ -194,11 +194,11 @@ export default function SumberDataScreen() {
       <View>
         <SectionHeader judul="Tanpa hitungan ganda" />
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Kalau dua perangkat mencatat olahraga yang sama, hanya sumber dengan prioritas
             tertinggi yang dihitung untuk olahraga itu di hari itu.
           </Text>
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
             Langkah dan energi aktif memakai total dari satu sumber saja, tidak pernah
             dijumlahkan antar perangkat.
           </Text>

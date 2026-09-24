@@ -77,7 +77,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                   ) : null}
                 </View>
 
-                <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flex: 1, gap: spacing.xxs }}>
                   <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
                     {f.nilai}
                   </Text>

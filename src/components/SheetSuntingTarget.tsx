@@ -88,7 +88,7 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       <Text style={{ ...typography.title, color: colors.text }}>
         {namaTipeHari} · {fase}
       </Text>
-      <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19 }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
         {tersimpan
           ? `Tersimpan: ${formatAngka(tersimpan.target_kalori)} kcal. Perubahan berlaku mulai hari ini.`
           : 'Belum ada target untuk tipe hari ini di fase ini. Isi keempat angkanya; berlaku mulai hari ini.'}
@@ -116,7 +116,7 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       {KOLOM.some((k) => tampilGalat(k.kunci)) ? (
         <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
           {KOLOM.filter((k) => tampilGalat(k.kunci)).map((k) => (
-            <Text key={k.kunci} style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+            <Text key={k.kunci} style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
               {galat[k.kunci]}
             </Text>
           ))}
@@ -124,13 +124,13 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       ) : null}
 
       {rincian ? <RincianKalori rincian={rincian} /> : (
-        <Text style={{ ...typography.label, fontWeight: '500', color: colors.textFaint }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
           Pembagian kalori muncul setelah isian lengkap dan sah.
         </Text>
       )}
 
       {status === 'gagal' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, fontWeight: '500', color: colors.aksenTeks.coral, lineHeight: 19 }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
           {pesanGagal}
         </Text>
       ) : null}
@@ -157,15 +157,15 @@ function RincianKalori({ rincian }: { rincian: ReturnType<typeof rincianKaloriMa
       style={{ gap: spacing.sm }}
     >
       <Text style={{ ...typography.caption, color: colors.textMuted }}>PEMBAGIAN KALORI</Text>
-      <View style={{ flexDirection: 'row', height: 10, borderRadius: radius.pill, overflow: 'hidden', gap: 2, backgroundColor: colors.surfaceSunken }}>
+      <View style={{ flexDirection: 'row', height: 10, borderRadius: radius.pill, overflow: 'hidden', gap: spacing.xxs, backgroundColor: colors.surfaceSunken }}>
         {bagian.filter((b) => b.persen > 0).map((b) => (
           <View key={b.kunci} style={{ flex: b.persen, backgroundColor: b.warna }} />
         ))}
       </View>
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: spacing.xxs }}>
         {bagian.map((b) => (
           <View key={b.kunci} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>{b.label}</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{b.label}</Text>
             <Text style={{ ...typography.label, color: colors.text }}>
               {formatAngka(b.kkal)} kcal · {b.persen}%
             </Text>

@@ -141,7 +141,7 @@ export default function BudgetScreen() {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
           <Text style={{ ...typography.title, color: colors.text }}>Budget mingguan</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: 2 }}>
+          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
             Mulai {formatTanggalPanjang(budget.mingguMulai)}
           </Text>
         </View>
@@ -220,13 +220,13 @@ export default function BudgetScreen() {
               backgroundColor: colors.surfaceSunken,
             }}
           >
-            <View style={{ gap: 3 }}>
+            <View style={{ gap: spacing.xxs }}>
               <Text style={{ ...typography.label, color: colors.text }}>Total minggu</Text>
               <Text style={{ ...typography.caption, color: colors.textFaint }}>
                 tercatat {formatAngka(budget.terpakai)} · proyeksi {formatAngka(budget.targetMendatang)}
               </Text>
             </View>
-            <View style={{ alignItems: 'flex-end', gap: 3 }}>
+            <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
               <Text style={{ ...typography.label, color: colors.text }}>
                 {formatAngka(budget.budgetTotal)} kcal
               </Text>
@@ -245,7 +245,7 @@ export default function BudgetScreen() {
         {catatanRedistribusi && !redistribusi ? (
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.label, fontWeight: '500', color: colors.textMuted, lineHeight: 19, marginBottom: spacing.sm }}
+            style={{ ...typography.labelBiasa, color: colors.textMuted, marginBottom: spacing.sm }}
           >
             {catatanRedistribusi}
           </Text>
@@ -343,7 +343,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         backgroundColor: iniHariIni ? colors.amber + '0F' : 'transparent',
       }}
     >
-      <View style={{ flex: 1, gap: 3 }}>
+      <View style={{ flex: 1, gap: spacing.xxs }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Text style={{ ...typography.label, color: colors.text }}>
             {namaHariSingkat(hari.tanggal)}
@@ -367,7 +367,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         </View>
       </View>
 
-      <View style={{ alignItems: 'flex-end', gap: 3 }}>
+      <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
         <Text
           style={{
             ...typography.label,
@@ -404,7 +404,7 @@ function StatKecil({
   warna: string;
 }) {
   return (
-    <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs, paddingHorizontal: 2 }}>
+    <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xxs }}>
       <Text
         style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}
         numberOfLines={1}
