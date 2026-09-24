@@ -85,10 +85,10 @@ export function SheetRiwayatPercakapan({
                 {p.judul}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+                <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                   {labelTanggalRelatif(tanggal, hariIni)} · {formatJam(p.diperbaruiPada)}
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+                <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                   · {p.pesan.length} pesan
                 </Text>
                 {aktif ? (

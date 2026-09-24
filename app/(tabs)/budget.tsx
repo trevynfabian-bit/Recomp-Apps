@@ -338,11 +338,11 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+          <Text style={{ ...typography.caption, color: colors.teksRedup }}>
             {hari.namaTipeHari} · {formatAngka(hari.nilaiKalori)} kcal
           </Text>
           {hari.proyeksi ? (
-            <Text style={{ ...typography.caption, color: colors.teksSamar }}>proyeksi</Text>
+            <Text style={{ ...typography.caption, color: colors.teksRedup }}>proyeksi</Text>
           ) : hari.selisih !== null && hari.selisih !== 0 ? (
             <Text style={{ ...typography.caption, color: warnaSelisih }}>
               {formatSelisih(hari.selisih, { desimal: 0 })}
@@ -361,7 +361,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
           {hari.sisaBerjalan < 0 ? '−' : ''}
           {formatAngka(Math.abs(hari.sisaBerjalan))}
         </Text>
-        <Text style={{ ...typography.caption, color: colors.teksSamar }}>sisa</Text>
+        <Text style={{ ...typography.caption, color: colors.teksRedup }}>sisa</Text>
       </View>
     </View>
   );

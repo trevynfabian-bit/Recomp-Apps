@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.6 (24 September 2026) |
+| **Versi** | 1.7 (24 September 2026) |
 | **Penjaga** | `npm run cek:desain-semua` (`cek:desain`, `cek:hardcode`, `cek:kontras`) |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
@@ -159,7 +159,11 @@ berubah karena keputusan desain.
 
 ### 8.8 Penjaga otomatis
 
-- `npm run cek:kontras`: semua pasangan warna yang dipakai layar, kedua mode.
+- `npm run cek:kontras`: semua pasangan warna yang dipakai layar, kedua mode,
+  ditambah pemindaian KODE: setiap `<Text>` di dalam elemen berlatar
+  `tint(...)` diuji 4,5:1 terhadap tint itu di atas permukaan dan latar
+  (semua cabang kondisional ikut diuji). Aturan yang lahir darinya: teks
+  sekunder di baris yang bisa disorot memakai `teksRedup`, bukan `teksSamar`.
 - `npm run cek:desain`: prinsip (satu angka hero per layar, mode mengikuti
   sistem, warna tidak dibekukan di modul, varian tipografi, area sentuh 44 pt).
 - `npm run cek:hardcode`: tidak ada warna, jarak, radius, ukuran huruf, tinggi
@@ -195,3 +199,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | 1.4 | 24 September 2026 | Navigasi: tab final "Setelan", ikon terisi + garis penanda untuk tab terpilih, `HeaderLayar` di semua layar, pola transisi dorong/modal, kembali satu langkah. Aturan angka hero dipertegas: hanya layar data, selalu `KartuHero`. |
 | 1.5 | 24 September 2026 | Penjaga desain diperbarui: `cek:hardcode` baru (nilai tertanam + saran token), pelanggaran per baris dengan nilainya, ringkasan lulus/gagal seragam di akhir setiap penjaga, dan `cek:desain-semua` untuk ketiganya. |
 | 1.6 | 24 September 2026 | Hierarki angka hero: warna dari `nada` (aksen/netral/bahaya) menurut peran angka, `HeroPengganti` untuk angka yang belum bisa dihitung; dijaga `cek:desain`. |
+| 1.7 | 24 September 2026 | Fase 5 ditutup: komponen bersama `Chip`, `PilihanSegmen`, `BarisTautan`, `JudulSheet`, `Sisipan`, `Isian` mono/ringkas; `cek:kontras` memindai teks di atas tint dari kode (dua temuan diperbaiki: baris hari ini di Budget dan percakapan terbuka di Riwayat). |

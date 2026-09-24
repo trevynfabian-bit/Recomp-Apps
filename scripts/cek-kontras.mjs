@@ -14,11 +14,12 @@
  * Kode di sini memakai nama semantik yang sama dengan layar (bab Desain 8.2).
  * Label "amber"/"coral"/"jade" di daftar hanya untuk dibaca manusia.
  */
-import { copyFileSync, mkdtempSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import ts from 'typescript';
 import { buatRingkasan } from './lib/ringkasan-cek.mjs';
 
 const require = createRequire(import.meta.url);
@@ -56,6 +57,20 @@ function muatWarna() {
 }
 
 const PALET = muatWarna();
+
+/**
+ * Warna pratinjau widget layar kunci (`src/theme/layarKunci.ts`): monokrom,
+ * sama di kedua mode, jadi dibaca sekali. Dibaca dengan regex (bukan tsc)
+ * karena berkasnya mengimpor tipe react-native.
+ */
+function muatLayarKunci() {
+  const teks = readFileSync('src/theme/layarKunci.ts', 'utf8');
+  const blok = teks.match(/warna: \{([\s\S]*?)\n  \}/)[1];
+  return Object.fromEntries([...blok.matchAll(/(\w+): '(#[0-9A-Fa-f]{6,8})'/g)].map((m) => [m[1], m[2]]));
+}
+const LAYAR_KUNCI = muatLayarKunci();
+/** Warna #RRGGBBAA dicampur ke dasarnya; #RRGGBB apa adanya. */
+const padat = (hex, dasar) => (hex.length === 9 ? campur(hex.slice(0, 7), hex.slice(7), dasar) : hex);
 
 const rgb = (hex) => {
   const h = hex.replace('#', '');
@@ -234,6 +249,24 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
   ['tepi Isian fokus (aksen) di permukaanCekung', c.aksen.isian, c.permukaanCekung, true],
   ['tepi Isian galat (bahaya) di permukaanCekung', c.status.bahaya.isian, c.permukaanCekung, true],
   ['galat Isian (bahaya.teks) di permukaan', c.status.bahaya.teks, c.permukaan, false],
+
+  // Chip terpilih (Fase 5): tint aksen `pill` di atas kartu/sheet dan di atas
+  // latar layar (saran Coach). Label `teks`, ikon `aksen.teks`, tepi aksen 3:1.
+  ...[['permukaan', c.permukaan], ['latar', c.latar]].flatMap(([nama, dasar]) => {
+    const chip = campur(c.aksen.isian, c.alfa.pill, dasar);
+    return [
+      [`teks di chip terpilih atas ${nama}`, c.teks, chip, false],
+      [`aksen.teks (ikon) di chip terpilih atas ${nama}`, c.aksen.teks, chip, false],
+      [`tepi chip terpilih (aksen) di ${nama}`, c.aksen.isian, dasar, true],
+    ];
+  }),
+
+  // Pratinjau widget layar kunci: monokrom, sama di kedua mode.
+  ['layar kunci: jam di wallpaper', LAYAR_KUNCI.jam, LAYAR_KUNCI.latar, true],
+  ['layar kunci: teks di wallpaper', LAYAR_KUNCI.teks, LAYAR_KUNCI.latar, false],
+  ['layar kunci: teksRedup di wallpaper', padat(LAYAR_KUNCI.teksRedup, LAYAR_KUNCI.latar), LAYAR_KUNCI.latar, false],
+  ['layar kunci: teks di widget persegi', LAYAR_KUNCI.teks, padat(LAYAR_KUNCI.isian, LAYAR_KUNCI.latar), false],
+  ['layar kunci: teksRedup di widget persegi', padat(LAYAR_KUNCI.teksRedup, padat(LAYAR_KUNCI.isian, LAYAR_KUNCI.latar)), padat(LAYAR_KUNCI.isian, LAYAR_KUNCI.latar), false],
 ];
 }
 
@@ -310,6 +343,72 @@ for (const [skema, c] of Object.entries(PALET)) {
     `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} [${skema}] garis vs permukaan ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
   );
   hasil.catat(`[${skema}] garis vs permukaan`, rasioGaris < 2);
+}
+
+/*
+ * Teks di atas latar bertint, dibaca dari KODE (Fase 5). Daftar pasangan di
+ * atas hanya memeriksa kombinasi yang didaftarkan orang; di sini setiap elemen
+ * dengan `backgroundColor: tint(colors.x, 'tingkat')` di layar & komponen
+ * dicari, lalu setiap warna `colors.*` pada <Text> di dalamnya diuji 4,5:1
+ * terhadap tint itu di atas permukaan dan latar, di kedua mode. Warna di
+ * cabang kondisional (`a ? colors.x : colors.y`) diuji semuanya.
+ */
+console.log('\nTeks di atas latar bertint (dibaca dari kode)');
+hasil.bagian('Teks di atas tint (dari kode)');
+{
+  const berkasTsx = (d) =>
+    readdirSync(d).flatMap((n) => {
+      const p = join(d, n);
+      return statSync(p).isDirectory() ? berkasTsx(p) : p.endsWith('.tsx') ? [p] : [];
+    });
+  const ambil = (c, expr) => {
+    const m = expr.match(/^colors\.([\w.]+)$/);
+    if (!m) return null;
+    let v = c;
+    for (const bagian of m[1].split('.')) v = v?.[bagian];
+    return typeof v === 'string' ? v : null;
+  };
+  let diuji = 0;
+  const temuan = [];
+  for (const f of [...berkasTsx('app'), ...berkasTsx('src/components')]) {
+    const sf = ts.createSourceFile(f, readFileSync(f, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    (function kunjungi(n) {
+      if (ts.isJsxElement(n)) {
+        const m = n.openingElement.getText(sf).match(/backgroundColor:\s*(?:[^,}]*\?\s*)?tint\((colors\.[\w.]+),\s*'(\w+)'\)/);
+        if (m) {
+          // Warna teks langsung di dalam elemen ini (bukan di elemen bertint bersarang).
+          const warnaTeks = new Set();
+          (function teks(x) {
+            if ((ts.isJsxOpeningElement(x) || ts.isJsxSelfClosingElement(x)) && x.tagName.getText(sf) === 'Text') {
+              for (const c of x.getText(sf).matchAll(/color:\s*([^,}]+)/g)) {
+                for (const e of c[1].split(/[?:]/)) if (e.trim().startsWith('colors.')) warnaTeks.add(e.trim());
+              }
+            }
+            ts.forEachChild(x, teks);
+          })(n);
+          const baris = sf.getLineAndCharacterOfPosition(n.getStart()).line + 1;
+          for (const [mode, c] of Object.entries(PALET)) {
+            for (const dasar of ['permukaan', 'latar']) {
+              const w = ambil(c, m[1]);
+              if (!w) continue;
+              const latar = campur(w, c.alfa[m[2]], c[dasar]);
+              for (const tw of warnaTeks) {
+                const depan = ambil(c, tw);
+                if (!depan) continue;
+                diuji += 1;
+                const r = kontras(depan, latar);
+                if (r < AA_KECIL) temuan.push(`${f}:${baris} [${mode}, atas ${dasar}] ${tw} di tint(${m[1]}, '${m[2]}') ${r.toFixed(2)}:1`);
+              }
+            }
+          }
+        }
+      }
+      ts.forEachChild(n, kunjungi);
+    })(sf);
+  }
+  console.log(`${temuan.length === 0 ? '  ok  ' : ' GAGAL'} ${diuji} kombinasi teks × tint dari kode`);
+  for (const t of temuan) console.log(`         ${t}`);
+  hasil.catat('teks di atas tint lolos AA (min 4,5:1)', temuan.length === 0, temuan.length);
 }
 
 console.log('\nRincian per mode');
