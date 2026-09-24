@@ -70,3 +70,27 @@ sumber, impor, sunting target, riwayat percakapan.
 | N8 | Tidak ada tab yang bisa diketuk ulang untuk kembali ke atas/awal tumpukan secara eksplisit (perilaku bawaan navigator). | — (dicatat, bukan masalah) |
 
 Temuan N1–N7 menjadi bahan task berikutnya di fitur ini.
+
+## 4. Keputusan: tab final
+
+**Lima tab, urutan tetap:** Hari Ini · Tren · Budget · Coach · Setelan.
+
+- **Jumlah.** Lima adalah batas tab iPhone menurut HIG; semua lima tempat
+  dipakai harian atau berkala, dan tidak ada kandidat yang cukup sering dibuka
+  untuk menggeser salah satunya. Ukuran, Sumber data, Latihan, dan Hasil lab
+  tetap layar tumpukan yang dibuka dari layar asalnya (Tren, Setelan).
+- **Urutan** mengikuti seberapa sering dibuka dalam sehari: mencatat hari ini,
+  melihat arah berat, memeriksa jatah minggu, bertanya ke coach, lalu setelan
+  yang jarang disentuh di ujung kanan.
+- **Nama: "Setelan"** untuk tab maupun judul layarnya (N3). Dua alasan:
+  "Pengaturan" terpotong menjadi "Penga…" di tab bar pada lebar 320–390 pt, dan
+  iOS berbahasa Indonesia memakai "Pengaturan" untuk app Settings-nya sendiri,
+  yang ditautkan app ini ("Buka Pengaturan ›" untuk izin notifikasi, "Pengaturan
+  › Kesehatan" untuk izin Apple Health). Satu nama untuk tempat app, satu nama
+  untuk tempat sistem. Pesan galat "Atur dulu di Pengaturan" ikut diganti.
+- **Label tab** memakai `caption` tanpa tracking (tracking 0,6 hanya untuk huruf
+  kapital).
+
+Diwujudkan sebagai data di `app/(tabs)/_layout.tsx` (`TAB`). `cek:desain`
+menjaga jumlah tab 1–5 dan bahwa judul setiap layar tab diawali label tabnya
+(sehingga "Setelan" vs "Pengaturan" tidak bisa terulang tanpa ketahuan).

@@ -105,7 +105,7 @@ export default function PengaturanScreen() {
       }}
     >
       <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-        Pengaturan
+        Setelan
       </Text>
 
       {/* --- Profil ----------------------------------------------------------- */}

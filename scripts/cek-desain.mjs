@@ -176,6 +176,18 @@ const kontrolRapat = semuaUi.flatMap((p) => {
 });
 cek('setiap kontrol rapat menggenapkan area sentuh', kontrolRapat.length === 0, kontrolRapat.join(' | '));
 
+console.log('\nNavigasi (docs/desain/peta-navigasi.md)');
+const tabTeks = readFileSync(join('app', '(tabs)', '_layout.tsx'), 'utf8');
+const tab = [...tabTeks.matchAll(/\{ rute: '(\w+)', judul: '([^']+)'/g)].map((m) => ({ rute: m[1], judul: m[2] }));
+cek(`jumlah tab ${tab.length} (1–5, batas HIG iPhone)`, tab.length >= 1 && tab.length <= 5);
+const tabBeda = tab.filter((t) => {
+  const layarTab = readFileSync(join('app', '(tabs)', `${t.rute}.tsx`), 'utf8');
+  // Tab "index" menyapa pengguna ("Hai, …") alih-alih mencetak judulnya.
+  // Judul boleh lebih panjang ("Tren berat") asalkan diawali label tabnya.
+  return t.rute !== 'index' && !new RegExp(`>\\s*${t.judul}\\b`).test(layarTab);
+});
+cek('judul layar diawali label tabnya', tabBeda.length === 0, tabBeda.map((t) => `${t.rute}: "${t.judul}"`).join(', '));
+
 console.log('\nAcuan resmi');
 let bab = '';
 try {

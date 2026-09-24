@@ -2,7 +2,32 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { colors, typography } from '@/theme';
 
-/** Tab bar utama: Hari Ini (log harian), Tren, Coach, Pengaturan. */
+type Tab = {
+  /** Nama berkas rute di `app/(tabs)/`. */
+  rute: string;
+  /** Label tab: judul layarnya atau bentuk pendeknya ("Tren" untuk "Tren berat"). */
+  judul: string;
+  ikon: React.ComponentProps<typeof Ionicons>['name'];
+};
+
+/**
+ * Tab final (docs/desain/peta-navigasi.md §4): lima, batas HIG untuk iPhone,
+ * diurutkan menurut seberapa sering dibuka dalam sehari — mencatat hari ini,
+ * melihat arah berat, memeriksa jatah minggu, bertanya ke coach, lalu
+ * setelan yang jarang disentuh di ujung. "Setelan", bukan "Pengaturan":
+ * iOS berbahasa Indonesia memakai "Pengaturan" untuk app Settings-nya sendiri,
+ * dan app ini punya tautan ke sana (izin notifikasi, Kesehatan). Judul layar diawali label tabnya,
+ * supaya satu tempat punya satu nama (dijaga `cek:desain`).
+ */
+export const TAB: Tab[] = [
+  { rute: 'index', judul: 'Hari Ini', ikon: 'today-outline' },
+  { rute: 'tren', judul: 'Tren', ikon: 'trending-up-outline' },
+  { rute: 'budget', judul: 'Budget', ikon: 'wallet-outline' },
+  { rute: 'coach', judul: 'Coach', ikon: 'sparkles-outline' },
+  { rute: 'pengaturan', judul: 'Setelan', ikon: 'options-outline' },
+];
+
+/** Tab bar utama. */
 export default function TabsLayout() {
   return (
     <Tabs
@@ -14,44 +39,20 @@ export default function TabsLayout() {
           backgroundColor: colors.latar,
           borderTopColor: colors.garis,
         },
-        tabBarLabelStyle: { ...typography.caption, textTransform: 'none' },
+        // Label tab tidak kapital, jadi tanpa tracking caption (itu untuk huruf kapital).
+        tabBarLabelStyle: { ...typography.caption, letterSpacing: 0, textTransform: 'none' },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Hari Ini',
-          tabBarIcon: ({ color, size }) => <Ionicons name="today-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="tren"
-        options={{
-          title: 'Tren',
-          tabBarIcon: ({ color, size }) => <Ionicons name="trending-up-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="budget"
-        options={{
-          title: 'Budget',
-          tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="coach"
-        options={{
-          title: 'Coach',
-          tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="pengaturan"
-        options={{
-          title: 'Setelan',
-          tabBarIcon: ({ color, size }) => <Ionicons name="options-outline" size={size} color={color} />,
-        }}
-      />
+      {TAB.map((t) => (
+        <Tabs.Screen
+          key={t.rute}
+          name={t.rute}
+          options={{
+            title: t.judul,
+            tabBarIcon: ({ color, size }) => <Ionicons name={t.ikon} size={size} color={color} />,
+          }}
+        />
+      ))}
     </Tabs>
   );
 }

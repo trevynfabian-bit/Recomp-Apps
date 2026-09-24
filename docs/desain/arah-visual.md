@@ -225,7 +225,7 @@ diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
   dipilih dibanding mengubah puluhan layar menjadi pembaca konteks.
 - Deteksi sistem ada di satu fungsi murni, `skemaDariSistem()`: hanya `light`
   yang memilih terang; `null`/`unspecified` jatuh ke gelap.
-- **Pilihan manual** (Pengaturan → Preferensi → Tampilan): *Ikuti sistem*
+- **Pilihan manual** (Setelan → Preferensi → Tampilan): *Ikuti sistem*
   (bawaan), *Terang*, atau *Gelap*. Disimpan di perangkat (`recomp:tampilan`,
   di luar cadangan per akun, jadi tidak hilang saat keluar) lewat
   `usePilihanTampilan()`. Skema yang berlaku = `skemaBerlakuDari(pilihan,
@@ -412,7 +412,7 @@ Aturan: radius elemen di dalam kartu harus **lebih kecil** dari radius kartunya
 `app/arah-visual.tsx` menaruh seluruh keputusan di atas dalam satu layar:
 komposisi hero + baris makro, palet status (isian, teks, pill), palet netral,
 tangga tipografi dengan tinggi barisnya, token jarak dan radius, serta tiga
-varian tombol. Dibuka dari **Pengaturan → Arah visual**, hanya pada build
+varian tombol. Dibuka dari **Setelan → Arah visual**, hanya pada build
 pengembangan (`__DEV__`). Data dari `src/mocks/dailyLog.ts`.
 
 Varian tipografi di layar ini masih didefinisikan lokal (`usulanTipografi`);

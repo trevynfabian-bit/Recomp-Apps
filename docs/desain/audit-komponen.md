@@ -110,7 +110,7 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    `pengganti` saat target belum diisi; Sumber data dan Latihan kini ikut
    berbingkai kartu seperti layar lain.
 
-Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).
+Halaman peraga: **Setelan → Peraga komponen** (build pengembangan).
 
 ## 7. Konsistensi akhir Fase 3
 

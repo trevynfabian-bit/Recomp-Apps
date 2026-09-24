@@ -70,7 +70,7 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanTipeHa
     case '23503': // foreign_key_violation — tipe hari tidak ditemukan / bukan milik Anda
       return new KesalahanTipeHari('Tipe hari itu tidak ada di akun Anda.', false);
     case '23502': // not_null_violation — profil belum punya fase aktif
-      return new KesalahanTipeHari('Profil belum punya fase program. Atur dulu di Pengaturan.', false);
+      return new KesalahanTipeHari('Profil belum punya fase program. Atur dulu di Setelan.', false);
     default:
       return new KesalahanTipeHari('Gagal menyimpan tipe hari. Periksa koneksi lalu coba lagi.', true);
   }

@@ -115,5 +115,5 @@ Hasilnya berupa daftar centang (✓) atau silang (✗). Setiap silang menyebut
 - Aturan resmi: [`bab-desain-prd.md`](./bab-desain-prd.md)
 - Alasan di balik setiap keputusan: [`arah-visual.md`](./arah-visual.md)
 - Kondisi sebelum rombak: [`audit-token-layar.md`](./audit-token-layar.md)
-- Di aplikasi (build pengembangan): **Pengaturan → Arah visual** menampilkan
+- Di aplikasi (build pengembangan): **Setelan → Arah visual** menampilkan
   semua token ini di satu layar.

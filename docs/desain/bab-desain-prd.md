@@ -130,7 +130,7 @@ berubah karena keputusan desain.
 
 - Mengikuti setelan sistem; sistem tanpa pilihan jatuh ke gelap. Splash dan
   latar asli app tetap gelap.
-- Pengguna bisa memaksa terang atau gelap di Pengaturan → Tampilan; pilihan
+- Pengguna bisa memaksa terang atau gelap di Setelan → Tampilan; pilihan
   itu milik perangkat, bukan akun.
 - Seluruh layar membaca palet yang berlaku saat render; warna tidak boleh
   dibekukan di konstanta tingkat modul.
