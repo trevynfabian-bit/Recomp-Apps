@@ -9,7 +9,7 @@ type Props = {
   /** Satu baris konteks di bawah judul: tanggal, sumber, jumlah. */
   subjudul?: string;
   /**
-   * Tombol kembali di kiri. `true` memakai `router.back()`; fungsi dipakai bila
+   * Tombol kembali di kiri. `true` memakai `useKembali()` (satu langkah, atau naik ke induk); fungsi dipakai bila
    * kembali perlu konfirmasi dulu (mis. ada isian yang belum disimpan).
    * Layar tab tidak punya tombol kembali.
    */
