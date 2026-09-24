@@ -17,7 +17,7 @@ const ts = require('typescript');
 const kerja = mkdtempSync(join(tmpdir(), 'target-'));
 for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
-  ['targetHarian.ts', 'targetBerlaku.ts', 'pengingat.ts', 'redistribusi.ts', 'deteksiTipeHari.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+  ['targetHarian.ts', 'targetBerlaku.ts', 'pengingat.ts', 'redistribusi.ts', 'deteksiTipeHari.ts', 'peringatanProtein.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
 const {
   uraiKalori, uraiGram, isianDariTarget, periksaTarget, isianBerubah, karboTersisaG, RENTANG_TARGET,
@@ -27,6 +27,7 @@ const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 const { redistribusiBasi, terapkanRedistribusi } = require(join(kerja, 'keluar', 'redistribusi.js'));
 const { deteksiTipeHari, aturanDeteksiTipeHari } = require(join(kerja, 'keluar', 'deteksiTipeHari.js'));
 const { targetBerlaku, tipeHariBerlaku, cariBarisTarget } = require(join(kerja, 'keluar', 'targetBerlaku.js'));
+const { peringatanProtein } = require(join(kerja, 'keluar', 'peringatanProtein.js'));
 
 let gagal = 0;
 function cek(nama, lulus, rincian = '') {
@@ -312,6 +313,23 @@ console.log('\nAPI target (muat_target / simpan_target)');
   } };
   jelajahi('src'); jelajahi('app');
   cek('app tidak menulis day_type_targets langsung (hanya simpan_target)', tulisLangsung.length === 0, tulisLangsung.join(', '));
+}
+
+console.log('\nPeringatan protein sebelum simpan');
+{
+  // Tidak turun dan cukup per kg: tanpa peringatan.
+  cek('protein naik & ≥1,6 g/kg: tanpa peringatan', peringatanProtein(185, 180, 75) === null);
+  cek('target baru (belum tersimpan) & cukup: tanpa peringatan', peringatanProtein(160, null, 75) === null);
+  cek('berat tidak diketahui & tidak turun: tanpa peringatan', peringatanProtein(100, 100, null) === null);
+  const turun = peringatanProtein(150, 185, 75);
+  cek('protein turun: peringatan dengan selisih gram', turun !== null && turun.turunG === 35 && !turun.rendah, JSON.stringify(turun));
+  cek('kalimat turun menyebut 185 → 150 g', turun !== null && turun.kalimat.includes('185 → 150 g'), turun?.kalimat);
+  const rendah = peringatanProtein(110, null, 75);
+  cek('di bawah 1,6 g/kg: peringatan rendah', rendah !== null && rendah.rendah && rendah.turunG === null && Math.abs(rendah.gPerKg - 110 / 75) < 1e-9);
+  cek('kalimat rendah memakai koma desimal', rendah !== null && rendah.kalimat.includes('1,5 g per kg') && rendah.kalimat.includes('1,6 g/kg'), rendah?.kalimat);
+  const keduanya = peringatanProtein(100, 150, 75);
+  cek('turun sekaligus rendah: keduanya disebut', keduanya !== null && keduanya.turunG === 50 && keduanya.rendah);
+  cek('tepat 1,6 g/kg tidak dianggap rendah', peringatanProtein(120, null, 75) === null);
 }
 
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan target lulus');

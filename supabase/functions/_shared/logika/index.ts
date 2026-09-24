@@ -343,6 +343,9 @@ export {
   urutanFaseJanggal,
 } from './targetHarian.ts';
 
+export type { PeringatanProtein } from './peringatanProtein.ts';
+export { peringatanProtein, PROTEIN_MIN_G_PER_KG } from './peringatanProtein.ts';
+
 export type { HasilGantiFase, PeriodeFase } from './periodeFase.ts';
 export { faseSaat, jangkarKoridor, periodeBerjalan, terapkanGantiFase } from './periodeFase.ts';
 

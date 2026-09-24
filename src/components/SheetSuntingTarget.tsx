@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { formatAngka, ISIAN_KOSONG, isianBerubah, isianDariTarget, periksaTarget, rincianKaloriMakro } from '@recomp/logika';
+import {
+  formatAngka,
+  ISIAN_KOSONG,
+  isianBerubah,
+  isianDariTarget,
+  periksaTarget,
+  peringatanProtein,
+  rincianKaloriMakro,
+} from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
+import { Panel } from './Card';
 import { InputTarget } from './InputTarget';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
@@ -18,6 +27,8 @@ type Props = {
   tersimpan: NilaiTarget | null;
   /** Simpan satu target; melempar bila gagal (isian tetap ada), `KesalahanTarget` membawa pesannya. */
   simpan: (nilai: NilaiTarget) => Promise<void>;
+  /** Rata-rata berat 7 hari untuk memeriksa protein per kg; `null` bila belum ada timbangan. */
+  beratKg?: number | null;
 };
 
 const KOLOM: { kunci: KolomTarget; label: string; unit: string; akses: string }[] = [
@@ -40,13 +51,15 @@ const KOLOM: { kunci: KolomTarget; label: string; unit: string; akses: string }[
  * Aturan pemeriksaan sama dengan form halaman (`periksaTarget`): galat tampil
  * setelah kolom ditinggalkan atau saat menyimpan.
  */
-export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersimpan, simpan }: Props) {
+export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersimpan, simpan, beratKg = null }: Props) {
   const awal = () => (tersimpan ? isianDariTarget(tersimpan) : ISIAN_KOSONG);
   const [isian, setIsian] = useState<IsianTarget>(awal);
   const [disentuh, setDisentuh] = useState<Partial<Record<KolomTarget, true>>>({});
   const [cobaSimpan, setCobaSimpan] = useState(false);
   const [status, setStatus] = useState<'diam' | 'menyimpan' | 'gagal'>('diam');
   const [pesanGagal, setPesanGagal] = useState('');
+  /** Peringatan protein sudah dibaca dan pengguna memilih tetap menyimpan. */
+  const [proteinDisetujui, setProteinDisetujui] = useState(false);
 
   useEffect(() => {
     if (!terbuka) return;
@@ -54,6 +67,7 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
     setDisentuh({});
     setCobaSimpan(false);
     setStatus('diam');
+    setProteinDisetujui(false);
     // Hanya saat dibuka: nilai tersimpan yang berubah sesudahnya berasal dari simpanan ini sendiri.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [terbuka]);
@@ -66,10 +80,19 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
   const berubah = isianBerubah(isian, tersimpan);
   const menyimpan = status === 'menyimpan';
   const rincian = hasil.sah ? rincianKaloriMakro(hasil.nilai) : null;
+  const peringatan = hasil.sah
+    ? peringatanProtein(hasil.nilai.target_protein_g, tersimpan?.target_protein_g ?? null, beratKg)
+    : null;
 
   async function jalankan() {
     if (!hasil.sah) {
       setCobaSimpan(true);
+      return;
+    }
+    // Simpan pertama dengan peringatan berhenti (tombol jadi "Tetap simpan");
+    // simpan kedua menyimpan.
+    if (peringatan && !proteinDisetujui) {
+      setProteinDisetujui(true);
       return;
     }
     setStatus('menyimpan');
@@ -105,6 +128,8 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
             ditandai={tampilGalat(k.kunci)}
             onUbah={(t) => {
               setIsian((x) => ({ ...x, [k.kunci]: t }));
+              // Angka berubah: peringatan (bila ada) harus dibaca ulang sebelum menyimpan.
+              setProteinDisetujui(false);
               if (status === 'gagal') setStatus('diam');
             }}
             onTinggalkan={() => setDisentuh((d) => ({ ...d, [k.kunci]: true }))}
@@ -129,6 +154,19 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
         </Text>
       )}
 
+      {/* Peringatan protein SEBELUM menyimpan: tampil begitu angkanya sah, dan
+          Simpan pertama berhenti di sini supaya kalimatnya terbaca. */}
+      {peringatan ? (
+        <Panel nada="peringatan">
+          <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
+            <Text style={{ ...typography.label, color: colors.status.peringatan.teks }}>
+              {peringatan.turunG !== null ? 'Protein diturunkan' : 'Protein di bawah 1,6 g/kg'}
+            </Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{peringatan.kalimat}</Text>
+          </View>
+        </Panel>
+      ) : null}
+
       {status === 'gagal' ? (
         <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
           {pesanGagal}
@@ -136,7 +174,13 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <Tombol label="Simpan" nonaktif={!berubah} memproses={menyimpan} onPress={() => void jalankan()} />
+        <Tombol
+          label={proteinDisetujui && peringatan ? 'Tetap simpan' : 'Simpan'}
+          aksesPetunjuk={peringatan && !proteinDisetujui ? 'Menampilkan catatan protein dulu sebelum menyimpan' : undefined}
+          nonaktif={!berubah}
+          memproses={menyimpan}
+          onPress={() => void jalankan()}
+        />
         <Tombol varian="bertepi" label="Batal" onPress={onTutup} nonaktif={menyimpan} />
       </View>
     </KerangkaSheet>

@@ -5,15 +5,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   aturanDeteksiTipeHari,
   formatAngka,
+  formatDesimal,
   formatMakro,
   formatTanggalPanjang,
+  ISIAN_KOSONG,
   isianBerubah,
   isianDariTarget,
-  ISIAN_KOSONG,
   karboTersisaG,
   periksaTarget,
+  peringatanProtein,
   periodeBerjalan,
+  rataRata7Hari,
   susunMatriksTarget,
+  tanggalHariIni,
 } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import {
@@ -24,6 +28,7 @@ import {
   KartuHero,
   KerangkaSheet,
   MatriksTarget,
+  Panel,
   PemilihTipeHari,
   PilihanSegmen,
   Pill,
@@ -39,6 +44,7 @@ import { useProfil } from '@/state/profil';
 import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import type { DayType } from '@/types/domain';
 import { useJagaKeluar } from '@/lib/jagaKeluar';
 import { useKembali } from '@/lib/kembali';
@@ -153,6 +159,16 @@ export default function TargetHarianScreen() {
     [draf, cariTarget],
   );
   const adaTidakSah = berubah.some((b) => !b.hasil.sah);
+
+  // Rata-rata berat 7 hari untuk memeriksa protein per kg (null tanpa timbangan).
+  const beratKg = rataRata7Hari(mockRiwayatBerat, tanggalHariIni()).rataRataKg;
+  /** Perubahan sah yang menurunkan protein atau membuatnya di bawah 1,6 g/kg. */
+  const peringatanSimpan = berubah.flatMap((b) => {
+    if (!b.hasil.sah) return [];
+    const p = peringatanProtein(b.hasil.nilai.target_protein_g, cariTarget(b.dayTypeId, b.fase)?.target_protein_g ?? null, beratKg);
+    return p ? [{ ...b, peringatan: p, nama: tipeHari.find((d) => d.id === b.dayTypeId)?.nama ?? '' }] : [];
+  });
+  const [proteinDisetujui, setProteinDisetujui] = useState(false);
   const faseDiubah = new Set(berubah.map((b) => b.fase));
   const menyimpan = status.jenis === 'menyimpan';
 
@@ -160,6 +176,8 @@ export default function TargetHarianScreen() {
     const k = kunciBaris(dt, fase);
     setDraf((d) => ({ ...d, [k]: { ...(d[k] ?? isianTersimpan(dt, fase)), [kolom]: teks } }));
     if (status.jenis !== 'menyimpan') setStatus({ jenis: 'diam' });
+    // Angka berubah: peringatan protein harus dibaca ulang sebelum menyimpan.
+    setProteinDisetujui(false);
   }
 
   function kembalikan(dt: string) {
@@ -182,6 +200,11 @@ export default function TargetHarianScreen() {
       setCobaSimpan(true);
       const pertama = berubah.find((b) => !b.hasil.sah);
       if (pertama && pertama.fase !== fase) setFase(pertama.fase);
+      return;
+    }
+    // Simpan pertama dengan peringatan protein berhenti di panelnya; yang kedua menyimpan.
+    if (peringatanSimpan.length > 0 && !proteinDisetujui) {
+      setProteinDisetujui(true);
       return;
     }
     setStatus({ jenis: 'menyimpan' });
@@ -380,10 +403,41 @@ export default function TargetHarianScreen() {
               Ada isian yang perlu diperbaiki sebelum disimpan.
             </Text>
           ) : null}
+          {menyunting && peringatanSimpan.length > 0 ? (
+            <Panel nada="peringatan">
+              <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
+                <Text style={{ ...typography.label, color: colors.status.peringatan.teks }}>
+                  Protein turun atau di bawah 1,6 g/kg di {peringatanSimpan.length === 1 ? 'satu target' : `${peringatanSimpan.length} target`}
+                </Text>
+                {peringatanSimpan.map((b) => (
+                  <Text key={kunciBaris(b.dayTypeId, b.fase)} style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+                    {b.nama} · {b.fase}:{' '}
+                    {[
+                      b.peringatan.turunG !== null ? `turun ${formatAngka(b.peringatan.turunG)} g` : null,
+                      b.peringatan.rendah && b.peringatan.gPerKg !== null
+                        ? `${formatDesimal(b.peringatan.gPerKg, 1)} g/kg`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </Text>
+                ))}
+                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+                  Protein yang menjaga otot selama kalori ditekan; kurangi karbo atau lemak dulu bila bisa.
+                </Text>
+              </View>
+            </Panel>
+          ) : null}
           {menyunting ? (
             <>
               <Tombol
-                label={berubah.length > 1 ? `Simpan ${berubah.length} perubahan` : 'Simpan perubahan'}
+                label={
+                  proteinDisetujui && peringatanSimpan.length > 0
+                    ? 'Tetap simpan'
+                    : berubah.length > 1
+                      ? `Simpan ${berubah.length} perubahan`
+                      : 'Simpan perubahan'
+                }
                 nonaktif={berubah.length === 0}
                 memproses={menyimpan}
                 onPress={() => void simpan()}
@@ -419,6 +473,7 @@ export default function TargetHarianScreen() {
           namaTipeHari={tipeHari.find((d) => d.id === suntingSatu.dayTypeId)?.nama ?? ''}
           fase={suntingSatu.fase}
           tersimpan={cariTarget(suntingSatu.dayTypeId, suntingSatu.fase)}
+          beratKg={beratKg}
           simpan={async (nilai) => {
             const { hariDiredistribusiTetap } = await simpanTarget([
               { day_type_id: suntingSatu.dayTypeId, fase: suntingSatu.fase, nilai },
