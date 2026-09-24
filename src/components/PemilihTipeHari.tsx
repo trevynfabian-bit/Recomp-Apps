@@ -119,8 +119,11 @@ export function PemilihTipeHari({
             </Text>
           )}
 
+          {/* Fase ikut menentukan angkanya: tipe hari yang sama punya target berbeda
+              di Maintenance, Lean Gain, dan Cut. Dikatakan dengan kata, bukan nama tabel. */}
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-            Target absolut dari day_type_targets · fase {fase}
+            Angka untuk {daftar.find((d) => d.id === terpilihId)?.nama ?? 'tipe hari ini'} saat fase {fase}; fase lain
+            punya target sendiri.
           </Text>
         </View>
       </View>
