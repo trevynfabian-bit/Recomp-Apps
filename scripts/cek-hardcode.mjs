@@ -87,14 +87,12 @@ const BARIS_BEBAS = [
   { pola: /'transparent'/, alasan: 'bukan warna' },
 ];
 const UKURAN_HURUF_BEBAS = [
-  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'angka berat yang bisa diketik: input, bukan HeroNumber' },
-  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'angka batas yang bisa diketik: input, bukan HeroNumber' },
+  { berkas: 'src/components/Pemilih.tsx', alasan: 'angka PemilihAngka 52 pt: input yang bisa diketik, bukan HeroNumber; satu-satunya tempat' },
   { berkas: 'src/components/SheetHubungkanSumber.tsx', alasan: 'glyph centang dekoratif, disembunyikan dari pembaca layar' },
   { berkas: 'src/components/SheetImporRiwayat.tsx', alasan: 'pratinjau CSV mentah dalam Menlo (teks mesin, bukan UI)' },
 ];
 const TINGGI_BARIS_BEBAS = [
-  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'glyph −/+ stepper dipusatkan di tombol bulat 56 pt' },
-  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'glyph −/+ stepper dipusatkan di tombol bulat 56 pt' },
+  { berkas: 'src/components/Pemilih.tsx', alasan: 'tinggi baris angka 52 pt PemilihAngka (pasangan ukuran huruf di atas)' },
   { berkas: 'src/components/InputChat.tsx', alasan: 'field chat multiline menghitung tingginya sendiri per baris' },
 ];
 

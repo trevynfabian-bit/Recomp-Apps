@@ -33,6 +33,7 @@ export { PanelRedistribusi } from './PanelRedistribusi';
 export { PanelRingkasanMakro } from './PanelRingkasanMakro';
 export { PemilihFase } from './PemilihFase';
 export { PemilihTipeHari } from './PemilihTipeHari';
+export { PemilihAngka, PemilihTanggal, uraiAngka } from './Pemilih';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
 export { Pill } from './Pill';
 export { Placeholder } from './Placeholder';

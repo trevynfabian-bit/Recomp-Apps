@@ -74,7 +74,12 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    (mis. tampilkan sandi), keterangan, galat (ikon + kalimat, diumumkan ke
    pembaca layar), `ditandai` untuk galat bersama, nonaktif, dan tepi fokus
    (aksen, 2 px) / galat (bahaya, 2 px). Tepi keduanya dijaga `cek:kontras`.
-   Sisa: pindahkan `TextInput` langsung.
+   `PemilihAngka` (− angka 52 pt yang bisa diketik +, langkah/rentang/
+   pembulatan di satu tempat) menggantikan stepper di `KartuTimbangPagi` dan
+   `SheetBatasPinggang`; `PemilihTanggal` (‹ tanggal ›, tombol di batas rentang
+   nonaktif) menggantikan penggeser tanggal di `SheetCatatUkuran`. Pengecualian
+   ukuran huruf 52 pt kini hanya di `Pemilih.tsx`. Sisa: pindahkan `TextInput`
+   langsung.
 4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.
 5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
 

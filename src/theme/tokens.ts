@@ -64,6 +64,10 @@ export const ukuran = {
   radio: 18,
   /** Sisipan di dalam kontrol segmen, antara track dan segmen terpilih. */
   sisipanSegmen: 3,
+  /** Tombol −/+ pemilih angka: lebih besar dari TAP_MIN karena ditekan berulang. */
+  tombolLangkah: 56,
+  /** Lebar kolom angka besar di pemilih angka (cukup untuk "120,5"). */
+  kolomAngka: 140,
 } as const;
 
 /**
@@ -78,6 +82,8 @@ export const ukuranIkon = {
   sedang: 20,
   /** Ikon depan baris pengaturan dan kartu. */
   baris: 22,
+  /** Ikon di tombol −/+ pemilih angka. */
+  besar: 28,
 } as const;
 
 /**

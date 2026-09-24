@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
+import { PemilihAngka, uraiAngka } from './Pemilih';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -57,7 +58,7 @@ export function SheetBatasPinggang({
     setStatus('idle');
   }, [terbuka, nilaiAwal]);
 
-  const angka = urai(draf);
+  const angka = uraiAngka(draf);
   const valid = angka !== null && angka >= BATAS_MIN && angka <= BATAS_MAKS;
   const sisa = angka !== null ? bulat(angka - pinggangSekarangCm) : null;
   const sudahLewat = sisa !== null && sisa < 0;
@@ -71,13 +72,6 @@ export function SheetBatasPinggang({
       : []),
   ];
 
-  function geser(delta: number) {
-    ketukRingan();
-    const dasar = angka ?? nilaiAwal;
-    const berikut = Math.min(Math.max(dasar + delta, BATAS_MIN), BATAS_MAKS);
-    setDraf(formatDesimal(Math.round(berikut * 10) / 10));
-    if (status === 'gagal') setStatus('idle');
-  }
 
   async function simpan() {
     if (!valid || angka === null) return;
@@ -135,58 +129,23 @@ export function SheetBatasPinggang({
             contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
           >
             {/* − 86,0 cm + */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <TombolGeser
-                label="−"
-                aksesLabel={`Kurangi ${formatDesimal(LANGKAH_CM)} sentimeter`}
-                onPress={() => geser(-LANGKAH_CM)}
-              />
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'baseline',
-                  justifyContent: 'center',
-                  gap: spacing.xs,
-                }}
-              >
-                <TextInput
-                  value={draf}
-                  onChangeText={(t) => {
-                    setDraf(t);
-                    if (status === 'gagal') setStatus('idle');
-                  }}
-                  keyboardType="decimal-pad"
-                  inputMode="decimal"
-                  selectTextOnFocus
-                  accessibilityLabel="Batas pinggang dalam sentimeter"
-                  style={{
-                    ...typography.hero,
-                    fontSize: 52,
-                    // Lebar eksplisit: tanpa ini input di web memakai lebar
-                    // bawaannya dan mendorong tombol + keluar layar.
-                    width: 140,
-                    color: valid ? colors.teks : colors.status.bahaya.teks,
-                    textAlign: 'center',
-                    padding: 0,
-                  }}
-                />
-                <Text style={{ ...typography.title, color: colors.teksSamar }}>cm</Text>
-              </View>
-              <TombolGeser
-                label="+"
-                aksesLabel={`Tambah ${formatDesimal(LANGKAH_CM)} sentimeter`}
-                onPress={() => geser(LANGKAH_CM)}
-              />
-            </View>
+            <PemilihAngka
+              nilai={draf}
+              onUbah={(t) => {
+                setDraf(t);
+                if (status === 'gagal') setStatus('idle');
+              }}
+              langkah={LANGKAH_CM}
+              min={BATAS_MIN}
+              maks={BATAS_MAKS}
+              cadangan={angka ?? nilaiAwal}
+              unit="cm"
+              unitAkses="sentimeter"
+              aksesLabel="Batas pinggang dalam sentimeter"
+              galat={valid ? null : `Masukkan batas antara ${BATAS_MIN} dan ${BATAS_MAKS} cm.`}
+            />
 
-            {!valid ? (
-              <Text
-                style={{ ...typography.caption, color: colors.status.bahaya.teks, textAlign: 'center' }}
-              >
-                Masukkan batas antara {BATAS_MIN} dan {BATAS_MAKS} cm.
-              </Text>
-            ) : (
+            {!valid ? null : (
               /* Jarak ke pinggang sekarang — arti sebenarnya dari angka di atas. */
               <Panel style={{ gap: spacing.xs, borderWidth: 1, borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent' }}>
                 <Text
@@ -290,38 +249,6 @@ export function SheetBatasPinggang({
   );
 }
 
-/** Tombol bulat −/+ untuk menggeser batas setengah sentimeter. */
-function TombolGeser({
-  label,
-  aksesLabel,
-  onPress,
-}: {
-  label: string;
-  aksesLabel: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={aksesLabel}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        width: 56,
-        height: 56,
-        borderRadius: radius.pill,
-        backgroundColor: colors.permukaanCekung,
-        borderWidth: 1,
-        borderColor: colors.garisKontrol,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.display, color: colors.teks, lineHeight: 36 }}>{label}</Text>
-    </Pressable>
-  );
-}
-
 function labelSimpan(status: StatusSimpan): string {
   switch (status) {
     case 'menyimpan':
@@ -333,14 +260,6 @@ function labelSimpan(status: StatusSimpan): string {
     default:
       return 'Simpan batas';
   }
-}
-
-/** Urai input pengguna; menerima koma maupun titik sebagai pemisah desimal. */
-function urai(teks: string): number | null {
-  const bersih = teks.replace(',', '.').trim();
-  if (bersih === '') return null;
-  const n = Number(bersih);
-  return Number.isFinite(n) ? n : null;
 }
 
 function bulat(n: number): number {

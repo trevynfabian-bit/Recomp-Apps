@@ -10,6 +10,8 @@ import {
   Isian,
   KerangkaSheet,
   MacroRow,
+  PemilihAngka,
+  PemilihTanggal,
   Panel,
   Pemisah,
   Pill,
@@ -18,7 +20,9 @@ import {
   TombolBertepi,
   TombolIkon,
   TombolUtama,
+  uraiAngka,
 } from '@/components';
+import { tanggalHariIni } from '@recomp/logika';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
 import { colors, spacing, typography, useSkema } from '@/theme';
 
@@ -40,6 +44,7 @@ export default function PeragaScreen() {
   const [sheetTerbuka, setSheetTerbuka] = useState(false);
   const [angka, setAngka] = useState('74,6');
   const [target, setTarget] = useState('3100');
+  const [tanggal, setTanggal] = useState(tanggalHariIni());
   const log = mockDailyLogHariIni;
   const makro = susunMacros(log, cariTarget(log.day_type_id, 'Lean Gain'));
 
@@ -185,6 +190,24 @@ export default function PeragaScreen() {
               nonaktif={false}
             />
           </View>
+        </Card>
+      </Bagian>
+
+      <Bagian judul="Pemilih angka & tanggal">
+        <Card style={{ gap: spacing.xl }}>
+          <PemilihAngka
+            nilai={angka}
+            onUbah={setAngka}
+            langkah={0.1}
+            min={30}
+            maks={250}
+            cadangan={74.6}
+            unit="kg"
+            unitAkses="kilogram"
+            aksesLabel="Berat dalam kilogram"
+            galat={(uraiAngka(angka) ?? 0) < 30 ? 'Masukkan berat antara 30 dan 250 kg' : null}
+          />
+          <PemilihTanggal tanggal={tanggal} onUbah={setTanggal} hariIni={tanggalHariIni()} mundurMaks={7} />
         </Card>
       </Bagian>
 

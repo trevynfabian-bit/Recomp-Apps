@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 import { Card, Panel } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
@@ -9,6 +9,7 @@ import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 import { Tombol } from './Tombol';
+import { PemilihAngka, uraiAngka } from './Pemilih';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
 const LANGKAH_KG = 0.1;
@@ -82,19 +83,12 @@ export function KartuTimbangPagi({
     return () => clearTimeout(t);
   }, [baruTersimpan]);
 
-  const drafAngka = urai(draf);
+  const drafAngka = uraiAngka(draf);
   const valid = drafAngka !== null && drafAngka >= BERAT_MIN && drafAngka <= BERAT_MAKS;
   const selisih =
     beratKg !== null && beratSebelumnyaKg !== null ? beratKg - beratSebelumnyaKg : null;
   const jenisSumber = beratKg !== null ? sumberBerat(sumber) : null;
 
-  function geser(delta: number) {
-    ketukRingan();
-    const dasar = urai(draf) ?? nilaiAwal;
-    const berikut = Math.min(Math.max(dasar + delta, BERAT_MIN), BERAT_MAKS);
-    // Bulatkan ke 0,1 agar tidak muncul galat pembulatan biner.
-    setDraf(formatDesimal(Math.round(berikut * 10) / 10));
-  }
 
   /** Selisih draf terhadap timbangan terakhir — dasar konfirmasi salah ketik. */
   const lompatan =
@@ -253,49 +247,18 @@ export function KartuTimbangPagi({
               </Text>
             </View>
 
-            {/* Baris angka: −  74,6 kg  + */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <TombolGeser label="−" onPress={() => geser(-LANGKAH_KG)} />
-
-              {/* `flex: 1` menahan grup tengah agar tombol + tidak terdorong keluar layar. */}
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'baseline',
-                  justifyContent: 'center',
-                  gap: spacing.xs,
-                }}
-              >
-                <TextInput
-                  value={draf}
-                  onChangeText={setDraf}
-                  keyboardType="decimal-pad"
-                  inputMode="decimal"
-                  selectTextOnFocus
-                  accessibilityLabel="Berat dalam kilogram"
-                  style={{
-                    ...typography.hero,
-                    fontSize: 52,
-                    // Lebar eksplisit: tanpa ini input memakai lebar bawaan
-                    // (~20 karakter) dan mendorong tombol + keluar layar.
-                    width: 140,
-                    color: valid ? colors.teks : colors.status.bahaya.teks,
-                    textAlign: 'center',
-                    padding: 0,
-                  }}
-                />
-                <Text style={{ ...typography.title, color: colors.teksSamar }}>kg</Text>
-              </View>
-
-              <TombolGeser label="+" onPress={() => geser(LANGKAH_KG)} />
-            </View>
-
-            {!valid ? (
-              <Text style={{ ...typography.caption, color: colors.status.bahaya.teks, textAlign: 'center' }}>
-                Masukkan berat antara {BERAT_MIN} dan {BERAT_MAKS} kg
-              </Text>
-            ) : null}
+            <PemilihAngka
+              nilai={draf}
+              onUbah={setDraf}
+              langkah={LANGKAH_KG}
+              min={BERAT_MIN}
+              maks={BERAT_MAKS}
+              cadangan={nilaiAwal}
+              unit="kg"
+              unitAkses="kilogram"
+              aksesLabel="Berat dalam kilogram"
+              galat={valid ? null : `Masukkan berat antara ${BERAT_MIN} dan ${BERAT_MAKS} kg`}
+            />
 
             {/* Asal angka yang sedang diubah, plus akibat menyimpannya. */}
             {jenisSumber !== null ? (
@@ -401,30 +364,6 @@ export function KartuTimbangPagi({
   );
 }
 
-/** Tombol bulat −/+ untuk menggeser berat 0,1 kg per ketukan. */
-function TombolGeser({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label === '+' ? 'Tambah 0,1 kg' : 'Kurangi 0,1 kg'}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        width: 56,
-        height: 56,
-        borderRadius: radius.pill,
-        backgroundColor: colors.permukaanCekung,
-        borderWidth: 1,
-        borderColor: colors.garisKontrol,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.display, color: colors.teks, lineHeight: 36 }}>{label}</Text>
-    </Pressable>
-  );
-}
-
 /** Teks tombol simpan sesuai tahap penyimpanan. */
 function labelTombolSimpan(status: StatusSimpan, perluKonfirmasi: boolean): string {
   switch (status) {
@@ -439,12 +378,4 @@ function labelTombolSimpan(status: StatusSimpan, perluKonfirmasi: boolean): stri
     default:
       return perluKonfirmasi ? 'Simpan…' : 'Simpan';
   }
-}
-
-/** Urai input pengguna; menerima koma maupun titik sebagai pemisah desimal. */
-function urai(teks: string): number | null {
-  const bersih = teks.replace(',', '.').trim();
-  if (bersih === '') return null;
-  const n = Number(bersih);
-  return Number.isFinite(n) ? n : null;
 }

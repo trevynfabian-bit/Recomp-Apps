@@ -1,18 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import {
-  formatDesimal,
-  formatTanggalPanjang,
-  majuHari,
-  RENTANG_UKURAN_CM,
-  selisihHari,
-  tanggalHariIni,
-} from '@recomp/logika';
+import { formatDesimal, formatTanggalPanjang, RENTANG_UKURAN_CM, selisihHari, tanggalHariIni } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
+import { PemilihTanggal } from './Pemilih';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -169,16 +163,6 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
     if (status === 'konfirmasi') setStatus('idle');
   }
 
-  function geserTanggal(delta: number) {
-    ketukRingan();
-    setTanggal((t) => {
-      const berikut = majuHari(t, delta);
-      const batasBawah = majuHari(hariIni, -MUNDUR_MAKS_HARI);
-      if (berikut > hariIni || berikut < batasBawah) return t;
-      return berikut;
-    });
-    if (status === 'konfirmasi') setStatus('idle');
-  }
 
   function tekanSimpan() {
     if (!bisaSimpan) return;
@@ -260,26 +244,15 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
           >
             {/* Tanggal pencatatan — bisa digeser karena ukur sering tertunda sehari. */}
             <View style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                <TombolGeser
-                  label="‹"
-                  aksesLabel="Tanggal sehari lebih awal"
-                  onPress={() => geserTanggal(-1)}
-                />
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{ ...typography.body, color: colors.teks }}>
-                    {formatTanggalPanjang(tanggal)}
-                  </Text>
-                  <Text style={{ ...typography.caption, color: colors.teksSamar, marginTop: spacing.xxs }}>
-                    {tanggal === hariIni ? 'hari ini' : 'tanggal pencatatan'}
-                  </Text>
-                </View>
-                <TombolGeser
-                  label="›"
-                  aksesLabel="Tanggal sehari lebih akhir"
-                  onPress={() => geserTanggal(1)}
-                />
-              </View>
+              <PemilihTanggal
+                tanggal={tanggal}
+                hariIni={hariIni}
+                mundurMaks={MUNDUR_MAKS_HARI}
+                onUbah={(t) => {
+                  setTanggal(t);
+                  if (status === 'konfirmasi') setStatus('idle');
+                }}
+              />
 
               {mode === 'perbarui' ? (
                 <Keterangan nada="netral">
@@ -498,38 +471,6 @@ function BarisInput({
         <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
       </View>
     </View>
-  );
-}
-
-/** Tombol bulat untuk menggeser tanggal sehari. */
-function TombolGeser({
-  label,
-  aksesLabel,
-  onPress,
-}: {
-  label: string;
-  aksesLabel: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={aksesLabel}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        width: TAP_MIN,
-        height: TAP_MIN,
-        borderRadius: radius.pill,
-        backgroundColor: colors.permukaanCekung,
-        borderWidth: 1,
-        borderColor: colors.garisKontrol,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.title, color: colors.teks }}>{label}</Text>
-    </Pressable>
   );
 }
 
