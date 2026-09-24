@@ -1214,6 +1214,33 @@ export type StatusPekerjaanRow = {
   ekspor: { disusun_di: 'perangkat'; sumber: 'ekspor_data_saya' };
 };
 
+/** Hasil `riwayat_percakapan_saya`: utas terbaru dulu, dengan kursor halaman berikutnya. */
+export type RiwayatPercakapanRow = {
+  utas: {
+    id: string;
+    judul: string;
+    dibuat_pada: string;
+    diperbarui_pada: string;
+    jumlah_pesan: number;
+    /** Pesan terakhir; kartu (penolakan, evaluasi, ringkasan) disebut jenisnya. */
+    terakhir: { peran: 'pengguna' | 'coach'; cuplikan: string; waktu: string } | null;
+  }[];
+  /** `p_sebelum` untuk halaman berikutnya; `null` bila sudah habis. */
+  berikutnya: string | null;
+};
+
+/** Hasil `pesan_percakapan`: pesan satu utas dalam urutan tulis. */
+export type PesanPercakapanRow = {
+  percakapan_id: string;
+  judul: string;
+  pesan: Pick<
+    PesanCoachRow,
+    'id' | 'urutan' | 'peran' | 'teks' | 'waktu' | 'rujukan' | 'widget' | 'ringkasan' | 'evaluasi' | 'penolakan'
+  >[];
+  /** `p_sebelum_urutan` untuk halaman yang lebih lama; `null` bila sudah habis. */
+  lebih_lama: number | null;
+};
+
 /** Hasil `putuskan_sumber`: status baru dan berapa yang ikut dihapus. */
 export type PutuskanSumberRow = {
   sumber: HealthConnectionRow['sumber'];
@@ -1587,6 +1614,14 @@ export type Database = {
       status_pekerjaan_saya: {
         Args: Record<string, never>;
         Returns: StatusPekerjaanRow;
+      };
+      riwayat_percakapan_saya: {
+        Args: { p_sebelum?: string | null; p_batas?: number };
+        Returns: RiwayatPercakapanRow;
+      };
+      pesan_percakapan: {
+        Args: { p_percakapan: string; p_sebelum_urutan?: number | null; p_batas?: number };
+        Returns: PesanPercakapanRow;
       };
       putuskan_sumber: {
         Args: { p_sumber: string; p_hapus_data?: boolean };

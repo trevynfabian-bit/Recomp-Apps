@@ -1,7 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import { DISCLAIMER_COACH, formatAngka, MAKS_PERTANYAAN_COACH, periksaBatasMedis } from '@recomp/logika';
 import type { PenolakanMedis } from '@recomp/logika';
-import type { AngkaKonteksRow, KonteksCoachRow, KuotaCoachRow } from '@/types/database';
+import type {
+  AngkaKonteksRow,
+  KonteksCoachRow,
+  KuotaCoachRow,
+  PesanPercakapanRow,
+  RiwayatPercakapanRow,
+} from '@/types/database';
 import type { RujukanData, WidgetCoach } from '@/types/domain';
 
 /**
@@ -59,14 +65,9 @@ export async function konteksCoach(
   // Pemeriksaan bentuk di batas jaringan, bukan kepercayaan buta. Angka tanpa
   // sumber akan lolos ke prompt sebagai angka tanpa asal, dan di situlah
   // pembedaan "mentah vs estimasi" runtuh tanpa ada yang menyadarinya.
-  const tanpaSumber = (k.angka ?? []).filter(
-    (a) => !['manual', 'sinkron', 'estimasi'].includes(a.sumber),
-  );
+  const tanpaSumber = (k.angka ?? []).filter((a) => !['manual', 'sinkron', 'estimasi'].includes(a.sumber));
   if (tanpaSumber.length > 0) {
-    throw new KesalahanCoach(
-      `Konteks memuat ${tanpaSumber.length} angka tanpa asal yang dikenal.`,
-      false,
-    );
+    throw new KesalahanCoach(`Konteks memuat ${tanpaSumber.length} angka tanpa asal yang dikenal.`, false);
   }
 
   return k;
@@ -90,12 +91,8 @@ export function angkaEstimasi(k: KonteksCoachRow): AngkaKonteksRow[] {
  * berbeda. Server mengirim rinciannya di `dasar.sumber_rincian`; fungsi ini
  * mengangkatnya supaya layar bisa menyebut angkanya, bukan cuma memberi label.
  */
-export function porsiTaksiran(
-  angka: AngkaKonteksRow,
-): { ditaksir: number; total: number } | null {
-  const r = angka.dasar?.sumber_rincian as
-    | { entri_estimasi?: number; total_entri?: number }
-    | undefined;
+export function porsiTaksiran(angka: AngkaKonteksRow): { ditaksir: number; total: number } | null {
+  const r = angka.dasar?.sumber_rincian as { entri_estimasi?: number; total_entri?: number } | undefined;
   if (!r || typeof r.entri_estimasi !== 'number' || typeof r.total_entri !== 'number') {
     return null;
   }
@@ -193,10 +190,7 @@ export async function tanyakanKeCoach(
   if (error) {
     const status = (error as { context?: { status?: number } }).context?.status ?? 0;
     if (status === 429) {
-      throw new KesalahanCoach(
-        'Batas pertanyaan hari ini sudah tercapai. Coach bisa ditanya lagi besok.',
-        false,
-      );
+      throw new KesalahanCoach('Batas pertanyaan hari ini sudah tercapai. Coach bisa ditanya lagi besok.', false);
     }
     if (status === 401) {
       throw new KesalahanCoach('Sesi Anda berakhir. Masuk lagi untuk memakai Coach.', false);
@@ -207,10 +201,7 @@ export async function tanyakanKeCoach(
     if (status === 400) {
       throw new KesalahanCoach('Pertanyaan ini belum bisa dikirim. Periksa isinya, lalu kirim lagi.', false);
     }
-    throw new KesalahanCoach(
-      'Coach sedang tidak bisa dihubungi. Coba lagi.',
-      status === 0 || status >= 500,
-    );
+    throw new KesalahanCoach('Coach sedang tidak bisa dihubungi. Coba lagi.', status === 0 || status >= 500);
   }
 
   const h = data as {
@@ -275,4 +266,46 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanCoach 
     default:
       return new KesalahanCoach('Data Coach belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
+}
+
+/**
+ * Daftar utas coach, terbaru dulu (`riwayat_percakapan_saya`). Halaman
+ * berikutnya diminta dengan `berikutnya` dari jawaban sebelumnya.
+ */
+export async function riwayatPercakapan(sebelum: string | null = null, batas = 20): Promise<RiwayatPercakapanRow> {
+  const { data, error } = await supabase.rpc('riwayat_percakapan_saya', { p_sebelum: sebelum, p_batas: batas });
+  if (error) throw galatRiwayat(error);
+  return data as RiwayatPercakapanRow;
+}
+
+/**
+ * Pesan satu utas dalam urutan tulis (`pesan_percakapan`); halaman yang lebih
+ * lama diminta dengan `lebih_lama` dari jawaban sebelumnya.
+ */
+export async function pesanPercakapan(
+  percakapanId: string,
+  sebelumUrutan: number | null = null,
+  batas = 50,
+): Promise<PesanPercakapanRow> {
+  const { data, error } = await supabase.rpc('pesan_percakapan', {
+    p_percakapan: percakapanId,
+    p_sebelum_urutan: sebelumUrutan,
+    p_batas: batas,
+  });
+  if (error) throw galatRiwayat(error);
+  return data as PesanPercakapanRow;
+}
+
+function galatRiwayat(error: { code?: string; message: string }): KesalahanCoach {
+  if (error.code === 'P0002')
+    return new KesalahanCoach('Percakapan ini sudah tidak ada. Mulai percakapan baru.', false);
+  if (error.code === '28000' || error.code === 'PGRST301') {
+    return new KesalahanCoach('Sesi Anda berakhir. Masuk lagi untuk melihat riwayat.', false);
+  }
+  return new KesalahanCoach(
+    /fetch|network|jaringan/i.test(error.message)
+      ? 'Riwayat percakapan belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+      : 'Riwayat percakapan belum bisa dimuat. Coba lagi sebentar lagi.',
+    true,
+  );
 }
