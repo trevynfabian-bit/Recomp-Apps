@@ -24,6 +24,7 @@ import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
 import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { DayType } from '@/types/domain';
+import { useJagaKeluar } from '@/lib/jagaKeluar';
 
 const FASE: Fase[] = ['Maintenance', 'Lean Gain', 'Cut'];
 
@@ -188,6 +189,8 @@ export default function TargetHarianScreen() {
     if (menyunting && berubah.length > 0) setKonfirmasiKeluar(true);
     else router.back();
   }
+  // Geser-kembali dan tombol kembali Android juga melewati konfirmasi yang sama.
+  useJagaKeluar(menyunting && berubah.length > 0, () => setKonfirmasiKeluar(true));
 
   function selesaiMenyunting() {
     buangSemua();

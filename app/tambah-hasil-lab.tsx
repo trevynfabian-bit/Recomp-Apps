@@ -19,6 +19,7 @@ import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
 import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, typography, ukuranIkon } from '@/theme';
+import { useJagaKeluar } from '@/lib/jagaKeluar';
 
 type GalatLab = Extract<HasilPeriksaLab, { sah: false }>['galat'];
 
@@ -119,6 +120,8 @@ export default function TambahHasilLabScreen() {
     if (berisi) setKonfirmasiBatal(true);
     else router.back();
   }
+  // Geser-kembali dan tombol kembali Android juga melewati konfirmasi yang sama.
+  useJagaKeluar(berisi, () => setKonfirmasiBatal(true));
 
   if (id && !asal && statusMuat === 'memuat') {
     return (

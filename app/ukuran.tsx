@@ -172,7 +172,9 @@ export default function UkuranScreen() {
         pinggangCm={terbaru.pinggang_cm}
         fase={profil.fase_aktif}
         onUbahBatas={() => setSheetBatasTerbuka(true)}
-        onLihatFase={() => router.push('/(tabs)/budget')}
+        // `navigate`, bukan `push`: kembali ke tab yang sudah ada di bawah tumpukan
+        // (lalu pindah ke Budget), bukan menumpuk salinan tab di atas Ukuran.
+        onLihatFase={() => router.navigate('/(tabs)/budget')}
       />
 
       {/* Aksi utama layar: catat ukuran pekan ini */}

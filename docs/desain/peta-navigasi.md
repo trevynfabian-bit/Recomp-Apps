@@ -132,3 +132,17 @@ pengembangan); hanya layar masuk (publik, judul `display`) yang tidak memakainya
 Coach kini memindahkan fase ke subjudul ("Lean Gain · judul utas") supaya aksi
 kanan tetap satu (Riwayat). Subjudul selalu satu baris. `cek:desain` menolak
 layar tanpa `HeaderLayar`.
+
+## 7. Kembali & aksi atas
+
+- **Satu tombol kembali**: `TombolIkon` bulat di `HeaderLayar`, di kiri, di
+  semua layar tumpukan. Aksi atas paling banyak satu, di kanan.
+- **Semua jalan keluar sama**: layar dengan isian belum disimpan
+  (`target-harian`, `tambah-hasil-lab`) memakai `useJagaKeluar`
+  (`src/lib/jagaKeluar.ts`): selama isian kotor, geser-kembali iOS dimatikan dan
+  tombol kembali Android membuka konfirmasi yang sama dengan tombol di header.
+  Dulu keduanya langsung menutup layar dan membuang isian.
+- **Pindah ke tab dari layar tumpukan memakai `router.navigate`**, bukan `push`
+  (N5): Ukuran → "Fase & budget" kini kembali ke tab yang sudah ada lalu pindah
+  ke Budget, bukan menumpuk salinan tab di atas Ukuran. Diuji di web: berakhir
+  di `/budget` tanpa tombol kembali.
