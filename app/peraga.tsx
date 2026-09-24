@@ -4,10 +4,13 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
+  DaftarBaris,
   InputAngka,
   InputTarget,
   KerangkaSheet,
   MacroRow,
+  Panel,
+  Pemisah,
   Pill,
   SectionHeader,
   Tombol,
@@ -102,21 +105,32 @@ export default function PeragaScreen() {
             Permukaan standar: padding lg, radius lg, tepi garis, bayangan kartu.
           </Text>
         </Card>
-        <Card flat style={{ marginTop: spacing.md }}>
-          {['Baris pertama', 'Baris kedua'].map((b, i) => (
-            <View
-              key={b}
-              style={{
-                padding: spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.garis,
-              }}
-            >
+        <DaftarBaris style={{ marginTop: spacing.md }}>
+          {['Baris pertama', 'Baris kedua', 'Baris ketiga'].map((b) => (
+            <View key={b} style={{ padding: spacing.lg }}>
               <Text style={{ ...typography.bodySedang, color: colors.teks }}>{b}</Text>
-              <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>Card flat untuk daftar baris</Text>
+              <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>DaftarBaris: Pemisah otomatis</Text>
             </View>
           ))}
+        </DaftarBaris>
+        <Card style={{ gap: spacing.md, marginTop: spacing.md }}>
+          <Text style={{ ...typography.bodySedang, color: colors.teks }}>Panel di dalam kartu</Text>
+          <Panel>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>Angka yang dipakai</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.teks }}>Rata-rata 7 hari · 74,5 kg</Text>
+          </Panel>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup, flex: 1 }}>Kolom kiri</Text>
+            <Pemisah arah="vertikal" />
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup, flex: 1 }}>Kolom kanan</Text>
+          </View>
         </Card>
+        {(['aksen', 'sukses', 'peringatan', 'bahaya'] as const).map((n) => (
+          <Card key={n} nada={n} style={{ marginTop: spacing.md }}>
+            <Text style={{ ...typography.bodySedang, color: colors.teks }}>Card nada=&quot;{n}&quot;</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>Tepi bertint; maknanya tetap ditulis.</Text>
+          </Card>
+        ))}
       </Bagian>
 
       <Bagian judul="Label & pill">

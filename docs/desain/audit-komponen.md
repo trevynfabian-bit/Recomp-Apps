@@ -63,8 +63,10 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    kembali di 11 layar → `TombolIkon`; 18 tautan/tombol teks → `Tombol
    varian="teks"` (nada aksen/netral/bahaya) atau `bertepi` kecil; 2 tombol
    isian buatan sendiri → `Tombol`.
-2. **Kartu & kontainer**: `Card` bertanda (perhatian/bahaya), `DaftarBaris` +
-   `Pemisah` bersama.
+2. **Kartu & kontainer** ✓ `Card nada` (aksen/sukses/peringatan/bahaya: tepi
+   bertint), `Pemisah` (horizontal/penuh/vertikal; 3 salinan lokal dihapus),
+   `DaftarBaris` (pemisah otomatis; dipakai 6 daftar di Pengaturan, Privasi,
+   Widget & pengingat), `Panel` (area cekung di dalam kartu).
 3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks
    dan angka; pindahkan `TextInput` langsung.
 4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.

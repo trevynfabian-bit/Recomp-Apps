@@ -100,6 +100,10 @@ berubah karena keputusan desain.
 - Satu angka hero per layar data (Hari Ini, Tren, Budget, Ukuran, Latihan,
   Sumber data, Target harian); komponen tidak membawa angka hero sendiri.
 - Judul layar tab dan tumpukan memakai `title` dengan peran header aksesibilitas.
+- Kontainer: `Card` (kartu standar; `nada` memberi tepi bertint untuk kartu yang
+  perlu dilihat lebih dulu), `DaftarBaris` (baris-baris dalam satu kartu dengan
+  pemisah otomatis), `Panel` (area cekung di dalam kartu), `Pemisah` (garis
+  resesif, menjorok `lg`).
 - Satu komponen tombol (`Tombol`) dengan empat varian: **utama** (isian
   aksen, satu per kartu/sheet), **bertepi** (aksi kedua), **merusak** (isian
   bahaya, label menyebut tindakannya), **teks** (tautan aksi di dalam kartu).

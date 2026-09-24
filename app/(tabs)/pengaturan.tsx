@@ -19,6 +19,7 @@ import {
 import type { Satuan } from '@recomp/logika';
 import {
   Card,
+  DaftarBaris,
   SectionHeader,
   SheetBatasPinggang,
   SheetEksporData,
@@ -35,7 +36,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, KONTROL_RAPAT, KONTROL_SEGMEN, type PilihanTampilan, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon, usePilihanTampilan, useSkema } from '@/theme';
+import { colors, KONTROL_SEGMEN, type PilihanTampilan, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon, usePilihanTampilan, useSkema } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -159,7 +160,7 @@ export default function PengaturanScreen() {
       {/* --- Program ---------------------------------------------------------- */}
       <View>
         <SectionHeader judul="Program" />
-        <Card flat>
+        <DaftarBaris>
           <BarisPengaturan
             ikon="flag-outline"
             judul="Fase"
@@ -167,7 +168,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka pilihan fase program"
             onPress={() => setSheet('fase')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="restaurant-outline"
             judul="Target per tipe hari"
@@ -175,7 +175,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka form target kalori dan makro tiap tipe hari"
             onPress={() => router.push('/target-harian')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="resize-outline"
             judul="Batas pinggang"
@@ -183,7 +182,7 @@ export default function PengaturanScreen() {
             petunjuk="Membuka pengaturan batas pinggang"
             onPress={() => setSheet('pinggang')}
           />
-        </Card>
+        </DaftarBaris>
       </View>
 
       {/* --- Preferensi ------------------------------------------------------- */}
@@ -227,7 +226,7 @@ export default function PengaturanScreen() {
       {/* --- Data --------------------------------------------------------------- */}
       <View>
         <SectionHeader judul="Data" />
-        <Card flat>
+        <DaftarBaris>
           <BarisPengaturan
             ikon="sync-outline"
             judul="Sumber data"
@@ -235,7 +234,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka status sinkron tiap sumber"
             onPress={() => router.push('/sumber-data')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="download-outline"
             judul="Impor riwayat"
@@ -243,7 +241,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka impor riwayat sekali"
             onPress={() => router.push('/impor-riwayat')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="flask-outline"
             judul="Hasil lab"
@@ -259,7 +256,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka riwayat hasil lab"
             onPress={() => router.push('/hasil-lab')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="share-outline"
             judul="Ekspor data saya"
@@ -267,7 +263,7 @@ export default function PengaturanScreen() {
             petunjuk="Membuka ekspor seluruh data"
             onPress={() => setSheet('ekspor')}
           />
-        </Card>
+        </DaftarBaris>
       </View>
 
       {/* --- Notifikasi ----------------------------------------------------------- */}
@@ -301,7 +297,7 @@ export default function PengaturanScreen() {
             </View>
           </View>
         </Card>
-        <Card flat style={{ marginTop: spacing.md }}>
+        <DaftarBaris style={{ marginTop: spacing.md }}>
           <BarisPengaturan
             ikon="shield-checkmark-outline"
             judul="Privasi"
@@ -309,7 +305,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka penjelasan privasi dalam bahasa sehari-hari beserta keadaannya"
             onPress={() => router.push('/privasi')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="log-out-outline"
             judul="Keluar"
@@ -317,7 +312,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka konfirmasi keluar dari akun di perangkat ini"
             onPress={() => setSheet('keluar')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
@@ -325,7 +319,7 @@ export default function PengaturanScreen() {
             petunjuk="Membuka konfirmasi penghapusan akun"
             onPress={() => setSheet('hapus')}
           />
-        </Card>
+        </DaftarBaris>
         {pesanTiruan ? (
           <Text
             accessibilityLiveRegion="polite"
@@ -338,7 +332,7 @@ export default function PengaturanScreen() {
 
       {/* Layar acuan desain: hanya di build pengembangan, tidak pernah sampai ke pengguna. */}
       {__DEV__ ? (
-        <Card flat>
+        <DaftarBaris>
           <BarisPengaturan
             ikon="color-palette-outline"
             judul="Arah visual"
@@ -346,7 +340,6 @@ export default function PengaturanScreen() {
             petunjuk="Membuka layar contoh arah visual"
             onPress={() => router.push('/arah-visual')}
           />
-          <Pemisah />
           <BarisPengaturan
             ikon="shapes-outline"
             judul="Peraga komponen"
@@ -354,7 +347,7 @@ export default function PengaturanScreen() {
             petunjuk="Membuka halaman peraga komponen"
             onPress={() => router.push('/peraga')}
           />
-        </Card>
+        </DaftarBaris>
       ) : null}
 
       <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
@@ -503,8 +496,4 @@ function BarisPengaturan({
       <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />
     </Pressable>
   );
-}
-
-function Pemisah() {
-  return <View style={{ height: 1, backgroundColor: colors.garis, marginHorizontal: spacing.lg }} />;
 }

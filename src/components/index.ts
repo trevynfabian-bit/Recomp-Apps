@@ -1,7 +1,7 @@
 export { BannerBatasPinggang } from './BannerBatasPinggang';
 export { BannerDataMasuk } from './BannerDataMasuk';
 export { BannerEksporSiap } from './BannerEksporSiap';
-export { Card } from './Card';
+export { Card, DaftarBaris, Panel, Pemisah, type NadaKartu } from './Card';
 export { CatatanKecukupan } from './CatatanKecukupan';
 export { DaftarRujukan } from './DaftarRujukan';
 export { GelembungMengetik, GelembungPesan, PemisahTanggal } from './GelembungPesan';

@@ -12,7 +12,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { JenisNotifikasi, NotifikasiKatalog } from '@recomp/logika';
-import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang, TombolIkon } from '@/components';
+import { Card, DaftarBaris, PratinjauWidget, SectionHeader, SheetJamTimbang, TombolIkon } from '@/components';
 import {
   ambilPengaturanPengingat,
   simpanPengaturanPengingat,
@@ -186,10 +186,9 @@ export default function WidgetPengingatScreen() {
       {/* --- Notifikasi per jenis ------------------------------------------ */}
       <View>
         <SectionHeader judul="Notifikasi" aksi={ringkasJenisAktif(atur.jenis)} />
-        <Card flat>
-          {katalog.map((n, i) => (
+        <DaftarBaris>
+          {katalog.map((n) => (
             <View key={n.jenis}>
-              {i > 0 ? <Pemisah /> : null}
               <BarisSakelar
                 judul={n.nama}
                 keterangan={n.kapan}
@@ -221,7 +220,7 @@ export default function WidgetPengingatScreen() {
               ) : null}
             </View>
           ))}
-        </Card>
+        </DaftarBaris>
       </View>
 
       {izin === 'ditolak' && aktif.length > 0 ? (
@@ -425,8 +424,4 @@ function PratinjauNotif({ waktu, judul, isi }: { waktu: string; judul: string; i
       <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{isi}</Text>
     </View>
   );
-}
-
-function Pemisah() {
-  return <View style={{ height: 1, backgroundColor: colors.garis, marginHorizontal: spacing.lg }} />;
 }

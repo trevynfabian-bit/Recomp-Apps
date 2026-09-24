@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DATA_TERSIMPAN, PROFIL_SUMBER, susunStatusPrivasi } from '@recomp/logika';
 import type { ButirStatusPrivasi } from '@recomp/logika';
-import { Card, SectionHeader, SheetEksporData, SheetHapusAkun, TombolIkon } from '@/components';
+import { Card, DaftarBaris, SectionHeader, SheetEksporData, SheetHapusAkun, TombolIkon } from '@/components';
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -159,35 +159,32 @@ export default function PrivasiScreen() {
 
       <View>
         <SectionHeader judul="Kendali Anda" />
-        <Card flat>
+        <DaftarBaris>
           <BarisKendali
             ikon="download-outline"
             judul="Ekspor data saya"
             keterangan="CSV & JSON, kapan saja"
             onPress={() => setSheet('ekspor')}
           />
-          <Pemisah />
           <BarisKendali
             ikon="sync-outline"
             judul="Sumber data"
             keterangan="Sambungkan atau putuskan"
             onPress={() => router.push('/sumber-data')}
           />
-          <Pemisah />
           <BarisKendali
             ikon="phone-portrait-outline"
             judul="Widget & pengingat"
             keterangan="Angka di layar kunci"
             onPress={() => router.push('/widget-pengingat')}
           />
-          <Pemisah />
           <BarisKendali
             ikon="trash-outline"
             judul="Hapus akun & semua data"
             keterangan="Tidak bisa dibatalkan"
             onPress={() => setSheet('hapus')}
           />
-        </Card>
+        </DaftarBaris>
         {pesanTiruan ? (
           <Text
             accessibilityLiveRegion="polite"
@@ -252,8 +249,4 @@ function BarisKendali({
       <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />
     </Pressable>
   );
-}
-
-function Pemisah() {
-  return <View style={{ height: 1, backgroundColor: colors.garis, marginHorizontal: spacing.lg }} />;
 }
