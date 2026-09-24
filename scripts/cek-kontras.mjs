@@ -22,9 +22,25 @@ import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
 
-/** Ambang WCAG AA. */
+/**
+ * Ambang WCAG 2.1 tingkat AA — acuan resmi app (bab Desain 8.3), BUKAN AAA.
+ *
+ * - `AA_KECIL` 4,5:1 — SC 1.4.3 Contrast (Minimum), teks biasa. Di tangga
+ *   tipografi app: `body`, `label`, `caption`, `labelBiasa`, `bodySedang`,
+ *   `bodyTebal` (semuanya < 18,66 px tebal / < 24 px).
+ * - `AA_BESAR` 3:1 — SC 1.4.3 untuk teks besar (≥ 24 px, atau ≥ 18,66 px
+ *   tebal): `hero`, `display`, `title` (20 px tebal ≥ 18,66). DAN SC 1.4.11
+ *   Non-text Contrast untuk mark grafik, bar terhadap track, dan tepi kontrol.
+ * - Pemisah dekoratif (`garis`) tidak tunduk 1.4.11; ia diperiksa dari arah
+ *   sebaliknya: MAKSIMAL 2:1 supaya tetap resesif.
+ *
+ * Pasangan yang ditandai `besar: true` di daftar memakai `AA_BESAR`.
+ */
 const AA_KECIL = 4.5;
 const AA_BESAR = 3.0;
+/** Hanya informasi (tidak menggagalkan): seberapa banyak yang juga lolos AAA (SC 1.4.6). */
+const AAA_KECIL = 7.0;
+const AAA_BESAR = 4.5;
 
 function muatWarna() {
   const kerja = mkdtempSync(join(tmpdir(), 'kontras-'));
@@ -236,6 +252,7 @@ for (const [skema, c] of Object.entries(PALET)) {
   console.log(`\nKontras teks (WCAG 2.1 AA) — mode ${skema}`);
   let lulusMode = 0;
   let gagalMode = 0;
+  let lulusAAA = 0;
   let terlemah = null;
   const tipis = [];
   for (const [label, depan, belakang, besar] of pasangan(c)) {
@@ -248,11 +265,12 @@ for (const [skema, c] of Object.entries(PALET)) {
     );
     if (lulus) lulusMode += 1;
     else gagalMode += 1;
+    if (rasio >= (besar ? AAA_BESAR : AAA_KECIL)) lulusAAA += 1;
     if (lulus && margin < MARGIN_TIPIS) tipis.push(label);
     if (!terlemah || margin < terlemah.margin) terlemah = { label, rasio, ambang, margin };
   }
   gagal += gagalMode;
-  ringkasan.push({ skema, lulusMode, gagalMode, terlemah, tipis });
+  ringkasan.push({ skema, lulusMode, gagalMode, lulusAAA, terlemah, tipis });
 }
 
 /*
@@ -275,7 +293,7 @@ for (const [skema, c] of Object.entries(PALET)) {
 console.log('\nRingkasan');
 for (const r of ringkasan) {
   console.log(
-    `  ${r.skema.padEnd(7)} ${r.lulusMode} lulus, ${r.gagalMode} gagal · terlemah: ${r.terlemah.label} ${r.terlemah.rasio.toFixed(2)}:1 (min ${r.terlemah.ambang})`,
+    `  ${r.skema.padEnd(7)} AA: ${r.lulusMode} lulus, ${r.gagalMode} gagal · terlemah: ${r.terlemah.label} ${r.terlemah.rasio.toFixed(2)}:1 (min ${r.terlemah.ambang}) · AAA (info): ${r.lulusAAA}/${r.lulusMode + r.gagalMode}`,
   );
   if (r.tipis.length) console.log(`          margin < ${MARGIN_TIPIS} (lulus, tapi rawan): ${r.tipis.join('; ')}`);
 }

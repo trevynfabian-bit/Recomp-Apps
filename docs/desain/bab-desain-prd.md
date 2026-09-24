@@ -54,8 +54,10 @@ berubah karena keputusan desain.
 
 ### 8.3 Aksesibilitas warna
 
-- WCAG 2.1 AA di **kedua mode**: 4,5:1 teks kecil; 3:1 teks besar, mark grafik,
-  bar terhadap track, dan tepi kontrol (`garisKontrol`).
+- Acuan: **WCAG 2.1 tingkat AA** di **kedua mode** (bukan AAA; AAA hanya
+  dilaporkan sebagai informasi). 4,5:1 untuk teks biasa (SC 1.4.3: `body`,
+  `label`, `caption` dan variannya); 3:1 untuk teks besar (`hero`, `display`,
+  `title`), mark grafik, bar terhadap track, dan tepi kontrol (SC 1.4.11).
 - Pemisah dekoratif (`garis`) sengaja resesif, di bawah 2:1.
 - Teks di atas latar bertint dihitung terhadap warna campurannya.
 - Setiap pasangan warna baru di layar wajib didaftarkan di `cek:kontras`.
