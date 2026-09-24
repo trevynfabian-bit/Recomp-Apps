@@ -171,6 +171,38 @@ begin
   assert v_gagal, 'pekan_data 9 seharusnya ditolak — periodenya hanya 4 pekan';
 end $$;
 
+-- 7b. Kode & keyakinan harus TURUNAN dari sumbu di baris yang sama (pohon
+--     keputusan `kode_evaluasi`), juga untuk tulisan langsung dari klien lama:
+--     coach dan notifikasi membaca kode ini tanpa menghitung ulang.
+do $$
+declare v_kode text;
+begin
+  v_kode := null;
+  begin
+    insert into public.evaluasi_periodik (
+      user_id, periode_dari, periode_sampai, fase, arah_berat, arah_pinggang,
+      arah_kekuatan, pekan_data, kode, judul, ringkas, rekomendasi, penentu, keyakinan)
+    values ('bbbb5555-0000-0000-0000-000000000005', date '2026-07-27', date '2026-08-23',
+            'Cut', 'naik', 'naik', 'turun', 4,
+            'cut-berjalan', 'a', 'b', 'c', 'd', 'tinggi');  -- kode dikenal, tapi bertentangan dengan sumbunya
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('kode yang bertentangan dengan sumbu: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+
+  v_kode := null;
+  begin
+    insert into public.evaluasi_periodik (
+      user_id, periode_dari, periode_sampai, fase, arah_berat, arah_pinggang,
+      arah_kekuatan, pekan_data, kode, judul, ringkas, rekomendasi, penentu, keyakinan)
+    values ('bbbb5555-0000-0000-0000-000000000005', date '2026-07-27', date '2026-08-23',
+            'Cut', 'turun', 'turun', 'belum jelas', 4,
+            (public.kode_evaluasi('Cut', 'turun', 'turun', 'belum jelas', 4)->>'kode'),
+            'a', 'b', 'c', 'd', 'tinggi');  -- satu sumbu belum jelas, tapi keyakinan tinggi
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('keyakinan yang tidak mengikuti sumbu: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+end $$;
+
 -- 8. JAMINAN 4 & alasan tabel ini ada: menghapus percakapan tidak membawa
 --    laporannya. Inilah yang membedakan tabel ini dari kolom jsonb di pesan.
 do $$

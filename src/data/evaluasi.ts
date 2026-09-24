@@ -135,7 +135,7 @@ export async function simpanEvaluasi(
 function terjemahkan(error: { code?: string; message: string }): KesalahanEvaluasi {
   switch (error.code) {
     case '23514': // check_violation — periode tidak sah atau kode tak dikenal
-      return new KesalahanEvaluasi('Evaluasi ini belum bisa disimpan karena periodenya tidak lengkap. Muat ulang evaluasi, lalu coba lagi.', false);
+      return new KesalahanEvaluasi('Evaluasi ini tidak sesuai dengan periode atau datanya. Muat ulang evaluasi, lalu simpan lagi.', false);
     case '28000':
     case 'PGRST301':
       return new KesalahanEvaluasi('Sesi Anda berakhir. Masuk lagi untuk melihat evaluasi.', false);
