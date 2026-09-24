@@ -93,12 +93,13 @@ function muatLogikaTs() {
   copyFileSync('packages/logika/src/targetBerlaku.ts', join(kerja, 'targetBerlaku.ts'));
   copyFileSync('packages/logika/src/hasilLab.ts', join(kerja, 'hasilLab.ts'));
   copyFileSync('packages/logika/src/latihan.ts', join(kerja, 'latihan.ts'));
+  copyFileSync('packages/logika/src/satuan.ts', join(kerja, 'satuan.ts'));
 
   execFileSync(
     join(process.cwd(), 'node_modules', '.bin', 'tsc'),
     ['makro.ts', 'format.ts', 'tipe.ts', 'deteksiTipeHari.ts', 'tren.ts', 'koridor.ts',
      'budget.ts', 'redistribusi.ts', 'tdee.ts', 'bodyFat.ts', 'ukuran.ts', 'evaluasi.ts', 'pengingat.ts',
-     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', 'hasilLab.ts', 'latihan.ts', '--module', 'commonjs', '--target', 'es2022',
+     'periodeFase.ts', 'targetHarian.ts', 'targetBerlaku.ts', 'hasilLab.ts', 'latihan.ts', 'satuan.ts', '--module', 'commonjs', '--target', 'es2022',
      '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
     { cwd: kerja, stdio: 'pipe' },
   );
@@ -119,6 +120,9 @@ function muatLogikaTs() {
     ...require(join(kerja, 'keluar', 'targetBerlaku.js')),
     ...require(join(kerja, 'keluar', 'hasilLab.js')),
     ...require(join(kerja, 'keluar', 'latihan.js')),
+    ...require(join(kerja, 'keluar', 'satuan.js')),
+    ...require(join(kerja, 'keluar', 'pengingat.js')),
+    ...require(join(kerja, 'keluar', 'percakapan.js')),
   };
 }
 
@@ -2031,6 +2035,97 @@ try {
       process.exit(1);
     }
     console.log(`\n✓ ${SKENARIO.length} kasus cocok — arah kekuatan dan e1RM per gerakan di SQL dan TypeScript sejalan.`);
+    console.log();
+  }
+
+  // --- Batas nilai: setiap CHECK berbatas di database punya kembaran TS -----
+  // Katalognya yang diperiksa, bukan daftar yang diingat: CHECK berbatas atas
+  // DAN bawah (angka/jam konstan) wajib dipetakan ke konstanta @recomp/logika
+  // dengan angka yang sama, atau dinyatakan "hanya server" beserta alasannya.
+  // CHECK baru yang belum digolongkan membuat pemeriksaan ini gagal.
+  {
+    const L = muatLogikaTs();
+    const jam = (menit) => `'${String(Math.floor(menit / 60)).padStart(2, '0')}:${String(menit % 60).padStart(2, '0')}:00'`;
+    const TERPETAKAN = {
+      ukuran_pinggang_masuk_akal: ['RENTANG_UKURAN_CM.pinggang_cm', L.RENTANG_UKURAN_CM.pinggang_cm],
+      ukuran_dada_masuk_akal: ['RENTANG_UKURAN_CM.dada_cm', L.RENTANG_UKURAN_CM.dada_cm],
+      ukuran_leher_masuk_akal: ['RENTANG_UKURAN_CM.leher_cm', L.RENTANG_UKURAN_CM.leher_cm],
+      ukuran_lengan_kiri_masuk_akal: ['RENTANG_UKURAN_CM.lengan_kiri_cm', L.RENTANG_UKURAN_CM.lengan_kiri_cm],
+      ukuran_lengan_kanan_masuk_akal: ['RENTANG_UKURAN_CM.lengan_kanan_cm', L.RENTANG_UKURAN_CM.lengan_kanan_cm],
+      ukuran_paha_kiri_masuk_akal: ['RENTANG_UKURAN_CM.paha_kiri_cm', L.RENTANG_UKURAN_CM.paha_kiri_cm],
+      ukuran_paha_kanan_masuk_akal: ['RENTANG_UKURAN_CM.paha_kanan_cm', L.RENTANG_UKURAN_CM.paha_kanan_cm],
+      daily_logs_berat_masuk_akal: ['RENTANG_BERAT_KG', L.RENTANG_BERAT_KG],
+      profiles_tinggi_masuk_akal: ['RENTANG_TINGGI_CM', L.RENTANG_TINGGI_CM],
+      profiles_batas_pinggang_masuk_akal: ['RENTANG_BATAS_PINGGANG_CM', L.RENTANG_BATAS_PINGGANG_CM],
+      day_type_targets_kalori_masuk_akal: ['RENTANG_TARGET.kalori', L.RENTANG_TARGET.kalori],
+      day_type_targets_protein_rentang: ['RENTANG_TARGET.protein', L.RENTANG_TARGET.protein],
+      day_type_targets_lemak_rentang: ['RENTANG_TARGET.lemak', L.RENTANG_TARGET.lemak],
+      day_type_targets_sat_fat_rentang: ['RENTANG_TARGET.satFat', L.RENTANG_TARGET.satFat],
+      workout_sets_reps_wajar: ['RENTANG_SET.reps', L.RENTANG_SET.reps],
+      workout_sets_beban_wajar: ['RENTANG_SET.bebanKg (> 0)', { min: 0, maks: L.RENTANG_SET.bebanKg.maks, bawahEksklusif: true }],
+      settings_notifications_jam_pagi: ['RENTANG_JAM_TIMBANG', { min: jam(L.RENTANG_JAM_TIMBANG.min), maks: jam(L.RENTANG_JAM_TIMBANG.maks) }],
+      settings_notifications_jam_akhir_pekan_pagi: ['RENTANG_JAM_TIMBANG', { min: jam(L.RENTANG_JAM_TIMBANG.min), maks: jam(L.RENTANG_JAM_TIMBANG.maks) }],
+      percakapan_judul_wajar: ['MAKS_JUDUL + elipsis', { min: 1, maks: L.MAKS_JUDUL + 1 }],
+      pesan_teks_wajar: ['MAKS_PERTANYAAN_COACH', { maks: L.MAKS_PERTANYAAN_COACH }],
+      lab_results_nama_wajar: ['BATAS_PANJANG_LAB.panel', { min: 1, maks: L.BATAS_PANJANG_LAB.panel }],
+      lab_results_laboratorium_wajar: ['BATAS_PANJANG_LAB.laboratorium', { min: 1, maks: L.BATAS_PANJANG_LAB.laboratorium }],
+      lab_result_markers_nama_wajar: ['BATAS_PANJANG_LAB.penanda', { min: 1, maks: L.BATAS_PANJANG_LAB.penanda }],
+      lab_result_markers_satuan_wajar: ['BATAS_PANJANG_LAB.satuan', { min: 1, maks: L.BATAS_PANJANG_LAB.satuan }],
+    };
+    const HANYA_SERVER = {
+      copy_notifikasi_isi_muat: 'katalog teks notifikasi milik server',
+      copy_notifikasi_judul_muat: 'katalog teks notifikasi milik server',
+      copy_notifikasi_nama_isi: 'katalog teks notifikasi milik server',
+      daily_logs_asal_berat_sinkron: 'asal berat ditulis sinkron HealthKit',
+      evaluasi_pekan_data_wajar: 'dihitung evaluasi_4_mingguan',
+      evaluasi_teks_wajar: 'kalimat verdict disusun app dari kode; panjangnya dijaga pohon keputusan',
+      health_connections_akun_eksternal_isi: 'id akun luar ditulis Edge Function',
+      health_connections_galat_ringkas: 'galat sinkron ditulis server',
+      health_data_asal_hanya_apple_health: 'asal data ditulis sinkron HealthKit',
+      health_data_id_eksternal_isi: 'id dari layanan luar',
+      health_data_nilai_wajar: 'nilai dari layanan luar; baris di luar rentang dilewati per kiriman (cek:sumber)',
+      health_data_rentang_waktu: 'waktu dari layanan luar',
+      import_jobs_galat_konsisten: 'status job impor ditulis RPC impor',
+      import_jobs_kemajuan: 'kemajuan job ditulis RPC impor',
+      import_jobs_ringkas_isi: 'ringkasan dipotong 200 oleh mulai_impor',
+      import_jobs_total_wajar: 'batas total dijaga potongBatch & mulai_impor (cek:impor)',
+      lab_result_markers_nilai_wajar: 'diterima/ditolak sama di form & tabel (paritas hasil lab)',
+      lab_result_markers_rujukan_maks_wajar: 'diterima/ditolak sama di form & tabel (paritas hasil lab)',
+      lab_result_markers_rujukan_min_wajar: 'diterima/ditolak sama di form & tabel (paritas hasil lab)',
+      profiles_batas_bawah_masuk_akal: 'batas bawah kalori belum bisa diisi di app; hanya dibaca redistribusi',
+      ringkasan_bacaan_wajar: 'narasi ringkasan ditulis model lewat simpan_ringkasan_mingguan',
+      source_priority_rank_wajar: 'peringkat sumber disusun server',
+      workout_sets_latihan_isi: 'nama latihan dipotong 120 oleh pengurai impor & sinkron',
+      workouts_durasi_wajar: 'durasi dari layanan luar / pengurai',
+    };
+    const semua = sql(`select conname || E'\t' || replace(pg_get_constraintdef(oid), E'\n', ' ')
+                         from pg_constraint where contype = 'c' and connamespace = 'public'::regnamespace order by 1;`)
+      .split('\n').filter(Boolean).map((b) => b.split('\t'));
+    const berbatas = (d) => /(>=|>)\s*\(?'?-?\d/.test(d) && /(<=|<)\s*\(?'?-?\d/.test(d);
+    const angka = (op, n) => new RegExp(`${op} \\(?${String(n).replace(/[.:']/g, (c) => `\\${c}`)}\\)?`);
+    let gagalBatas = 0;
+    const tak = [];
+    for (const [nama, def] of semua) {
+      if (TERPETAKAN[nama]) {
+        const [asal, r] = TERPETAKAN[nama];
+        const bawah = r.min === undefined || angka(r.bawahEksklusif ? '>' : '>=', r.min).test(def);
+        const atas = angka('<=', r.maks).test(def);
+        if (!bawah || !atas) {
+          gagalBatas += 1;
+          console.log(`✗ ${nama}: ${asal} ${r.min ?? ''}–${r.maks} tidak sama dengan database: ${def.slice(0, 140)}`);
+        }
+      } else if (berbatas(def) && !HANYA_SERVER[nama]) {
+        tak.push(nama);
+      }
+    }
+    const hilang = Object.keys(TERPETAKAN).filter((n) => !semua.some(([x]) => x === n));
+    for (const n of hilang) console.log(`✗ ${n}: dipetakan ke TS tetapi tidak ada di database`);
+    for (const n of tak) console.log(`✗ ${n}: CHECK berbatas belum digolongkan (petakan ke konstanta TS atau nyatakan hanya server)`);
+    if (gagalBatas + hilang.length + tak.length > 0) {
+      console.error(`✗ Batas nilai: ${gagalBatas} berbeda, ${hilang.length} hilang, ${tak.length} belum digolongkan.`);
+      process.exit(1);
+    }
+    console.log(`✓ Batas nilai: ${Object.keys(TERPETAKAN).length} CHECK berbatas sama dengan konstanta TS; ${Object.keys(HANYA_SERVER).length} dinyatakan hanya server; tidak ada yang belum digolongkan.`);
     console.log();
   }
 

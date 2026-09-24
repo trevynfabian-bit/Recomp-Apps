@@ -235,6 +235,15 @@ const PASANGAN: PasanganParitas[] = [
     keadaan: 'sama',
   },
   {
+    id: 'batas',
+    area: 'Skema data',
+    aturan: 'Batas nilai CHECK = konstanta TS',
+    ts: 'RENTANG_* · BATAS_PANJANG_LAB · MAKS_*',
+    sql: 'katalog CHECK berbatas',
+    kasus: 24,
+    keadaan: 'sama',
+  },
+  {
     id: 'tipe',
     area: 'Skema data',
     aturan: 'Tipe baris klien = kolom tabel',
