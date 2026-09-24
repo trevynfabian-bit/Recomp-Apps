@@ -111,7 +111,7 @@ export function Tombol({
       accessibilityRole="button"
       accessibilityLabel={aksesLabel ?? label}
       accessibilityHint={aksesPetunjuk}
-      accessibilityState={{ disabled: mati, busy: memproses }}
+      aria-disabled={mati} aria-busy={memproses}
       disabled={mati}
       hitSlop={tinggi < TAP_MIN ? sisaSentuh(tinggi) : undefined}
       onPress={() => {
@@ -167,7 +167,7 @@ export function TombolIkon({ ikon, aksesLabel, onPress, bentuk = 'bulat', nonakt
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={aksesLabel}
-      accessibilityState={{ disabled: nonaktif }}
+      aria-disabled={nonaktif}
       disabled={nonaktif}
       hitSlop={bulat ? undefined : sisaSentuh(KONTROL_RAPAT)}
       onPress={() => {

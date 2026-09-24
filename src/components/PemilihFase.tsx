@@ -37,7 +37,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
               <Pressable
                 key={f.nilai}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: aktif }}
+                aria-checked={aktif}
                 accessibilityLabel={`Fase ${f.nilai}`}
                 onPress={() => {
                   if (aktif) return;

@@ -52,7 +52,9 @@ export function PilihanSegmen<T extends string>({
             key={o.nilai}
             hitSlop={{ top: sisaSentuh(KONTROL_SEGMEN), bottom: sisaSentuh(KONTROL_SEGMEN) }}
             accessibilityRole={peran}
-            accessibilityState={{ selected: aktif }}
+            // Radio: checked; tab: selected — dua peran, dua keadaan yang berbeda.
+            aria-checked={peran === 'radio' ? aktif : undefined}
+            aria-selected={peran === 'tab' ? aktif : undefined}
             accessibilityLabel={o.aksesLabel ?? (aksesAwalan ? `${aksesAwalan} ${o.label}` : o.label)}
             onPress={() => {
               if (aktif) return;

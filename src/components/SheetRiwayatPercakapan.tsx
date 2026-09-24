@@ -60,7 +60,7 @@ export function SheetRiwayatPercakapan({
             <Pressable
               key={p.id}
               accessibilityRole="button"
-              accessibilityState={{ selected: aktif }}
+              aria-selected={aktif}
               accessibilityLabel={`Buka percakapan: ${p.judul}`}
               onPress={() => {
                 ketukRingan();

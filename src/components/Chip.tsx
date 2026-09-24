@@ -24,7 +24,7 @@ type Props = {
  * templat lab, pilih cepat batas pinggang, skenario widget, tipe hari).
  *
  * Terpilih ditandai tepi aksen + tint + teks penuh, tidak dengan warna isian
- * saja, dan diumumkan lewat `accessibilityState.selected`.
+ * saja, dan diumumkan lewat `aria-checked`.
  */
 export function Chip({ label, onPress, terpilih, aksesLabel, ikon, nonaktif = false }: Props) {
   const pilihan = terpilih !== undefined;
@@ -32,7 +32,9 @@ export function Chip({ label, onPress, terpilih, aksesLabel, ikon, nonaktif = fa
   return (
     <Pressable
       accessibilityRole={pilihan ? 'radio' : 'button'}
-      accessibilityState={{ selected: pilihan ? aktif : undefined, disabled: nonaktif }}
+      // Radio diumumkan "dicentang" (checked), bukan "dipilih" (selected, untuk tab).
+      aria-checked={pilihan ? aktif : undefined}
+      aria-disabled={nonaktif}
       accessibilityLabel={aksesLabel ?? label}
       disabled={nonaktif}
       onPress={() => {

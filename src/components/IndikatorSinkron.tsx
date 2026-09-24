@@ -45,7 +45,7 @@ export function IndikatorSinkron() {
       accessibilityRole="button"
       accessibilityLabel={status.aksesLabel}
       accessibilityHint="Membuka Sumber data"
-      accessibilityState={{ busy: sibuk }}
+      aria-busy={sibuk}
       onPress={() => {
         ketukRingan();
         router.push('/sumber-data');

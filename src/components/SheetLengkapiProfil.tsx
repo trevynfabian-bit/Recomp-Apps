@@ -165,7 +165,7 @@ function PilihanKelamin({
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityState={{ selected: aktif }}
+      aria-checked={aktif}
       accessibilityLabel={label}
       onPress={onPilih}
       style={({ pressed }) => ({

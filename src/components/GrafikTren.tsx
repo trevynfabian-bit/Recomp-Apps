@@ -411,7 +411,7 @@ export function GrafikTren({
         {/* Keterangan sekaligus sakelar: titik harian bisa disembunyikan bila ramai. */}
         <Pressable
           accessibilityRole="switch"
-          accessibilityState={{ checked: tampilkanHarian }}
+          aria-checked={tampilkanHarian}
           accessibilityLabel={
             tampilkanHarian ? 'Sembunyikan timbangan harian' : 'Tampilkan timbangan harian'
           }

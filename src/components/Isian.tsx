@@ -102,7 +102,7 @@ export function Isian({
           placeholderTextColor={colors.teksSamar}
           accessibilityLabel={aksesLabel ?? label}
           accessibilityHint={galat ?? accessibilityHint ?? keterangan}
-          accessibilityState={{ disabled: nonaktif }}
+          aria-disabled={nonaktif}
           {...(mono ? { multiline: true, autoCapitalize: 'none' as const, autoCorrect: false, spellCheck: false } : null)}
           onFocus={(e) => {
             setFokus(true);

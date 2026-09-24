@@ -36,7 +36,7 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
     <Card flat>
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ expanded: terbuka }}
+        aria-expanded={terbuka}
         accessibilityLabel={`${sesi.nama}, ${formatJam(sesi.mulai)}, ${sesi.durasi_menit} menit, ${r.jumlahLatihan} latihan, ${r.jumlahSet} set, volume ${formatAngka(r.volumeKg)} kilogram`}
         accessibilityHint={terbuka ? 'Menutup rincian latihan' : 'Membuka rincian latihan'}
         onPress={() => {

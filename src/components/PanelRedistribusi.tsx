@@ -87,7 +87,7 @@ export function PanelRedistribusi({
               <Pressable
                 key={o.nilai}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: aktif }}
+                aria-checked={aktif}
                 accessibilityLabel={`Opsi ${o.judul}`}
                 disabled={sudahDipakai}
                 onPress={() => {

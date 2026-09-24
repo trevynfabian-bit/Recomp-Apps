@@ -223,6 +223,20 @@ const komponenRakitan = [...layar, ...berkasTsx('src/components')].flatMap((p) =
 });
 cek('sheet, isian, dan tombol lewat komponen bersama', komponenRakitan.length === 0, komponenRakitan);
 
+// Keadaan kontrol lewat prop `aria-*` (RN ≥ 0.71 dan RN-web 0.21):
+// RN-web 0.21 TIDAK lagi membaca `accessibilityState`, jadi keadaan yang ditulis
+// di sana hilang di web tanpa galat. Radio memakai `aria-checked`
+// (VoiceOver: "dicentang"); `aria-selected` milik tab.
+const keadaanSalah = [...layar, ...berkasTsx('src/components')].flatMap((p) => {
+  const t = readFileSync(p, 'utf8');
+  const baris = (i) => t.slice(0, i).split('\n').length;
+  return [
+    ...[...t.matchAll(/accessibilityState=/g)].map((m) => `${p}:${baris(m.index)}  accessibilityState → aria-checked/selected/disabled/busy/expanded`),
+    ...[...t.matchAll(/accessibilityRole="radio"[^>]{0,200}?aria-selected/g)].map((m) => `${p}:${baris(m.index)}  radio memakai aria-selected → aria-checked`),
+  ];
+});
+cek('keadaan kontrol lewat aria-* (radio: aria-checked)', keadaanSalah.length === 0, keadaanSalah);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
