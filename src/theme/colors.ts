@@ -31,6 +31,8 @@ const dasarGelap = {
 
   /** Aksen utama: kalori, angka utama, CTA. Lolos AA untuk teks maupun isian. */
   amber: '#F0A202',
+  /** Amber untuk TEKS BESAR (≥24 px atau ≥18,7 px tebal: angka hero). Ambangnya 3:1. */
+  amberBesar: '#F0A202',
   /** Batas terlampaui. Untuk ISIAN & teks besar; teks kecil pakai aksenTeks.coral. */
   coral: '#E24E1B',
   /** Positif / protein / on-track. Untuk ISIAN; teks kecil pakai aksenTeks.jade. */
@@ -89,6 +91,9 @@ const dasarTerang: Dasar = {
   borderKuat: '#7D8391',
 
   amber: '#8A5A00',
+  // Teks besar cukup 3:1, jadi angka hero boleh amber yang jauh lebih cerah
+  // daripada amber teks kecil (#8A5A00 terlihat cokelat pada ukuran hero).
+  amberBesar: '#B37700',
   coral: '#B23A10',
   jade: '#0E7166',
 
@@ -162,7 +167,12 @@ function lengkapi(d: Dasar) {
     // `diAtasIsian` sudah bernama semantik di palet dasar.
 
     /** Suara merek: CTA, angka hero, tab aktif, pilihan terpilih. */
-    aksen: { isian: d.amber, teks: d.amber } satisfies Peran,
+    aksen: {
+      isian: d.amber,
+      teks: d.amber,
+      /** Teks besar (angka hero): ambang 3:1, jadi di mode terang bisa lebih cerah. */
+      besar: d.amberBesar,
+    } satisfies Peran & { besar: string },
 
     /** Warna status; SELALU disertai label atau ikon, tidak pernah warna saja. */
     status: {

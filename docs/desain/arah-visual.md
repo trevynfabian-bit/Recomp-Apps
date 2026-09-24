@@ -168,6 +168,7 @@ pilihannya memakai gelap.
 | `garis` / `garisKontrol` | `#343845` / `#727888` | `#DCDFE5` / `#7D8391` |
 | `teks` / `teksRedup` / `teksSamar` | `#F5F6F8` / `#9BA1AF` / `#8E94A3` | `#14151A` / `#4A4F5C` / `#5C6170` |
 | `aksen` (amber) | `#F0A202` | `#8A5A00` |
+| `aksen.besar` (angka hero, teks ≥24 px) | `#F0A202` | `#B37700` |
 | `aksenKedua` (jade) | isian `#1B998B`, teks `#1DA697` | `#0E7166` |
 | `aksenKetiga` (coral) | isian `#E24E1B`, teks `#E97147` | `#B23A10` |
 | `info` (karbo) | isian `#7C6AE8`, teks `#9587EC` | `#5B4BC4` |
@@ -201,9 +202,10 @@ diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
   skema umumnya terjadi saat app di latar belakang, jadi biaya ini dipilih
   dibanding mengubah puluhan layar menjadi pembaca konteks.
 
-Catatan untuk Fase 3: angka hero memakai amber terang-mode `#8A5A00` yang lolos
-AA tetapi terlihat cokelat; karena hero adalah teks besar (ambang 3:1), ada
-ruang memakai amber yang lebih cerah khusus hero.
+**Angka hero di mode terang (Fase 3).** Amber teks kecil `#8A5A00` terlihat
+cokelat pada ukuran 64 px. Karena hero adalah teks besar (ambang 3:1), peran
+`aksen.besar` memakai `#B37700`: 3,78:1 di kartu dan 3,47:1 di latar. Di mode
+gelap nilainya sama dengan amber biasa. `HeroNumber` memakainya secara bawaan.
 
 ---
 

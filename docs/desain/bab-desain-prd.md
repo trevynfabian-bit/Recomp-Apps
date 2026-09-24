@@ -46,6 +46,7 @@ berubah karena keputusan desain.
 | latar / permukaan / permukaan cekung | `#14151A` / `#2A2D36` / `#1C1E25` | `#F4F5F7` / `#FFFFFF` / `#E9EBEF` |
 | teks / redup / samar | `#F5F6F8` / `#9BA1AF` / `#8E94A3` | `#14151A` / `#4A4F5C` / `#5C6170` |
 | aksen (amber) | `#F0A202` | `#8A5A00` |
+| aksen besar (angka hero) | `#F0A202` | `#B37700` |
 | sukses (jade) | `#1B998B` isian, `#1DA697` teks | `#0E7166` |
 | bahaya (coral) | `#E24E1B` isian, `#E97147` teks | `#B23A10` |
 | info (karbo) | `#7C6AE8` isian, `#9587EC` teks | `#5B4BC4` |

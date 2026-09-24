@@ -16,7 +16,7 @@ type Props = {
  * SATU angka utama per layar (prinsip desain PRD): label kecil di atas,
  * angka raksasa di tengah, keterangan redup di bawah.
  */
-export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.aksen.teks }: Props) {
+export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.aksen.besar }: Props) {
   return (
     <View style={{ alignItems: 'center', gap: spacing.xs }}>
       <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>

@@ -156,7 +156,7 @@ export default function LogHarianScreen() {
             nilai={formatAngka(sisaKalori)}
             unit="kcal"
             keterangan={`${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal`}
-            warna={sisaKalori >= 0 ? colors.aksen.teks : colors.status.bahaya.isian}
+            warna={sisaKalori >= 0 ? colors.aksen.besar : colors.status.bahaya.isian}
           />
         ) : (
           <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>

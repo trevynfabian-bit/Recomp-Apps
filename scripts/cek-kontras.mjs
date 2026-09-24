@@ -141,6 +141,11 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, '14', c.latar);
     ...(nama === 'info' ? [] : [[`peran ${nama}: diAtasIsian di isian`, c.diAtasIsian, p.isian, false]]),
   ]),
 
+  // Angka hero (teks besar, 3:1) di kartu dan latar.
+  ['aksen.besar (hero) di permukaan', c.aksen.besar, c.permukaan, true],
+  ['aksen.besar (hero) di latar', c.aksen.besar, c.latar, true],
+  ['bahaya.isian (hero lewat) di permukaan', c.status.bahaya.isian, c.permukaan, true],
+
   // Pill status, satu baris per peran di arah-visual bab 1.3. Di atas `bg`
   // pill bertint (warna + '1A'); di atas kartu/sheet pill memakai `diKartu`
   // (tanpa isian), sehingga teksnya berdiri langsung di atas `surface`.

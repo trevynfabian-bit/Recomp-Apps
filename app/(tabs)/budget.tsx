@@ -155,7 +155,7 @@ export default function BudgetScreen() {
           nilai={formatAngka(Math.abs(budget.sisa))}
           unit="kcal"
           keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
-          warna={lewat ? colors.status.bahaya.isian : colors.aksen.teks}
+          warna={lewat ? colors.status.bahaya.isian : colors.aksen.besar}
         />
 
         {/* Meter laju: sisa saja tidak menjawab "apakah lajunya wajar". */}
