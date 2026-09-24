@@ -182,3 +182,24 @@ langsung lalu kembali → `/tren`, `/hasil-lab`, `/sumber-data`; dengan riwayat,
 Tren → Ukuran → kembali → Tren. Tombol kembali Android di tab mengikuti
 perilaku bawaan tab (ke tab pertama, lalu keluar). `cek:desain` menolak
 `router.back()` langsung dan rute tumpukan tanpa induk.
+
+## 10. Audit jalan buntu
+
+Setiap `return` di setiap layar diperiksa (AST): apakah keadaan itu punya jalan
+keluar (header dengan kembali/tutup, aksi Keluar/Coba lagi, atau tab bar).
+
+| Temuan | Perbaikan |
+|---|---|
+| `tambah-hasil-lab?id=…` saat memuat: hanya teks "Memuat hasil lab…", tanpa header atau tombol. Bila muat macet, layar buntu. | Header dengan `✕` + `KeadaanMemuat`. |
+| `tambah-hasil-lab?id=…` saat hasilnya tidak ada: judul dan tombol dirakit sendiri, tanpa header. | Header dengan `✕` + `KeadaanGagal` ("Kembali ke riwayat" lewat `useKembali`). Diuji di web: `?id=tidak-ada` → Tutup → `/hasil-lab`. |
+
+Yang diperiksa dan sudah aman: `LayarMuatTarget` (Coba lagi + Keluar), layar
+masuk (publik, tidak punya "sebelumnya"), ketujuh `Modal` di komponen
+(semuanya menangani tombol kembali Android lewat `onRequestClose`),
+`KerangkaSheet` dengan `onTutup: null` (hanya selama proses yang tidak boleh
+terputus, lalu kembali bisa ditutup), dan sheet OAuth/kunci Hevy (ada Batal
+selama menunggu).
+
+Sisa temuan peta navigasi: **N6** (ketukan notifikasi tidak diarahkan) di luar
+lingkup desain visual; dicatat untuk plan berikutnya karena menyentuh perilaku
+notifikasi, bukan tampilan.

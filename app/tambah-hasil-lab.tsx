@@ -13,7 +13,18 @@ import {
   TEMPLAT_PANEL_LAB,
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
-import { Card, HeaderLayar, Isian, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolUtama } from '@/components';
+import {
+  Card,
+  HeaderLayar,
+  Isian,
+  KeadaanGagal,
+  KeadaanMemuat,
+  KerangkaSheet,
+  PenandaSumber,
+  Tombol,
+  TombolBertepi,
+  TombolUtama,
+} from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
@@ -125,24 +136,21 @@ export default function TambahHasilLabScreen() {
   // Geser-kembali dan tombol kembali Android juga melewati konfirmasi yang sama.
   useJagaKeluar(berisi, () => setKonfirmasiBatal(true));
 
-  if (id && !asal && statusMuat === 'memuat') {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg }}>
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-          Memuat hasil lab…
-        </Text>
-      </View>
-    );
-  }
-
+  // Keadaan sebelum form: tetap ber-header dengan tombol Tutup, supaya memuat
+  // yang macet atau hasil yang sudah terhapus tidak menjadi jalan buntu.
   if (id && !asal) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
-        <Text style={{ ...typography.title, color: colors.teks }}>Hasil lab ini tidak ditemukan</Text>
-        <Text style={{ ...typography.body, color: colors.teksRedup }}>
-          Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
-        </Text>
-        <TombolBertepi label="Kembali ke riwayat" onPress={() => kembaliSatuLangkah()} />
+      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg, gap: spacing.xl }}>
+        <HeaderLayar kembali jenisKembali="tutup" judul="Ubah hasil lab" />
+        {statusMuat === 'memuat' ? (
+          <KeadaanMemuat label="Memuat hasil lab…" tampilan="kartu" />
+        ) : (
+          <KeadaanGagal
+            judul="Hasil lab ini tidak ditemukan"
+            keterangan="Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah."
+            aksi={{ label: 'Kembali ke riwayat', onPress: kembaliSatuLangkah }}
+          />
+        )}
       </View>
     );
   }
