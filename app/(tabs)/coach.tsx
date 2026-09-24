@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -23,6 +23,8 @@ import {
 
 import { useProfil } from '@/state/profil';
 import { balasCoachStub, mockRiwayatPercakapan, SARAN_PERTANYAAN } from '@/mocks/coach';
+import { pulihkanRiwayatCoach, simpanRiwayatCoach } from '@/lib/riwayatCoach';
+import { useSesi } from '@/state/sesi';
 import type { Percakapan, PesanCoach } from '@/types/domain';
 import { colors, spacing, typography } from '@/theme';
 
@@ -49,6 +51,30 @@ export default function CoachScreen() {
     mockRiwayatPercakapan[mockRiwayatPercakapan.length - 1]?.id ?? '',
   );
   const [menjawab, setMenjawab] = useState(false);
+
+  // Riwayat dipulihkan dari perangkat saat layar dipasang, lalu disimpan setiap
+  // berubah. `pulih` mencegah data tiruan awal menimpa salinan sebelum terbaca.
+  const { pengguna } = useSesi();
+  const penggunaId = pengguna?.id ?? null;
+  const [pulih, setPulih] = useState(false);
+  useEffect(() => {
+    if (!penggunaId) return;
+    let batal = false;
+    void pulihkanRiwayatCoach(penggunaId).then((tersimpan) => {
+      if (batal) return;
+      if (tersimpan && tersimpan.length > 0) {
+        setRiwayat(tersimpan);
+        setAktifId(tersimpan[tersimpan.length - 1].id);
+      }
+      setPulih(true);
+    });
+    return () => {
+      batal = true;
+    };
+  }, [penggunaId]);
+  useEffect(() => {
+    if (pulih && penggunaId) void simpanRiwayatCoach(penggunaId, riwayat);
+  }, [pulih, penggunaId, riwayat]);
   const [sheetRiwayat, setSheetRiwayat] = useState(false);
   const gulungRef = useRef<ScrollView>(null);
 
