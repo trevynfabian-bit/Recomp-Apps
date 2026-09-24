@@ -47,3 +47,6 @@ yarn-error.*
 # environment lokal (jangan di-commit)
 .env
 .env.local
+
+# Laporan runner paritas (npm run cek:paritas-semua)
+laporan/
