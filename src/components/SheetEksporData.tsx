@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Platform, Text, View } from 'react-native';
 import { formatAngka, formatUkuranBerkas } from '@recomp/logika';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
+import { Panel } from './Card';
 import { StatusProses } from './StatusProses';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuranIkon } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -79,6 +81,19 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
           </View>
         ))}
       </View>
+
+      {/* Aman dibuka di spreadsheet: dikatakan sebelum berkas disiapkan, karena
+          itulah alasan orang ragu membuka CSV berisi catatan bebas. */}
+      <Panel style={{ gap: spacing.xs }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+          <Ionicons name="shield-checkmark-outline" size={ukuranIkon.kecil} color={colors.status.sukses.teks} />
+          <Text style={{ ...typography.label, color: colors.teks }}>Aman dibuka di Excel & Google Sheets</Text>
+        </View>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+          Teks yang diawali =, +, -, atau @ (mis. catatan) diberi tanda kutip di depannya, jadi tidak pernah dijalankan
+          sebagai rumus. CSV memakai UTF-8, jadi huruf dan simbol terbaca benar.
+        </Text>
+      </Panel>
 
       {status.jenis === 'memproses' ? (
         <StatusProses
