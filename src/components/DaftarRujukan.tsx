@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { PenandaSumber } from './PenandaSumber';
 import { METADATA_SUMBER } from '@/lib/sumber';
 import type { RujukanData } from '@/types/domain';
-import { colors, spacing, tint, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { Panel } from './Card';
 
 type Props = {
@@ -28,7 +28,7 @@ export function DaftarRujukan({ rujukan }: Props) {
   const adaEstimasi = rujukan.some((r) => r.jenis === 'estimasi');
 
   return (
-    <Panel style={{ maxWidth: '88%', borderWidth: 1, borderColor: adaEstimasi ? tint(colors.aksen.isian, 'tepi') : colors.garis }}>
+    <Panel nada={adaEstimasi ? 'aksen' : undefined} style={{ maxWidth: '88%' }}>
       <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         Angka yang dipakai
       </Text>

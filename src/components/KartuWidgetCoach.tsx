@@ -24,8 +24,10 @@ type Props = {
  * model untuk salah menyalin satu digit, dan itu jenis kesalahan yang paling
  * sulit disadari pembacanya.
  *
- * Nama fungsinya ikut dicetak, redup, di kaki kartu. Kalau suatu saat angkanya
- * terasa aneh, itu satu-satunya cara melacak dari mana ia datang.
+ * Kaki kartu menyebut dari mana angkanya dihitung dengan kalimat biasa
+ * ("dari timbangan pagi 7 hari terakhir"). Nama fungsinya tetap dicetak di
+ * build pengembangan: kalau suatu saat angkanya terasa aneh, itu cara
+ * melacaknya — tapi bagi pengguna, `ambil_ringkasan_sisa_harian` hanya jargon.
  */
 export function KartuWidgetCoach({ widget }: Props) {
   return (
@@ -35,7 +37,8 @@ export function KartuWidgetCoach({ widget }: Props) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <PenandaSumber jenis={widget.sumber} />
         <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>
-          · dihitung app lewat {widget.fungsi}
+          · dihitung app {asalFungsi(widget.fungsi)}
+          {__DEV__ ? ` (${widget.fungsi})` : ''}
         </Text>
       </View>
     </Card>
@@ -170,4 +173,24 @@ function warnaDelta(arah: 'sesuai' | 'berlawanan' | 'netral' | undefined): strin
   if (arah === 'sesuai') return colors.status.sukses.teks;
   if (arah === 'berlawanan') return colors.status.peringatan.teks;
   return colors.teksRedup;
+}
+
+/** Asal angka per fungsi Coach, dalam kalimat biasa. Fungsi baru jatuh ke kalimat umum. */
+const ASAL_FUNGSI: Record<string, string> = {
+  ambil_rata_rata_7_hari: 'dari timbangan pagi 7 hari terakhir',
+  ambil_deret_berat: 'dari riwayat timbangan pagi',
+  ambil_deret_ukuran: 'dari pencatatan ukuran tubuh',
+  ambil_riwayat_ukuran: 'dari pencatatan ukuran tubuh',
+  ambil_ringkasan_harian: 'dari catatan makan hari ini',
+  ambil_ringkasan_sisa_harian: 'dari catatan makan & target hari ini',
+  ambil_sisa_makro_hari_ini: 'dari catatan makan & target hari ini',
+  ambil_kumulatif_budget: 'dari jatah kalori minggu ini',
+  ambil_rincian_budget: 'dari jatah kalori minggu ini',
+  bandingkan_target_tdee: 'dari target dan perkiraan kebutuhan energi',
+  estimasi_body_fat_navy: 'dengan rumus Navy dari lingkar & tinggi',
+  ambil_hasil_lab: 'dari hasil lab yang Anda simpan',
+};
+
+function asalFungsi(fungsi: string): string {
+  return ASAL_FUNGSI[fungsi] ?? 'dari data Anda';
 }
