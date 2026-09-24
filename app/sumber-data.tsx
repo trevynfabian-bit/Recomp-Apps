@@ -117,7 +117,7 @@ export default function SumberDataScreen() {
         nilai={String(ringkasan.aktif)}
         unit={`dari ${ringkasan.total}`}
         keterangan={keteranganHero}
-        warna={ringkasan.perluPerhatian > 0 ? colors.aksen.besar : colors.status.sukses.teks}
+        nada="netral"
       />
 
       <View style={{ gap: spacing.md }}>

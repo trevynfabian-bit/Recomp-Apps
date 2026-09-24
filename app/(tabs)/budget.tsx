@@ -152,7 +152,7 @@ export default function BudgetScreen() {
         nilai={formatAngka(Math.abs(budget.sisa))}
         unit="kcal"
         keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
-        warna={lewat ? colors.status.bahaya.isian : colors.aksen.besar}
+        nada={lewat ? 'bahaya' : 'aksen'}
         stat={[
           { label: 'Hari tersisa', nilai: String(budget.hariTersisa), unit: 'hari', unitDiBawah: true },
           {

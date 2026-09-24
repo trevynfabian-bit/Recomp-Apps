@@ -19,6 +19,7 @@ import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika
 import {
   Card,
   HeaderLayar,
+  HeroPengganti,
   InputTarget,
   KartuHero,
   KerangkaSheet,
@@ -244,17 +245,17 @@ export default function TargetHarianScreen() {
                 keterangan={targetHariIni ? `${namaTipeHariIni} · ${profil.fase_aktif} · protein ${formatMakro(targetHariIni.target_protein_g)} g · lemak ${formatMakro(targetHariIni.target_lemak_g)} g · sat fat ≤${formatMakro(targetHariIni.batas_sat_fat_g)} g` : undefined}
                 pengganti={
                   targetHariIni ? undefined : (
-                  <View style={{ gap: spacing.md }}>
-                    <Text style={{ ...typography.caption, color: colors.teksRedup, textTransform: 'uppercase' }}>Target kalori hari ini</Text>
-                    <Text style={{ ...typography.title, color: colors.teks }}>
-                      {namaTipeHariIni} · {profil.fase_aktif} belum diisi
-                    </Text>
-                    <Tombol
-                      label="Isi target"
-                      aksesLabel={`Isi target ${namaTipeHariIni} untuk fase ${profil.fase_aktif}`}
-                      onPress={() => setSuntingSatu({ dayTypeId: tipeHariIni, fase: profil.fase_aktif })}
-                    />
-                  </View>
+                  <HeroPengganti
+                    label="Target kalori hari ini"
+                    judul={`${namaTipeHariIni} · ${profil.fase_aktif} belum diisi`}
+                    aksi={
+                      <Tombol
+                        label="Isi target"
+                        aksesLabel={`Isi target ${namaTipeHariIni} untuk fase ${profil.fase_aktif}`}
+                        onPress={() => setSuntingSatu({ dayTypeId: tipeHariIni, fase: profil.fase_aktif })}
+                      />
+                    }
+                  />
                   )
                 }
               />

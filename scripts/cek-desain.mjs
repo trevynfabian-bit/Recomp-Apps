@@ -132,6 +132,30 @@ const heroRakitan = [...layar, ...berkasTsx('src/components')]
   .flatMap((p) => cariBaris(p, /typography\.hero\b/));
 cek('tidak ada angka hero rakitan sendiri (typography.hero)', heroRakitan.length === 0, heroRakitan.join(' | '));
 
+/**
+ * Hierarki di sekitar angka hero (Fase 5): warnanya dari `nada` (peran angka),
+ * dan pengganti "belum bisa dihitung" selalu `HeroPengganti` — label yang
+ * sama dengan angka hero, bukan label rakitan dengan warna lain.
+ */
+const heroBerwarna = layar.flatMap((p) => {
+  const sf = ts.createSourceFile(p, readFileSync(p, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const hasil = [];
+  (function kunjungi(n) {
+    if ((ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)) && n.tagName.getText(sf) === 'KartuHero') {
+      for (const a of n.attributes.properties) {
+        const nama = ts.isJsxAttribute(a) ? a.name.getText(sf) : null;
+        if (nama === 'warna') hasil.push(`${p}:${sf.getLineAndCharacterOfPosition(a.getStart()).line + 1}  warna= → pakai nada="aksen|netral|bahaya"`);
+        if (nama === 'pengganti' && a.initializer && !/HeroPengganti/.test(a.initializer.getText(sf))) {
+          hasil.push(`${p}:${sf.getLineAndCharacterOfPosition(a.getStart()).line + 1}  pengganti tanpa HeroPengganti`);
+        }
+      }
+    }
+    ts.forEachChild(n, kunjungi);
+  })(sf);
+  return hasil;
+});
+cek('angka hero: warna dari nada, pengganti lewat HeroPengganti', heroBerwarna.length === 0, heroBerwarna);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];

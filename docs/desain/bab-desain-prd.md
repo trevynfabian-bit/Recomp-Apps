@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.5 (24 September 2026) |
+| **Versi** | 1.6 (24 September 2026) |
 | **Penjaga** | `npm run cek:desain-semua` (`cek:desain`, `cek:hardcode`, `cek:kontras`) |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
@@ -106,6 +106,20 @@ berubah karena keputusan desain.
   dengan gaya `hero`. Alasan dipertahankan: aturan ini yang membuat setiap layar
   data menjawab satu pertanyaan sekali lirik; tidak ada layar yang terbukti
   butuh dua. Angka pendukung memakai `AngkaStat`.
+- **Hierarki di sekitar angka hero (Fase 5).** Urutan tetap di setiap layar
+  data: label kapital kecil (`caption`, `teksSamar`) → angka `hero` → satuan
+  (`title`, `teksSamar`) → satu kalimat keterangan (`labelBiasa`, `teksRedup`)
+  → (opsional) isi pendukung → deret `AngkaStat` di bawah garis. Warna angka
+  dari `nada`, menurut peran angkanya, bukan pilihan layar:
+
+  | `nada` | Peran | Layar |
+  |---|---|---|
+  | `aksen` | jatah yang tersisa untuk dipakai | Hari Ini, Budget, Target harian |
+  | `netral` | hasil ukur atau hitungan | Tren, Ukuran, Latihan, Sumber data |
+  | `bahaya` | jatah sudah terlewati (labelnya mengatakannya) | Hari Ini, Budget |
+
+  Saat angkanya belum bisa dihitung, `HeroPengganti` menggantikannya dengan
+  label yang sama, kalimat `title` yang menyebut apa yang kurang, dan satu aksi.
 - Judul layar tab dan tumpukan memakai `title` dengan peran header aksesibilitas.
 - Kolom isian: satu komponen `Isian` (label di atas, satuan di kanan,
   keterangan/galat di bawah). Keadaan dibaca dari tepi kolom: biasa
@@ -180,3 +194,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | 1.3 | 24 September 2026 | Mode terang: pilihan manual di Pengaturan, angka hero `aksen.besar`, tint & bayangan per mode. Varian teks kecil mode gelap dinaikkan agar lolos AA di dalam pill bertint (≥4,6:1). |
 | 1.4 | 24 September 2026 | Navigasi: tab final "Setelan", ikon terisi + garis penanda untuk tab terpilih, `HeaderLayar` di semua layar, pola transisi dorong/modal, kembali satu langkah. Aturan angka hero dipertegas: hanya layar data, selalu `KartuHero`. |
 | 1.5 | 24 September 2026 | Penjaga desain diperbarui: `cek:hardcode` baru (nilai tertanam + saran token), pelanggaran per baris dengan nilainya, ringkasan lulus/gagal seragam di akhir setiap penjaga, dan `cek:desain-semua` untuk ketiganya. |
+| 1.6 | 24 September 2026 | Hierarki angka hero: warna dari `nada` (aksen/netral/bahaya) menurut peran angka, `HeroPengganti` untuk angka yang belum bisa dihitung; dijaga `cek:desain`. |

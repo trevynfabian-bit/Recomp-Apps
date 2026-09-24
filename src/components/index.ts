@@ -8,7 +8,7 @@ export { GelembungMengetik, GelembungPesan, PemisahTanggal } from './GelembungPe
 export { GrafikTren } from './GrafikTren';
 export { GrafikUkuran } from './GrafikUkuran';
 export { HeaderLayar } from './HeaderLayar';
-export { HeroNumber } from './HeroNumber';
+export { HeroNumber, HeroPengganti, type NadaHero } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { IndikatorSinkron } from './IndikatorSinkron';
 export { InputAngka } from './InputAngka';

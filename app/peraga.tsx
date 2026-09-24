@@ -6,6 +6,7 @@ import {
   Card,
   DaftarBaris,
   HeaderLayar,
+  HeroPengganti,
   InputAngka,
   InputTarget,
   Isian,
@@ -251,6 +252,15 @@ export default function PeragaScreen() {
             { label: 'Tipe hari', nilai: 'Beban+Lari', kata: true },
           ]}
         />
+        {/* Bingkainya sama dengan KartuHero; di layar sungguhan ini prop `pengganti`. */}
+        <Card style={{ paddingVertical: spacing.xl, marginTop: spacing.md }}>
+          <HeroPengganti
+            label="Sisa kalori hari ini"
+            judul="Target Rest · Cut belum diisi"
+            keterangan="Tanpa target, sisanya belum bisa dihitung."
+            aksi={<Tombol label="Isi target" onPress={() => undefined} />}
+          />
+        </Card>
         <Card style={{ gap: spacing.lg, marginTop: spacing.md }}>
           {makro.slice(0, 3).map((m) => (
             <MacroRow key={m.key} macro={m} mode="sisa" />

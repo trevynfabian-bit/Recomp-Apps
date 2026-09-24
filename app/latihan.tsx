@@ -83,6 +83,7 @@ export default function LatihanScreen() {
         nilai={String(pekan.jumlahSesi)}
         unit="sesi"
         keterangan={pekan.jumlahSesi > 0 ? `Volume ${formatAngka(pekan.volumeKg)} kg` : 'Belum ada sesi pekan ini'}
+        nada="netral"
       />
 
       {kelompok.length === 0 ? (

@@ -123,7 +123,7 @@ export default function UkuranScreen() {
             ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
             : undefined
         }
-        warna={colors.teks}
+        nada="netral"
       >
         <View style={{ alignItems: 'center', marginTop: spacing.md }}>
           {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru

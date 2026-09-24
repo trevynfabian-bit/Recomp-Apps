@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   HeaderLayar,
+  HeroPengganti,
   IndikatorSinkron,
   KartuCatatan,
   KartuHero,
@@ -149,26 +150,21 @@ export default function LogHarianScreen() {
         nilai={sisaKalori !== null ? formatAngka(sisaKalori) : '—'}
         unit="kcal"
         keterangan={target ? `${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal` : undefined}
-        warna={sisaKalori !== null && sisaKalori < 0 ? colors.status.bahaya.isian : colors.aksen.besar}
+        nada={sisaKalori !== null && sisaKalori < 0 ? 'bahaya' : 'aksen'}
         pengganti={
           target && sisaKalori !== null ? undefined : (
-            <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>
-              <Text style={{ ...typography.caption, color: colors.teksRedup, textTransform: 'uppercase' }}>
-                Sisa kalori hari ini
-              </Text>
-              <Text style={{ ...typography.title, color: colors.teks }}>
-                Target {dayType.nama} · {fase} belum diisi
-              </Text>
-              <Text style={{ ...typography.body, color: colors.teksRedup }}>
-                Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
-                tetap tersimpan seperti biasa.
-              </Text>
-              <TombolUtama
-                label="Isi target"
-                aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`}
-                onPress={() => router.push({ pathname: '/target-harian', params: { isi: dayTypeId } })}
-              />
-            </View>
+            <HeroPengganti
+              label="Sisa kalori hari ini"
+              judul={`Target ${dayType.nama} · ${fase} belum diisi`}
+              keterangan={`Tanpa target, sisanya belum bisa dihitung. Tercatat ${formatAngka(log.kalori)} kcal; makanan dan timbangan tetap tersimpan seperti biasa.`}
+              aksi={
+                <Tombol
+                  label="Isi target"
+                  aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`}
+                  onPress={() => router.push({ pathname: '/target-harian', params: { isi: dayTypeId } })}
+                />
+              }
+            />
           )
         }
         stat={[

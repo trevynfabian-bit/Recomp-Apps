@@ -117,7 +117,7 @@ export default function TrenScreen() {
             ? `dari ${rata.jumlahTimbangan} timbangan dalam ${JENDELA_HARI} hari terakhir`
             : 'belum ada timbangan dalam sepekan terakhir'
         }
-        warna={colors.teks}
+        nada="netral"
         stat={[
           {
             label: 'Arah sepekan',
