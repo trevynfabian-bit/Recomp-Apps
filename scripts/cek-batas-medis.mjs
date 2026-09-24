@@ -55,6 +55,12 @@ const DITOLAK = [
   ['Apakah saya kena diabetes?', 'diagnosis'],
   ['Ini gejala apa ya?', 'diagnosis'],
   ['Tolong diagnosa kondisi saya dari data ini', 'diagnosis'],
+  // Obat bebas & obat/zat seputar turun berat dan membentuk badan.
+  ['Boleh ga minum paracetamol pas pusing habis latihan?', 'dosis-obat'],
+  ['Ibuprofennya boleh berapa tablet sehari?', 'dosis-obat'],
+  ['Mounjaro sama Wegovy lebih bagus mana buat saya?', 'resep'],
+  ['Clenbuterol aman buat fase cut?', 'dosis-obat'],
+  ['Siklus SARMs pertama sebaiknya berapa minggu?', 'dosis-obat'],
 ];
 
 console.log('\nHarus ditolak');
@@ -84,6 +90,9 @@ const DILOLOSKAN = [
   'Saya ngantuk terus, apakah kalori saya terlalu rendah?',
   // "sobat" mengandung "obat"; batas kata harus menahannya.
   'Sobat saya juga pakai app ini, datanya bisa dibandingkan?',
+  // Kata biasa yang mirip nama obat tidak boleh terbaca sebagai obat.
+  'Berapa langkah harian yang cukup untuk fase cut?',
+  'Latihan hiit sama lari biasa lebih bagus mana?',
 ];
 
 console.log('\nHarus diloloskan');
@@ -149,6 +158,9 @@ const JAWABAN_DITOLAK = [
   // Kalimat pertama aman; yang kedua yang melanggar. Pemeriksaan per kalimat
   // tidak boleh berhenti di kalimat pertama.
   ['Protein Anda sudah cukup. Tambahkan metformin 850 mg kalau gula darah naik.', 'dosis-obat'],
+  ['Take 1000mg paracetamol.', 'dosis-obat'],
+  ['Tirzepatide biasanya dimulai 2,5 mg seminggu sekali.', 'dosis-obat'],
+  ['Coba clenbuterol selama fase cut.', 'resep'],
 ];
 
 console.log('\nJawaban yang harus diganti penolakan');

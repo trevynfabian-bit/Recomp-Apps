@@ -47,6 +47,27 @@ const OBAT = [
   'diuretik',
   'suntik',
   'infus',
+  // Obat bebas yang paling sering ditanyakan "boleh minum berapa".
+  'paracetamol',
+  'parasetamol',
+  'ibuprofen',
+  'aspirin',
+  'asam mefenamat',
+  // Obat & zat yang sering muncul di konteks turun berat / membentuk badan.
+  'tirzepatide',
+  'mounjaro',
+  'wegovy',
+  'saxenda',
+  'phentermine',
+  'fentermin',
+  'clenbuterol',
+  'hgh',
+  'sarms',
+  'dianabol',
+  'anadrol',
+  'oxandrolone',
+  'prednison',
+  'prednisone',
 ];
 
 /** Kata yang menandakan permintaan diagnosis, bukan sekadar menyebut gejala. */
