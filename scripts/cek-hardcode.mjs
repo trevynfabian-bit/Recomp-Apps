@@ -94,7 +94,6 @@ const UKURAN_BEBAS = [
 ];
 const TINGGI_BARIS_BEBAS = [
   { berkas: 'src/components/Pemilih.tsx', alasan: 'tinggi baris angka 52 pt PemilihAngka (pasangan ukuran huruf di atas)' },
-  { berkas: 'src/components/InputChat.tsx', alasan: 'field chat multiline menghitung tingginya sendiri per baris' },
 ];
 
 // ---------------------------------------------------------------------------

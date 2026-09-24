@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Platform, Text, TextInput, View } from 'react-native';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import { TombolIkon } from './Tombol';
@@ -22,6 +22,7 @@ type Props = {
  */
 export function InputChat({ sibuk, onKirim }: Props) {
   const [teks, setTeks] = useState('');
+  const [fokus, setFokus] = useState(false);
   const bersih = teks.trim();
   const bisaKirim = bersih.length > 0 && !sibuk;
   const sisaKarakter = MAKS_KARAKTER - teks.length;
@@ -49,24 +50,38 @@ export function InputChat({ sibuk, onKirim }: Props) {
           style={{
             flex: 1,
             borderRadius: radius.lg,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
+            // Fokus seperti Isian: tepi aksen 2 px; padding mengimbangi supaya teks tidak melompat.
+            borderWidth: fokus ? 2 : 1,
+            borderColor: fokus ? colors.aksen.isian : colors.garisKontrol,
             backgroundColor: colors.permukaanCekung,
-            paddingHorizontal: spacing.lg,
+            paddingHorizontal: spacing.lg - (fokus ? 1 : 0),
           }}
         >
           <TextInput
             value={teks}
             onChangeText={(t) => setTeks(t.slice(0, MAKS_KARAKTER))}
-            placeholder="Tanya apa saja tentang data Anda"
+            placeholder={sibuk ? 'Coach sedang menjawab…' : 'Tanya apa saja tentang data Anda'}
             placeholderTextColor={colors.teksSamar}
             multiline
             accessibilityLabel="Pertanyaan untuk coach"
+            accessibilityHint={Platform.OS === 'web' ? 'Enter mengirim, Shift+Enter baris baru' : undefined}
+            onFocus={() => setFokus(true)}
+            onBlur={() => setFokus(false)}
+            // Web (papan ketik fisik): Enter mengirim, Shift+Enter baris baru —
+            // kebiasaan kolom chat. Di ponsel, Enter tetap baris baru; kirim lewat tombol.
+            onKeyPress={(e) => {
+              if (Platform.OS !== 'web') return;
+              const n = e.nativeEvent as { key: string; shiftKey?: boolean };
+              if (n.key === 'Enter' && !n.shiftKey) {
+                e.preventDefault();
+                kirim();
+              }
+            }}
             style={{
               ...typography.body,
               color: colors.teks,
-              lineHeight: 22,
               paddingVertical: spacing.md,
+              outlineWidth: 0,
               // Tumbuh sampai ~4 baris lalu berhenti; sisanya digulung sendiri.
               minHeight: TAP_MIN,
               maxHeight: ukuran.isianChatMaks,
