@@ -169,7 +169,7 @@ export const mockPercakapan: PesanCoach[] = [
       {
         jenis: 'angka',
         fungsi: 'estimasi_body_fat_navy',
-        label: 'Estimasi body fat',
+        label: 'Estimasi lemak tubuh',
         nilai: '16,5',
         unit: '%',
         delta: '+0,5 poin sejak 1 September',
@@ -181,7 +181,7 @@ export const mockPercakapan: PesanCoach[] = [
     ],
     rujukan: [
       {
-        label: 'Body fat',
+        label: 'Lemak tubuh',
         nilai: '16,5%',
         jenis: 'estimasi',
         dasar: 'rumus Navy, galat ±4 poin',
@@ -287,6 +287,31 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
           sumber: 'manual',
           deret: [74.0, 74.1, 74.2, 74.3, 74.35, 74.4, 74.5],
         },
+      ],
+    );
+  }
+
+  if (t.includes('protein')) {
+    return teksDanRujukan(
+      'Rata-rata tujuh hari terakhir 168 g per hari terhadap target 180 g, jadi kurang sekitar ' +
+        '12 g sehari.\n\nSaat Lean Gain kekurangan sebesar itu tidak menggagalkan apa pun, tapi ' +
+        'protein adalah satu-satunya makro yang tidak pernah dipotong saat redistribusi budget. ' +
+        'Kalau ingin ditutup, satu porsi yoghurt atau dua butir telur sudah cukup.',
+      [
+        { label: 'Protein rata-rata 7 hari', nilai: '168 g', jenis: 'estimasi', dasar: 'sebagian entri dari foto AI' },
+        { label: 'Target protein', nilai: '180 g', jenis: 'manual', dasar: 'target tipe hari' },
+      ],
+    );
+  }
+
+  if (t.includes('lemak tubuh') || t.includes('body fat') || t.includes('bf ')) {
+    return teksDanRujukan(
+      'Estimasi lemak tubuh Anda 16,5%, wajarnya di antara 12,5% dan 20,5%, naik 0,5 poin sejak ' +
+        '1 September.\n\nAngkanya dari rumus Navy (lingkar pinggang, leher, tinggi), bukan pengukuran: ' +
+        'yang berguna adalah ARAHNYA dari pekan ke pekan, bukan angka pastinya.',
+      [
+        { label: 'Lemak tubuh', nilai: '16,5%', jenis: 'estimasi', dasar: 'rumus Navy, ±4 poin' },
+        { label: 'Pinggang terakhir', nilai: '85,4 cm', jenis: 'manual', dasar: '22 September' },
       ],
     );
   }
@@ -403,7 +428,7 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
 
   return teksDanRujukan(
     'Saya membaca data Anda sampai hari ini: rata-rata 7 hari 74,5 kg, fase Lean Gain, dan ' +
-    'estimasi body fat 16,5% (Navy — estimasi, bukan pengukuran).\n\nCoba tanyakan lebih spesifik, ' +
+    'estimasi lemak tubuh 16,5% (Navy — estimasi, bukan pengukuran).\n\nCoba tanyakan lebih spesifik, ' +
     'misalnya soal laju mingguan, ukuran tubuh, atau sisa kalori hari ini.',
     [
       {
@@ -412,7 +437,7 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
         jenis: 'manual',
         dasar: '7 timbangan pagi',
       },
-      { label: 'Body fat', nilai: '16,5%', jenis: 'estimasi', dasar: 'rumus Navy, ±4 poin' },
+      { label: 'Lemak tubuh', nilai: '16,5%', jenis: 'estimasi', dasar: 'rumus Navy, ±4 poin' },
     ],
   );
 }
