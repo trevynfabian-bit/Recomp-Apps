@@ -145,6 +145,24 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
   // akan langsung gagal.
   ['teksRedup di pilihan terpilih', c.teksRedup, PILIHAN_AMBER, false],
 
+  // Matriks lengkap: SETIAP token teks × SETIAP permukaan, dibentuk dari palet.
+  // Token teks atau permukaan baru otomatis ikut diperiksa di kedua mode tanpa
+  // perlu menambah baris di sini.
+  ...(() => {
+    const teks = {
+      teks: c.teks,
+      teksRedup: c.teksRedup,
+      teksSamar: c.teksSamar,
+      'aksen.teks': c.aksen.teks,
+      ...Object.fromEntries(Object.entries(c.status).map(([n, p]) => [`status.${n}.teks`, p.teks])),
+      ...Object.fromEntries(Object.entries(c.macroTeks).map(([n, v]) => [`macroTeks.${n}`, v])),
+    };
+    const permukaan = { latar: c.latar, permukaan: c.permukaan, permukaanCekung: c.permukaanCekung };
+    return Object.entries(teks).flatMap(([nt, vt]) =>
+      Object.entries(permukaan).map(([np, vp]) => [`matriks: ${nt} di ${np}`, vt, vp, false]),
+    );
+  })(),
+
   // Peran semantik (bab Desain 8.2): teks tiap peran di tiga permukaan, dan
   // isiannya sebagai mark terhadap track.
   ...[['aksen', c.aksen], ...Object.entries(c.status)].flatMap(([nama, p]) => [
