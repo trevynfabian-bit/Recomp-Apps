@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DATA_TERSIMPAN, PROFIL_SUMBER, susunStatusPrivasi } from '@recomp/logika';
 import type { ButirStatusPrivasi } from '@recomp/logika';
-import { Card, SectionHeader, SheetEksporData, SheetHapusAkun } from '@/components';
+import { Card, SectionHeader, SheetEksporData, SheetHapusAkun, TombolIkon } from '@/components';
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -13,7 +13,7 @@ import { mockFotoMakananDisimpan } from '@/mocks/privasi';
 import { mockPengaturanPengingat } from '@/mocks/widget';
 import { useSesi } from '@/state/sesi';
 import { useSinkron } from '@/state/sinkron';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, TAP_MIN, typography } from '@/theme';
 
 const IKON: Record<ButirStatusPrivasi['nada'], React.ComponentProps<typeof Ionicons>['name']> = {
   terjaga: 'lock-closed-outline',
@@ -98,27 +98,7 @@ export default function PrivasiScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View style={{ flex: 1 }}>
           <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
             Privasi

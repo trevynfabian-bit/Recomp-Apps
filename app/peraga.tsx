@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -15,9 +15,8 @@ import {
   TombolIkon,
   TombolUtama,
 } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, typography, useSkema } from '@/theme';
+import { colors, spacing, typography, useSkema } from '@/theme';
 
 /**
  * Peraga komponen (docs/desain/audit-komponen.md).
@@ -51,27 +50,7 @@ export default function PeragaScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View style={{ flex: 1, gap: spacing.xxs }}>
           <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
             Peraga komponen
@@ -92,6 +71,11 @@ export default function PeragaScreen() {
           <Tombol label="Bertepi" varian="bertepi" onPress={() => undefined} />
           <Tombol label="Bertepi nonaktif" varian="bertepi" nonaktif onPress={() => undefined} />
           <Tombol label="Tautan teks" varian="teks" onPress={() => undefined} />
+          <View style={{ flexDirection: 'row', gap: spacing.lg }}>
+            <Tombol label="Ubah" varian="teks" ukuran="kecil" onPress={() => undefined} />
+            <Tombol label="Batal" varian="teks" nada="netral" ukuran="kecil" onPress={() => undefined} />
+            <Tombol label="Hapus" varian="teks" nada="bahaya" ukuran="kecil" onPress={() => undefined} />
+          </View>
         </Card>
         <Card style={{ gap: spacing.md, marginTop: spacing.md }}>
           <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>Ukuran kecil</Text>

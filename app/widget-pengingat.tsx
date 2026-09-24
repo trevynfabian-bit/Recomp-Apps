@@ -12,7 +12,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { JenisNotifikasi, NotifikasiKatalog } from '@recomp/logika';
-import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
+import { Card, PratinjauWidget, SectionHeader, SheetJamTimbang, TombolIkon } from '@/components';
 import {
   ambilPengaturanPengingat,
   simpanPengaturanPengingat,
@@ -179,27 +179,7 @@ export default function WidgetPengingatScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <Text style={{ ...typography.title, color: colors.teks }}>Widget & pengingat</Text>
       </View>
 

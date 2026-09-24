@@ -4,8 +4,9 @@ import { ketukRingan } from '@/lib/haptics';
 import { formatAngka, formatMakro } from '@recomp/logika';
 import { alasanDeteksi, type HasilDeteksi } from '@recomp/logika';
 import { NAMA_SUMBER } from '@/mocks/workout';
-import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
+import { Tombol } from './Tombol';
 
 type Props = {
   daftar: DayType[];
@@ -125,27 +126,13 @@ export function PemilihTipeHari({
                   ? `Dari workout, tipe hari ini terbaca ${deteksi.nama} — ${alasan}.`
                   : alasan}
               </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Kembali ikuti auto-deteksi tipe hari"
-                onPress={() => {
-                  ketukRingan();
-                  onKembalikanAuto();
-                }}
-                style={({ pressed }) => ({
-                  alignSelf: 'flex-start',
-                  minHeight: TAP_MIN,
-                  justifyContent: 'center',
-                  paddingHorizontal: spacing.lg,
-                  borderRadius: radius.pill,
-                  borderWidth: 1,
-                  borderColor: tint(colors.aksen.isian, 'tepi'),
-                  backgroundColor: tint(colors.aksen.isian, 'pill'),
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ikuti auto lagi</Text>
-              </Pressable>
+              <Tombol
+                varian="bertepi"
+                ukuran="kecil"
+                label="Ikuti auto lagi"
+                aksesLabel="Kembali ikuti auto-deteksi tipe hari"
+                onPress={() => onKembalikanAuto()}
+              />
             </View>
           ) : (
             <Text style={{ ...typography.caption, color: colors.teksSamar }}>

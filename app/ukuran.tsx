@@ -16,10 +16,11 @@ import {
   HeroNumber,
   KartuBodyFat,
   RiwayatPerubahan,
-  SheetBatasPinggang,
   SectionHeader,
+  SheetBatasPinggang,
   SheetCatatUkuran,
   SheetLengkapiProfil,
+  TombolIkon,
   type UkuranBaru,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
@@ -116,27 +117,7 @@ export default function UkuranScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View>
           <Text style={{ ...typography.title, color: colors.teks }}>Ukuran tubuh</Text>
           <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>

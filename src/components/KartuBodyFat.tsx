@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import {
   estimasiBodyFatNavy,
   formatDesimal,
@@ -8,9 +8,9 @@ import {
 } from '@recomp/logika';
 import { Card } from './Card';
 import { Pill } from './Pill';
-import { ketukRingan } from '@/lib/haptics';
 import type { Profile, UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
+import { Tombol } from './Tombol';
 
 type Props = {
   profil: Profile;
@@ -172,32 +172,14 @@ export function KartuBodyFat({
       {/* Masukan profil ditampilkan terbuka, bukan disembunyikan: tinggi badan
           yang salah ketik memiringkan setiap estimasi tanpa pernah kelihatan
           salah di angkanya. */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Ubah tinggi badan dan jenis kelamin"
-        onPress={() => {
-          ketukRingan();
-          onLengkapiProfil();
-        }}
-        style={({ pressed }) => ({
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: TAP_MIN,
-          paddingHorizontal: spacing.md,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderColor: colors.garisKontrol,
-          backgroundColor: colors.permukaanCekung,
-          opacity: pressed ? 0.7 : 1,
-        })}
-      >
-        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-          Dihitung untuk tinggi {formatDesimal(profil.tinggi_cm!, 0)} cm ·{' '}
-          {profil.jenis_kelamin === 'pria' ? 'pria' : 'wanita'}
-        </Text>
-        <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah</Text>
-      </Pressable>
+      <Tombol
+        varian="bertepi"
+        ukuran="kecil"
+        label="Ubah"
+        aksesLabel="Ubah tinggi badan dan jenis kelamin"
+        sejajar="tengah"
+        onPress={() => onLengkapiProfil()}
+      />
     </Card>
   );
 }
@@ -267,53 +249,20 @@ function KartuKosong({
 
       {bisaDilengkapi ? (
         <>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Lengkapi profil"
-            onPress={() => {
-              ketukRingan();
-              onLengkapiProfil();
-            }}
-            style={({ pressed }) => ({
-              minHeight: TAP_MIN,
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: spacing.md,
-              borderRadius: radius.lg,
-              backgroundColor: colors.aksen.isian,
-              opacity: pressed ? 0.8 : 1,
-            })}
-          >
-            <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
-              Lengkapi profil
-            </Text>
-          </Pressable>
+          <Tombol label="Lengkapi profil" aksesLabel="Lengkapi profil" onPress={onLengkapiProfil} />
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Cukup sekali isi. Ukuran yang sudah Anda catat tetap tersimpan dan tidak perlu
             diulang — estimasinya langsung muncul begitu datanya lengkap.
           </Text>
         </>
       ) : adaJalanKeProfil ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Ubah data profil"
-          onPress={() => {
-            ketukRingan();
-            onLengkapiProfil();
-          }}
-          style={({ pressed }) => ({
-            minHeight: TAP_MIN,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: radius.md,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            backgroundColor: colors.permukaanCekung,
-            opacity: pressed ? 0.7 : 1,
-          })}
-        >
-          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah data profil</Text>
-        </Pressable>
+        <Tombol
+          varian="bertepi"
+          label="Ubah data profil"
+          aksesLabel="Ubah data profil"
+          sejajar="tengah"
+          onPress={() => onLengkapiProfil()}
+        />
       ) : null}
     </Card>
   );

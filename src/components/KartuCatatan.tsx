@@ -3,6 +3,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { Tombol } from './Tombol';
 
 /** Batas panjang catatan; cukup untuk konteks sehari, tidak untuk jurnal. */
 const MAKS_KARAKTER = 500;
@@ -121,20 +122,14 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
           </Text>
 
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Pressable
-              accessibilityRole="button"
-              disabled={menyimpan}
+            <Tombol
+              varian="teks"
+              ukuran="kecil"
+              nada="netral"
+              label="Batal"
+              nonaktif={menyimpan}
               onPress={() => setMenyunting(false)}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                opacity: pressed ? 0.6 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.teksSamar }}>Batal</Text>
-            </Pressable>
+            />
 
             <Pressable
               accessibilityRole="button"

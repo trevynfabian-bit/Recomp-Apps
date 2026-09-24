@@ -2,9 +2,9 @@ import { Pressable, Text, View } from 'react-native';
 import { formatAngka, PROFIL_SUMBER } from '@recomp/logika';
 import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/logika';
 import { Card } from './Card';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { colors, radius, sisaSentuh, spacing, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   koneksi: KoneksiSumber;
@@ -159,22 +159,13 @@ function AksiKartu({
   // ditekan. "Putuskan" tetap ada, tapi sebagai tautan redup — ia tindakan
   // yang jarang dan merusak, bukan ajakan.
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Putuskan ${nama}`}
-      onPress={() => {
-        ketukRingan();
-        onPutuskan();
-      }}
-      // Target sentuh 44 pt dicapai lewat hitSlop, bukan tinggi baris: tautan
-      // redup ini tidak boleh memakan ruang sebesar tombol utama.
-      hitSlop={{ top: sisaSentuh(typography.label.lineHeight), bottom: sisaSentuh(typography.label.lineHeight), left: spacing.sm, right: spacing.lg }}
-      style={({ pressed }) => ({
-        alignSelf: 'flex-start',
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.label, color: colors.teksSamar }}>Putuskan</Text>
-    </Pressable>
+    <Tombol
+      varian="teks"
+      ukuran="kecil"
+      nada="netral"
+      label="Putuskan"
+      aksesLabel={`Putuskan ${nama}`}
+      onPress={() => onPutuskan()}
+    />
   );
 }

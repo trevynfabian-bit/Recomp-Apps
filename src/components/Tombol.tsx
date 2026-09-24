@@ -38,19 +38,29 @@ type Props = {
   /** Petunjuk pembaca layar: apa yang terjadi setelah ditekan. */
   aksesPetunjuk?: string;
   nonaktif?: boolean;
-  /** Indikator proses menggantikan label; tombol nonaktif selama itu. */
+  /**
+   * Sedang memproses: spinner di depan label (pemanggil boleh mengganti label,
+   * mis. "Menyimpan…"). Tombol tidak bisa ditekan selama itu.
+   */
   memproses?: boolean;
   /**
-   * Aksi baru saja berhasil (mis. "Tersimpan"): isian sukses + centang.
-   * Tombol tetap bisa ditekan lagi; pemanggil yang memutuskan kapan kembali.
+   * Aksi baru saja berhasil (mis. "Tersimpan"): isian sukses + centang, tidak
+   * bisa ditekan lagi sampai pemanggil mengembalikannya — mencegah simpan ganda.
    */
   berhasil?: boolean;
   /** Ikon di depan label. */
   ikon?: React.ComponentProps<typeof Ionicons>['name'];
+  /**
+   * Nada warna varian `teks`: `aksen` (bawaan) untuk aksi yang dianjurkan,
+   * `netral` untuk batal/tutup/nanti, `bahaya` untuk hapus/putuskan.
+   */
+  nada?: 'aksen' | 'netral' | 'bahaya';
+  /** Posisi tombol selebar isi (`kecil`/`teks`) di dalam kontainernya. */
+  sejajar?: 'awal' | 'tengah';
 };
 
 /** Warna isian, tepi, dan label per varian & keadaan. Dibaca saat render (ikut skema). */
-function gaya(varian: VarianTombol, berhasil: boolean) {
+function gaya(varian: VarianTombol, berhasil: boolean, nada: NonNullable<Props['nada']>) {
   if (berhasil) return { isian: colors.status.sukses.isian, tepi: 'transparent', label: colors.diAtasIsian };
   switch (varian) {
     case 'utama':
@@ -60,7 +70,11 @@ function gaya(varian: VarianTombol, berhasil: boolean) {
     case 'bertepi':
       return { isian: 'transparent', tepi: colors.garisKontrol, label: colors.teks };
     case 'teks':
-      return { isian: 'transparent', tepi: 'transparent', label: colors.aksen.teks };
+      return {
+        isian: 'transparent',
+        tepi: 'transparent',
+        label: nada === 'bahaya' ? colors.status.bahaya.teks : nada === 'netral' ? colors.teksRedup : colors.aksen.teks,
+      };
   }
 }
 
@@ -76,16 +90,20 @@ export function Tombol({
   memproses = false,
   berhasil = false,
   ikon,
+  nada = 'aksen',
+  sejajar = 'awal',
 }: Props) {
-  const mati = nonaktif || memproses;
+  const mati = nonaktif || memproses || berhasil;
   const kecil = ukuran === 'kecil';
-  const g = gaya(varian, berhasil);
+  const g = gaya(varian, berhasil, nada);
   const teksGaya = kecil
     ? typography.label
     : varian === 'utama' || varian === 'merusak' || berhasil
       ? typography.bodyTebal
       : typography.bodySedang;
-  const tinggi = kecil ? KONTROL_RAPAT : TAP_MIN;
+  // Tautan teks tidak punya kotak yang terlihat, jadi selalu setinggi TAP_MIN:
+  // area sentuhnya penuh tanpa hitSlop dan garis dasarnya sejajar dengan baris 44 pt.
+  const tinggi = kecil && varian !== 'teks' ? KONTROL_RAPAT : TAP_MIN;
   const ikonTampil = berhasil ? 'checkmark' : ikon;
 
   return (
@@ -95,14 +113,14 @@ export function Tombol({
       accessibilityHint={aksesPetunjuk}
       accessibilityState={{ disabled: mati, busy: memproses }}
       disabled={mati}
-      hitSlop={kecil || varian === 'teks' ? sisaSentuh(tinggi) : undefined}
+      hitSlop={tinggi < TAP_MIN ? sisaSentuh(tinggi) : undefined}
       onPress={() => {
         ketukRingan();
         onPress();
       }}
       style={({ pressed }) => ({
         minHeight: tinggi,
-        alignSelf: kecil || varian === 'teks' ? 'flex-start' : 'stretch',
+        alignSelf: kecil || varian === 'teks' ? (sejajar === 'tengah' ? 'center' : 'flex-start') : 'stretch',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -117,14 +135,10 @@ export function Tombol({
     >
       {memproses ? (
         <ActivityIndicator size="small" color={g.label} />
-      ) : (
-        <>
-          {ikonTampil ? (
-            <Ionicons name={ikonTampil} size={kecil ? ukuranIkon.mini : ukuranIkon.kecil} color={g.label} />
-          ) : null}
-          <Text style={{ ...teksGaya, color: g.label }}>{label}</Text>
-        </>
-      )}
+      ) : ikonTampil ? (
+        <Ionicons name={ikonTampil} size={kecil ? ukuranIkon.mini : ukuranIkon.kecil} color={g.label} />
+      ) : null}
+      <Text style={{ ...teksGaya, color: g.label }}>{label}</Text>
     </Pressable>
   );
 }

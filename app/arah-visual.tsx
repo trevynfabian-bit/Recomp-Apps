@@ -1,11 +1,10 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatAngka } from '@recomp/logika';
-import { Card, HeroNumber, MacroRow, Pill, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+import { Card, HeroNumber, MacroRow, Pill, SectionHeader, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
 
 /**
  * Layar contoh arah visual (docs/desain/arah-visual.md).
@@ -59,27 +58,7 @@ export default function ArahVisualScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View style={{ flex: 1, gap: spacing.xxs }}>
           <Text accessibilityRole="header" style={{ ...usulanTipografi.title, color: colors.teks }}>
             Arah visual

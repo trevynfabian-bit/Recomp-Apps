@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
@@ -8,6 +8,7 @@ import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
+import { Tombol } from './Tombol';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
 const LANGKAH_KG = 0.1;
@@ -399,42 +400,13 @@ export function KartuTimbangPagi({
             ) : null}
 
             <View style={{ gap: spacing.md }}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={labelTombolSimpan(status, perluKonfirmasi)}
-                disabled={!valid || status === 'menyimpan' || status === 'tersimpan'}
+              <Tombol
+                label={labelTombolSimpan(status, perluKonfirmasi)}
                 onPress={tekanSimpan}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  gap: spacing.sm,
-                  backgroundColor:
-                    status === 'tersimpan'
-                      ? colors.status.sukses.isian
-                      : valid
-                        ? colors.aksen.isian
-                        : colors.permukaanCekung,
-                  borderRadius: radius.lg,
-                  minHeight: TAP_MIN,
-                  justifyContent: 'center',
-                  paddingVertical: spacing.lg,
-                  alignItems: 'center',
-                  opacity: pressed ? 0.8 : 1,
-                })}
-              >
-                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.diAtasIsian} /> : null}
-                {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>✓</Text>
-                ) : null}
-                <Text
-                  style={{
-                    ...typography.bodyTebal,
-                    color:
-                      status === 'tersimpan' || valid ? colors.diAtasIsian : colors.teksSamar,
-                  }}
-                >
-                  {labelTombolSimpan(status, perluKonfirmasi)}
-                </Text>
-              </Pressable>
+                nonaktif={!valid}
+                memproses={status === 'menyimpan'}
+                berhasil={status === 'tersimpan'}
+              />
 
               <Pressable
                 accessibilityRole="button"

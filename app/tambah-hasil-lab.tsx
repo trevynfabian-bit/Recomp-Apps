@@ -13,7 +13,7 @@ import {
   TEMPLAT_PANEL_LAB,
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
-import { Card, KerangkaSheet, PenandaSumber, TombolBertepi, TombolUtama } from '@/components';
+import { Card, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
@@ -155,27 +155,7 @@ export default function TambahHasilLabScreen() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Kembali"
-            onPress={() => {
-              ketukRingan();
-              kembali();
-            }}
-            style={({ pressed }) => ({
-              width: TAP_MIN,
-              height: TAP_MIN,
-              borderRadius: radius.pill,
-              backgroundColor: colors.permukaan,
-              borderWidth: 1,
-              borderColor: colors.garisKontrol,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-          </Pressable>
+          <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => kembali()} />
           <View style={{ flex: 1 }}>
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
               {asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
@@ -237,15 +217,13 @@ export default function TambahHasilLabScreen() {
               galat={tampil ? galat.tanggal : undefined}
               nonaktif={menyimpan}
             />
-            <Pressable
-              hitSlop={sisaSentuh(KONTROL_RAPAT)}
-              accessibilityRole="button"
-              accessibilityLabel="Isi tanggal hari ini"
+            <Tombol
+              varian="teks"
+              ukuran="kecil"
+              label="Hari ini"
+              aksesLabel="Isi tanggal hari ini"
               onPress={() => ubah({ tanggal: hariIniTertulis() })}
-              style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: KONTROL_RAPAT, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-            >
-              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Hari ini</Text>
-            </Pressable>
+            />
           </View>
           <Kolom
             label="Laboratorium (boleh kosong)"

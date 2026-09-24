@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -15,11 +15,11 @@ import {
   Pill,
   SectionHeader,
   SheetCatatFoto,
+  Tombol,
   TombolUtama,
   type EntriMakananBaru,
 } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHariBerlaku } from '@recomp/logika';
-import { ketukRingan } from '@/lib/haptics';
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
 import { useProfil } from '@/state/profil';
@@ -36,7 +36,7 @@ import {
   simpanBeratStub,
   susunMacros,
 } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
 import type { DailyLog, FoodLog } from '@/types/domain';
 
 /**
@@ -215,14 +215,13 @@ export default function LogHarianScreen() {
           onPilih={pilihTipeHari}
           onKembalikanAuto={kembalikanAuto}
         />
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel="Lihat target semua tipe hari"
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          label="Target semua tipe hari ›"
+          aksesLabel="Lihat target semua tipe hari"
           onPress={() => router.push('/target-harian')}
-          style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Target semua tipe hari ›</Text>
-        </Pressable>
+        />
       </View>
 
       {/* Rincian makro vs target absolut hari ini */}
@@ -273,27 +272,14 @@ export default function LogHarianScreen() {
             </View>
           ))}
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Catat makan via foto"
-            onPress={() => {
-              ketukRingan();
-              setSheetFotoTerbuka(true);
-            }}
-            style={({ pressed }) => ({
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing.sm,
-              padding: spacing.lg,
-              borderTopWidth: 1,
-              borderTopColor: colors.garis,
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <Text style={{ ...typography.body }}>📷</Text>
-            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Catat makan via foto</Text>
-          </Pressable>
+          <Tombol
+            varian="teks"
+            ukuran="kecil"
+            label="Catat makan via foto"
+            aksesLabel="Catat makan via foto"
+            sejajar="tengah"
+            onPress={() => setSheetFotoTerbuka(true)}
+          />
         </Card>
       </View>
 

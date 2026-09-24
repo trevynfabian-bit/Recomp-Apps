@@ -58,8 +58,11 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
 
 1. **Tombol & aksi** ✓ `Tombol` (varian utama/bertepi/merusak/teks, ukuran
    normal/kecil, keadaan nonaktif/memproses/berhasil) dan `TombolIkon`;
-   `TombolUtama`/`TombolBertepi` kini pembungkus `Tombol`. Sisa: pindahkan 5
-   tombol simpan buatan sendiri dan tombol kembali di 10 layar.
+   `TombolUtama`/`TombolBertepi` kini pembungkus `Tombol`. Diterapkan: 4 tombol
+   simpan buatan sendiri → `Tombol` dengan `memproses`/`berhasil`; tombol
+   kembali di 11 layar → `TombolIkon`; 18 tautan/tombol teks → `Tombol
+   varian="teks"` (nada aksen/netral/bahaya) atau `bertepi` kecil; 2 tombol
+   isian buatan sendiri → `Tombol`.
 2. **Kartu & kontainer**: `Card` bertanda (perhatian/bahaya), `DaftarBaris` +
    `Pemisah` bersama.
 3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks

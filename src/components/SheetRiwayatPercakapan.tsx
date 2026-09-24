@@ -3,6 +3,7 @@ import { formatJam, labelTanggalRelatif, tanggalDariWaktu, tanggalHariIni } from
 import { ketukRingan } from '@/lib/haptics';
 import type { Percakapan } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { Tombol } from './Tombol';
 
 type Props = {
   terbuka: boolean;
@@ -74,29 +75,7 @@ export function SheetRiwayatPercakapan({
           </View>
 
           <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Mulai percakapan baru"
-              onPress={() => {
-                ketukRingan();
-                onBaru();
-              }}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: spacing.sm,
-                minHeight: TAP_MIN,
-                paddingVertical: spacing.md,
-                borderRadius: radius.lg,
-                backgroundColor: colors.aksen.isian,
-                opacity: pressed ? 0.8 : 1,
-              })}
-            >
-              <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
-                Percakapan baru
-              </Text>
-            </Pressable>
+            <Tombol label="Percakapan baru" aksesLabel="Mulai percakapan baru" onPress={onBaru} />
 
             {urut.length === 0 ? (
               <Text
@@ -159,13 +138,14 @@ export function SheetRiwayatPercakapan({
           </ScrollView>
 
           <View style={{ padding: spacing.lg, paddingTop: 0 }}>
-            <Pressable
-              accessibilityRole="button"
+            <Tombol
+              varian="teks"
+              ukuran="kecil"
+              nada="netral"
+              label="Tutup"
+              sejajar="tengah"
               onPress={onTutup}
-              style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Text style={{ ...typography.label, color: colors.teksSamar }}>Tutup</Text>
-            </Pressable>
+            />
           </View>
         </View>
       </View>

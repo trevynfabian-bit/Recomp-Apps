@@ -27,7 +27,9 @@ import {
   SectionHeader,
   SheetGantiFase,
   SheetSuntingTarget,
+  Tombol,
   TombolBertepi,
+  TombolIkon,
   TombolUtama,
 } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -220,27 +222,7 @@ export default function TargetHarianScreen() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Kembali"
-            onPress={() => {
-              ketukRingan();
-              kembali();
-            }}
-            style={({ pressed }) => ({
-              width: TAP_MIN,
-              height: TAP_MIN,
-              borderRadius: radius.pill,
-              backgroundColor: colors.permukaan,
-              borderWidth: 1,
-              borderColor: colors.garisKontrol,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-          </Pressable>
+          <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => kembali()} />
           <View style={{ flex: 1 }}>
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
               Target per tipe hari
@@ -514,17 +496,13 @@ function KartuTargetBaca({
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Sunting target ${dayType.nama}`}
-        onPress={() => {
-          ketukRingan();
-          onSunting();
-        }}
-        style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-      >
-        <Text style={{ ...typography.label, color: colors.aksen.teks }}>Sunting target ini</Text>
-      </Pressable>
+      <Tombol
+        varian="teks"
+        ukuran="kecil"
+        label="Sunting target ini"
+        aksesLabel={`Sunting target ${dayType.nama}`}
+        onPress={() => onSunting()}
+      />
     </Card>
   );
 }
@@ -696,23 +674,18 @@ function BarisTarget({
           {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: bobot.biasa }}> · bawaan</Text> : null}
         </Text>
         {diubah ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
+          <Tombol
+            varian="teks"
+            ukuran="kecil"
+            label="Kembalikan"
+            aksesLabel={
               tersimpan
                 ? `Kembalikan ${dayType.nama} ke ${formatAngka(tersimpan.target_kalori)} kilokalori`
                 : `Kosongkan lagi isian ${dayType.nama}`
             }
-            disabled={nonaktif}
-            onPress={() => {
-              ketukRingan();
-              onKembalikan();
-            }}
-            hitSlop={8}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          >
-            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Kembalikan</Text>
-          </Pressable>
+            nonaktif={nonaktif}
+            onPress={() => onKembalikan()}
+          />
         ) : null}
       </View>
 

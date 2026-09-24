@@ -16,6 +16,7 @@ import {
   PemisahTanggal,
   Pill,
   SheetRiwayatPercakapan,
+  Tombol,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { useProfil } from '@/state/profil';
@@ -178,26 +179,13 @@ export default function CoachScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Text style={{ ...typography.title, color: colors.teks, flex: 1 }}>Coach</Text>
           <Pill label={profil.fase_aktif.toUpperCase()} warna={colors.aksen.teks} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Riwayat percakapan"
-            onPress={() => {
-              ketukRingan();
-              setSheetRiwayat(true);
-            }}
-            style={({ pressed }) => ({
-              minHeight: TAP_MIN,
-              justifyContent: 'center',
-              paddingHorizontal: spacing.md,
-              borderRadius: radius.pill,
-              borderWidth: 1,
-              borderColor: colors.garisKontrol,
-              backgroundColor: colors.permukaanCekung,
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <Text style={{ ...typography.label, color: colors.teksRedup }}>Riwayat</Text>
-          </Pressable>
+          <Tombol
+            varian="bertepi"
+            ukuran="kecil"
+            label="Riwayat"
+            aksesLabel="Riwayat percakapan"
+            onPress={() => setSheetRiwayat(true)}
+          />
         </View>
         {/* Baris kedua: judul utas yang sedang dibuka, supaya tidak tersesat
             setelah berpindah dari riwayat. */}

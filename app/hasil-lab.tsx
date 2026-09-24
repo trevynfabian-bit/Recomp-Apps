@@ -12,12 +12,21 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import { Card, KerangkaSheet, PenandaSumber, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import {
+  Card,
+  KerangkaSheet,
+  PenandaSumber,
+  SectionHeader,
+  Tombol,
+  TombolBertepi,
+  TombolIkon,
+  TombolUtama,
+} from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
  * Riwayat hasil lab.
@@ -74,27 +83,7 @@ export default function HasilLabScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View style={{ flex: 1 }}>
           <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
             Hasil lab
@@ -244,28 +233,21 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
             {nilaiTerbuka ? 'Sembunyikan nilai' : `Lihat ${hasil.penanda.length} nilai`}
           </Text>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Ubah ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
-          onPress={() => {
-            ketukRingan();
-            onUbah();
-          }}
-          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Hapus ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
-          onPress={() => {
-            ketukRingan();
-            onHapus();
-          }}
-          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>Hapus</Text>
-        </Pressable>
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          label="Ubah"
+          aksesLabel={`Ubah ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          onPress={() => onUbah()}
+        />
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          nada="bahaya"
+          label="Hapus"
+          aksesLabel={`Hapus ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          onPress={() => onHapus()}
+        />
       </View>
     </Card>
   );

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -11,10 +11,9 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card, HeroNumber, KartuSesiLatihan, SectionHeader } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+import { Card, HeroNumber, KartuSesiLatihan, SectionHeader, TombolIkon } from '@/components';
 import { mockSesiLatihan } from '@/mocks/latihan';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
 /**
  * Layar Latihan: sesi yang masuk dari Hevy.
@@ -74,27 +73,7 @@ export default function LatihanScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View>
           <Text style={{ ...typography.title, color: colors.teks }}>Latihan</Text>
           <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>

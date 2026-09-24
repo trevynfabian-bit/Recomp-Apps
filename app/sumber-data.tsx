@@ -11,11 +11,12 @@ import {
   SectionHeader,
   SheetHubungkanSumber,
   SheetPutuskanSumber,
+  TombolIkon,
 } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { mockHubungkan, mockPutuskan } from '@/mocks/sumberData';
 import { useSinkron } from '@/state/sinkron';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
  * Layar Sumber Data: apakah data dari Apple Health, WHOOP, Strava, dan Hevy
@@ -105,27 +106,7 @@ export default function SumberDataScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View>
           <Text style={{ ...typography.title, color: colors.teks }}>Sumber data</Text>
           <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>

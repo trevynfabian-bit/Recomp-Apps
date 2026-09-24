@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { Tombol } from './Tombol';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -284,46 +285,23 @@ export function SheetBatasPinggang({
             ) : null}
 
             <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={labelSimpan(status)}
-                disabled={!valid || terkunci}
+              <Tombol
+                label={labelSimpan(status)}
                 onPress={() => void simpan()}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  gap: spacing.sm,
-                  backgroundColor:
-                    status === 'tersimpan' ? colors.status.sukses.isian : valid ? colors.aksen.isian : colors.permukaanCekung,
-                  borderRadius: radius.lg,
-                  minHeight: TAP_MIN,
-                  paddingVertical: spacing.lg,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: pressed ? 0.8 : 1,
-                })}
-              >
-                {status === 'menyimpan' ? <ActivityIndicator size="small" color={colors.diAtasIsian} /> : null}
-                {status === 'tersimpan' ? (
-                  <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>✓</Text>
-                ) : null}
-                <Text
-                  style={{
-                    ...typography.bodyTebal,
-                    color: status === 'tersimpan' || valid ? colors.diAtasIsian : colors.teksSamar,
-                  }}
-                >
-                  {labelSimpan(status)}
-                </Text>
-              </Pressable>
+                nonaktif={!valid}
+                memproses={status === 'menyimpan'}
+                berhasil={status === 'tersimpan'}
+              />
 
-              <Pressable
-                accessibilityRole="button"
-                disabled={terkunci}
+              <Tombol
+                varian="teks"
+                ukuran="kecil"
+                nada="netral"
+                label="Batal"
+                nonaktif={terkunci}
+                sejajar="tengah"
                 onPress={onTutup}
-                style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Text style={{ ...typography.label, color: colors.teksSamar }}>Batal</Text>
-              </Pressable>
+              />
             </View>
           </ScrollView>
         </View>

@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatWaktuRelatif } from '@recomp/logika';
-import { Card, SheetImporRiwayat, TombolBertepi, TombolUtama, type SumberImpor } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { Card, SheetImporRiwayat, TombolBertepi, TombolIkon, TombolUtama, type SumberImpor } from '@/components';
+import { colors, spacing, typography } from '@/theme';
 
 type StatusImpor = { selesaiPada: string; ringkas: string } | null;
 
@@ -62,27 +61,7 @@ export default function ImporRiwayatScreen() {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kembali"
-          onPress={() => {
-            ketukRingan();
-            router.back();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaan,
-            borderWidth: 1,
-            borderColor: colors.garisKontrol,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
-        </Pressable>
+        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
         <View style={{ flex: 1 }}>
           <Text style={{ ...typography.title, color: colors.teks }}>Impor riwayat</Text>
           <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>

@@ -10,7 +10,7 @@ import {
 } from '@recomp/logika';
 import type { BarisDilewati } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
 import { jalankanImporRiwayat, KesalahanImpor, type IsiImpor } from '@/data/imporRiwayat';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -263,18 +263,15 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                 {galat}
               </Text>
             ) : null}
-            <Pressable
-              accessibilityRole="button"
+            <Tombol
+              varian="teks"
+              ukuran="kecil"
+              label="Pakai berkas contoh"
               onPress={() => {
-                ketukRingan();
                 setTeks(sumber === 'hevy_csv' ? CONTOH_CSV_HEVY : CONTOH_CSV_UKURAN);
                 setGalat(null);
               }}
-              hitSlop={spacing.md}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Pakai berkas contoh</Text>
-            </Pressable>
+            />
             <View style={{ gap: spacing.sm }}>
               <TombolUtama label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
               <TombolBertepi label="Nanti saja" onPress={onTutup} />

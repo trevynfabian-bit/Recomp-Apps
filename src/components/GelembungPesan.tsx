@@ -1,13 +1,13 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { formatJam } from '@recomp/logika';
 import { DaftarRujukan } from './DaftarRujukan';
 import { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
 import { KartuPenolakanMedis } from './KartuPenolakanMedis';
 import { KartuVerdictEvaluasi } from './KartuVerdictEvaluasi';
 import { KartuWidgetCoach } from './KartuWidgetCoach';
-import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { colors, radius, spacing, tint, typography } from '@/theme';
+import { Tombol } from './Tombol';
 
 type Props = {
   pesan: PesanCoach;
@@ -148,22 +148,13 @@ export function GelembungPesan({
             Gagal terkirim
           </Text>
           {onCobaLagi ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Kirim ulang pesan"
-              onPress={() => {
-                ketukRingan();
-                onCobaLagi(pesan);
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.md,
-                opacity: pressed ? 0.6 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Coba lagi</Text>
-            </Pressable>
+            <Tombol
+              varian="teks"
+              ukuran="kecil"
+              label="Coba lagi"
+              aksesLabel="Kirim ulang pesan"
+              onPress={() => onCobaLagi(pesan)}
+            />
           ) : null}
         </View>
       ) : null}
