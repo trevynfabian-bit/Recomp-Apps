@@ -24,6 +24,7 @@ Semua ada di folder `src/theme/`:
 | `colors.ts` | Warna, untuk mode gelap **dan** mode terang | warna latar, warna teks, warna aksen |
 | `tokens.ts` | Ukuran huruf, jarak, sudut membulat, ukuran ikon | jarak antar-kartu, ukuran judul |
 | `hig.ts` | Aturan kenyamanan dari Apple | tombol minimal 44×44 titik |
+| `layarKunci.ts` | Warna & huruf pratinjau widget layar kunci iOS (monokrom, tidak ikut mode) | putih 70% untuk label widget |
 
 ## Warna: pakai "peran", bukan nama warna
 

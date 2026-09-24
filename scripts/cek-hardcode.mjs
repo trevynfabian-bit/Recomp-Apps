@@ -80,11 +80,10 @@ function terdekat(skala, awalan, nilai) {
 // ---------------------------------------------------------------------------
 // Pengecualian (masing-masing dengan alasan)
 
-const BERKAS_BEBAS = [
-  { berkas: 'src/components/PratinjauWidget.tsx', alasan: 'meniru layar kunci iOS; warna & huruf ditentukan sistem, bukan palet app' },
-];
+// Tidak ada berkas yang dibebaskan seluruhnya. Pratinjau widget layar kunci
+// (dulu dibebaskan) kini mengambil warnanya dari `layarKunci` di src/theme.
+const BERKAS_BEBAS = [];
 const BARIS_BEBAS = [
-  { pola: /shadowColor: '#000(000)?'/, alasan: 'warna bayangan iOS selalu hitam; kepekatannya yang ikut skema' },
   { pola: /'transparent'/, alasan: 'bukan warna' },
 ];
 const UKURAN_HURUF_BEBAS = [
@@ -104,6 +103,10 @@ const NAMA_WARNA = 'white|black|red|green|blue|yellow|orange|purple|gray|grey|pi
 const ATURAN = [
   {
     nama: 'warna tertanam',
+    // Warna diperiksa di SELURUH src (lib, hooks, dsb.) selain src/theme,
+    // bukan hanya layar & komponen: warna di util grafik atau notifikasi
+    // sama-sama lolos dari mode terang.
+    luas: true,
     pola: new RegExp(`['"](#[0-9A-Fa-f]{3,8})['"]|\\b(rgba?|hsla?)\\(|['"](${NAMA_WARNA})['"]`, 'g'),
     saran: (m) => {
       const heks = m[1]?.toUpperCase();
@@ -113,6 +116,7 @@ const ATURAN = [
   },
   {
     nama: 'tint tertanam',
+    luas: true,
     pola: /\+ '([0-9A-Fa-f]{2})'/g,
     saran: () => "pakai tint(warna, 'pilih' | 'pill' | 'tepi' | …) dari src/theme",
   },
@@ -152,17 +156,22 @@ const ATURAN = [
 
 // ---------------------------------------------------------------------------
 
-function berkasTsx(dir) {
+function berkasKode(dir, ekstensi) {
   return readdirSync(dir).flatMap((n) => {
     const p = join(dir, n);
-    return statSync(p).isDirectory() ? berkasTsx(p) : p.endsWith('.tsx') ? [p] : [];
+    return statSync(p).isDirectory() ? berkasKode(p, ekstensi) : ekstensi.test(p) ? [p] : [];
   });
 }
 
 const temuan = new Map(ATURAN.map((a) => [a.nama, []]));
-const berkas = [...berkasTsx('app'), ...berkasTsx('src/components')].filter(
-  (p) => !BERKAS_BEBAS.some((b) => b.berkas === p),
+const bukanBebas = (p) => !BERKAS_BEBAS.some((b) => b.berkas === p);
+/** Layar & komponen: semua aturan. */
+const berkasUi = new Set([...berkasKode('app', /\.tsx$/), ...berkasKode('src/components', /\.tsx$/)].filter(bukanBebas));
+/** Sisa src (.ts/.tsx) di luar src/theme: hanya aturan `luas` (warna, tint). */
+const berkasLuas = berkasKode('src', /\.tsx?$/).filter(
+  (p) => !p.startsWith(join('src', 'theme')) && !berkasUi.has(p) && bukanBebas(p),
 );
+const berkas = [...berkasUi, ...berkasLuas];
 
 for (const p of berkas) {
   readFileSync(p, 'utf8')
@@ -172,6 +181,7 @@ for (const p of berkas) {
       if (/^\s*(\*|\/\*)/.test(kode)) return; // komentar blok
       for (const aturan of ATURAN) {
         if (aturan.bebas?.some((b) => b.berkas === p)) continue;
+        if (!aturan.luas && !berkasUi.has(p)) continue;
         for (const m of kode.matchAll(aturan.pola)) {
           if (BARIS_BEBAS.some((b) => b.pola.test(kode))) continue;
           temuan.get(aturan.nama).push(`${p}:${i + 1}  ${m[0].trim()}  → ${aturan.saran(m)}`);
@@ -182,7 +192,7 @@ for (const p of berkas) {
 
 const ringkasan = buatRingkasan('cek:hardcode');
 ringkasan.bagian('Nilai tertanam');
-console.log(`Nilai tertanam di ${berkas.length} berkas layar & komponen\n`);
+console.log(`Nilai tertanam di ${berkasUi.size} berkas layar & komponen (+ warna di ${berkasLuas.length} berkas src lain)\n`);
 let jumlahNilai = 0;
 for (const [nama, daftar] of temuan) {
   console.log(`${daftar.length === 0 ? '✓' : '✗'} ${nama}${daftar.length ? ` (${daftar.length})` : ''}`);

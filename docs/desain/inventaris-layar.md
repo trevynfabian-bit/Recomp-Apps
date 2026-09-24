@@ -51,7 +51,8 @@ Hasil Fase 1–4, dijaga oleh `npm run cek:desain-semua`:
   Coach (lihat K8).
 - **Angka hero:** paling banyak satu per layar, selalu lewat `KartuHero`.
 - **Nilai tertanam:** nol warna, jarak, radius, ukuran huruf, atau ukuran ikon
-  mentah.
+  mentah. Warna diperiksa di seluruh `src` (bukan hanya layar), dan pratinjau
+  widget layar kunci tidak lagi dibebaskan: warnanya dari `layarKunci`.
 - **Kontras:** 264 pasangan lolos AA di kedua mode.
 - **Sentuh:** setiap `Pressable` terbukti ≥ 44 pt.
 

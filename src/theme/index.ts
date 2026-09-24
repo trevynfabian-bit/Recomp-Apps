@@ -14,3 +14,4 @@ export {
 } from './skema';
 export { spacing, radius, typography, angkaTabular, bobot, ukuran, ukuranIkon, bayangan } from './tokens';
 export { TAP_MIN, KONTROL_RAPAT, KONTROL_SEGMEN, sisaSentuh, TEKS_MIN, MAKS_SKALA_HERO, PADANAN_IOS } from './hig';
+export { layarKunci } from './layarKunci';

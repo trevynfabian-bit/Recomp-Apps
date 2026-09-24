@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { formatJam, isiWidgetLingkar, teksWidget, teksWidgetSebaris } from '@recomp/logika';
 import type { RingkasanWidget } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, layarKunci, radius, spacing, typography } from '@/theme';
 
 type Props = {
   ringkasan: RingkasanWidget;
@@ -11,15 +11,8 @@ type Props = {
   sekarang?: Date;
 };
 
-/*
- * Warna layar kunci. iOS menggambar widget layar kunci MONOKROM (vibrant) di
- * atas wallpaper; tiga tingkat putih transparan ini meniru itu. Tidak ada
- * aksen amber atau coral di sini dengan sengaja — pratinjau yang berwarna
- * menjanjikan warna yang tidak akan pernah muncul di layar kunci sungguhan.
- */
-const PUTIH = '#FFFFFF';
-const PUTIH_REDUP = '#FFFFFFB3';
-const PUTIH_LATAR = '#FFFFFF24';
+/* Warna, huruf, dan ukuran layar kunci: `layarKunci` di src/theme (monokrom, tidak ikut skema). */
+const { warna, huruf, ukuran } = layarKunci;
 
 /**
  * Pratinjau widget layar kunci: tiga ukuran iOS dalam satu layar kunci tiruan.
@@ -43,17 +36,17 @@ export function PratinjauWidget({ ringkasan, tampilkanAngka, sekarang }: Props) 
         paddingVertical: spacing.xl,
         paddingHorizontal: spacing.md,
         borderRadius: radius.lg,
-        backgroundColor: '#0B0C10',
+        backgroundColor: warna.latar,
       }}
     >
       <Text
         accessibilityLabel={`Pratinjau widget sebaris: ${sebaris}`}
         numberOfLines={1}
-        style={{ ...typography.label, color: PUTIH_REDUP }}
+        style={{ ...typography.label, color: warna.teksRedup }}
       >
         {sebaris}
       </Text>
-      <Text style={{ fontSize: 56, fontWeight: '300', color: '#E9EAEE', letterSpacing: -1.5 }}>
+      <Text style={{ ...huruf.jam, color: warna.jam }}>
         {formatJam(new Date().toISOString())}
       </Text>
 
@@ -68,21 +61,21 @@ export function PratinjauWidget({ ringkasan, tampilkanAngka, sekarang }: Props) 
           accessible
           accessibilityLabel={`Pratinjau widget persegi: ${persegi.aksesLabel}`}
           style={{
-            width: 160,
-            minHeight: 72,
+            width: ukuran.persegiLebar,
+            minHeight: ukuran.persegiTinggiMin,
             justifyContent: 'center',
             paddingHorizontal: spacing.md,
             paddingVertical: spacing.sm,
             borderRadius: radius.md,
-            backgroundColor: PUTIH_LATAR,
-            gap: 1,
+            backgroundColor: warna.isian,
+            gap: ukuran.jarakBaris,
           }}
         >
-          <Text style={{ ...typography.caption, color: PUTIH_REDUP, textTransform: 'uppercase' }}>
+          <Text style={{ ...typography.caption, color: warna.teksRedup, textTransform: 'uppercase' }}>
             {persegi.judul}
           </Text>
-          <Text numberOfLines={1} style={{ ...typography.label, color: PUTIH }}>{persegi.baris1}</Text>
-          <Text numberOfLines={1} style={{ ...typography.label, fontWeight: '500', color: PUTIH_REDUP }}>
+          <Text numberOfLines={1} style={{ ...typography.label, color: warna.teks }}>{persegi.baris1}</Text>
+          <Text numberOfLines={1} style={{ ...typography.label, ...huruf.barisKedua, color: warna.teksRedup }}>
             {persegi.baris2}
           </Text>
         </View>
@@ -97,9 +90,8 @@ export function PratinjauWidget({ ringkasan, tampilkanAngka, sekarang }: Props) 
   );
 }
 
-/** Ukuran widget bundar layar kunci iOS, dalam pt. */
-const UKURAN_LINGKAR = 72;
-const TEBAL = 6;
+const UKURAN_LINGKAR = ukuran.cincin;
+const TEBAL = ukuran.tebalCincin;
 
 function WidgetLingkar({
   angka,
@@ -121,14 +113,14 @@ function WidgetLingkar({
       style={{ width: UKURAN_LINGKAR, height: UKURAN_LINGKAR, alignItems: 'center', justifyContent: 'center' }}
     >
       <Svg width={UKURAN_LINGKAR} height={UKURAN_LINGKAR} style={{ position: 'absolute' }}>
-        <Circle cx={UKURAN_LINGKAR / 2} cy={UKURAN_LINGKAR / 2} r={r} stroke={PUTIH_LATAR} strokeWidth={TEBAL} fill="none" />
+        <Circle cx={UKURAN_LINGKAR / 2} cy={UKURAN_LINGKAR / 2} r={r} stroke={warna.isian} strokeWidth={TEBAL} fill="none" />
         {/* Busur nol tidak digambar: ujung bulat pada panjang nol menjadi titik. */}
         {terpakai !== null && terpakai > 0 ? (
           <Circle
             cx={UKURAN_LINGKAR / 2}
             cy={UKURAN_LINGKAR / 2}
             r={r}
-            stroke={PUTIH}
+            stroke={warna.teks}
             strokeWidth={TEBAL}
             strokeLinecap="round"
             fill="none"
@@ -138,8 +130,8 @@ function WidgetLingkar({
           />
         ) : null}
       </Svg>
-      <Text style={{ ...typography.label, fontWeight: '700', color: PUTIH }}>{angka}</Text>
-      <Text style={{ fontSize: 9, fontWeight: '600', color: PUTIH_REDUP }}>{satuan}</Text>
+      <Text style={{ ...typography.label, ...huruf.angkaCincin, color: warna.teks }}>{angka}</Text>
+      <Text style={{ ...huruf.satuanCincin, color: warna.teksRedup }}>{satuan}</Text>
     </View>
   );
 }
