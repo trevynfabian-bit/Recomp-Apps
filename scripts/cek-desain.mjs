@@ -186,6 +186,20 @@ const keadaanRakitan = [...layar, ...berkasTsx('src/components')]
   });
 cek('keadaan memuat/kosong lewat komponen Keadaan*', keadaanRakitan.length === 0, keadaanRakitan);
 
+// Isi yang diredupkan dengan opacity turun di bawah kontras AA tanpa bisa
+// dilihat cek:kontras. Opacity hanya untuk keadaan interaksi (ditekan,
+// nonaktif, memproses, mengirim); isi sekunder memakai warna teksRedup/teksSamar.
+const OPACITY_INTERAKSI = /pressed|nonaktif|disabled|terkunci|memproses|sibuk|mati|mengirim|menyimpan/;
+const opacityIsi = [...layar, ...berkasTsx('src/components')].flatMap((p) =>
+  readFileSync(p, 'utf8')
+    .split('\n')
+    .flatMap((baris, i) => {
+      const m = baris.match(/opacity:\s*([^,}]+\?\s*0?\.\d+[^,}]*)/);
+      return m && !OPACITY_INTERAKSI.test(m[1]) ? [`${p}:${i + 1}  opacity: ${m[1].trim()} → warna teksRedup/teksSamar`] : [];
+    }),
+);
+cek('isi tidak diredupkan dengan opacity (hanya keadaan interaksi)', opacityIsi.length === 0, opacityIsi);
+
 bagian('Komponen bersama');
 /**
  * Komponen bersama (inventaris Fase 5, K1–K3): bingkai sheet hanya di

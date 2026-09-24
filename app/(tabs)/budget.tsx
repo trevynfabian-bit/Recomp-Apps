@@ -19,6 +19,7 @@ import {
 import type { BarisKumulatif, Fase, HasilRedistribusi } from '@recomp/logika';
 import {
   Card,
+  DaftarBaris,
   HeaderLayar,
   IndikatorProteinTerlindungi,
   KartuHero,
@@ -36,7 +37,7 @@ import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
-import { colors, radius, spacing, tint, typography } from '@/theme';
+import { colors, spacing, tint, typography } from '@/theme';
 import { formatSelisih } from '@/lib/formatTampilan';
 
 /**
@@ -138,7 +139,6 @@ export default function BudgetScreen() {
   const laju = lajuBudget(budget);
   const rincian = rincianKumulatif(budget);
 
-
   const lewat = budget.sisa < 0;
 
   return (
@@ -199,9 +199,9 @@ export default function BudgetScreen() {
       {/* Rincian tujuh hari */}
       <View>
         <SectionHeader judul="Minggu ini" aksi="sisa berjalan" />
-        <Card flat>
-          {rincian.map((h, i) => (
-            <BarisHari key={h.tanggal} hari={h} pertama={i === 0} />
+        <DaftarBaris>
+          {rincian.map((h) => (
+            <BarisHari key={h.tanggal} hari={h} />
           ))}
 
           {/* Baris total: menutup daftar dengan angka yang sama di kartu utama. */}
@@ -211,8 +211,6 @@ export default function BudgetScreen() {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: spacing.lg,
-              borderTopWidth: 1,
-              borderTopColor: colors.garis,
               backgroundColor: colors.permukaanCekung,
             }}
           >
@@ -229,7 +227,7 @@ export default function BudgetScreen() {
               <Text style={{ ...typography.caption, color: colors.teksSamar }}>jatah</Text>
             </View>
           </View>
-        </Card>
+        </DaftarBaris>
       </View>
 
       {/* Redistribusi: menawarkan, tidak pernah menerapkan sendiri */}
@@ -292,20 +290,7 @@ export default function BudgetScreen() {
         </Text>
       </Card>
 
-      <View style={{ alignItems: 'center' }}>
-        <View
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.sm,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaanCekung,
-          }}
-        >
-          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-            Data tiruan · redistribusi menyusul
-          </Text>
-        </View>
-      </View>
+      <Pill sejajar="tengah" label="Data tiruan" />
     </ScrollView>
   );
 }
@@ -315,7 +300,7 @@ export default function BudgetScreen() {
  * hari itu: yang ingin dijawab pengguna adalah "setelah hari ini tinggal
  * berapa", dan itu butuh akumulasi, bukan angka satuan.
  */
-function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }) {
+function BarisHari({ hari }: { hari: BarisKumulatif }) {
   const iniHariIni = hari.status === 'hari ini';
 
   const warnaSelisih =
@@ -332,16 +317,14 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: spacing.lg,
-        borderTopWidth: pertama ? 0 : 1,
-        borderTopColor: colors.garis,
-        // Hari yang belum berjalan diredupkan: angkanya proyeksi, bukan catatan.
-        opacity: hari.proyeksi ? 0.55 : 1,
         backgroundColor: iniHariIni ? tint(colors.aksen.isian, 'sorotSamar') : 'transparent',
       }}
     >
       <View style={{ flex: 1, gap: spacing.xxs }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.label, color: colors.teks }}>
+          {/* Hari yang belum berjalan diredupkan lewat WARNA (teksRedup) dan kata
+              "proyeksi", bukan opacity: opacity menurunkan kontras di bawah AA. */}
+          <Text style={{ ...typography.label, color: hari.proyeksi ? colors.teksRedup : colors.teks }}>
             {namaHariSingkat(hari.tanggal)}
           </Text>
           {iniHariIni ? (
@@ -366,7 +349,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         <Text
           style={{
             ...typography.label,
-            color: hari.sisaBerjalan < 0 ? colors.status.bahaya.teks : colors.teks,
+            color: hari.sisaBerjalan < 0 ? colors.status.bahaya.teks : hari.proyeksi ? colors.teksRedup : colors.teks,
           }}
         >
           {hari.sisaBerjalan < 0 ? '−' : ''}
