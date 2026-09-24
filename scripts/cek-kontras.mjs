@@ -195,6 +195,10 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
   ['garisKontrol di permukaan', c.garisKontrol, c.permukaan, true],
   ['garisKontrol di permukaanCekung', c.garisKontrol, c.permukaanCekung, true],
   ['garisKontrol di latar', c.garisKontrol, c.latar, true],
+  // Tepi kolom Isian saat fokus dan saat bermasalah, terhadap latar kolom.
+  ['tepi Isian fokus (aksen) di permukaanCekung', c.aksen.isian, c.permukaanCekung, true],
+  ['tepi Isian galat (bahaya) di permukaanCekung', c.status.bahaya.isian, c.permukaanCekung, true],
+  ['galat Isian (bahaya.teks) di permukaan', c.status.bahaya.teks, c.permukaan, false],
 ];
 }
 

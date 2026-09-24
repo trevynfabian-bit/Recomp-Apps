@@ -100,6 +100,9 @@ berubah karena keputusan desain.
 - Satu angka hero per layar data (Hari Ini, Tren, Budget, Ukuran, Latihan,
   Sumber data, Target harian); komponen tidak membawa angka hero sendiri.
 - Judul layar tab dan tumpukan memakai `title` dengan peran header aksesibilitas.
+- Kolom isian: satu komponen `Isian` (label di atas, satuan di kanan,
+  keterangan/galat di bawah). Keadaan dibaca dari tepi kolom: biasa
+  `garisKontrol`, fokus aksen 2 px, bermasalah bahaya 2 px + ikon + kalimat.
 - Kontainer: `Card` (kartu standar; `nada` memberi tepi bertint untuk kartu yang
   perlu dilihat lebih dulu), `DaftarBaris` (baris-baris dalam satu kartu dengan
   pemisah otomatis), `Panel` (area cekung di dalam kartu), `Pemisah` (garis

@@ -70,8 +70,11 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    chat buatan sendiri → `Card bayangan={false}` (2 dengan `nada="aksen"`), 14
    panel → `Panel` (4 dengan `nada="bahaya"/"aksen"`, 3 dengan tepi bersyarat),
    7 pemisah vertikal → `Pemisah arah="vertikal"`.
-3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks
-   dan angka; pindahkan `TextInput` langsung.
+3. **Formulir & input** ✓ `Isian`: label, kolom cekung, satuan, elemen ekor
+   (mis. tampilkan sandi), keterangan, galat (ikon + kalimat, diumumkan ke
+   pembaca layar), `ditandai` untuk galat bersama, nonaktif, dan tepi fokus
+   (aksen, 2 px) / galat (bahaya, 2 px). Tepi keduanya dijaga `cek:kontras`.
+   Sisa: pindahkan `TextInput` langsung.
 4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.
 5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
 

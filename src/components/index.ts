@@ -11,6 +11,7 @@ export { HeroNumber } from './HeroNumber';
 export { IndikatorProteinTerlindungi } from './IndikatorProteinTerlindungi';
 export { IndikatorSinkron } from './IndikatorSinkron';
 export { InputAngka } from './InputAngka';
+export { Isian } from './Isian';
 export { InputTarget } from './InputTarget';
 export { InputChat } from './InputChat';
 export { KartuBodyFat } from './KartuBodyFat';

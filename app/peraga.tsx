@@ -7,6 +7,7 @@ import {
   DaftarBaris,
   InputAngka,
   InputTarget,
+  Isian,
   KerangkaSheet,
   MacroRow,
   Panel,
@@ -154,6 +155,10 @@ export default function PeragaScreen() {
 
       <Bagian judul="Formulir & input">
         <Card style={{ gap: spacing.lg }}>
+          <Isian label="Email" placeholder="nama@contoh.id" keterangan="Sama dengan akun web." autoCapitalize="none" />
+          <Isian label="Berat pagi" unit="kg" angka keyboardType="decimal-pad" defaultValue="74,6" />
+          <Isian label="Pinggang" unit="cm" angka defaultValue="120" galat="Di luar rentang wajar 40–200 cm." />
+          <Isian label="Nonaktif" defaultValue="Tidak bisa diubah" nonaktif />
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <InputAngka label="Berat" nilai={angka} unit="kg" onUbah={setAngka} />
             <InputAngka label="Protein" nilai="42" unit="g" onUbah={() => undefined} warna={colors.macroTeks.protein} />
