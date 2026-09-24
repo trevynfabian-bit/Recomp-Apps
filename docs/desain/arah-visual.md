@@ -413,7 +413,7 @@ token resmi.
 
 | Skrip | Menjaga | Bab |
 |---|---|---|
-| `npm run cek:kontras` | Setiap pasangan teks/latar dan mark/track yang ada di layar, termasuk latar bertint, pill status per peran, dan label di atas isian | 1 |
+| `npm run cek:kontras` | Paritas bentuk palet gelap ↔ terang (kunci sama, heks sah); setiap pasangan teks/latar dan mark/track di layar untuk **kedua mode**, termasuk latar bertint, pill status, peran semantik, angka hero, dan label di atas isian; ringkasan per mode dengan pasangan terlemah dan daftar margin < 0,1 (lulus tapi rawan) | 1 |
 | `npm run cek:desain` | Prinsip: satu angka hero per layar; skema mengikuti sistem; `colors` tidak dibekukan di modul; token usang tidak dipakai; varian tipografi & tinggi baris; batas HIG 11 pt; area sentuh 44 pt; bab Desain resmi | 1–3 |
 | `npm run cek:hardcode` | Nilai tertanam di layar & komponen: warna (heks, rgb/hsl, nama CSS), jarak, radius, ukuran huruf, tinggi baris, ukuran ikon, aritmetika token. Setiap temuan dicetak `berkas:baris` + saran token terdekat | 1–3 |
 

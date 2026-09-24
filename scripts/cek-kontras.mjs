@@ -190,17 +190,56 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
 }
 
 let gagal = 0;
+
+// --- Paritas bentuk: kedua mode wajib punya kunci yang sama dan nilai sah.
+// Kunci yang hanya ada di satu mode berarti layar yang memakainya mendapat
+// `undefined` di mode lain — warna hilang tanpa galat.
+console.log('Paritas palet gelap ↔ terang');
+const daun = (objek, jalur = '') =>
+  Object.entries(objek).flatMap(([k, v]) =>
+    typeof v === 'string' ? [[`${jalur}${k}`, v]] : daun(v, `${jalur}${k}.`),
+  );
+const kunciPer = Object.fromEntries(Object.entries(PALET).map(([m, c]) => [m, new Map(daun(c))]));
+const [modeA, modeB] = Object.keys(kunciPer);
+const hanyaA = [...kunciPer[modeA].keys()].filter((k) => !kunciPer[modeB].has(k));
+const hanyaB = [...kunciPer[modeB].keys()].filter((k) => !kunciPer[modeA].has(k));
+const tidakSah = Object.entries(kunciPer).flatMap(([m, peta]) =>
+  [...peta].filter(([k, v]) => !(k.startsWith('alfa.') ? /^[0-9A-F]{2}$/i : /^#([0-9A-F]{6}|[0-9A-F]{8})$/i).test(v)).map(([k, v]) => `${m}:${k}=${v}`),
+);
+for (const [nama, daftar] of [
+  [`kunci hanya di ${modeA}`, hanyaA],
+  [`kunci hanya di ${modeB}`, hanyaB],
+  ['nilai bukan heks sah', tidakSah],
+]) {
+  console.log(`${daftar.length === 0 ? '  ok  ' : ' GAGAL'} ${nama}${daftar.length ? `: ${daftar.join(', ')}` : ''}`);
+  gagal += daftar.length;
+}
+
+// --- Kontras per mode.
+/** Margin di bawah ini lulus, tapi satu penyesuaian warna kecil bisa menjatuhkannya. */
+const MARGIN_TIPIS = 0.1;
+const ringkasan = [];
 for (const [skema, c] of Object.entries(PALET)) {
   console.log(`\nKontras teks (WCAG 2.1 AA) — mode ${skema}`);
+  let lulusMode = 0;
+  let gagalMode = 0;
+  let terlemah = null;
+  const tipis = [];
   for (const [label, depan, belakang, besar] of pasangan(c)) {
     const rasio = kontras(depan, belakang);
     const ambang = besar ? AA_BESAR : AA_KECIL;
     const lulus = rasio >= ambang;
+    const margin = rasio - ambang;
     console.log(
-      `${lulus ? '  ok  ' : ' GAGAL'} ${label.padEnd(46)} ${rasio.toFixed(2)}:1 (min ${ambang})`,
+      `${lulus ? (margin < MARGIN_TIPIS ? ' tipis' : '  ok  ') : ' GAGAL'} ${label.padEnd(46)} ${rasio.toFixed(2)}:1 (min ${ambang})`,
     );
-    if (!lulus) gagal += 1;
+    if (lulus) lulusMode += 1;
+    else gagalMode += 1;
+    if (lulus && margin < MARGIN_TIPIS) tipis.push(label);
+    if (!terlemah || margin < terlemah.margin) terlemah = { label, rasio, ambang, margin };
   }
+  gagal += gagalMode;
+  ringkasan.push({ skema, lulusMode, gagalMode, terlemah, tipis });
 }
 
 /*
@@ -220,5 +259,13 @@ for (const [skema, c] of Object.entries(PALET)) {
   if (rasioGaris >= 2) gagal += 1;
 }
 
-console.log(gagal === 0 ? '\n✓ Semua pasangan lolos AA' : `\n✗ ${gagal} pasangan gagal`);
+console.log('\nRingkasan');
+for (const r of ringkasan) {
+  console.log(
+    `  ${r.skema.padEnd(7)} ${r.lulusMode} lulus, ${r.gagalMode} gagal · terlemah: ${r.terlemah.label} ${r.terlemah.rasio.toFixed(2)}:1 (min ${r.terlemah.ambang})`,
+  );
+  if (r.tipis.length) console.log(`          margin < ${MARGIN_TIPIS} (lulus, tapi rawan): ${r.tipis.join('; ')}`);
+}
+
+console.log(gagal === 0 ? '\n✓ Semua pasangan lolos AA di kedua mode' : `\n✗ ${gagal} pemeriksaan gagal`);
 process.exit(gagal === 0 ? 0 : 1);
