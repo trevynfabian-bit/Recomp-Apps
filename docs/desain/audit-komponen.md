@@ -1,0 +1,68 @@
+# Audit Komponen Inti
+
+Titik awal fitur **Komponen Inti Terpadu** (Fase 3). Memotret 61 komponen di
+`src/components/` dan 16 layar di `app/` untuk menjawab: bagian UI mana yang
+sama tugasnya tetapi dibuat ulang di banyak tempat? Setiap temuan di bawah
+menjadi task berikutnya di fitur ini. Halaman peraga (`app/peraga.tsx`)
+menampilkan komponen inti dalam semua keadaannya, dan tumbuh bersama task-task
+itu.
+
+Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
+`<TombolUtama|TombolBertepi`, `<Card`, dan `<Modal|<KerangkaSheet` per berkas.
+
+## 1. Tombol & aksi
+
+| Temuan | Jumlah | Keterangan |
+|---|---|---|
+| `TombolUtama` / `TombolBertepi` dipakai | 16 berkas | Sebagian besar sheet dan layar `hasil-lab`, `target-harian`, `tambah-hasil-lab`. |
+| **Tombol simpan buatan sendiri** dengan keadaan *menyimpan → tersimpan ✓* | 5 (`KartuTimbangPagi`, `SheetBatasPinggang`, `SheetCatatUkuran`, `SheetLengkapiProfil`, `target-harian`) | Pola yang sama (spinner, centang, label berganti, warna jade saat tersimpan) ditulis lima kali. `TombolUtama` hanya punya `memproses`, tidak punya *tersimpan*. |
+| `Pressable` di layar & komponen | 101 | Campuran: baris yang bisa diketuk, chip, tautan teks, tombol bulat −/+, tombol ikon (tutup, kembali). Tombol kembali (`‹`) disalin di 10 layar. |
+| Varian yang belum ada | – | Tombol **ukuran kecil** (chip aksi di kartu), **tombol teks/tautan** ("Ubah", "Lihat 4 nilai"), **tombol ikon** (tutup, kembali), keadaan **nonaktif** yang seragam. |
+
+## 2. Kartu & kontainer
+
+| Temuan | Jumlah | Keterangan |
+|---|---|---|
+| `Card` dipakai | 70 kejadian di 28 berkas | Sudah menjadi kontainer standar. |
+| `Card flat` + `Pemisah` untuk daftar baris | Pengaturan, Privasi, Target harian | `Pemisah` didefinisikan lokal di `pengaturan.tsx`; daftar baris lain memakai `borderTopWidth` sendiri. |
+| Kartu bertanda (tepi aksen/status) | `KartuRingkasanMingguan`, `DaftarRujukan`, `KartuPenolakanMedis`, `BannerBatasPinggang`, Strava "Terputus" | Tepi `tint(warna, 'tepi')` ditulis manual; tidak ada varian `Card` untuk "kartu yang perlu perhatian". |
+| Sheet memakai `KerangkaSheet` | 10 | Kerangka standar (selubung, pegangan, label, isi bergulir). |
+| **Sheet membuat `Modal` sendiri** | 6 (`KartuTimbangPagi`, `SheetBatasPinggang`, `SheetCatatFoto`, `SheetCatatUkuran`, `SheetLengkapiProfil`, `SheetRiwayatPercakapan`) | Selubung, pegangan, radius atas, dan animasi disalin; alasannya masing-masing butuh isi yang tidak bergulir atau tinggi tetap. |
+
+## 3. Formulir & input
+
+| Temuan | Jumlah | Keterangan |
+|---|---|---|
+| Komponen input bersama | 3 (`InputAngka`, `InputTarget`, `InputChat`) | Ketiganya berbeda tepi, tinggi, dan cara menampilkan unit. |
+| **`TextInput` langsung di layar/sheet** | 14 di 11 berkas | `masuk` (3, lewat `gayaIsian` lokal), `KartuCatatan` (2), dan satu-satu di 9 sheet. Tinggi, padding, tepi fokus, dan pesan galat berbeda. |
+| Pesan galat di bawah field | `masuk`, `SheetLengkapiProfil`, `SheetCatatUkuran`, `tambah-hasil-lab` | Warna `status.bahaya.teks`, tetapi posisi dan ikon berbeda. |
+| Pemilih tanggal | `SheetCatatUkuran` (tombol geser hari) dan `tambah-hasil-lab` (ketik + "Hari ini") | Dua cara berbeda untuk tugas yang sama. |
+| Kontrol segmen | `PilihSegmen` (Pengaturan), segmen tampilan di `target-harian`, pemilih fase, jenis kelamin | Tiga implementasi. |
+
+## 4. Umpan balik status
+
+| Temuan | Jumlah | Keterangan |
+|---|---|---|
+| Spinner `ActivityIndicator` | 9 komponen | Warna, ukuran, dan teks pendampingnya berbeda. |
+| Keadaan **memuat / kosong / gagal** ditulis per layar | ±25 kalimat di 20 berkas (`hasil-lab` 15, `SheetHubungkanSumber` 9, `SheetSuntingTarget` 9, `coach` 8, …) | Kartu "Belum ada …" ditulis ulang dengan susunan berbeda; gagal kadang dengan tombol Coba lagi, kadang tanpa. `LayarMuatTarget` satu-satunya layar penuh yang rapi. |
+| Banner | `BannerBatasPinggang`, `BannerDataMasuk`, `BannerEksporSiap` | Tiga banner, tiga susunan. |
+
+## 5. Angka hero
+
+| Temuan | Keterangan |
+|---|---|
+| `HeroNumber` di 7 layar data | Satu komponen, sudah dijaga `cek:desain`. |
+| Angka "hampir hero" dibuat sendiri | `KartuTimbangPagi` (74,6), `KartuBodyFat` (16,5 %), `KartuTdee` (rentang), baris `StatKecil` di Tren/Hari Ini. Ukuran dan susunan unitnya berbeda dari `HeroNumber`, dan tidak ada varian "angka sekunder". |
+
+## 6. Rencana (task berikutnya di fitur ini)
+
+1. **Tombol & aksi**: varian ukuran (normal/kecil), tombol teks, tombol ikon,
+   keadaan *tersimpan*; pindahkan 5 tombol simpan buatan sendiri.
+2. **Kartu & kontainer**: `Card` bertanda (perhatian/bahaya), `DaftarBaris` +
+   `Pemisah` bersama.
+3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks
+   dan angka; pindahkan `TextInput` langsung.
+4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.
+5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
+
+Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).

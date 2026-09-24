@@ -346,6 +346,14 @@ export default function PengaturanScreen() {
             petunjuk="Membuka layar contoh arah visual"
             onPress={() => router.push('/arah-visual')}
           />
+          <Pemisah />
+          <BarisPengaturan
+            ikon="shapes-outline"
+            judul="Peraga komponen"
+            nilai="Komponen inti dalam semua keadaannya"
+            petunjuk="Membuka halaman peraga komponen"
+            onPress={() => router.push('/peraga')}
+          />
         </Card>
       ) : null}
 
