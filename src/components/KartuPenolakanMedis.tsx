@@ -1,6 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import type { PenolakanMedis } from '@recomp/logika';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuranIkon } from '@/theme';
 import { Card } from './Card';
 
 type Props = {
@@ -24,8 +25,14 @@ type Props = {
 export function KartuPenolakanMedis({ penolakan }: Props) {
   return (
     <Card bayangan={false} nada="aksen" style={{ gap: spacing.md }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Text style={{ ...typography.body, color: colors.aksen.teks }}>▲</Text>
+      {/* Diumumkan sebagai satu pesan Coach: judul, alasan, dan kata pemicunya. */}
+      <View
+        accessible
+        accessibilityRole="alert"
+        accessibilityLabel={`Coach menolak: ${penolakan.judul}. ${penolakan.alasan} Dipicu kata ${penolakan.pemicu}.`}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+      >
+        <Ionicons name="hand-left-outline" size={ukuranIkon.sedang} color={colors.aksen.teks} />
         <Text style={{ ...typography.bodyTebal, color: colors.aksen.teks, flex: 1 }}>
           {penolakan.judul}
         </Text>
