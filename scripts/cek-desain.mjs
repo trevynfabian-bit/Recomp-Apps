@@ -200,6 +200,25 @@ cek(`tidak ada gaya di bawah ${teksMin}pt (HIG)`, gaya.every((g) => Number(g[2])
   gaya.filter((g) => Number(g[2]) < teksMin).map((g) => g[1]).join(', '));
 const dasar = ['hero', 'display', 'title', 'body', 'label', 'caption'];
 cek('setiap gaya dasar punya padanan iOS di hig.ts', dasar.every((d) => new RegExp(`\\b${d}: '`).test(higTeks)));
+// Tangga (bab Desain 8.4): enam ukuran dasar, naik tegas dari caption ke hero.
+const ukuranDasar = Object.fromEntries(gaya.filter((g) => dasar.includes(g[1])).map((g) => [g[1], Number(g[2])]));
+const urut = [...dasar].reverse(); // caption → hero
+cek(
+  'tangga ukuran naik tegas: caption < label < body < title < display < hero',
+  urut.every((d, i) => i === 0 || ukuranDasar[d] > ukuranDasar[urut[i - 1]]),
+  urut.map((d) => `${d} ${ukuranDasar[d]}`).join(' < '),
+);
+const rasioBaris = gaya.map((g) => [g[1], Number(g[3]) / Number(g[2])]);
+const rasioLuar = rasioBaris.filter(([, r]) => r < 1.05 || r > 1.5);
+cek('tinggi baris 1,05–1,5 × ukuran', rasioLuar.length === 0, rasioLuar.map(([n, r]) => `${n} ${r.toFixed(2)}`).join(', '));
+const varian = gaya.filter((g) => !dasar.includes(g[1]));
+const varianLiar = varian.filter((g) => !Object.values(ukuranDasar).includes(Number(g[2])));
+cek('varian bernama memakai ukuran dari tangga (tidak menambah ukuran)', varianLiar.length === 0, varianLiar.map((g) => g[1]).join(', '));
+// Dynamic Type (HIG): tidak ada teks yang mematikan penskalaan; hanya angka
+// hero yang dibatasi, lewat MAKS_SKALA_HERO.
+const skalaMati = [...layar, ...berkasTsx('src/components')].flatMap((p) => cariBaris(p, /allowFontScaling=\{false\}/));
+cek('tidak ada teks yang mematikan Dynamic Type', skalaMati.length === 0, skalaMati.join(' | '));
+cek('angka hero dibatasi MAKS_SKALA_HERO', /maxFontSizeMultiplier=\{MAKS_SKALA_HERO\}/.test(readFileSync('src/components/HeroNumber.tsx', 'utf8')));
 
 console.log('\nArea sentuh (HIG 44×44 pt)');
 // Kontrol yang tampil lebih kecil dari 44 pt memakai KONTROL_RAPAT/SEGMEN dan
