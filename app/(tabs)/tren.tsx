@@ -19,7 +19,17 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { Fase, StatusKoridor } from '@recomp/logika';
-import { Card, CatatanKecukupan, GrafikTren, KartuHero, LabelSinyalArah, PenandaSumber, Pill, SectionHeader } from '@/components';
+import {
+  Card,
+  CatatanKecukupan,
+  GrafikTren,
+  HeaderLayar,
+  KartuHero,
+  LabelSinyalArah,
+  PenandaSumber,
+  Pill,
+  SectionHeader,
+} from '@/components';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { sumberBerat } from '@/lib/sumber';
@@ -89,15 +99,11 @@ export default function TrenScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Tren berat</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            {formatTanggalPanjang(hariIni)}
-          </Text>
-        </View>
-        <Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />
-      </View>
+      <HeaderLayar
+        judul="Tren berat"
+        subjudul={formatTanggalPanjang(hariIni)}
+        aksi={<Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />}
+      />
 
       {/* Angka utama: rata-rata 7 hari, bukan berat hari ini */}
       <KartuHero

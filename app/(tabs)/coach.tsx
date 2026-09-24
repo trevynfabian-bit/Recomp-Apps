@@ -9,15 +9,7 @@ import {
   kelompokkanPerTanggal,
   tanggalHariIni,
 } from '@recomp/logika';
-import {
-  GelembungMengetik,
-  GelembungPesan,
-  InputChat,
-  PemisahTanggal,
-  Pill,
-  SheetRiwayatPercakapan,
-  Tombol,
-} from '@/components';
+import { GelembungMengetik, GelembungPesan, HeaderLayar, InputChat, PemisahTanggal, SheetRiwayatPercakapan, Tombol } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { useProfil } from '@/state/profil';
 import { balasCoachStub, mockRiwayatPercakapan, SARAN_PERTANYAAN } from '@/mocks/coach';
@@ -176,24 +168,23 @@ export default function CoachScreen() {
           borderBottomColor: colors.garis,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.title, color: colors.teks, flex: 1 }}>Coach</Text>
-          <Pill label={profil.fase_aktif.toUpperCase()} warna={colors.aksen.teks} />
-          <Tombol
-            varian="bertepi"
-            ukuran="kecil"
-            label="Riwayat"
-            aksesLabel="Riwayat percakapan"
-            onPress={() => setSheetRiwayat(true)}
-          />
-        </View>
-        {/* Baris kedua: judul utas yang sedang dibuka, supaya tidak tersesat
-            setelah berpindah dari riwayat. */}
-        <Text style={{ ...typography.caption, color: colors.teksSamar }} numberOfLines={1}>
-          {aktif && !kosong
-            ? aktif.judul
-            : `Membaca data Anda sampai ${formatTanggalPanjang(tanggalHariIni())}`}
-        </Text>
+        {/* Subjudul: fase yang dipakai coach + judul utas yang sedang dibuka,
+            supaya tidak tersesat setelah berpindah dari riwayat. */}
+        <HeaderLayar
+          judul="Coach"
+          subjudul={`${profil.fase_aktif} · ${
+            aktif && !kosong ? aktif.judul : `membaca data sampai ${formatTanggalPanjang(tanggalHariIni())}`
+          }`}
+          aksi={
+            <Tombol
+              varian="bertepi"
+              ukuran="kecil"
+              label="Riwayat"
+              aksesLabel="Riwayat percakapan"
+              onPress={() => setSheetRiwayat(true)}
+            />
+          }
+        />
 
         {/* Disclaimer berdiri TETAP di kepala layar, bukan hanya muncul saat
             menolak: batas itu perlu diketahui sebelum pertanyaannya diketik,

@@ -13,7 +13,7 @@ import {
   TEMPLAT_PANEL_LAB,
 } from '@recomp/logika';
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
-import { Card, Isian, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
+import { Card, HeaderLayar, Isian, KerangkaSheet, PenandaSumber, Tombol, TombolBertepi, TombolUtama } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
@@ -154,15 +154,11 @@ export default function TambahHasilLabScreen() {
           gap: spacing.xl,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => kembali()} />
-          <View style={{ flex: 1 }}>
-            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-              {asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
-            </Text>
-            <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>Salin dari kertas hasilnya</Text>
-          </View>
-        </View>
+        <HeaderLayar
+          kembali={() => kembali()}
+          judul={asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
+          subjudul="Salin dari kertas hasilnya"
+        />
 
         <View style={{ gap: spacing.sm }}>
           <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} tampilan="pill" />

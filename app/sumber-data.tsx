@@ -4,15 +4,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logika';
 import type { KoneksiSumber, SumberData } from '@recomp/logika';
-import {
-  Card,
-  KartuHero,
-  KartuSumberData,
-  SectionHeader,
-  SheetHubungkanSumber,
-  SheetPutuskanSumber,
-  TombolIkon,
-} from '@/components';
+import { Card, HeaderLayar, KartuHero, KartuSumberData, SectionHeader, SheetHubungkanSumber, SheetPutuskanSumber } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { mockHubungkan, mockPutuskan } from '@/mocks/sumberData';
 import { useSinkron } from '@/state/sinkron';
@@ -105,15 +97,11 @@ export default function SumberDataScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Sumber data</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Apple Health, WHOOP, Strava, Hevy
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Sumber data"
+        subjudul="Apple Health, WHOOP, Strava, Hevy"
+      />
 
       <KartuHero
         label="Sumber aktif"

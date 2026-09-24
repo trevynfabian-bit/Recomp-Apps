@@ -12,7 +12,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { JenisNotifikasi, NotifikasiKatalog } from '@recomp/logika';
-import { Card, DaftarBaris, PratinjauWidget, SectionHeader, SheetJamTimbang, TombolIkon } from '@/components';
+import { Card, DaftarBaris, HeaderLayar, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
 import {
   ambilPengaturanPengingat,
   simpanPengaturanPengingat,
@@ -178,10 +178,7 @@ export default function WidgetPengingatScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <Text style={{ ...typography.title, color: colors.teks }}>Widget & pengingat</Text>
-      </View>
+      <HeaderLayar kembali judul="Widget & pengingat" />
 
       {/* --- Notifikasi per jenis ------------------------------------------ */}
       <View>

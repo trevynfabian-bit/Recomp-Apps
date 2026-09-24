@@ -11,7 +11,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card, KartuHero, KartuSesiLatihan, KeadaanKosong, SectionHeader, TombolIkon } from '@/components';
+import { Card, HeaderLayar, KartuHero, KartuSesiLatihan, KeadaanKosong, SectionHeader } from '@/components';
 import { mockSesiLatihan } from '@/mocks/latihan';
 import { colors, spacing, typography } from '@/theme';
 
@@ -72,15 +72,11 @@ export default function LatihanScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Latihan</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Dibaca dari Hevy · dicatat di Hevy, bukan di sini
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Latihan"
+        subjudul="Dibaca dari Hevy · dicatat di Hevy, bukan di sini"
+      />
 
       <KartuHero
         label="Pekan ini"

@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DATA_TERSIMPAN, PROFIL_SUMBER, susunStatusPrivasi } from '@recomp/logika';
 import type { ButirStatusPrivasi } from '@recomp/logika';
-import { Card, DaftarBaris, SectionHeader, SheetEksporData, SheetHapusAkun, TombolIkon } from '@/components';
+import { Card, DaftarBaris, HeaderLayar, SectionHeader, SheetEksporData, SheetHapusAkun } from '@/components';
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -97,17 +97,11 @@ export default function PrivasiScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View style={{ flex: 1 }}>
-          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-            Privasi
-          </Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Apa yang disimpan, dan siapa yang bisa membacanya
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Privasi"
+        subjudul="Apa yang disimpan, dan siapa yang bisa membacanya"
+      />
 
       <View>
         <SectionHeader judul="Keadaan sekarang" />

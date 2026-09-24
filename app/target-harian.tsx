@@ -16,22 +16,7 @@ import {
   susunMatriksTarget,
 } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
-import {
-  Card,
-  InputTarget,
-  KartuHero,
-  KerangkaSheet,
-  MatriksTarget,
-  PemilihTipeHari,
-  Pill,
-  SectionHeader,
-  SheetGantiFase,
-  SheetSuntingTarget,
-  Tombol,
-  TombolBertepi,
-  TombolIkon,
-  TombolUtama,
-} from '@/components';
+import { Card, HeaderLayar, InputTarget, KartuHero, KerangkaSheet, MatriksTarget, PemilihTipeHari, Pill, SectionHeader, SheetGantiFase, SheetSuntingTarget, Tombol, TombolBertepi, TombolUtama } from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
@@ -221,17 +206,11 @@ export default function TargetHarianScreen() {
           gap: spacing.xl,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => kembali()} />
-          <View style={{ flex: 1 }}>
-            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-              Target per tipe hari
-            </Text>
-            <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-              Angka absolut, berlaku mulai hari ini
-            </Text>
-          </View>
-        </View>
+        <HeaderLayar
+          kembali={() => kembali()}
+          judul="Target per tipe hari"
+          subjudul="Angka absolut, berlaku mulai hari ini"
+        />
 
         {!menyunting ? (
           <View>

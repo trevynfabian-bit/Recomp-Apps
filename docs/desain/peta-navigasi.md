@@ -126,3 +126,9 @@ disusun ulang di tiap layar (N1, N2):
 | Bawah | slot opsional di bawah subjudul (mis. `IndikatorSinkron` di Hari Ini) |
 
 Jarak ke isi di bawahnya dipegang kerangka layar (`gap: xl`), bukan header.
+
+Diterapkan ke semua 17 layar app (5 tab, 10 layar tumpukan, 2 layar
+pengembangan); hanya layar masuk (publik, judul `display`) yang tidak memakainya.
+Coach kini memindahkan fase ke subjudul ("Lean Gain · judul utas") supaya aksi
+kanan tetap satu (Riwayat). Subjudul selalu satu baris. `cek:desain` menolak
+layar tanpa `HeaderLayar`.

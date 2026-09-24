@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatWaktuRelatif } from '@recomp/logika';
-import { Card, SheetImporRiwayat, TombolBertepi, TombolIkon, TombolUtama, type SumberImpor } from '@/components';
+import { Card, HeaderLayar, SheetImporRiwayat, TombolBertepi, TombolUtama, type SumberImpor } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 
 type StatusImpor = { selesaiPada: string; ringkas: string } | null;
@@ -60,15 +60,11 @@ export default function ImporRiwayatScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ ...typography.title, color: colors.teks }}>Impor riwayat</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Sekali saja, supaya tren tidak mulai dari nol
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Impor riwayat"
+        subjudul="Sekali saja, supaya tren tidak mulai dari nol"
+      />
 
       <View style={{ gap: spacing.md }}>
         {KARTU.map((k) => {

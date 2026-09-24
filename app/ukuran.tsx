@@ -10,19 +10,7 @@ import {
   statusBatasPinggang,
   tanggalHariIni,
 } from '@recomp/logika';
-import {
-  BannerBatasPinggang,
-  Card,
-  KartuBodyFat,
-  KartuHero,
-  RiwayatPerubahan,
-  SectionHeader,
-  SheetBatasPinggang,
-  SheetCatatUkuran,
-  SheetLengkapiProfil,
-  TombolIkon,
-  type UkuranBaru,
-} from '@/components';
+import { BannerBatasPinggang, Card, HeaderLayar, KartuBodyFat, KartuHero, RiwayatPerubahan, SectionHeader, SheetBatasPinggang, SheetCatatUkuran, SheetLengkapiProfil, type UkuranBaru } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
@@ -117,15 +105,11 @@ export default function UkuranScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Ukuran tubuh</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Terakhir {formatTanggalPanjang(terbaru.tanggal)}
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Ukuran tubuh"
+        subjudul={`Terakhir ${formatTanggalPanjang(terbaru.tanggal)}`}
+      />
 
       {/* Pinggang jadi angka utama: ia penanda lemak perut yang paling responsif.
           Memakai HeroNumber, bukan hero rakitan sendiri, supaya batas Dynamic

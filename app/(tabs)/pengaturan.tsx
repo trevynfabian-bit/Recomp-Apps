@@ -20,6 +20,7 @@ import type { Satuan } from '@recomp/logika';
 import {
   Card,
   DaftarBaris,
+  HeaderLayar,
   SectionHeader,
   SheetBatasPinggang,
   SheetEksporData,
@@ -104,9 +105,7 @@ export default function PengaturanScreen() {
         gap: spacing.xl,
       }}
     >
-      <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-        Setelan
-      </Text>
+      <HeaderLayar judul="Setelan" />
 
       {/* --- Profil ----------------------------------------------------------- */}
       <Pressable

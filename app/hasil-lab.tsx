@@ -12,18 +12,7 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import {
-  Card,
-  KeadaanGagal,
-  KeadaanKosong,
-  KerangkaSheet,
-  PenandaSumber,
-  SectionHeader,
-  Tombol,
-  TombolBertepi,
-  TombolIkon,
-  TombolUtama,
-} from '@/components';
+import { Card, HeaderLayar, KeadaanGagal, KeadaanKosong, KerangkaSheet, PenandaSumber, SectionHeader, Tombol, TombolBertepi, TombolUtama } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
@@ -84,23 +73,11 @@ export default function HasilLabScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View style={{ flex: 1 }}>
-          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-            Hasil lab
-          </Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            {statusMuat === 'memuat'
-              ? 'Memuat…'
-              : statusMuat === 'gagal'
-                ? 'Belum termuat'
-                : riwayat.length > 0
-                  ? `${riwayat.length} hasil tersimpan`
-                  : 'Belum ada yang tersimpan'}
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Hasil lab"
+        subjudul={statusMuat === 'memuat' ? 'Memuat…' : statusMuat === 'gagal' ? 'Belum termuat' : riwayat.length > 0 ? `${riwayat.length} hasil tersimpan` : 'Belum ada yang tersimpan'}
+      />
 
       <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
         <Ionicons name="flask-outline" size={ukuranIkon.sedang} color={colors.teksRedup} />

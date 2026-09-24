@@ -2,7 +2,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatAngka } from '@recomp/logika';
-import { Card, HeroNumber, MacroRow, Pill, SectionHeader, TombolBertepi, TombolIkon, TombolUtama } from '@/components';
+import { Card, HeaderLayar, HeroNumber, MacroRow, Pill, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -57,17 +57,11 @@ export default function ArahVisualScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text accessibilityRole="header" style={{ ...usulanTipografi.title, color: colors.teks }}>
-            Arah visual
-          </Text>
-          <Text style={{ ...usulanTipografi.labelBiasa, color: colors.teksSamar }}>
-            Layar acuan · data tiruan
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Arah visual"
+        subjudul="Layar acuan · data tiruan"
+      />
 
       {/* Komposisi: satu angka hero, lalu kartu pendukung dengan kepadatan rapat. */}
       <Card style={{ paddingVertical: spacing.xl, gap: spacing.xl }}>

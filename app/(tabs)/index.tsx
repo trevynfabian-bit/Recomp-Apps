@@ -2,7 +2,24 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, IndikatorSinkron, KartuCatatan, KartuHero, KartuTimbangPagi, LegendaSumber, PanelRingkasanMakro, PemilihTipeHari, PenandaSumber, Pill, SectionHeader, SheetCatatFoto, Tombol, TombolUtama, type EntriMakananBaru } from '@/components';
+import {
+  Card,
+  HeaderLayar,
+  IndikatorSinkron,
+  KartuCatatan,
+  KartuHero,
+  KartuTimbangPagi,
+  LegendaSumber,
+  PanelRingkasanMakro,
+  PemilihTipeHari,
+  PenandaSumber,
+  Pill,
+  SectionHeader,
+  SheetCatatFoto,
+  Tombol,
+  TombolUtama,
+  type EntriMakananBaru,
+} from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHariBerlaku } from '@recomp/logika';
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
@@ -118,19 +135,13 @@ export default function LogHarianScreen() {
       }}
     >
       {/* Header: sapaan + tanggal + fase aktif */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Hai, {profil.nama}</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            {formatTanggalPanjang(log.tanggal)}
-          </Text>
-          {/* Seberapa segar angka di bawahnya; ketuk untuk membuka Sumber data. */}
-          <View style={{ marginTop: spacing.sm }}>
-            <IndikatorSinkron />
-          </View>
-        </View>
-        <Pill label={fase} warna={colors.status.sukses.teks} />
-      </View>
+      <HeaderLayar
+        judul={`Hai, ${profil.nama}`}
+        subjudul={formatTanggalPanjang(log.tanggal)}
+        aksi={<Pill label={fase} warna={colors.status.sukses.teks} />}
+        // Seberapa segar angka di bawahnya; ketuk untuk membuka Sumber data.
+        bawah={<IndikatorSinkron />}
+      />
 
       {/* Angka utama: sisa kalori hari ini */}
       <KartuHero

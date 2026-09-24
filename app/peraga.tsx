@@ -8,16 +8,16 @@ import {
   HeaderLayar,
   InputAngka,
   InputTarget,
-  KartuHero,
   Isian,
+  KartuHero,
   KeadaanGagal,
   KeadaanKosong,
   KeadaanMemuat,
   KerangkaSheet,
   MacroRow,
+  Panel,
   PemilihAngka,
   PemilihTanggal,
-  Panel,
   Pemisah,
   Pill,
   SectionHeader,
@@ -64,17 +64,11 @@ export default function PeragaScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => router.back()} />
-        <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
-            Peraga komponen
-          </Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
-            Skema {skema} · data tiruan
-          </Text>
-        </View>
-      </View>
+      <HeaderLayar
+        kembali
+        judul="Peraga komponen"
+        subjudul={`Skema ${skema} · data tiruan`}
+      />
 
       <Bagian judul="Header layar">
         <Card style={{ gap: spacing.xl }}>

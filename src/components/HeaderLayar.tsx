@@ -43,7 +43,11 @@ export function HeaderLayar({ judul, subjudul, kembali, aksi, bawah }: Props) {
         <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
           {judul}
         </Text>
-        {subjudul ? <Text style={{ ...typography.label, color: colors.teksSamar }}>{subjudul}</Text> : null}
+        {subjudul ? (
+          <Text numberOfLines={1} style={{ ...typography.label, color: colors.teksSamar }}>
+            {subjudul}
+          </Text>
+        ) : null}
         {bawah ? <View style={{ marginTop: spacing.sm }}>{bawah}</View> : null}
       </View>
       {aksi ? <View style={{ alignSelf: kembali ? 'center' : 'flex-start' }}>{aksi}</View> : null}

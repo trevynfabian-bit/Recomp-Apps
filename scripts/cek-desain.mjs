@@ -184,9 +184,13 @@ const tabBeda = tab.filter((t) => {
   const layarTab = readFileSync(join('app', '(tabs)', `${t.rute}.tsx`), 'utf8');
   // Tab "index" menyapa pengguna ("Hai, …") alih-alih mencetak judulnya.
   // Judul boleh lebih panjang ("Tren berat") asalkan diawali label tabnya.
-  return t.rute !== 'index' && !new RegExp(`>\\s*${t.judul}\\b`).test(layarTab);
+  return t.rute !== 'index' && !new RegExp(`(>\\s*|judul="|judul=\\{\`)${t.judul}\\b`).test(layarTab);
 });
 cek('judul layar diawali label tabnya', tabBeda.length === 0, tabBeda.map((t) => `${t.rute}: "${t.judul}"`).join(', '));
+const tanpaHeader = layar
+  .filter((p) => !/_layout\.tsx$|masuk\.tsx$/.test(p))
+  .filter((p) => (readFileSync(p, 'utf8').match(/<HeaderLayar\b/g) ?? []).length === 0);
+cek('setiap layar memakai HeaderLayar (kecuali layar masuk)', tanpaHeader.length === 0, tanpaHeader.join(', '));
 
 console.log('\nAcuan resmi');
 let bab = '';

@@ -16,7 +16,20 @@ import {
   usiaPada,
 } from '@recomp/logika';
 import type { BarisKumulatif, Fase, HasilRedistribusi } from '@recomp/logika';
-import { Card, IndikatorProteinTerlindungi, KartuHero, KartuTdee, MeterBudget, PanelRedistribusi, PemilihFase, Pill, SectionHeader, SheetGantiFase, StatusRedistribusi } from '@/components';
+import {
+  Card,
+  HeaderLayar,
+  IndikatorProteinTerlindungi,
+  KartuHero,
+  KartuTdee,
+  MeterBudget,
+  PanelRedistribusi,
+  PemilihFase,
+  Pill,
+  SectionHeader,
+  SheetGantiFase,
+  StatusRedistribusi,
+} from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
@@ -127,15 +140,11 @@ export default function BudgetScreen() {
         gap: spacing.xl,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View>
-          <Text style={{ ...typography.title, color: colors.teks }}>Budget mingguan</Text>
-          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
-            Mulai {formatTanggalPanjang(budget.mingguMulai)}
-          </Text>
-        </View>
-        <Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />
-      </View>
+      <HeaderLayar
+        judul="Budget mingguan"
+        subjudul={`Mulai ${formatTanggalPanjang(budget.mingguMulai)}`}
+        aksi={<Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />}
+      />
 
       {/* Angka utama: sisa jatah minggu ini */}
       <KartuHero
