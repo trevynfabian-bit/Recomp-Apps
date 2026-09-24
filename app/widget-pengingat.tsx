@@ -12,7 +12,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { JenisNotifikasi, NotifikasiKatalog } from '@recomp/logika';
-import { Card, DaftarBaris, HeaderLayar, PratinjauWidget, SectionHeader, SheetJamTimbang } from '@/components';
+import { Card, Chip, DaftarBaris, HeaderLayar, PratinjauWidget, SectionHeader, SheetJamTimbang, Tombol } from '@/components';
 import {
   ambilPengaturanPengingat,
   simpanPengaturanPengingat,
@@ -226,16 +226,13 @@ export default function WidgetPengingatScreen() {
           <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Pengingat di atas baru terkirim setelah notifikasi untuk Recomp diizinkan di Pengaturan.
           </Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              ketukRingan();
-              void Linking.openSettings();
-            }}
-            style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-          >
-            <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>Buka Pengaturan ›</Text>
-          </Pressable>
+          <Tombol
+            varian="teks"
+            ukuran="kecil"
+            label="Buka Pengaturan iPhone"
+            aksesPetunjuk="Membuka pengaturan notifikasi app ini di iPhone"
+            onPress={() => void Linking.openSettings()}
+          />
         </Card>
       ) : null}
 
@@ -367,31 +364,13 @@ function PemilihSkenario({
         {SKENARIO.map((s) => {
           const aktif = s === terpilih;
           return (
-            <Pressable
+            <Chip
               key={s}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: aktif }}
-              accessibilityLabel={`Pratinjau: ${LABEL_SKENARIO_WIDGET[s]}`}
-              onPress={() => {
-                if (aktif) return;
-                ketukRingan();
-                onPilih(s);
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                borderWidth: 1,
-                borderColor: aktif ? colors.garisKontrol : colors.garis,
-                backgroundColor: aktif ? colors.permukaanCekung : 'transparent',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>
-                {LABEL_SKENARIO_WIDGET[s]}
-              </Text>
-            </Pressable>
+              label={LABEL_SKENARIO_WIDGET[s]}
+              terpilih={aktif}
+              aksesLabel={`Pratinjau: ${LABEL_SKENARIO_WIDGET[s]}`}
+              onPress={() => onPilih(s)}
+            />
           );
         })}
       </ScrollView>

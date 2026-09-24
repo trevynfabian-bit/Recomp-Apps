@@ -1,4 +1,4 @@
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
@@ -25,7 +25,12 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
       animationType="slide"
       onRequestClose={() => onTutup?.()}
     >
-      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
+      {/* Papan ketik mendorong sheet ke atas (iOS), supaya kolom isian di
+          dalamnya tidak tertutup. Android sudah mengubah ukuran jendelanya sendiri. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}
+      >
         <Pressable
           accessibilityLabel="Tutup"
           disabled={onTutup === null}
@@ -55,7 +60,7 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
             {children}
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

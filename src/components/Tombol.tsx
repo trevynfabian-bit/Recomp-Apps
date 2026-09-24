@@ -151,15 +151,17 @@ type PropsIkon = {
   /**
    * `bulat`: lingkaran 44 pt bertepi di atas permukaan (kembali, −/+).
    * `polos`: ikon 36 pt tanpa latar (tutup sheet, hapus baris), area sentuh 44 pt.
+   * `aksen`: lingkaran 44 pt berisi aksen untuk aksi utama berikon (kirim pesan).
    */
-  bentuk?: 'bulat' | 'polos';
+  bentuk?: 'bulat' | 'polos' | 'aksen';
   nonaktif?: boolean;
   warna?: string;
 };
 
 /** Tombol berisi ikon saja. Selalu dengan `aksesLabel`. */
 export function TombolIkon({ ikon, aksesLabel, onPress, bentuk = 'bulat', nonaktif = false, warna }: PropsIkon) {
-  const bulat = bentuk === 'bulat';
+  const isi = bentuk === 'aksen';
+  const bulat = bentuk === 'bulat' || isi;
   const ukuran = bulat ? TAP_MIN : KONTROL_RAPAT;
   return (
     <Pressable
@@ -178,13 +180,13 @@ export function TombolIkon({ ikon, aksesLabel, onPress, bentuk = 'bulat', nonakt
         borderRadius: radius.pill,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: bulat ? colors.permukaan : 'transparent',
-        borderWidth: bulat ? 1 : 0,
+        backgroundColor: isi ? colors.aksen.isian : bulat ? colors.permukaan : 'transparent',
+        borderWidth: bulat && !isi ? 1 : 0,
         borderColor: colors.garisKontrol,
         opacity: nonaktif ? 0.45 : pressed ? 0.6 : 1,
       })}
     >
-      <Ionicons name={ikon} size={bulat ? ukuranIkon.baris : ukuranIkon.sedang} color={warna ?? (bulat ? colors.teks : colors.teksRedup)} />
+      <Ionicons name={ikon} size={bulat ? ukuranIkon.baris : ukuranIkon.sedang} color={warna ?? (isi ? colors.diAtasIsian : bulat ? colors.teks : colors.teksRedup)} />
     </Pressable>
   );
 }

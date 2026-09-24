@@ -1,10 +1,11 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { formatRentangTanggal } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
-import { ketukRingan } from '@/lib/haptics';
+
 import type { RingkasanMingguan } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { Card } from './Card';
+import { Chip } from './Chip';
 
 type Props = {
   ringkasan: RingkasanMingguan;
@@ -63,27 +64,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
             Tanya lanjutan
           </Text>
           {ringkasan.lanjutan.map((t) => (
-            <Pressable
-              key={t}
-              accessibilityRole="button"
-              accessibilityLabel={`Tanyakan: ${t}`}
-              onPress={() => {
-                ketukRingan();
-                onTanya(t);
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: colors.garisKontrol,
-                backgroundColor: colors.permukaanCekung,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.teksRedup }}>{t}</Text>
-            </Pressable>
+            <Chip key={t} label={t} aksesLabel={`Tanyakan: ${t}`} onPress={() => onTanya(t)} />
           ))}
         </View>
       ) : null}

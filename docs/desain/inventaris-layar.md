@@ -173,3 +173,23 @@ Total: 6 sheet, 6 tombol, 4 kolom (1 wajar), 4 pemilih, 5 keadaan, 3 sisipan
 ketebalan. Setelah semuanya ditutup, penjaga `cek:desain` diperluas supaya
 penyimpangan K1–K3 tidak bisa kembali (sheet harus lewat `KerangkaSheet`,
 `TextInput` hanya di komponen isian bersama).
+
+## 5. Status penutupan (akhir Fase 5)
+
+Hasil `npm run cek:desain-semua` setelah semua task Fase 5, plus tangkapan
+layar 17 rute di mode gelap dan terang tanpa galat halaman.
+
+| Kode | Status | Ditutup dengan | Dijaga oleh |
+|---|---|---|---|
+| K1 sheet rakitan | Selesai (6/6) | `KerangkaSheet` (kini juga menghindari papan ketik) + `JudulSheet` | `cek:desain` › Komponen bersama: `<Modal>` hanya di `KerangkaSheet` |
+| K2 tombol rakitan | Selesai | `Tombol` (utama/bertepi/merusak/teks), `TombolIkon` (bulat/polos/aksen), `BarisTautan`; pembungkus lama `TombolUtama`/`TombolBertepi` dihapus | Komponen bersama: Pressable berlabel teks saja ditolak |
+| K3 isian rakitan | Selesai; `InputChat` tetap pengecualian | `Isian` (+ `mono`, `ringkas`) | Komponen bersama: `<TextInput>` hanya di `Isian`, `Pemilih`, `InputChat` |
+| K4 pemilih | Selesai | `PilihanSegmen` (segmen) dan `Chip` (pilihan & aksi cepat); `PemilihFase` tetap kartu | Komponen bersama (chip rakitan ditolak sebagai tombol rakitan) |
+| K5 keadaan | Selesai | `KeadaanMemuat` / `KeadaanKosong` / `KeadaanGagal`; Hasil lab kini menampilkan keadaan memuat | Keadaan layar: teks "Belum ada …" dan spinner lepas ditolak |
+| K6 ketebalan disisipkan | Selesai | `Sisipan` | tipografi dari satu skala |
+| K7 layar Masuk | Selesai | tautan jadi `Tombol` teks | kepala layar |
+| K8 wadah Coach | Pengecualian tetap | – | – |
+
+Tambahan dari Fase 5: `nada` angka hero + `HeroPengganti`, kepala layar per
+jenis rute dan subjudul ≤ 40 karakter, token `layarKunci` untuk pratinjau
+widget, dan `cek:hardcode` yang memeriksa warna di seluruh `src`.

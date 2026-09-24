@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
-import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { ketukBerhasil } from '@/lib/haptics';
+import { colors, spacing, tint, typography, ukuran } from '@/theme';
 import { KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
 import { PemilihAngka, uraiAngka } from './Pemilih';
+import { Chip } from './Chip';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -138,29 +139,12 @@ export function SheetBatasPinggang({
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {saran.map((s) => (
-            <Pressable
+            <Chip
               key={s.label}
-              accessibilityRole="button"
-              accessibilityLabel={`Setel batas ke ${formatDesimal(s.nilai)} sentimeter, ${s.label}`}
-              onPress={() => {
-                ketukRingan();
-                setDraf(formatDesimal(s.nilai));
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                borderWidth: 1,
-                borderColor: colors.garisKontrol,
-                backgroundColor: colors.permukaanCekung,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.teksRedup }}>
-                {formatDesimal(s.nilai)} · {s.label}
-              </Text>
-            </Pressable>
+              label={`${formatDesimal(s.nilai)} · ${s.label}`}
+              aksesLabel={`Setel batas ke ${formatDesimal(s.nilai)} sentimeter, ${s.label}`}
+              onPress={() => setDraf(formatDesimal(s.nilai))}
+            />
           ))}
         </View>
       </View>

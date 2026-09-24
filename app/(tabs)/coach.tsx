@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   DISCLAIMER_COACH,
@@ -10,6 +10,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import {
+  Chip,
   GelembungMengetik,
   GelembungPesan,
   HeaderLayar,
@@ -19,11 +20,11 @@ import {
   SheetRiwayatPercakapan,
   Tombol,
 } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+
 import { useProfil } from '@/state/profil';
 import { balasCoachStub, mockRiwayatPercakapan, SARAN_PERTANYAAN } from '@/mocks/coach';
 import type { Percakapan, PesanCoach } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
 /**
  * Layar chat AI Coach.
@@ -260,27 +261,7 @@ export default function CoachScreen() {
           }}
         >
           {SARAN_PERTANYAAN.map((s) => (
-            <Pressable
-              key={s}
-              accessibilityRole="button"
-              accessibilityLabel={`Tanyakan: ${s}`}
-              onPress={() => {
-                ketukRingan();
-                void tanya(s);
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                borderWidth: 1,
-                borderColor: colors.garisKontrol,
-                backgroundColor: colors.permukaanCekung,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text style={{ ...typography.label, color: colors.teksRedup }}>{s}</Text>
-            </Pressable>
+            <Chip key={s} label={s} aksesLabel={`Tanyakan: ${s}`} onPress={() => void tanya(s)} />
           ))}
         </ScrollView>
       ) : null}

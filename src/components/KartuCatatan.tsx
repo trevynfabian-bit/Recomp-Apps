@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { Tombol } from './Tombol';
 import { Isian } from './Isian';
 
@@ -115,28 +115,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
               onPress={() => setMenyunting(false)}
             />
 
-            <Pressable
-              accessibilityRole="button"
-              disabled={menyimpan}
-              onPress={simpan}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                backgroundColor: menyimpan ? colors.permukaanCekung : colors.aksen.isian,
-                opacity: pressed ? 0.8 : 1,
-              })}
-            >
-              <Text
-                style={{
-                  ...typography.label,
-                  color: menyimpan ? colors.teksSamar : colors.diAtasIsian,
-                }}
-              >
-                {menyimpan ? 'Menyimpan…' : 'Simpan'}
-              </Text>
-            </Pressable>
+            <Tombol ukuran="kecil" label={menyimpan ? 'Menyimpan…' : 'Simpan'} memproses={menyimpan} onPress={simpan} />
           </View>
         </View>
       </View>

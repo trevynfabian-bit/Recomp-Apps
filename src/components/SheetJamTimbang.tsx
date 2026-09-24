@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
+import { Switch, Text, View } from 'react-native';
 import {
   formatJamMenit,
   geserJamTimbang,
@@ -10,9 +10,9 @@ import {
 } from '@recomp/logika';
 import type { JamPengingat } from '@recomp/logika';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
-import { Tombol } from './Tombol';
+import { Tombol, TombolIkon } from './Tombol';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { Panel } from './Card';
 
 /** Jam akhir pekan yang ditawarkan saat sakelarnya pertama dinyalakan. */
@@ -65,18 +65,13 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
           <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Biasanya Anda timbang sekitar {formatJamMenit(saran.kebiasaanMenit)} ({saran.dasar} pagi terakhir).
           </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Pakai jam ${formatJamMenit(saran.saranMenit)} untuk hari kerja`}
-            onPress={() => {
-              ketukRingan();
-              setDraf((d) => ({ ...d, hariKerjaMenit: saran.saranMenit }));
-            }}
-            hitSlop={spacing.md}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Pakai {formatJamMenit(saran.saranMenit)}</Text>
-          </Pressable>
+          <Tombol
+            varian="teks"
+            ukuran="kecil"
+            label={`Pakai ${formatJamMenit(saran.saranMenit)}`}
+            aksesLabel={`Pakai jam ${formatJamMenit(saran.saranMenit)} untuk hari kerja`}
+            onPress={() => setDraf((d) => ({ ...d, hariKerjaMenit: saran.saranMenit }))}
+          />
         </Panel>
       ) : null}
 
@@ -150,29 +145,16 @@ function PengaturJam({ label, menit, onUbah }: { label: string; menit: number; o
   );
 }
 
-function TombolGeser({ label, onPress, nonaktif }: { label: string; onPress: () => void; nonaktif: boolean }) {
+function TombolGeser({ label, onPress, nonaktif }: { label: '−' | '+'; onPress: () => void; nonaktif: boolean }) {
   return (
-    <Pressable
-      // Pembaca layar memakai aksi naik/turun pada pembungkus `adjustable`.
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      disabled={nonaktif}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        width: TAP_MIN,
-        height: TAP_MIN,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        borderColor: colors.garisKontrol,
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: nonaktif ? 0.35 : pressed ? 0.6 : 1,
-      })}
-    >
-      <Text style={{ ...typography.title, color: colors.teks }}>{label}</Text>
-    </Pressable>
+    // Pembaca layar memakai aksi naik/turun pada pembungkus `adjustable`.
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <TombolIkon
+        ikon={label === '+' ? 'add' : 'remove'}
+        aksesLabel={label === '+' ? 'Lebih siang' : 'Lebih pagi'}
+        nonaktif={nonaktif}
+        onPress={onPress}
+      />
+    </View>
   );
 }

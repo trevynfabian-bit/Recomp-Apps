@@ -5,6 +5,8 @@ import type { BudgetMingguan, HasilRedistribusi, OpsiRedistribusi } from '@recom
 import { Card, Panel } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { Chip } from './Chip';
+import { Tombol } from './Tombol';
 
 const OPSI: { nilai: OpsiRedistribusi; judul: string; ringkas: string }[] = [
   { nilai: 'sebar_rata', judul: 'Sebar rata', ringkas: 'Bagi ke semua hari yang tersisa' },
@@ -145,31 +147,14 @@ export function PanelRedistribusi({
               {mendatang.map((h) => {
                 const aktif = h.tanggal === sasaran;
                 return (
-                  <Pressable
+                  <Chip
                     key={h.tanggal}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: aktif }}
-                    accessibilityLabel={`Bebankan ke ${h.tanggal}`}
-                    disabled={sudahDipakai}
-                    onPress={() => {
-                      ketukRingan();
-                      setTanggalTumpuk(h.tanggal);
-                    }}
-                    style={({ pressed }) => ({
-                      minHeight: TAP_MIN,
-                      justifyContent: 'center',
-                      paddingHorizontal: spacing.lg,
-                      borderRadius: radius.pill,
-                      borderWidth: 1,
-                      borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                      backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
-                      opacity: pressed ? 0.7 : 1,
-                    })}
-                  >
-                    <Text style={{ ...typography.label, color: aktif ? colors.diAtasIsian : colors.teksRedup }}>
-                      {hariSingkat(h.tanggal)}
-                    </Text>
-                  </Pressable>
+                    label={hariSingkat(h.tanggal)}
+                    terpilih={aktif}
+                    aksesLabel={`Bebankan ke ${h.tanggal}`}
+                    nonaktif={sudahDipakai}
+                    onPress={() => setTanggalTumpuk(h.tanggal)}
+                  />
                 );
               })}
             </View>
@@ -214,33 +199,15 @@ export function PanelRedistribusi({
           </View>
         ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Terapkan redistribusi"
-          disabled={sudahDipakai}
+        <Tombol
+          label={sudahDipakai ? 'Sudah dipakai minggu ini' : opsi === 'abaikan' ? 'Biarkan apa adanya' : 'Terapkan'}
+          aksesLabel="Terapkan redistribusi"
+          nonaktif={sudahDipakai}
           onPress={() => {
             ketukBerhasil();
             onTerapkan(hasil);
           }}
-          style={({ pressed }) => ({
-            minHeight: TAP_MIN,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: radius.lg,
-            paddingVertical: spacing.lg,
-            backgroundColor: sudahDipakai ? colors.permukaanCekung : colors.aksen.isian,
-            opacity: pressed ? 0.8 : 1,
-          })}
-        >
-          <Text
-            style={{
-              ...typography.bodyTebal,
-              color: sudahDipakai ? colors.teksSamar : colors.diAtasIsian,
-            }}
-          >
-            {sudahDipakai ? 'Sudah dipakai minggu ini' : opsi === 'abaikan' ? 'Biarkan apa adanya' : 'Terapkan'}
-          </Text>
-        </Pressable>
+        />
       </View>
     </Card>
   );

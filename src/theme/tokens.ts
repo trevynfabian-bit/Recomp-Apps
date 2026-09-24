@@ -78,6 +78,10 @@ export const ukuran = {
   avatar: 52,
   /** Bingkai foto makanan sebelum difoto (SheetCatatFoto). */
   bingkaiFoto: 160,
+  /** Kolom angka ringkas di dalam baris (Isian ringkas), termasuk satuan. */
+  isianRingkas: 112,
+  /** Kolom selisih rata kanan di baris ukur ("−0,5"). */
+  kolomSelisih: 62,
   /** Tinggi chip indikator kecil (status sinkron di header). */
   indikator: 24,
   /** Garis contoh di legenda grafik (garis rata-rata). */

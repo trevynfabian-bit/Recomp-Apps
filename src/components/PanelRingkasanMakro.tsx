@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Card } from './Card';
 import { MacroRow } from './MacroRow';
 import { PenandaSumber } from './PenandaSumber';
-import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+
+import { colors, spacing, typography } from '@/theme';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
+import { PilihanSegmen } from './PilihanSegmen';
 
 type Props = {
   macros: MacroProgress[];
@@ -67,53 +68,6 @@ function SakelarMode({
   ];
 
   return (
-    <View
-      accessibilityRole="radiogroup"
-      style={{
-        flexDirection: 'row',
-        backgroundColor: colors.permukaanCekung,
-        borderRadius: radius.pill,
-        padding: spacing.xs,
-        gap: spacing.xs,
-      }}
-    >
-      {opsi.map((o) => {
-        const aktif = o.nilai === mode;
-        return (
-          <Pressable
-            key={o.nilai}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: aktif }}
-            accessibilityLabel={`Tampilkan ${o.label}`}
-            onPress={() => {
-              if (aktif) return;
-              ketukRingan();
-              onGanti(o.nilai);
-            }}
-            style={({ pressed }) => ({
-              flex: 1,
-              // Area sentuh anak harus 44pt sendiri; padding wadah tidak dihitung.
-              minHeight: TAP_MIN,
-              borderRadius: radius.pill,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: aktif ? colors.permukaan : 'transparent',
-              borderWidth: 1,
-              borderColor: aktif ? colors.garis : 'transparent',
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <Text
-              style={{
-                ...typography.label,
-                color: aktif ? colors.teks : colors.teksSamar,
-              }}
-            >
-              {o.label}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
+    <PilihanSegmen opsi={opsi} terpilih={mode} onPilih={onGanti} aksesAwalan="Tampilkan" />
   );
 }

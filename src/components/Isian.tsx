@@ -34,6 +34,12 @@ type Props = Omit<TextInputProps, 'style' | 'editable' | 'placeholderTextColor'>
    * `ukuran.isianTempel`, tanpa koreksi otomatis. Bukan untuk teks yang ditulis orang.
    */
   mono?: boolean;
+  /**
+   * Kolom ringkas di dalam baris (mis. baris lingkar di Catat ukuran): tanpa
+   * label terlihat (label tetap dibacakan), lebar tetap `ukuran.isianRingkas`,
+   * angka rata kanan.
+   */
+  ringkas?: boolean;
   ref?: React.Ref<TextInput>;
 };
 
@@ -63,6 +69,7 @@ export function Isian({
   ekor,
   angka = false,
   mono = false,
+  ringkas = false,
   ref,
   onFocus,
   onBlur,
@@ -74,8 +81,8 @@ export function Isian({
   const tepi = bermasalah ? colors.status.bahaya.isian : fokus ? colors.aksen.isian : colors.garisKontrol;
 
   return (
-    <View style={{ gap: spacing.xs, opacity: nonaktif ? 0.45 : 1 }}>
-      <Text style={{ ...typography.caption, color: warnaLabel ?? colors.teksRedup }}>{label}</Text>
+    <View style={{ gap: spacing.xs, opacity: nonaktif ? 0.45 : 1, width: ringkas ? ukuran.isianRingkas : undefined }}>
+      {ringkas ? null : <Text style={{ ...typography.caption, color: warnaLabel ?? colors.teksRedup }}>{label}</Text>}
       <View
         style={{
           flexDirection: 'row',
@@ -115,6 +122,7 @@ export function Isian({
             maxHeight: mono ? ukuran.isianTempel.maks : undefined,
             textAlignVertical: mono || inputProps.multiline ? 'top' : 'center',
             color: colors.teks,
+            textAlign: ringkas ? 'right' : undefined,
             paddingVertical: spacing.sm,
             // Fokus sudah ditandai tepi aksen kolom; garis fokus bawaan browser
             // (web) di dalamnya hanya menggandakan.

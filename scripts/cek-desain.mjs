@@ -186,6 +186,43 @@ const keadaanRakitan = [...layar, ...berkasTsx('src/components')]
   });
 cek('keadaan memuat/kosong lewat komponen Keadaan*', keadaanRakitan.length === 0, keadaanRakitan);
 
+bagian('Komponen bersama');
+/**
+ * Komponen bersama (inventaris Fase 5, K1–K3): bingkai sheet hanya di
+ * KerangkaSheet, kolom teks hanya di komponen isian, dan tombol yang
+ * digambar sendiri (Pressable berisi label teks saja, dengan isian atau tepi)
+ * diganti Tombol. Pressable lain (baris, kartu, pilihan) tetap boleh.
+ */
+const MODAL_BOLEH = ['KerangkaSheet.tsx'];
+const TEXTINPUT_BOLEH = ['Isian.tsx', 'Pemilih.tsx', 'InputChat.tsx'];
+const komponenRakitan = [...layar, ...berkasTsx('src/components')].flatMap((p) => {
+  const sf = ts.createSourceFile(p, readFileSync(p, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const hasil = [];
+  const di = (n) => `${p}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1}`;
+  (function kunjungi(n) {
+    if (ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)) {
+      const tag = n.tagName.getText(sf);
+      if (tag === 'Modal' && !MODAL_BOLEH.some((b) => p.endsWith(b))) hasil.push(`${di(n)}  <Modal> → KerangkaSheet`);
+      if (tag === 'TextInput' && !TEXTINPUT_BOLEH.some((b) => p.endsWith(b))) hasil.push(`${di(n)}  <TextInput> → Isian`);
+    }
+    // Tombol rakitan: Pressable yang isinya hanya satu <Text> dan bergaya
+    // isian/tepi (backgroundColor atau borderWidth), atau berakhiran "›".
+    if (ts.isJsxElement(n) && n.openingElement.tagName.getText(sf) === 'Pressable') {
+      const anak = n.children.filter((c) => !(ts.isJsxText(c) && c.getText(sf).trim() === ''));
+      const satuTeks = anak.length === 1 && ts.isJsxElement(anak[0]) && anak[0].openingElement.tagName.getText(sf) === 'Text';
+      const gaya = n.openingElement.getText(sf);
+      const isiTeks = satuTeks ? anak[0].getText(sf) : '';
+      // Tautan teks rakitan: tombol yang isinya satu <Text> saja → Tombol varian teks.
+      if (satuTeks && (/backgroundColor|borderWidth|accessibilityRole="(button|link)"/.test(gaya) || /›\s*</.test(isiTeks))) {
+        hasil.push(`${di(n)}  Pressable berlabel teks → Tombol/TombolIkon`);
+      }
+    }
+    ts.forEachChild(n, kunjungi);
+  })(sf);
+  return hasil;
+});
+cek('sheet, isian, dan tombol lewat komponen bersama', komponenRakitan.length === 0, komponenRakitan);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];

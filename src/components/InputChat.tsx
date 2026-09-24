@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { TombolIkon } from './Tombol';
 
 /** Batas panjang pertanyaan; penjaga tempel-seluruh-dokumen, bukan sensor. */
 const MAKS_KARAKTER = 1000;
@@ -73,33 +74,7 @@ export function InputChat({ sibuk, onKirim }: Props) {
           />
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Kirim pertanyaan"
-          accessibilityState={{ disabled: !bisaKirim }}
-          disabled={!bisaKirim}
-          onPress={kirim}
-          style={({ pressed }) => ({
-            width: TAP_MIN + 4,
-            height: TAP_MIN + 4,
-            borderRadius: radius.pill,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: bisaKirim ? colors.aksen.isian : colors.permukaanCekung,
-            borderWidth: 1,
-            borderColor: bisaKirim ? colors.aksen.isian : colors.garisKontrol,
-            opacity: pressed ? 0.8 : 1,
-          })}
-        >
-          <Text
-            style={{
-              ...typography.title,
-              color: bisaKirim ? colors.diAtasIsian : colors.teksSamar,
-            }}
-          >
-            ↑
-          </Text>
-        </Pressable>
+        <TombolIkon bentuk="aksen" ikon="arrow-up" aksesLabel="Kirim pertanyaan" nonaktif={!bisaKirim} onPress={kirim} />
       </View>
 
       {/* Sisa karakter baru muncul saat mendekati batas — sebelum itu ia cuma

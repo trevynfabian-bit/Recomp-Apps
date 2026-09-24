@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -11,6 +11,7 @@ import { Isian } from './Isian';
 import { KeadaanMemuat } from './Keadaan';
 import { uraiAngka } from './Pemilih';
 import { Tombol } from './Tombol';
+import { KerangkaSheet } from './KerangkaSheet';
 
 /** Entri makanan baru yang siap disimpan (tanpa id & relasi, diisi pemanggil). */
 export type EntriMakananBaru = Omit<FoodLog, 'id' | 'daily_log_id'>;
@@ -84,93 +85,57 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
   }
 
   return (
-    <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.selubung }}
-      >
-        <View
-          style={{
-            backgroundColor: colors.permukaan,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            borderTopWidth: 1,
-            borderColor: colors.garis,
-            maxHeight: '88%',
-          }}
-        >
-          <View style={{ alignItems: 'center', paddingTop: spacing.md }}>
-            <View
-              style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.garis }}
+    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Catat makan via foto">
+      {tahap === 'pilih' ? (
+        <TahapPilih onMulai={jalankanAnalisis} />
+      ) : tahap === 'menganalisis' ? (
+        <KeadaanMemuat label="Menganalisis foto…" keterangan="Hasilnya berupa estimasi dan masih bisa Anda koreksi." />
+      ) : (
+        <View style={{ gap: spacing.lg }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <Pill
+              diKartu
+              label={`Estimasi AI · keyakinan ${keyakinan}`}
+              warna={
+                keyakinan === 'tinggi'
+                  ? colors.status.sukses.teks
+                  : keyakinan === 'sedang'
+                    ? colors.status.peringatan.teks
+                    : colors.status.bahaya.teks
+              }
             />
           </View>
 
-          <ScrollView
-            contentContainerStyle={{
-              padding: spacing.xl,
-              paddingBottom: spacing.xxl + spacing.lg,
-              gap: spacing.xl,
-            }}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={{ gap: spacing.xs, alignItems: 'center' }}>
-              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-                Catat makan via foto
-              </Text>
-            </View>
+          <Isian label="Nama makanan" value={nama} onChangeText={setNama} />
 
-            {tahap === 'pilih' ? (
-              <TahapPilih onMulai={jalankanAnalisis} />
-            ) : tahap === 'menganalisis' ? (
-              <KeadaanMemuat label="Menganalisis foto…" keterangan="Hasilnya berupa estimasi dan masih bisa Anda koreksi." />
-            ) : (
-              <View style={{ gap: spacing.lg }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                  <Pill
-                    diKartu
-                    label={`Estimasi AI · keyakinan ${keyakinan}`}
-                    warna={
-                      keyakinan === 'tinggi'
-                        ? colors.status.sukses.teks
-                        : keyakinan === 'sedang'
-                          ? colors.status.peringatan.teks
-                          : colors.status.bahaya.teks
-                    }
-                  />
-                </View>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <InputAngka label="Kalori" unit="kcal" nilai={kalori} onUbah={setKalori} warna={colors.macroTeks.kalori} />
+            <InputAngka label="Protein" unit="g" nilai={protein} onUbah={setProtein} warna={colors.macroTeks.protein} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <InputAngka label="Lemak" unit="g" nilai={lemak} onUbah={setLemak} warna={colors.macroTeks.lemak} />
+            <InputAngka label="Karbo" unit="g" nilai={karbo} onUbah={setKarbo} warna={colors.macroTeks.karbo} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <InputAngka label="Sat fat" unit="g" nilai={satFat} onUbah={setSatFat} warna={colors.macroTeks.satFat} />
+            <View style={{ flex: 1 }} />
+          </View>
 
-                <Isian label="Nama makanan" value={nama} onChangeText={setNama} />
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+            Angka di atas adalah tebakan dari foto. Periksa dan koreksi bila perlu —
+            entri ini akan disimpan bertanda estimasi.
+          </Text>
 
-                <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Kalori" unit="kcal" nilai={kalori} onUbah={setKalori} warna={colors.macroTeks.kalori} />
-                  <InputAngka label="Protein" unit="g" nilai={protein} onUbah={setProtein} warna={colors.macroTeks.protein} />
-                </View>
-                <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Lemak" unit="g" nilai={lemak} onUbah={setLemak} warna={colors.macroTeks.lemak} />
-                  <InputAngka label="Karbo" unit="g" nilai={karbo} onUbah={setKarbo} warna={colors.macroTeks.karbo} />
-                </View>
-                <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                  <InputAngka label="Sat fat" unit="g" nilai={satFat} onUbah={setSatFat} warna={colors.macroTeks.satFat} />
-                  <View style={{ flex: 1 }} />
-                </View>
-
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Angka di atas adalah tebakan dari foto. Periksa dan koreksi bila perlu —
-                  entri ini akan disimpan bertanda estimasi.
-                </Text>
-
-                <View style={{ gap: spacing.md }}>
-                  <Tombol label="Simpan" nonaktif={!valid} onPress={simpan} />
-                  <Tombol label="Foto ulang" varian="teks" nada="netral" sejajar="tengah" onPress={() => setTahap('pilih')} />
-                </View>
-              </View>
-            )}
-
-            {tahap !== 'hasil' ? <Tombol label="Batal" varian="teks" nada="netral" sejajar="tengah" onPress={onTutup} /> : null}
-          </ScrollView>
+          <View style={{ gap: spacing.md }}>
+            <Tombol label="Simpan" nonaktif={!valid} onPress={simpan} />
+            <Tombol label="Foto ulang" varian="teks" nada="netral" sejajar="tengah" onPress={() => setTahap('pilih')} />
+          </View>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      )}
+
+      {tahap !== 'hasil' ? <Tombol label="Batal" varian="teks" nada="netral" sejajar="tengah" onPress={onTutup} /> : null}
+
+    </KerangkaSheet>
   );
 }
 

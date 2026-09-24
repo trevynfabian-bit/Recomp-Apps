@@ -10,7 +10,20 @@ import {
   statusBatasPinggang,
   tanggalHariIni,
 } from '@recomp/logika';
-import { BannerBatasPinggang, Card, HeaderLayar, KartuBodyFat, KartuHero, RiwayatPerubahan, SectionHeader, SheetBatasPinggang, SheetCatatUkuran, SheetLengkapiProfil, type UkuranBaru } from '@/components';
+import {
+  BannerBatasPinggang,
+  Card,
+  HeaderLayar,
+  KartuBodyFat,
+  KartuHero,
+  RiwayatPerubahan,
+  SectionHeader,
+  SheetBatasPinggang,
+  SheetCatatUkuran,
+  SheetLengkapiProfil,
+  Tombol,
+  type UkuranBaru,
+} from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
@@ -178,29 +191,7 @@ export default function UkuranScreen() {
       />
 
       {/* Aksi utama layar: catat ukuran pekan ini */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={labelAksi}
-        onPress={() => {
-          ketukRingan();
-          setSheetTerbuka(true);
-        }}
-        style={({ pressed }) => ({
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: spacing.sm,
-          minHeight: TAP_MIN,
-          paddingVertical: spacing.lg,
-          borderRadius: radius.lg,
-          backgroundColor: colors.aksen.isian,
-          opacity: pressed ? 0.8 : 1,
-        })}
-      >
-        <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
-          {labelAksi}
-        </Text>
-      </Pressable>
+      <Tombol label={labelAksi} onPress={() => setSheetTerbuka(true)} />
 
       {/* Estimasi body fat: angka turunan, jadi ditempatkan SETELAH pengukuran
           dan dengan bobot visual yang lebih kecil daripada hero pinggang */}

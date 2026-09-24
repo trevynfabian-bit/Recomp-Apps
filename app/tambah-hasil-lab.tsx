@@ -15,6 +15,7 @@ import {
 import type { HasilPeriksaLab, IsianHasilLab, IsianPenandaLab } from '@recomp/logika';
 import {
   Card,
+  Chip,
   HeaderLayar,
   Isian,
   JudulSheet,
@@ -28,7 +29,7 @@ import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, typography, ukuranIkon } from '@/theme';
+import { colors, KONTROL_RAPAT, sisaSentuh, spacing, typography, ukuranIkon } from '@/theme';
 import { useJagaKeluar } from '@/lib/jagaKeluar';
 import { useKembali } from '@/lib/kembali';
 
@@ -192,28 +193,14 @@ export default function TambahHasilLabScreen() {
           />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
             {TEMPLAT_PANEL_LAB.map((t) => (
-              <Pressable
+              <Chip
                 key={t.nama}
-                hitSlop={sisaSentuh(KONTROL_RAPAT)}
-                accessibilityRole="button"
-                accessibilityLabel={`Templat ${t.nama}: isi nama & satuan ${t.penanda.length} penanda`}
-                disabled={menyimpan}
-                onPress={() => {
-                  ketukRingan();
-                  pakaiTemplat(t.nama);
-                }}
-                style={({ pressed }) => ({
-                  minHeight: KONTROL_RAPAT,
-                  paddingHorizontal: spacing.md,
-                  justifyContent: 'center',
-                  borderRadius: radius.pill,
-                  borderWidth: 1,
-                  borderColor: isian.nama === t.nama ? colors.aksen.isian : colors.garisKontrol,
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <Text style={{ ...typography.label, color: isian.nama === t.nama ? colors.teks : colors.teksRedup }}>{t.nama}</Text>
-              </Pressable>
+                label={t.nama}
+                terpilih={isian.nama === t.nama}
+                aksesLabel={`Templat ${t.nama}: isi nama & satuan ${t.penanda.length} penanda`}
+                nonaktif={menyimpan}
+                onPress={() => pakaiTemplat(t.nama)}
+              />
             ))}
           </View>
           <View style={{ gap: spacing.xs }}>

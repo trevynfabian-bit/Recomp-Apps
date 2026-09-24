@@ -1,8 +1,9 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { formatDesimal, formatMakro, type Fase, type StatusBatasPinggang } from '@recomp/logika';
-import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+
+import { colors, radius, spacing, tint, typography } from '@/theme';
 import { formatSelisih } from '@/lib/formatTampilan';
+import { Tombol } from './Tombol';
 
 type Props = {
   status: StatusBatasPinggang;
@@ -92,10 +93,9 @@ export function BannerBatasPinggang({
         <TombolAksi
           label={fase === 'Cut' ? 'Lihat fase' : 'Fase & budget'}
           utama={lewat}
-          warna={dasar}
           onPress={onLihatFase}
         />
-        <TombolAksi label="Ubah batas" utama={false} warna={dasar} onPress={onUbahBatas} />
+        <TombolAksi label="Ubah batas" utama={false} onPress={onUbahBatas} />
       </View>
     </View>
   );
@@ -123,45 +123,11 @@ function teksLaju(laju: number): string {
   return formatSelisih(laju);
 }
 
-function TombolAksi({
-  label,
-  utama,
-  warna,
-  onPress,
-}: {
-  label: string;
-  utama: boolean;
-  warna: string;
-  onPress: () => void;
-}) {
+/** Dua aksi sejajar selebar setengah kartu; warna status tetap di teks & tepi banner, bukan di tombol. */
+function TombolAksi({ label, utama, onPress }: { label: string; utama: boolean; onPress: () => void }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        flex: 1,
-        minHeight: TAP_MIN,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: utama ? warna : colors.garisKontrol,
-        backgroundColor: utama ? warna : 'transparent',
-        opacity: pressed ? 0.75 : 1,
-      })}
-    >
-      <Text
-        style={{
-          ...typography.label,
-          color: utama ? colors.diAtasIsian : colors.teksRedup,
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
+    <View style={{ flex: 1 }}>
+      <Tombol ukuran="kecil" sejajar="tengah" varian={utama ? 'utama' : 'bertepi'} label={label} onPress={onPress} />
+    </View>
   );
 }

@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { formatDesimal, formatTanggalPanjang, RENTANG_UKURAN_CM, selisihHari, tanggalHariIni } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { colors, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
 import { PemilihTanggal } from './Pemilih';
 import { formatSelisih } from '@/lib/formatTampilan';
+import { KerangkaSheet } from './KerangkaSheet';
+import { Isian } from './Isian';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -164,7 +166,6 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
     if (status === 'konfirmasi') setStatus('idle');
   }
 
-
   function tekanSimpan() {
     if (!bisaSimpan) return;
     if (perluKonfirmasi && status !== 'konfirmasi') {
@@ -194,187 +195,136 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
   const terkunci = status === 'menyimpan' || status === 'tersimpan';
 
   return (
-    <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
-        {/* Area gelap di atas sheet: ketuk untuk menutup. */}
-        <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
-
-        <View
-          style={{
-            maxHeight: '88%',
-            backgroundColor: colors.permukaan,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            borderTopWidth: 1,
-            borderColor: colors.garis,
+    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Catat ukuran mingguan">
+      {/* Tanggal pencatatan — bisa digeser karena ukur sering tertunda sehari. */}
+      <View style={{ gap: spacing.sm }}>
+        <PemilihTanggal
+          tanggal={tanggal}
+          hariIni={hariIni}
+          mundurMaks={MUNDUR_MAKS_HARI}
+          onUbah={(t) => {
+            setTanggal(t);
+            if (status === 'konfirmasi') setStatus('idle');
           }}
-        >
-          {/* Kepala sheet tidak ikut menggulung; beri jarak agar baris teratas
-              tidak menempel ke judul saat daftar digulung. */}
-          <View
-            style={{
-              alignItems: 'center',
-              paddingTop: spacing.md,
-              paddingBottom: spacing.md,
-              gap: spacing.xs,
-            }}
-          >
-            <View
-              style={{
-                width: ukuran.pegangan.lebar,
-                height: ukuran.pegangan.tinggi,
-                borderRadius: radius.pill,
-                backgroundColor: colors.garis,
-              }}
-            />
-            <Text
-              style={{
-                ...typography.caption,
-                color: colors.teksSamar,
-                textTransform: 'uppercase',
-                marginTop: spacing.sm,
-              }}
-            >
-              Catat ukuran mingguan
-            </Text>
-          </View>
+        />
 
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
-          >
-            {/* Tanggal pencatatan — bisa digeser karena ukur sering tertunda sehari. */}
-            <View style={{ gap: spacing.sm }}>
-              <PemilihTanggal
-                tanggal={tanggal}
-                hariIni={hariIni}
-                mundurMaks={MUNDUR_MAKS_HARI}
-                onUbah={(t) => {
-                  setTanggal(t);
-                  if (status === 'konfirmasi') setStatus('idle');
-                }}
-              />
-
-              {mode === 'perbarui' ? (
-                <Keterangan nada="netral">
-                  Tanggal ini sudah punya pencatatan, jadi menyimpan akan MENGGANTINYA — satu
-                  tanggal satu pencatatan, supaya tren tidak bercabang.
-                </Keterangan>
-              ) : jarakHari !== null && jarakHari < JARAK_IDEAL_MIN ? (
-                <Keterangan nada="amber">
-                  Baru {jarakHari} hari dari pencatatan terakhir. Ukuran bergerak pelan — jarak
-                  sekitar 7 hari membuat perubahannya lebih terbaca ketimbang galat meteran.
-                </Keterangan>
-              ) : jarakHari !== null && jarakHari > JARAK_IDEAL_MAKS ? (
-                <Keterangan nada="netral">
-                  {jarakHari} hari dari pencatatan terakhir, jadi selisih di bawah ini menampung
-                  lebih dari sepekan perubahan.
-                </Keterangan>
-              ) : null}
-            </View>
-
-            {/* Tujuh field, sudah terisi angka yang ada — tinggal ubah yang berubah. */}
-            <View style={{ gap: spacing.sm }}>
-              {baris.map((b) => (
-                <BarisInput
-                  key={b.kunci}
-                  label={b.label}
-                  nilai={draf[b.kunci] ?? ''}
-                  lama={b.lama}
-                  selisih={b.selisih}
-                  valid={b.valid}
-                  onUbah={(t) => ubah(b.kunci, t)}
-                />
-              ))}
-            </View>
-
-            {/* Ringkas apa yang sebenarnya akan tersimpan. */}
-            <Panel style={{ gap: spacing.xs }}>
-              <Text style={{ ...typography.label, color: colors.teks }}>
-                {dasar === null
-                  ? 'Pencatatan pertama'
-                  : `${jumlahDiubah} dari ${FIELD.length} ukuran diubah`}
-              </Text>
-              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                {dasar === null
-                  ? 'Angka ini jadi titik nol Anda — pencatatan berikutnya dibandingkan dengannya.'
-                  : mode === 'perbarui'
-                    ? `Field terisi pencatatan ${formatTanggalPanjang(tanggal)} yang sudah ada; selisih di kanan tetap dihitung terhadap pencatatan sebelumnya.`
-                    : 'Field terisi ukuran pencatatan sebelumnya; yang tidak Anda sentuh tersimpan apa adanya.'}
-              </Text>
-            </Panel>
-
-            {!semuaValid ? (
-              <Keterangan nada="coral">
-                Periksa angka yang ditandai merah — ada yang di luar rentang masuk akal untuk
-                bagian tubuh itu.
-              </Keterangan>
-            ) : null}
-
-            {status === 'konfirmasi' && lompatan.length > 0 ? (
-              <Kotak nada="amber" judul={`Lompatan ${formatDesimal(AMBANG_KONFIRMASI_CM, 0)} cm ke atas`}>
-                {lompatan
-                  .map(
-                    (b) =>
-                      `${b.label} ${formatSelisih(b.selisih!, { unit: 'cm' })}`,
-                  )
-                  .join(' · ')}
-                {'\n'}Sepekan jarang mengubah ukuran sebanyak itu. Periksa sekali lagi, atau
-                lanjutkan bila memang benar.
-              </Kotak>
-            ) : null}
-
-            {status === 'konfirmasi' && lompatan.length === 0 && adaSalinan ? (
-              <Kotak nada="amber" judul="Tidak ada angka yang berubah">
-                Semua field masih persis ukuran pencatatan sebelumnya. Kalau Anda belum mengukur, batalkan
-                saja — menyimpan salinan membuat tren terlihat datar padahal datanya tidak ada.
-              </Kotak>
-            ) : null}
-
-            {status === 'gagal' ? (
-              <Kotak nada="coral" judul="Gagal menyimpan">
-                Angka Anda masih tersimpan di layar ini. Coba lagi.
-              </Kotak>
-            ) : null}
-
-            {/* Cara mengukur: konsistensi titik ukur lebih menentukan daripada akurasi. */}
-            <View style={{ gap: spacing.xs }}>
-              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-                Supaya angkanya bisa dibandingkan
-              </Text>
-              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                Ukur pagi sebelum makan, otot rileks, meteran rata dan tidak menekan kulit.
-                Pinggang di ketinggian pusar, leher di bawah jakun, lengan di titik tertebal.
-                Yang paling menentukan bukan akurasinya, tapi memakai titik ukur yang SAMA tiap
-                pekan — selisih 1 cm karena meteran bergeser tidak bisa dibedakan dari 1 cm yang
-                Anda benar-benar peroleh.
-              </Text>
-            </View>
-
-            <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
-              <Tombol
-                label={labelSimpan(status, perluKonfirmasi, mode)}
-                onPress={tekanSimpan}
-                nonaktif={!bisaSimpan}
-                memproses={status === 'menyimpan'}
-                berhasil={status === 'tersimpan'}
-              />
-
-              <Pressable
-                accessibilityRole="button"
-                disabled={terkunci}
-                onPress={() => (status === 'konfirmasi' ? setStatus('idle') : onTutup())}
-                style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Text style={{ ...typography.label, color: colors.teksSamar }}>
-                  {status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
-                </Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-        </View>
+        {mode === 'perbarui' ? (
+          <Keterangan nada="netral">
+            Tanggal ini sudah punya pencatatan, jadi menyimpan akan MENGGANTINYA — satu
+            tanggal satu pencatatan, supaya tren tidak bercabang.
+          </Keterangan>
+        ) : jarakHari !== null && jarakHari < JARAK_IDEAL_MIN ? (
+          <Keterangan nada="amber">
+            Baru {jarakHari} hari dari pencatatan terakhir. Ukuran bergerak pelan — jarak
+            sekitar 7 hari membuat perubahannya lebih terbaca ketimbang galat meteran.
+          </Keterangan>
+        ) : jarakHari !== null && jarakHari > JARAK_IDEAL_MAKS ? (
+          <Keterangan nada="netral">
+            {jarakHari} hari dari pencatatan terakhir, jadi selisih di bawah ini menampung
+            lebih dari sepekan perubahan.
+          </Keterangan>
+        ) : null}
       </View>
-    </Modal>
+
+      {/* Tujuh field, sudah terisi angka yang ada — tinggal ubah yang berubah. */}
+      <View style={{ gap: spacing.sm }}>
+        {baris.map((b) => (
+          <BarisInput
+            key={b.kunci}
+            label={b.label}
+            nilai={draf[b.kunci] ?? ''}
+            lama={b.lama}
+            selisih={b.selisih}
+            valid={b.valid}
+            onUbah={(t) => ubah(b.kunci, t)}
+          />
+        ))}
+      </View>
+
+      {/* Ringkas apa yang sebenarnya akan tersimpan. */}
+      <Panel style={{ gap: spacing.xs }}>
+        <Text style={{ ...typography.label, color: colors.teks }}>
+          {dasar === null
+            ? 'Pencatatan pertama'
+            : `${jumlahDiubah} dari ${FIELD.length} ukuran diubah`}
+        </Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+          {dasar === null
+            ? 'Angka ini jadi titik nol Anda — pencatatan berikutnya dibandingkan dengannya.'
+            : mode === 'perbarui'
+              ? `Field terisi pencatatan ${formatTanggalPanjang(tanggal)} yang sudah ada; selisih di kanan tetap dihitung terhadap pencatatan sebelumnya.`
+              : 'Field terisi ukuran pencatatan sebelumnya; yang tidak Anda sentuh tersimpan apa adanya.'}
+        </Text>
+      </Panel>
+
+      {!semuaValid ? (
+        <Keterangan nada="coral">
+          Periksa angka yang ditandai merah — ada yang di luar rentang masuk akal untuk
+          bagian tubuh itu.
+        </Keterangan>
+      ) : null}
+
+      {status === 'konfirmasi' && lompatan.length > 0 ? (
+        <Kotak nada="amber" judul={`Lompatan ${formatDesimal(AMBANG_KONFIRMASI_CM, 0)} cm ke atas`}>
+          {lompatan
+            .map(
+              (b) =>
+                `${b.label} ${formatSelisih(b.selisih!, { unit: 'cm' })}`,
+            )
+            .join(' · ')}
+          {'\n'}Sepekan jarang mengubah ukuran sebanyak itu. Periksa sekali lagi, atau
+          lanjutkan bila memang benar.
+        </Kotak>
+      ) : null}
+
+      {status === 'konfirmasi' && lompatan.length === 0 && adaSalinan ? (
+        <Kotak nada="amber" judul="Tidak ada angka yang berubah">
+          Semua field masih persis ukuran pencatatan sebelumnya. Kalau Anda belum mengukur, batalkan
+          saja — menyimpan salinan membuat tren terlihat datar padahal datanya tidak ada.
+        </Kotak>
+      ) : null}
+
+      {status === 'gagal' ? (
+        <Kotak nada="coral" judul="Gagal menyimpan">
+          Angka Anda masih tersimpan di layar ini. Coba lagi.
+        </Kotak>
+      ) : null}
+
+      {/* Cara mengukur: konsistensi titik ukur lebih menentukan daripada akurasi. */}
+      <View style={{ gap: spacing.xs }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
+          Supaya angkanya bisa dibandingkan
+        </Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+          Ukur pagi sebelum makan, otot rileks, meteran rata dan tidak menekan kulit.
+          Pinggang di ketinggian pusar, leher di bawah jakun, lengan di titik tertebal.
+          Yang paling menentukan bukan akurasinya, tapi memakai titik ukur yang SAMA tiap
+          pekan — selisih 1 cm karena meteran bergeser tidak bisa dibedakan dari 1 cm yang
+          Anda benar-benar peroleh.
+        </Text>
+      </View>
+
+      <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
+        <Tombol
+          label={labelSimpan(status, perluKonfirmasi, mode)}
+          onPress={tekanSimpan}
+          nonaktif={!bisaSimpan}
+          memproses={status === 'menyimpan'}
+          berhasil={status === 'tersimpan'}
+        />
+
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          nada="netral"
+          sejajar="tengah"
+          label={status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
+          nonaktif={terkunci}
+          onPress={() => (status === 'konfirmasi' ? setStatus('idle') : onTutup())}
+        />
+      </View>
+
+    </KerangkaSheet>
   );
 }
 
@@ -430,7 +380,7 @@ function BarisInput({
       <Text
         style={{
           ...typography.label,
-          width: 62,
+          width: ukuran.kolomSelisih,
           textAlign: 'right',
           color: warnaSelisih(selisih),
         }}
@@ -440,37 +390,18 @@ function BarisInput({
           : formatSelisih(selisih)}
       </Text>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.xs,
-          paddingHorizontal: spacing.md,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderColor: valid ? colors.garisKontrol : colors.status.bahaya.isian,
-          backgroundColor: colors.permukaanCekung,
-        }}
-      >
-        <TextInput
-          value={nilai}
-          onChangeText={onUbah}
-          keyboardType="decimal-pad"
-          inputMode="decimal"
-          selectTextOnFocus
-          accessibilityLabel={`${label} dalam sentimeter`}
-          style={{
-            ...typography.body,
-            // Lebar eksplisit: tanpa ini input di web memakai lebar bawaannya
-            // (~20 karakter) dan mendorong unit keluar baris.
-            width: 56,
-            paddingVertical: spacing.md,
-            textAlign: 'right',
-            color: valid ? colors.teks : colors.status.bahaya.teks,
-          }}
-        />
-        <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
-      </View>
+      <Isian
+        ringkas
+        angka
+        label={`${label} dalam sentimeter`}
+        unit="cm"
+        value={nilai}
+        onChangeText={onUbah}
+        keyboardType="decimal-pad"
+        inputMode="decimal"
+        selectTextOnFocus
+        ditandai={!valid}
+      />
     </View>
   );
 }

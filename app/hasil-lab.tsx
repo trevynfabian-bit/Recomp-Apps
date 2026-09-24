@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -25,10 +25,10 @@ import {
   Tombol,
 } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
-import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { ketukBerhasil } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, ukuranIkon, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
 /**
  * Riwayat hasil lab.
@@ -204,20 +204,14 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
       {nilaiTerbuka ? <DataMentahLab hasil={hasil} /> : null}
       {/* Tindakan terpisah dari isi kartu: tetap terjangkau pembaca layar. */}
       <View style={{ flexDirection: 'row', gap: spacing.lg }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${nilaiTerbuka ? 'Sembunyikan' : 'Lihat'} ${hasil.penanda.length} nilai ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
-          accessibilityState={{ expanded: nilaiTerbuka }}
-          onPress={() => {
-            ketukRingan();
-            setNilaiTerbuka((t) => !t);
-          }}
-          style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ ...typography.label, color: colors.teks }}>
-            {nilaiTerbuka ? 'Sembunyikan nilai' : `Lihat ${hasil.penanda.length} nilai`}
-          </Text>
-        </Pressable>
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          nada="netral"
+          label={nilaiTerbuka ? 'Sembunyikan nilai' : `Lihat ${hasil.penanda.length} nilai`}
+          aksesLabel={`${nilaiTerbuka ? 'Sembunyikan' : 'Lihat'} ${hasil.penanda.length} nilai ${hasil.nama}, ${tanggal} ${hasil.tanggal.slice(0, 4)}`}
+          onPress={() => setNilaiTerbuka((t) => !t)}
+        />
         <Tombol
           varian="teks"
           ukuran="kecil"

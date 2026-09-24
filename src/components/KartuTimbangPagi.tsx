@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Card, Panel } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 import { KeadaanKosong } from './Keadaan';
 import { Tombol } from './Tombol';
 import { PemilihAngka, uraiAngka } from './Pemilih';
 import { formatSelisih } from '@/lib/formatTampilan';
+import { KerangkaSheet } from './KerangkaSheet';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
 const LANGKAH_KG = 0.1;
@@ -90,7 +91,6 @@ export function KartuTimbangPagi({
   const selisih =
     beratKg !== null && beratSebelumnyaKg !== null ? beratKg - beratSebelumnyaKg : null;
   const jenisSumber = beratKg !== null ? sumberBerat(sumber) : null;
-
 
   /** Selisih draf terhadap timbangan terakhir — dasar konfirmasi salah ketik. */
   const lompatan =
@@ -208,161 +208,117 @@ export function KartuTimbangPagi({
         </Card>
       </Pressable>
 
-      <Modal
-        visible={sheetTerbuka}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setSheetTerbuka(false)}
-      >
-        <Pressable
-          accessibilityLabel="Tutup"
-          onPress={() => setSheetTerbuka(false)}
-          style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}
-        >
-          {/* Hentikan propagasi agar ketukan di dalam sheet tidak menutupnya. */}
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: colors.permukaan,
-              borderTopLeftRadius: radius.xl,
-              borderTopRightRadius: radius.xl,
-              borderTopWidth: 1,
-              borderColor: colors.garis,
-              padding: spacing.xl,
-              paddingBottom: spacing.xxl + spacing.lg,
-              gap: spacing.xl,
-            }}
-          >
-            <View style={{ alignItems: 'center', gap: spacing.xs }}>
-              <View
-                style={{
-                  width: ukuran.pegangan.lebar,
-                  height: ukuran.pegangan.tinggi,
-                  borderRadius: radius.pill,
-                  backgroundColor: colors.garis,
-                  marginBottom: spacing.sm,
-                }}
+      <KerangkaSheet terbuka={sheetTerbuka} onTutup={() => setSheetTerbuka(false)} label="Berat pagi">
+        <PemilihAngka
+          nilai={draf}
+          onUbah={setDraf}
+          langkah={LANGKAH_KG}
+          min={BERAT_MIN}
+          maks={BERAT_MAKS}
+          cadangan={nilaiAwal}
+          unit="kg"
+          unitAkses="kilogram"
+          aksesLabel="Berat dalam kilogram"
+          galat={valid ? null : `Masukkan berat antara ${BERAT_MIN} dan ${BERAT_MAKS} kg`}
+        />
+
+        {/* Asal angka yang sedang diubah, plus akibat menyimpannya. */}
+        {jenisSumber !== null ? (
+          <Panel>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>Asal angka</Text>
+              <PenandaSumber
+                jenis={jenisSumber}
+                detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
               />
-              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-                Berat pagi
+            </View>
+            {jenisSumber === 'sinkron' ? (
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+                Angka ini ditarik dari Apple Health. Menyimpan di sini akan
+                menggantinya dengan catatan manual Anda.
               </Text>
-            </View>
-
-            <PemilihAngka
-              nilai={draf}
-              onUbah={setDraf}
-              langkah={LANGKAH_KG}
-              min={BERAT_MIN}
-              maks={BERAT_MAKS}
-              cadangan={nilaiAwal}
-              unit="kg"
-              unitAkses="kilogram"
-              aksesLabel="Berat dalam kilogram"
-              galat={valid ? null : `Masukkan berat antara ${BERAT_MIN} dan ${BERAT_MAKS} kg`}
-            />
-
-            {/* Asal angka yang sedang diubah, plus akibat menyimpannya. */}
-            {jenisSumber !== null ? (
-              <Panel>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>Asal angka</Text>
-                  <PenandaSumber
-                    jenis={jenisSumber}
-                    detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
-                  />
-                </View>
-                {jenisSumber === 'sinkron' ? (
-                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                    Angka ini ditarik dari Apple Health. Menyimpan di sini akan
-                    menggantinya dengan catatan manual Anda.
-                  </Text>
-                ) : null}
-              </Panel>
             ) : null}
+          </Panel>
+        ) : null}
 
-            {/* Timbangan sebelumnya beserta asalnya masing-masing. */}
-            {riwayat.length > 0 ? (
-              <View style={{ gap: spacing.sm }}>
-                <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-                  Timbangan sebelumnya
-                </Text>
-                {riwayat.map((r) => (
-                  <View
-                    key={r.tanggal}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: spacing.sm,
-                    }}
-                  >
-                    <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }}>
-                      {formatTanggalPanjang(r.tanggal)}
-                    </Text>
-                    <PenandaSumber jenis={sumberBerat(r.sumber_berat) ?? 'manual'} />
-                    <Text style={{ ...typography.label, color: colors.teks, width: 56, textAlign: 'right' }}>
-                      {formatDesimal(r.berat_pagi_kg)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <KeadaanKosong
-                tampilan="polos"
-                judul="Belum ada catatan berat sebelumnya"
-                keterangan="Timbangan yang Anda simpan tampil di sini sebagai pembanding."
-              />
-            )}
-
-            {/* Penjaga salah ketik: lompatan tak wajar diminta dikonfirmasi. */}
-            {status === 'konfirmasi' ? (
-              <Panel nada="aksen">
-                <Text style={{ ...typography.label, color: colors.aksen.teks }}>
-                  Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
-                  lanjutkan bila memang benar.
-                </Text>
-              </Panel>
-            ) : null}
-
-            {status === 'gagal' ? (
-              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
-                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-                  Gagal menyimpan
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Angka Anda masih tersimpan di layar ini. Coba lagi.
-                </Text>
-              </Panel>
-            ) : null}
-
-            <View style={{ gap: spacing.md }}>
-              <Tombol
-                label={labelTombolSimpan(status, perluKonfirmasi)}
-                onPress={tekanSimpan}
-                nonaktif={!valid}
-                memproses={status === 'menyimpan'}
-                berhasil={status === 'tersimpan'}
-              />
-
-              <Pressable
-                accessibilityRole="button"
-                disabled={status === 'menyimpan' || status === 'tersimpan'}
-                onPress={() =>
-                  status === 'konfirmasi' ? setStatus('idle') : setSheetTerbuka(false)
-                }
-                style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
+        {/* Timbangan sebelumnya beserta asalnya masing-masing. */}
+        {riwayat.length > 0 ? (
+          <View style={{ gap: spacing.sm }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
+              Timbangan sebelumnya
+            </Text>
+            {riwayat.map((r) => (
+              <View
+                key={r.tanggal}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: spacing.sm,
+                }}
               >
-                <Text style={{ ...typography.label, color: colors.teksSamar }}>
-                  {status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
+                <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }}>
+                  {formatTanggalPanjang(r.tanggal)}
                 </Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+                <PenandaSumber jenis={sumberBerat(r.sumber_berat) ?? 'manual'} />
+                <Text style={{ ...typography.label, color: colors.teks, width: 56, textAlign: 'right' }}>
+                  {formatDesimal(r.berat_pagi_kg)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <KeadaanKosong
+            tampilan="polos"
+            judul="Belum ada catatan berat sebelumnya"
+            keterangan="Timbangan yang Anda simpan tampil di sini sebagai pembanding."
+          />
+        )}
+
+        {/* Penjaga salah ketik: lompatan tak wajar diminta dikonfirmasi. */}
+        {status === 'konfirmasi' ? (
+          <Panel nada="aksen">
+            <Text style={{ ...typography.label, color: colors.aksen.teks }}>
+              Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
+            </Text>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+              Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
+              lanjutkan bila memang benar.
+            </Text>
+          </Panel>
+        ) : null}
+
+        {status === 'gagal' ? (
+          <Panel nada="bahaya" style={{ gap: spacing.xs }}>
+            <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
+              Gagal menyimpan
+            </Text>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+              Angka Anda masih tersimpan di layar ini. Coba lagi.
+            </Text>
+          </Panel>
+        ) : null}
+
+        <View style={{ gap: spacing.md }}>
+          <Tombol
+            label={labelTombolSimpan(status, perluKonfirmasi)}
+            onPress={tekanSimpan}
+            nonaktif={!valid}
+            memproses={status === 'menyimpan'}
+            berhasil={status === 'tersimpan'}
+          />
+
+          <Tombol
+            varian="teks"
+            ukuran="kecil"
+            nada="netral"
+            sejajar="tengah"
+            label={status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
+            nonaktif={status === 'menyimpan' || status === 'tersimpan'}
+            onPress={() => (status === 'konfirmasi' ? setStatus('idle') : setSheetTerbuka(false))}
+          />
+        </View>
+      </KerangkaSheet>
     </>
   );
 }

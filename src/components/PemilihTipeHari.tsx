@@ -1,12 +1,13 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Card } from './Card';
-import { ketukRingan } from '@/lib/haptics';
+
 import { formatAngka, formatMakro } from '@recomp/logika';
 import { alasanDeteksi, type HasilDeteksi } from '@recomp/logika';
 import { NAMA_SUMBER } from '@/mocks/workout';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
 import { Tombol } from './Tombol';
+import { Chip } from './Chip';
 
 type Props = {
   daftar: DayType[];
@@ -57,37 +58,13 @@ export function PemilihTipeHari({
           {daftar.map((dt) => {
             const aktif = dt.id === terpilihId;
             return (
-              <Pressable
+              <Chip
                 key={dt.id}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: aktif }}
-                accessibilityLabel={`Tipe hari ${dt.nama}`}
-                onPress={() => {
-                  if (aktif) return;
-                  ketukRingan();
-                  onPilih(dt.id);
-                }}
-                style={({ pressed }) => ({
-                  minHeight: TAP_MIN,
-                  justifyContent: 'center',
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  borderRadius: radius.pill,
-                  borderWidth: 1,
-                  borderColor: aktif ? colors.aksen.isian : colors.garis,
-                  backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <Text
-                  style={{
-                    ...typography.label,
-                    color: aktif ? colors.diAtasIsian : colors.teksRedup,
-                  }}
-                >
-                  {dt.nama}
-                </Text>
-              </Pressable>
+                label={dt.nama}
+                terpilih={aktif}
+                aksesLabel={`Tipe hari ${dt.nama}`}
+                onPress={() => onPilih(dt.id)}
+              />
             );
           })}
         </ScrollView>

@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { formatDesimal, formatTanggalPanjang, ringkasPerubahan } from '@recomp/logika';
 import { Card } from './Card';
 import { GrafikUkuran } from './GrafikUkuran';
 import { SectionHeader } from './SectionHeader';
-import { ketukRingan } from '@/lib/haptics';
+
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { formatSelisih } from '@/lib/formatTampilan';
+import { Chip } from './Chip';
 
 type KunciUkuran = BarisUkuran['kunci'];
 
@@ -58,36 +59,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
         {bagian.map((b) => {
           const aktif = b.kunci === terpilih;
           return (
-            <Pressable
-              key={b.kunci}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: aktif }}
-              accessibilityLabel={b.label}
-              onPress={() => {
-                if (aktif) return;
-                ketukRingan();
-                setTerpilih(b.kunci);
-              }}
-              style={({ pressed }) => ({
-                minHeight: TAP_MIN,
-                justifyContent: 'center',
-                paddingHorizontal: spacing.lg,
-                borderRadius: radius.pill,
-                borderWidth: 1,
-                borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                backgroundColor: aktif ? tint(colors.aksen.isian, 'pill') : colors.permukaanCekung,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Text
-                style={{
-                  ...typography.label,
-                  color: aktif ? colors.aksen.teks : colors.teksRedup,
-                }}
-              >
-                {b.label}
-              </Text>
-            </Pressable>
+            <Chip key={b.kunci} label={b.label} terpilih={aktif} onPress={() => setTerpilih(b.kunci)} />
           );
         })}
       </ScrollView>
