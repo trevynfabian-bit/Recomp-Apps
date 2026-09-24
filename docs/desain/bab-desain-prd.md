@@ -110,6 +110,10 @@ berubah karena keputusan desain.
   `KeadaanGagal`: memuat menyebut apa yang dimuat; kosong bernada netral dan
   memberi jalan mengisinya; gagal menyebut apa yang gagal, sebabnya, dan jalan
   keluarnya (Coba lagi), dengan ikon — tidak pernah warna saja.
+- Angka: satu `KartuHero`/`HeroNumber` per layar; angka pendukung memakai
+  `AngkaStat` (label kapital kecil, `title` tabular, satuan). Selisih selalu
+  bertanda: "+" untuk naik, minus sejati "−" (U+2212) untuk turun
+  (`formatSelisih`), supaya arah terbaca tanpa warna dan kolom tidak bergeser.
 - Kontainer: `Card` (kartu standar; `nada` memberi tepi bertint untuk kartu yang
   perlu dilihat lebih dulu), `DaftarBaris` (baris-baris dalam satu kartu dengan
   pemisah otomatis), `Panel` (area cekung di dalam kartu), `Pemisah` (garis

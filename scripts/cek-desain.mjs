@@ -44,7 +44,8 @@ function berkasTsx(dir) {
 
 console.log('Satu angka utama per layar');
 const layar = berkasTsx('app');
-const hitung = (p) => (readFileSync(p, 'utf8').match(/<HeroNumber\b/g) ?? []).length;
+// `KartuHero` membungkus tepat satu `HeroNumber`, jadi dihitung sebagai satu angka utama.
+const hitung = (p) => (readFileSync(p, 'utf8').match(/<(HeroNumber|KartuHero)\b/g) ?? []).length;
 for (const p of layar) {
   const n = hitung(p);
   if (n > 0) cek(`${p}: ${n} angka utama`, n === 1, 'lebih dari satu');
@@ -61,7 +62,7 @@ const LAYAR_DATA = [
   'app/target-harian.tsx', // target kalori hari ini
 ];
 for (const p of LAYAR_DATA) cek(`layar data ${p} punya angka utama`, hitung(p) === 1, `${hitung(p)} angka utama`);
-const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumber.tsx'));
+const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumber.tsx') && !p.endsWith('KartuHero.tsx'));
 const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
 cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
 

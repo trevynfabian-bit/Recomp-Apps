@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import { formatDesimal, formatMakro, type Fase, type StatusBatasPinggang } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 type Props = {
   status: StatusBatasPinggang;
@@ -119,7 +120,7 @@ function pesanKeputusan(lewat: boolean, fase: Fase): string {
 }
 
 function teksLaju(laju: number): string {
-  return `${laju > 0 ? '+' : '−'}${formatDesimal(Math.abs(laju))}`;
+  return formatSelisih(laju);
 }
 
 function TombolAksi({

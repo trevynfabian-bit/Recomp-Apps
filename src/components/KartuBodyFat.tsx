@@ -11,6 +11,7 @@ import { Pill } from './Pill';
 import type { Profile, UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, typography } from '@/theme';
 import { Tombol } from './Tombol';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 type Props = {
   profil: Profile;
@@ -110,9 +111,7 @@ export function KartuBodyFat({
             terbaca seolah menerangkan rentang di atasnya. */}
         {selisihPoin !== null && pertama ? (
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-            {selisihPoin === 0
-              ? 'tidak berubah'
-              : `${selisihPoin > 0 ? '+' : '−'}${formatDesimal(Math.abs(selisihPoin))} poin`}{' '}
+            {formatSelisih(selisihPoin, { unit: 'poin', nol: 'tidak berubah' })}{' '}
             sejak {formatTanggalPanjang(pertama.tanggal)}
           </Text>
         ) : null}

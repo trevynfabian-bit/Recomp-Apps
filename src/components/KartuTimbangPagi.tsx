@@ -10,6 +10,7 @@ import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/th
 import type { SumberBerat } from '@/types/domain';
 import { Tombol } from './Tombol';
 import { PemilihAngka, uraiAngka } from './Pemilih';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
 const LANGKAH_KG = 0.1;
@@ -158,8 +159,7 @@ export function KartuTimbangPagi({
                         color: selisih > 0 ? colors.aksen.teks : colors.status.sukses.teks,
                       }}
                     >
-                      {selisih > 0 ? '+' : '−'}
-                      {formatDesimal(Math.abs(selisih))}
+                      {formatSelisih(selisih)}
                     </Text>
                   ) : null}
                 </View>

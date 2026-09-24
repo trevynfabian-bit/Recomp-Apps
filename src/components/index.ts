@@ -18,6 +18,7 @@ export { KartuBodyFat } from './KartuBodyFat';
 export { KartuCatatan } from './KartuCatatan';
 export { KartuPenolakanMedis } from './KartuPenolakanMedis';
 export { KartuRingkasanMingguan } from './KartuRingkasanMingguan';
+export { AngkaStat, DeretStat, KartuHero } from './KartuHero';
 export { KartuSesiLatihan } from './KartuSesiLatihan';
 export { KartuSumberData } from './KartuSumberData';
 export { KartuTdee } from './KartuTdee';

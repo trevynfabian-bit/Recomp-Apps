@@ -7,6 +7,7 @@ import {
   DaftarBaris,
   InputAngka,
   InputTarget,
+  KartuHero,
   Isian,
   KeadaanGagal,
   KeadaanKosong,
@@ -26,6 +27,7 @@ import {
   uraiAngka,
 } from '@/components';
 import { tanggalHariIni } from '@recomp/logika';
+import { formatSelisih } from '@/lib/formatTampilan';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
 import { colors, spacing, typography, useSkema } from '@/theme';
 
@@ -232,7 +234,18 @@ export default function PeragaScreen() {
       </Bagian>
 
       <Bagian judul="Angka & makro">
-        <Card style={{ gap: spacing.lg }}>
+        <KartuHero
+          label="Sisa kalori hari ini"
+          nilai="1.120"
+          unit="kcal"
+          keterangan="1.980 dari target 3.100 kcal"
+          stat={[
+            { label: 'Sisa protein', nilai: '57', unit: 'g', warna: colors.status.sukses.teks },
+            { label: 'Arah sepekan', nilai: formatSelisih(0.4), unit: 'kg' },
+            { label: 'Tipe hari', nilai: 'Beban+Lari', kata: true },
+          ]}
+        />
+        <Card style={{ gap: spacing.lg, marginTop: spacing.md }}>
           {makro.slice(0, 3).map((m) => (
             <MacroRow key={m.key} macro={m} mode="sisa" />
           ))}

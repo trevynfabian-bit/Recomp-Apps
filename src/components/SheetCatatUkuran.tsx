@@ -7,6 +7,7 @@ import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/th
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
 import { PemilihTanggal } from './Pemilih';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -315,7 +316,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                 {lompatan
                   .map(
                     (b) =>
-                      `${b.label} ${b.selisih! > 0 ? '+' : '−'}${formatDesimal(Math.abs(b.selisih!))} cm`,
+                      `${b.label} ${formatSelisih(b.selisih!, { unit: 'cm' })}`,
                   )
                   .join(' · ')}
                 {'\n'}Sepekan jarang mengubah ukuran sebanyak itu. Periksa sekali lagi, atau
@@ -436,7 +437,7 @@ function BarisInput({
       >
         {selisih === null || selisih === 0
           ? ''
-          : `${selisih > 0 ? '+' : '−'}${formatDesimal(Math.abs(selisih))}`}
+          : formatSelisih(selisih)}
       </Text>
 
       <View

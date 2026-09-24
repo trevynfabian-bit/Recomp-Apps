@@ -29,6 +29,7 @@ import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 /** Urutan tampil; label pendek supaya muat di dua kolom. */
 const BAGIAN: { kunci: BarisUkuran['kunci']; label: string; pasangan?: 'kiri' | 'kanan' }[] = [
@@ -318,9 +319,7 @@ export default function UkuranScreen() {
 
 /** "+0,4 cm" / "−0,3 cm"; tanda minus memakai karakter minus, bukan hyphen. */
 function selisihTeks(selisih: number): string {
-  const b = bulat(selisih);
-  if (b === 0) return 'tidak berubah';
-  return `${b > 0 ? '+' : '−'}${formatDesimal(Math.abs(b))} cm`;
+  return formatSelisih(selisih, { unit: 'cm', nol: 'tidak berubah' });
 }
 
 function bulat(n: number): number {

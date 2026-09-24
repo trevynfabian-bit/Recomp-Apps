@@ -7,6 +7,7 @@ import { SectionHeader } from './SectionHeader';
 import { ketukRingan } from '@/lib/haptics';
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 type KunciUkuran = BarisUkuran['kunci'];
 
@@ -168,6 +169,5 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
 
 /** "+0,4" / "−0,3" / "0,0"; tanda minus memakai karakter minus, bukan hyphen. */
 function teksSelisih(nilai: number): string {
-  if (nilai === 0) return '0,0';
-  return `${nilai > 0 ? '+' : '−'}${formatDesimal(Math.abs(nilai))}`;
+  return formatSelisih(nilai);
 }

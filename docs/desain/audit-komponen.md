@@ -99,6 +99,11 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    `BannerBatasPinggang` (warna mengikuti status banner) dan −/+ jam di
    `SheetJamTimbang` (tersembunyi dari pembaca layar karena pembungkusnya
    `adjustable`).
-5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
+5. **Kartu angka hero & format angka** ✓ `KartuHero` (satu `HeroNumber` +
+   isi pendukung + deret stat; dihitung sebagai angka utama oleh `cek:desain`),
+   `AngkaStat`/`DeretStat` (angka sekunder; menggantikan 3 salinan `StatKecil`
+   di tugas berikutnya), `formatSelisih()` di `src/lib/formatTampilan.ts`
+   (tanda "+" / minus U+2212, nol sesuai presisi atau kalimat) menggantikan 8
+   pola selisih tulisan tangan.
 
 Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).

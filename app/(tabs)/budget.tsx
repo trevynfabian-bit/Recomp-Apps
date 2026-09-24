@@ -35,6 +35,7 @@ import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
 import { colors, radius, spacing, tint, typography } from '@/theme';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 /**
  * Batas bawah kalori harian. Redistribusi tidak pernah menurunkan target di
@@ -361,8 +362,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
             <Text style={{ ...typography.caption, color: colors.teksSamar }}>proyeksi</Text>
           ) : hari.selisih !== null && hari.selisih !== 0 ? (
             <Text style={{ ...typography.caption, color: warnaSelisih }}>
-              {hari.selisih > 0 ? '+' : '−'}
-              {formatAngka(Math.abs(hari.selisih))}
+              {formatSelisih(hari.selisih, { desimal: 0 })}
             </Text>
           ) : null}
         </View>
