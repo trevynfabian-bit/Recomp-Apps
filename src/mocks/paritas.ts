@@ -4,54 +4,13 @@
  * Daftar pasangannya NYATA: setiap baris adalah aturan yang memang dihitung di
  * dua tempat, `@recomp/logika` dan Supabase PostgreSQL, dan dibandingkan oleh
  * `scripts/cek-paritas-makro.mjs` (`npm run cek:paritas`). Yang tiruan hanya
- * HASIL jalannya: waktu, commit, jumlah kasus, dan contoh selisih. Task backend
- * menukarnya dengan laporan yang ditulis skrip itu.
+ * HASIL jalannya: waktu, commit, jumlah kasus, dan contoh selisih. Bentuk &
+ * penyusun kalimatnya ada di `@recomp/logika` (`paritas.ts`).
  */
 
-export type AreaParitas =
-  | 'Makro & budget'
-  | 'Target & fase'
-  | 'Berat & tren'
-  | 'Komposisi tubuh'
-  | 'Evaluasi & teks'
-  | 'Skema data';
+import type { AreaParitas, LaporanParitas, PasanganParitas, SelisihParitas } from '@recomp/logika';
 
-export type PasanganParitas = {
-  id: string;
-  area: AreaParitas;
-  /** Nama aturan dalam bahasa sehari-hari. */
-  aturan: string;
-  /** Fungsi/konstanta di `@recomp/logika`. */
-  ts: string;
-  /** Fungsi, view, atau batasan di database. */
-  sql: string;
-  kasus: number;
-  keadaan: 'sama' | 'beda';
-  /** Setiap nilai yang berbeda, per kasus dan kolom; hanya untuk `beda`. */
-  selisih?: SelisihParitas[];
-};
-
-/**
- * Satu nilai yang tidak sama di kedua sisi. Angka ditampilkan beserta
- * selisihnya (SQL − TS); teks (arah, status, kode verdict) hanya berdampingan.
- */
-export type SelisihParitas = {
-  kasus: string;
-  /** Kolom hasil yang dibandingkan, mis. "sisa/hari". */
-  kolom: string;
-  ts: number | string | null;
-  sql: number | string | null;
-  satuan?: string;
-  /** Digit desimal untuk angka; bawaan 0. */
-  desimal?: number;
-};
-
-export type LaporanParitas = {
-  /** ISO 8601; null = belum pernah dijalankan. */
-  dijalankanPada: string | null;
-  commit: string | null;
-  pasangan: PasanganParitas[];
-};
+export type { AreaParitas, LaporanParitas, PasanganParitas, SelisihParitas };
 
 const PASANGAN: PasanganParitas[] = [
   {

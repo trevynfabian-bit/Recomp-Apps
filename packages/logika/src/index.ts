@@ -395,3 +395,6 @@ export {
   uraiNilaiLab,
   uraiTanggalLab,
 } from './hasilLab';
+
+export type { AreaParitas, LaporanParitas, PasanganParitas, SelisihParitas } from './paritas';
+export { kalimatPasanganParitas, kalimatSelisihParitas, ringkasLaporanParitas } from './paritas';

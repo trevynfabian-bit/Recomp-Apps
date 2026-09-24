@@ -26,6 +26,7 @@ const PENJAGA = [
   { nama: 'cek:widget', perlu: null, tentang: 'Widget layar kunci = ringkasan server' },
   { nama: 'cek:ringkasan', perlu: null, tentang: 'Poin ringkasan mingguan = aturan bersama' },
   { nama: 'cek:impor', perlu: null, tentang: 'Pengurai impor & batas = CHECK database' },
+  { nama: 'cek:laporan-paritas', perlu: null, tentang: 'Format laporan selisih dalam bahasa awam' },
 ];
 
 const cepat = process.argv.includes('--cepat');

@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatAngka, formatDesimal, formatJam, formatTanggalPanjang } from '@recomp/logika';
+import {
+  formatAngka,
+  formatDesimal,
+  formatJam,
+  formatTanggalPanjang,
+  kalimatPasanganParitas,
+  kalimatSelisihParitas,
+  ringkasLaporanParitas,
+} from '@recomp/logika';
 import {
   Card,
   DaftarBaris,
@@ -45,7 +53,8 @@ export default function ParitasScreen() {
   const [contoh, setContoh] = useState<Contoh>('beda');
   const laporan = mockLaporanParitas[contoh];
   const beda = laporan.pasangan.filter((p) => p.keadaan === 'beda');
-  const totalKasus = laporan.pasangan.reduce((n, p) => n + p.kasus, 0);
+  // Kalimat ringkasan dari penyusun bersama (`@recomp/logika`), sama dengan laporan skrip.
+  const ringkasan = ringkasLaporanParitas(laporan);
 
   return (
     <ScrollView
@@ -72,23 +81,15 @@ export default function ParitasScreen() {
       />
 
       {laporan.dijalankanPada === null ? (
-        <KeadaanKosong
-          ikon="git-compare-outline"
-          judul="Belum ada laporan"
-          keterangan="Jalankan npm run cek:paritas di mesin pengembangan. Laporannya muncul di sini setelah skrip selesai."
-        />
+        <KeadaanKosong ikon="git-compare-outline" judul={ringkasan.judul} keterangan={ringkasan.kalimat} />
       ) : (
         <>
           <Card>
             <StatusProses
               ringkas
               keadaan={beda.length ? 'gagal' : 'berhasil'}
-              judul={
-                beda.length
-                  ? `${beda.length} dari ${laporan.pasangan.length} aturan berbeda`
-                  : `${laporan.pasangan.length} aturan sama di kedua tempat`
-              }
-              keterangan={`${totalKasus} kasus uji · ${formatTanggalPanjang(laporan.dijalankanPada.slice(0, 10))}, ${formatJam(laporan.dijalankanPada)} · commit ${laporan.commit}`}
+              judul={ringkasan.judul}
+              keterangan={`${ringkasan.kalimat} ${formatTanggalPanjang(laporan.dijalankanPada.slice(0, 10))}, ${formatJam(laporan.dijalankanPada)} · commit ${laporan.commit}.`}
             />
           </Card>
 
@@ -129,7 +130,7 @@ function BarisPasangan({ p }: { p: PasanganParitas }) {
   return (
     <View
       accessible
-      accessibilityLabel={`${p.aturan}: ${ringkasKeadaan(p)}. TypeScript ${p.ts}; database ${p.sql}.`}
+      accessibilityLabel={`${kalimatPasanganParitas(p)} TypeScript ${p.ts}; database ${p.sql}.`}
       style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg }}
     >
       <Ionicons name={sama ? 'checkmark-circle' : 'alert-circle'} size={ukuranIkon.baris} color={warna} />
@@ -234,6 +235,14 @@ function TabelSelisih({ p }: { p: PasanganParitas }) {
           </View>
         );
       })}
+      {/* Tabel untuk yang memperbaiki; kalimat untuk semua orang. */}
+      <View style={{ gap: spacing.xs, marginTop: spacing.xs }}>
+        {baris.map((s, i) => (
+          <Text key={`kalimat-${i}`} style={{ ...typography.caption, color: colors.teksRedup }}>
+            {kalimatSelisihParitas(s)}
+          </Text>
+        ))}
+      </View>
     </Card>
   );
 }
