@@ -26,7 +26,8 @@ app/_layout.tsx                     Stack akar (headerShown: false), dijaga sesi
     ├── hasil-lab                   slide_from_right
     ├── tambah-hasil-lab            slide_from_bottom  param ?id=<hasilLabId>
     ├── arah-visual                 slide_from_right   (build pengembangan)
-    └── peraga                      slide_from_right   (build pengembangan)
+    ├── peraga                      slide_from_right   (build pengembangan)
+    └── paritas                     slide_from_right   (build pengembangan)
 ```
 
 - Tab bar: 5 tab, label `caption`, warna aktif `aksen.teks`, tidak aktif

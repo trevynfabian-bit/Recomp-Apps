@@ -18,6 +18,7 @@ const INDUK: Record<string, Href> = {
   '/tambah-hasil-lab': '/hasil-lab',
   '/arah-visual': '/pengaturan',
   '/peraga': '/pengaturan',
+  '/paritas': '/pengaturan',
 };
 
 /**

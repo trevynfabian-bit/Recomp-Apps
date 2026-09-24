@@ -351,6 +351,13 @@ export default function PengaturanScreen() {
             petunjuk="Membuka halaman peraga komponen"
             onPress={() => router.push('/peraga')}
           />
+          <BarisTautan
+            ikon="git-compare-outline"
+            judul="Laporan paritas"
+            keterangan="Aturan TS dan database, sama atau berbeda"
+            petunjuk="Membuka laporan paritas logika dan basis data"
+            onPress={() => router.push('/paritas')}
+          />
         </DaftarBaris>
       ) : null}
 

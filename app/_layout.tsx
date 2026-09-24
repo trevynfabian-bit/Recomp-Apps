@@ -57,6 +57,7 @@ const RUTE_TUMPUKAN: { nama: string; jenis: keyof typeof OPSI_TRANSISI }[] = [
   { nama: 'tambah-hasil-lab', jenis: 'modal' },
   { nama: 'arah-visual', jenis: 'dorong' },
   { nama: 'peraga', jenis: 'dorong' },
+  { nama: 'paritas', jenis: 'dorong' },
 ];
 
 /**
