@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -13,9 +13,12 @@ import {
 import {
   BannerBatasPinggang,
   Card,
+  Chip,
+  DaftarBaris,
   HeaderLayar,
   KartuBodyFat,
   KartuHero,
+  Pill,
   RiwayatPerubahan,
   SectionHeader,
   SheetBatasPinggang,
@@ -24,12 +27,12 @@ import {
   Tombol,
   type UkuranBaru,
 } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 import { formatSelisih } from '@/lib/formatTampilan';
 
 /** Urutan tampil; label pendek supaya muat di dua kolom. */
@@ -141,40 +144,21 @@ export default function UkuranScreen() {
         <View style={{ alignItems: 'center', marginTop: spacing.md }}>
           {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
               punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
+          <Chip
+            sejajar="tengah"
+            ikon="resize-outline"
+            label={
+              profil.batas_pinggang_cm !== null
+                ? `Batas ${formatDesimal(profil.batas_pinggang_cm)} cm · Ubah`
+                : 'Tetapkan batas pinggang'
+            }
+            aksesLabel={
               profil.batas_pinggang_cm !== null
                 ? `Batas pinggang ${formatDesimal(profil.batas_pinggang_cm)} sentimeter. Ketuk untuk mengubah.`
                 : 'Batas pinggang belum ditetapkan. Ketuk untuk menetapkan.'
             }
-            onPress={() => {
-              ketukRingan();
-              setSheetBatasTerbuka(true);
-            }}
-            style={({ pressed }) => ({
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.sm,
-              minHeight: TAP_MIN,
-              paddingHorizontal: spacing.lg,
-              marginTop: spacing.xs,
-              borderRadius: radius.pill,
-              borderWidth: 1,
-              borderColor: colors.garisKontrol,
-              backgroundColor: colors.permukaanCekung,
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-              {profil.batas_pinggang_cm !== null
-                ? `batas yang Anda tetapkan ${formatDesimal(profil.batas_pinggang_cm)} cm`
-                : 'batas pinggang belum ditetapkan'}
-            </Text>
-            <Text style={{ ...typography.label, color: colors.aksen.teks }}>
-              {profil.batas_pinggang_cm !== null ? 'Ubah' : 'Tetapkan'}
-            </Text>
-          </Pressable>
+            onPress={() => setSheetBatasTerbuka(true)}
+          />
         </View>
       </KartuHero>
 
@@ -209,8 +193,8 @@ export default function UkuranScreen() {
           judul="Ukuran terbaru"
           aksi={sebelumnya ? `vs ${formatTanggalPanjang(sebelumnya.tanggal)}` : 'pencatatan pertama'}
         />
-        <Card flat>
-          {baris.map((b, i) => (
+        <DaftarBaris>
+          {baris.map((b) => (
             <View
               key={b.kunci}
               style={{
@@ -218,8 +202,6 @@ export default function UkuranScreen() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.garis,
               }}
             >
               <Text style={{ ...typography.body, color: colors.teks }}>{b.label}</Text>
@@ -236,7 +218,7 @@ export default function UkuranScreen() {
               </View>
             </View>
           ))}
-        </Card>
+        </DaftarBaris>
       </View>
 
       {/* Riwayat perubahan per bagian tubuh */}
@@ -252,18 +234,7 @@ export default function UkuranScreen() {
       </Card>
 
       <View style={{ alignItems: 'center' }}>
-        <View
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.sm,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaanCekung,
-          }}
-        >
-          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-            Data tiruan · estimasi body fat memakai metode Navy
-          </Text>
-        </View>
+        <Pill label="Data tiruan · estimasi body fat memakai metode Navy" />
       </View>
 
       <SheetCatatUkuran

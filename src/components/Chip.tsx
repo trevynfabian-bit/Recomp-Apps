@@ -16,6 +16,8 @@ type Props = {
   /** Ikon kecil di depan label, mis. `add` untuk "Tipe hari baru". */
   ikon?: React.ComponentProps<typeof Ionicons>['name'];
   nonaktif?: boolean;
+  /** Posisi di wadah berkolom; bawaan `awal` (rata kiri). */
+  sejajar?: 'awal' | 'tengah';
 };
 
 /**
@@ -26,7 +28,7 @@ type Props = {
  * Terpilih ditandai tepi aksen + tint + teks penuh, tidak dengan warna isian
  * saja, dan diumumkan lewat `aria-checked`.
  */
-export function Chip({ label, onPress, terpilih, aksesLabel, ikon, nonaktif = false }: Props) {
+export function Chip({ label, onPress, terpilih, aksesLabel, ikon, nonaktif = false, sejajar = 'awal' }: Props) {
   const pilihan = terpilih !== undefined;
   const aktif = terpilih === true;
   return (
@@ -45,7 +47,7 @@ export function Chip({ label, onPress, terpilih, aksesLabel, ikon, nonaktif = fa
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        alignSelf: 'flex-start',
+        alignSelf: sejajar === 'tengah' ? 'center' : 'flex-start',
         gap: spacing.xs,
         minHeight: TAP_MIN,
         paddingHorizontal: spacing.lg,
