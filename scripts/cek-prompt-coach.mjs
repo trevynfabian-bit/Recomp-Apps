@@ -581,8 +581,24 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
   );
   cek(
     'hasil lab dibaca sebagai pengguna (klien ber-JWT, bukan kunci service role)',
-    src.includes("supabase.rpc('muat_hasil_lab')") && !/SERVICE_ROLE/.test(src),
+    src.includes("supabase.rpc('muat_hasil_lab')") && !/server\s*\.rpc\(/.test(src),
   );
+  {
+    // Service role HANYA untuk menulis jawaban coach (supaya database menandainya
+    // `ditulis_server`); semua pembacaan data tetap lewat klien ber-JWT pengguna.
+    const pemakaianServer = [...src.matchAll(/await server\s*\.([a-z]+)\(([^)]*)\)\s*\.([a-z]+)\(/g)];
+    cek(
+      'kunci service role hanya untuk MENULIS pesan coach, bukan membaca data',
+      pemakaianServer.length >= 1 &&
+        pemakaianServer.every((m) => m[1] === 'from' && m[2] === "'pesan_coach'" && m[3] === 'insert') &&
+        (src.match(/SERVICE_ROLE/g) ?? []).length === 1,
+      pemakaianServer.map((m) => m[0]).join(' | '),
+    );
+    cek(
+      'riwayat hanya memutar ulang jawaban coach yang ditulis server',
+      /\.filter\(\(p\) => \(p\.peran as string\) !== 'coach' \|\| p\.ditulis_server === true\)/.test(src),
+    );
+  }
   cek('hasil lab dipetakan dengan pemeta BERSAMA', src.includes('.map(hasilLabDariServer)'));
   cek(
     'gagal membaca hasil lab tidak menggagalkan chat (jadi null, bukan 502)',

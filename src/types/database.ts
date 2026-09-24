@@ -659,6 +659,8 @@ export type PesanCoachRow = {
   evaluasi: Record<string, unknown> | null;
   penolakan: Record<string, unknown> | null;
   created_at: string;
+  /** Benar bila disisipkan server (service role); diisi pemicu. Hanya jawaban coach seperti ini yang diputar ulang ke model. */
+  ditulis_server: boolean;
 };
 
 /** alert_pinggang — jejak keadaan batas pinggang. */

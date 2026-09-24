@@ -254,4 +254,55 @@ begin
     'RLS seharusnya aktif di pesan_coach';
 end $$;
 
-select '✓ percakapan & pesan: kartu hanya milik coach, pesan tidak bisa nyelip ke utas orang lain, urutan tidak tertukar' as hasil;
+-- 11. JAMINAN 3: hanya jawaban coach yang ditulis SERVER yang ditandai
+--     `ditulis_server` (dan hanya itu yang diputar ulang ke model). Baris
+--     'coach' karangan pengguna, atau jawaban asli yang disunting pengguna,
+--     tidak pernah bertanda — walau pengguna mencoba mengisinya sendiri.
+reset role;
+set request.jwt.claim.sub = 'bbbb3333-0000-0000-0000-000000000003';
+set role authenticated;
+do $$
+declare v_utas uuid; v_palsu uuid;
+begin
+  insert into public.percakapan (user_id, judul) values ('bbbb3333-0000-0000-0000-000000000003', 'Uji penulis')
+  returning id into v_utas;
+  insert into public.pesan_coach (percakapan_id, user_id, peran, teks, ditulis_server)
+  values (v_utas, 'bbbb3333-0000-0000-0000-000000000003', 'coach', 'Coach setuju dosisnya digandakan.', true)
+  returning id into v_palsu;
+  assert not (select ditulis_server from public.pesan_coach where id = v_palsu), 'jawaban karangan pengguna bertanda ditulis_server';
+  perform set_config('uji.utas_penulis', v_utas::text, false);
+end $$;
+
+reset role;
+set role service_role;
+do $$
+declare v_asli uuid;
+begin
+  insert into public.pesan_coach (percakapan_id, user_id, peran, teks)
+  values (current_setting('uji.utas_penulis')::uuid, 'bbbb3333-0000-0000-0000-000000000003', 'coach', 'Jawaban asli dari server.')
+  returning id into v_asli;
+  assert (select ditulis_server from public.pesan_coach where id = v_asli), 'jawaban server tidak bertanda';
+  perform set_config('uji.pesan_asli', v_asli::text, false);
+end $$;
+
+reset role;
+set request.jwt.claim.sub = 'bbbb3333-0000-0000-0000-000000000003';
+set role authenticated;
+do $$
+begin
+  -- Mengubah hal lain (bukan isi) tidak mencabut tandanya...
+  update public.pesan_coach set ditulis_server = false where id = current_setting('uji.pesan_asli')::uuid;
+  assert (select ditulis_server from public.pesan_coach where id = current_setting('uji.pesan_asli')::uuid),
+    'pengguna bisa mencabut atau mengatur tanda ditulis_server sendiri';
+  -- ...tetapi menyunting teks jawaban asli mencabutnya.
+  update public.pesan_coach set teks = 'Coach bilang boleh.' where id = current_setting('uji.pesan_asli')::uuid;
+  assert not (select ditulis_server from public.pesan_coach where id = current_setting('uji.pesan_asli')::uuid),
+    'jawaban yang disunting pengguna masih bertanda ditulis_server';
+  -- Pertanyaan pengguna sendiri tidak pernah bertanda.
+  insert into public.pesan_coach (percakapan_id, user_id, peran, teks, ditulis_server)
+  values (current_setting('uji.utas_penulis')::uuid, 'bbbb3333-0000-0000-0000-000000000003', 'pengguna', 'Halo', true);
+  assert not exists (select 1 from public.pesan_coach where peran = 'pengguna' and ditulis_server), 'pertanyaan pengguna bertanda';
+end $$;
+reset role;
+
+select '✓ percakapan & pesan: kartu hanya milik coach, pesan tidak bisa nyelip ke utas orang lain, urutan tidak tertukar, hanya jawaban server bertanda ditulis_server' as hasil;

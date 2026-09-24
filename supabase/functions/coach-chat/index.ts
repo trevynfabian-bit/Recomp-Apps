@@ -206,7 +206,7 @@ Deno.serve(async (req: Request) => {
   // disimpan dalam satu transaksi punya waktu yang sama persis.
   const { data: riwayat } = await supabase
     .from('pesan_coach')
-    .select('peran, teks, urutan')
+    .select('peran, teks, urutan, ditulis_server')
     .eq('percakapan_id', percakapanId)
     .order('urutan', { ascending: true })
     .limit(40);
@@ -218,8 +218,13 @@ Deno.serve(async (req: Request) => {
   // yang sudah berubah akan ditolak (akun baru) atau dibuang diam-diam (akun
   // lama). Di DALAM satu permintaan, putaran fungsi hanya MENAMBAH pesan dan
   // system/tools tidak berubah, jadi blok thinking-nya tetap sah.
+  //
+  // Hanya jawaban coach yang ditulis SERVER yang diputar ulang (`ditulis_server`,
+  // diisi pemicu database). Baris 'coach' yang dikarang atau disunting lewat
+  // PostgREST tidak pernah menjadi giliran `assistant`.
   const pesan: Anthropic.Beta.BetaMessageParam[] = (riwayat ?? [])
     .filter((p) => (p.teks as string).trim().length > 0)
+    .filter((p) => (p.peran as string) !== 'coach' || p.ditulis_server === true)
     .map((p) => ({
       role: (p.peran as string) === 'coach' ? 'assistant' : 'user',
       content: p.teks as string,
@@ -358,10 +363,15 @@ Deno.serve(async (req: Request) => {
   // riwayat utas tetap utuh dan jujur: ada pertanyaan, dan jawabannya adalah
   // batas — bukan gelembung yang hilang tanpa jejak. Isi jawabannya tidak ikut
   // dicatat ke log; yang dicatat hanya kategorinya.
+  // Jawaban (dan kartu penolakannya) ditulis service role supaya database
+  // menandainya `ditulis_server`; pengguna sudah terverifikasi di atas.
+  const server = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
   const penolakanJawaban = periksaJawabanMedis(teksJawaban);
   if (penolakanJawaban) {
     console.warn('jawaban diganti penolakan', penolakanJawaban.kategori);
-    const { data: kartu, error: galatKartu } = await supabase
+    const { data: kartu, error: galatKartu } = await server
       .from('pesan_coach')
       .insert({
         percakapan_id: percakapanId,
@@ -382,7 +392,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const { data: pesanCoach, error: galatSimpan } = await supabase
+  const { data: pesanCoach, error: galatSimpan } = await server
     .from('pesan_coach')
     .insert({
       percakapan_id: percakapanId,
