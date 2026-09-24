@@ -17,7 +17,7 @@ import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
-import { colors, spacing, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -169,7 +169,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
 function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>['name']; children: React.ReactNode }) {
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-      <Ionicons name={ikon} size={20} color={colors.textMuted} />
+      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.textMuted} />
       <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
         {children}
       </Text>

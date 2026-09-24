@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { angkaTabular, colors, radius, spacing, typography } from '@/theme';
+import { angkaTabular, colors, radius, spacing, typography, ukuran } from '@/theme';
 import { formatMakro } from '@recomp/logika';
 import { hitungMakro, keteranganMakro } from '@recomp/logika';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
@@ -39,7 +39,7 @@ export function MacroRow({ macro, mode }: Props) {
 
       <View
         style={{
-          height: 6,
+          height: ukuran.track,
           borderRadius: radius.pill,
           backgroundColor: colors.surfaceSunken,
           overflow: 'hidden',

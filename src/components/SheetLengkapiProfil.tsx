@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View 
 import { formatMakro } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
 const TINGGI_MIN = 100;
@@ -91,8 +91,8 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
           >
             <View
               style={{
-                width: 40,
-                height: 4,
+                width: ukuran.pegangan.lebar,
+                height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
                 backgroundColor: colors.border,
               }}
@@ -294,7 +294,7 @@ function PilihanKelamin({
         }}
       >
         {aktif ? (
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.amber }} />
+          <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }} />
         ) : null}
       </View>
       <Text style={{ ...typography.body, color: aktif ? colors.text : colors.textMuted }}>

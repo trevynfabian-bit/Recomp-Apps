@@ -169,6 +169,10 @@ cek(
   jarakMentah.length <= PLAFON.jarak,
   `jarak baru harus dari spacing: ${jarakMentah.slice(-3).join(' | ')}`,
 );
+const ikonMentah = semuaUi.flatMap((p) => cariBaris(p, /<Ionicons\b[^>]*size=\{\d+\}/));
+cek('ukuran ikon dari ukuranIkon', ikonMentah.length === 0, ikonMentah.slice(0, 5).join(' | '));
+const aritmetika = semuaUi.flatMap((p) => cariBaris(p, /spacing\.\w+ [+-] \d/));
+cek('tidak ada aritmetika spacing (pakai token ukuran)', aritmetika.length === 0, aritmetika.slice(0, 5).join(' | '));
 if (tinggiBaris.length < PLAFON.lineHeight || jarakMentah.length < PLAFON.jarak) {
   console.log('  (plafon bisa diturunkan: ubah PLAFON di scripts/cek-desain.mjs)');
 }

@@ -4,7 +4,7 @@ import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/
 import { Card } from './Card';
 import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 type Props = {
   koneksi: KoneksiSumber;
@@ -87,8 +87,8 @@ export function KartuSumberData({
           <Text style={{ ...typography.bodyTebal, color: colors.text, flexShrink: 1 }}>
             {profil.nama}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 2 }}>
-            <View style={{ width: 8, height: 8, borderRadius: radius.pill, backgroundColor: warna }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
+            <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: warna }} />
             <Text style={{ ...typography.label, color: warna }}>{kesehatan.ringkas}</Text>
           </View>
         </View>

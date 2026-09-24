@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -117,8 +117,8 @@ export function SheetBatasPinggang({
           >
             <View
               style={{
-                width: 40,
-                height: 4,
+                width: ukuran.pegangan.lebar,
+                height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
                 backgroundColor: colors.border,
               }}

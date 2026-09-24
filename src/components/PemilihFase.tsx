@@ -3,7 +3,7 @@ import type { Fase } from '@recomp/logika';
 import { formatDesimal, LAJU_PER_MINGGU } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 const FASE: { nilai: Fase; ringkas: string }[] = [
   { nilai: 'Cut', ringkas: 'Turunkan lemak, jaga otot' },
@@ -72,7 +72,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                 >
                   {aktif ? (
                     <View
-                      style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.amber }}
+                      style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }}
                     />
                   ) : null}
                 </View>

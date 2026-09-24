@@ -3,7 +3,7 @@ import { PanResponder, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { KoridorTarget, TitikTren } from '@recomp/logika';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 /** Tinggi area gambar, tidak termasuk label sumbu. */
 const TINGGI_PLOT = 180;
@@ -177,7 +177,7 @@ export function GrafikTren({
               {formatTanggalPanjang(sorot.tanggal)}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
                 <View style={{ width: 10, height: 2, backgroundColor: colors.amber }} />
                 <Text style={{ ...typography.label, color: colors.text }}>
                   {sorot.rataRataKg !== null ? `${formatDesimal(sorot.rataRataKg)} kg` : '—'}
@@ -384,14 +384,14 @@ export function GrafikTren({
           rowGap: spacing.xs,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
           <View
             style={{ width: 12, height: 2, backgroundColor: colors.amber, borderRadius: radius.pill }}
           />
           <Text style={{ ...typography.caption, color: colors.textFaint }}>rata-rata 7 hari</Text>
         </View>
         {koridor ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs + 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
             <View
               style={{
                 width: 12,
@@ -418,7 +418,7 @@ export function GrafikTren({
           style={({ pressed }) => ({
             flexDirection: 'row',
             alignItems: 'center',
-            gap: spacing.xs + 1,
+            gap: ukuran.celahTitik,
             // Hanya sakelar ini yang interaktif, jadi hanya ia yang butuh 44pt.
             minHeight: TAP_MIN,
             opacity: pressed ? 0.6 : 1,

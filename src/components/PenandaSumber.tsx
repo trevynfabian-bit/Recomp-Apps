@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { METADATA_SUMBER } from '@/lib/sumber';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 import type { JenisSumber } from '@/types/domain';
 
 type Props = {
@@ -25,11 +25,11 @@ export function PenandaSumber({ jenis, tampilan = 'inline', detail }: Props) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.xs + 1,
+        gap: ukuran.celahTitik,
         alignSelf: 'flex-start',
         ...(tampilan === 'pill'
           ? {
-              paddingHorizontal: spacing.sm + 2,
+              paddingHorizontal: ukuran.chip.horizontal,
               paddingVertical: 3,
               borderRadius: radius.pill,
               borderWidth: 1,
@@ -39,7 +39,7 @@ export function PenandaSumber({ jenis, tampilan = 'inline', detail }: Props) {
           : null),
       }}
     >
-      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: meta.warna }} />
+      <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: meta.warna }} />
       <Text style={{ ...typography.caption, color: meta.warna }}>{teks}</Text>
     </View>
   );
@@ -56,9 +56,9 @@ export function LegendaSumber() {
           <View style={{ paddingTop: 5 }}>
             <View
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
+                width: ukuran.titikKecil,
+                height: ukuran.titikKecil,
+                borderRadius: radius.pill,
                 backgroundColor: METADATA_SUMBER[jenis].warna,
               }}
             />

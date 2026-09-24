@@ -1,5 +1,5 @@
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -43,7 +43,7 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
           }}
         >
           <View style={{ alignItems: 'center', paddingVertical: spacing.md, gap: spacing.sm }}>
-            <View style={{ width: 40, height: 4, borderRadius: radius.pill, backgroundColor: colors.border }} />
+            <View style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.border }} />
             <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
               {label}
             </Text>

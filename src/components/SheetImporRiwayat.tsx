@@ -21,7 +21,7 @@ import {
   mockJalankanImpor,
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
 export type SumberImpor = 'hevy_csv' | 'apple_health' | 'ukuran_lama';
@@ -325,7 +325,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           <View
             accessibilityRole="progressbar"
             accessibilityValue={{ min: 0, max: langkah.p.jumlah, now: langkah.selesai }}
-            style={{ height: 8, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken, overflow: 'hidden' }}
+            style={{ height: ukuran.trackTebal, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken, overflow: 'hidden' }}
           >
             <View
               style={{

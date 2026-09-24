@@ -35,7 +35,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -150,7 +150,7 @@ export default function PengaturanScreen() {
               </Text>
             )}
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
+          <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.textFaint} />
         </Card>
       </Pressable>
 
@@ -189,7 +189,7 @@ export default function PengaturanScreen() {
         <SectionHeader judul="Preferensi" />
         <Card style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <Ionicons name="options-outline" size={22} color={colors.textMuted} />
+            <Ionicons name="options-outline" size={ukuranIkon.baris} color={colors.textMuted} />
             <View style={{ flex: 1, gap: spacing.xxs }}>
               <Text style={{ ...typography.bodySedang, color: colors.text }}>Satuan</Text>
               <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
@@ -270,7 +270,7 @@ export default function PengaturanScreen() {
         <SectionHeader judul="Privasi & akun" />
         <Card style={{ gap: spacing.sm }}>
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <Ionicons name="lock-closed-outline" size={22} color={colors.aksenTeks.jade} />
+            <Ionicons name="lock-closed-outline" size={ukuranIkon.baris} color={colors.aksenTeks.jade} />
             <View style={{ flex: 1, gap: spacing.xs }}>
               <Text style={{ ...typography.bodySedang, color: colors.text }}>
                 Data kesehatan hanya untuk akun Anda
@@ -449,12 +449,12 @@ function BarisPengaturan({
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Ionicons name={ikon} size={22} color={colors.textMuted} />
+      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.textMuted} />
       <View style={{ flex: 1, gap: spacing.xxs }}>
         <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
         <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{nilai}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
+      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.textFaint} />
     </Pressable>
   );
 }

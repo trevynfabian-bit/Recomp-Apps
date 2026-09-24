@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { formatAngka, formatTanggalPanjang } from '@recomp/logika';
 import type { HasilRedistribusi } from '@recomp/logika';
 import { Card } from './Card';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 const NAMA_OPSI: Record<string, string> = {
   sebar_rata: 'Sebar rata',
@@ -35,7 +35,7 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
           <View
             style={{
               paddingHorizontal: spacing.md,
-              paddingVertical: spacing.xs + 1,
+              paddingVertical: ukuran.chip.vertikal,
               borderRadius: radius.pill,
               backgroundColor: colors.aksenTeks.jade + '1A',
               borderWidth: 1,

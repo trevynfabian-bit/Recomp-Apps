@@ -35,7 +35,7 @@ import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
 import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import type { DayType } from '@/types/domain';
 
 const FASE: Fase[] = ['Maintenance', 'Lean Gain', 'Cut'];
@@ -650,7 +650,7 @@ function PilihFase({
               {f === aktif ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · aktif</Text> : null}
             </Text>
             {/* Titik = belum disimpan; label aksesibilitas menyebutnya dengan kata. */}
-            {diubah.has(f) ? <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.amber }} /> : null}
+            {diubah.has(f) ? <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: colors.amber }} /> : null}
           </Pressable>
         );
       })}

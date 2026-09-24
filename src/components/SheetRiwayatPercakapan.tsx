@@ -2,7 +2,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { formatJam, labelTanggalRelatif, tanggalDariWaktu, tanggalHariIni } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import type { Percakapan } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -62,8 +62,8 @@ export function SheetRiwayatPercakapan({
           >
             <View
               style={{
-                width: 40,
-                height: 4,
+                width: ukuran.pegangan.lebar,
+                height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
                 backgroundColor: colors.border,
               }}

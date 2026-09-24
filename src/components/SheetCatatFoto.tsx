@@ -14,7 +14,7 @@ import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { analisisFotoStub, type HasilAnalisisFoto } from '@/mocks/fotoAi';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import type { FoodLog } from '@/types/domain';
 
 /** Entri makanan baru yang siap disimpan (tanpa id & relasi, diisi pemanggil). */
@@ -106,7 +106,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
         >
           <View style={{ alignItems: 'center', paddingTop: spacing.md }}>
             <View
-              style={{ width: 40, height: 4, borderRadius: radius.pill, backgroundColor: colors.border }}
+              style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.border }}
             />
           </View>
 

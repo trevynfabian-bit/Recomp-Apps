@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NOTIF_EKSPOR_SIAP } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
  * Pemberitahuan "ekspor data siap" di dalam app, untuk berkas yang selesai
@@ -57,7 +57,7 @@ export function BannerEksporSiap() {
           elevation: 6,
         }}
       >
-        <Ionicons name="document-attach-outline" size={22} color={colors.textMuted} />
+        <Ionicons name="document-attach-outline" size={ukuranIkon.baris} color={colors.textMuted} />
         <View style={{ flex: 1, gap: spacing.xxs }}>
           <Text style={{ ...typography.label, color: colors.text }}>{NOTIF_EKSPOR_SIAP.judul}</Text>
           <Text style={{ ...typography.caption, color: gagal ? colors.aksenTeks.coral : colors.textMuted }}>
@@ -105,7 +105,7 @@ export function BannerEksporSiap() {
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Ionicons name="close" size={20} color={colors.textMuted} />
+          <Ionicons name="close" size={ukuranIkon.sedang} color={colors.textMuted} />
         </Pressable>
       </View>
     </View>

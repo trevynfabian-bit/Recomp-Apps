@@ -4,7 +4,7 @@ import { formatAngka, hitungRedistribusi, KELIPATAN_KCAL } from '@recomp/logika'
 import type { BudgetMingguan, HasilRedistribusi, OpsiRedistribusi } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 const OPSI: { nilai: OpsiRedistribusi; judul: string; ringkas: string }[] = [
   { nilai: 'sebar_rata', judul: 'Sebar rata', ringkas: 'Bagi ke semua hari yang tersisa' },
@@ -125,7 +125,7 @@ export function PanelRedistribusi({
                   }}
                 >
                   {aktif ? (
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.amber }} />
+                    <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }} />
                   ) : null}
                 </View>
                 <View style={{ flex: 1, gap: spacing.xxs }}>

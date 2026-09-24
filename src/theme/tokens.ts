@@ -1,26 +1,76 @@
 import type { TextStyle } from 'react-native';
 
 /**
- * Skala spasi 4pt — dipakai untuk padding, gap, dan margin. `xxs` (2) satu-satunya
- * langkah di bawah 4: label ↔ nilai yang menempel (judul + subjudul header).
+ * Skala jarak (bab Desain 8.5): 4pt ditambah satu langkah 2pt.
+ * Lega antar-blok, rapat di dalam kartu.
  */
 export const spacing = {
+  /** Label ↔ nilai yang menempel: judul + subjudul, nama + angka. */
   xxs: 2,
+  /** Ikon ↔ teks, pill vertikal. */
   xs: 4,
+  /** Antar-baris dalam satu grup. */
   sm: 8,
+  /** Antar-grup dalam kartu, padding field isian, di bawah SectionHeader. */
   md: 12,
+  /** Padding kartu, sisi & atas layar. */
   lg: 16,
+  /** Antar-kartu di layar, padding sheet. */
   xl: 24,
+  /** Padding bawah layar (di atas inset). */
   xxl: 32,
 } as const;
 
-/** Radius sudut; kartu memakai `lg`, pill memakai `pill`. */
+/**
+ * Radius sudut (bab Desain 8.5). Radius elemen di dalam kartu selalu lebih
+ * kecil dari radius kartunya (`md` di dalam `lg`) supaya sudutnya sejajar.
+ */
 export const radius = {
+  /** Sel matriks target, "ekor" gelembung chat, swatch legenda. */
   sm: 8,
+  /** Tombol, field isian, chip pilihan. */
   md: 12,
+  /** Kartu, gelembung chat. */
   lg: 18,
+  /** Sudut atas sheet. */
   xl: 24,
+  /** Pill, tombol bulat, pegangan sheet, titik status, track progress. */
   pill: 999,
+} as const;
+
+/**
+ * Ukuran elemen kecil yang berulang. Dulu ditulis sebagai angka mentah atau
+ * aritmetika (`spacing.xs + 1`) di tiap komponen; sekarang satu nama.
+ */
+export const ukuran = {
+  /** Pegangan di puncak sheet. */
+  pegangan: { lebar: 40, tinggi: 4 },
+  /** Titik status/legenda. */
+  titik: 8,
+  /** Titik status di dalam teks kecil (penanda sumber, catatan). */
+  titikKecil: 6,
+  /** Tinggi track progress (bar makro, meter). */
+  track: 6,
+  /** Track progress yang lebih tebal (progres impor). */
+  trackTebal: 8,
+  /** Padding pill & chip kecil: sedikit di atas `xs` agar teks kapital tidak menempel. */
+  chip: { vertikal: 5, horizontal: 10 },
+  /** Jarak titik/ikon kecil ↔ labelnya di legenda dan penanda. */
+  celahTitik: 5,
+} as const;
+
+/**
+ * Ukuran ikon (Ionicons). Empat ukuran, dipilih menurut perannya.
+ */
+export const ukuranIkon = {
+  /** Ikon sisipan di teks kecil (gembok di catatan kaki). */
+  mini: 14,
+  /** Chevron baris, ikon status di samping teks. */
+  kecil: 18,
+  /** Ikon di tombol aksi (tutup, tampilkan sandi). */
+  sedang: 20,
+  /** Ikon depan baris pengaturan dan kartu. */
+  baris: 22,
 } as const;
 
 /**

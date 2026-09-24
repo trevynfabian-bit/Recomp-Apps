@@ -4,7 +4,7 @@ import { formatAngka, formatMakro, urutanFaseJanggal } from '@recomp/logika';
 import type { BarisMatriks, Fase } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type Props = {
   baris: BarisMatriks[];
@@ -143,7 +143,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
 
       {janggal.length > 0 ? (
         <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-          <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
+          <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.textMuted} />
           <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
             {janggal.map((j) => j.kalimat).join(' ')} Periksa lagi bila tidak disengaja.
           </Text>

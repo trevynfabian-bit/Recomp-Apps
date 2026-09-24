@@ -18,7 +18,7 @@ import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 type GalatLab = Extract<HasilPeriksaLab, { sah: false }>['galat'];
 
@@ -342,7 +342,7 @@ function KartuPenanda({
             hitSlop={8}
             style={({ pressed }) => ({ width: TAP_MIN - 8, height: TAP_MIN - 8, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
           >
-            <Ionicons name="close" size={20} color={colors.textMuted} />
+            <Ionicons name="close" size={ukuranIkon.sedang} color={colors.textMuted} />
           </Pressable>
         ) : null}
       </View>

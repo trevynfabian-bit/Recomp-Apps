@@ -17,7 +17,7 @@ import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
  * Riwayat hasil lab.
@@ -112,7 +112,7 @@ export default function HasilLabScreen() {
       </View>
 
       <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-        <Ionicons name="flask-outline" size={20} color={colors.textMuted} />
+        <Ionicons name="flask-outline" size={ukuranIkon.sedang} color={colors.textMuted} />
         <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
           Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis. Semua angka di sini data mentah yang
           Anda salin; app tidak memperkirakan atau membulatkannya. Rentang rujukan adalah milik laboratorium yang

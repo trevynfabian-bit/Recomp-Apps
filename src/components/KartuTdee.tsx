@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { formatAngka } from '@recomp/logika';
 import type { HasilTdee } from '@recomp/logika';
 import { Card } from './Card';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   tdee: HasilTdee;
@@ -57,7 +57,7 @@ export function KartuTdee({ tdee, perbandingan }: Props) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: spacing.xs + 1,
+              gap: ukuran.celahTitik,
               paddingHorizontal: spacing.md,
               paddingVertical: spacing.xs,
               borderRadius: radius.pill,

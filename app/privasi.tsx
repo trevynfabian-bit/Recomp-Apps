@@ -13,7 +13,7 @@ import { mockFotoMakananDisimpan } from '@/mocks/privasi';
 import { mockPengaturanPengingat } from '@/mocks/widget';
 import { useSesi } from '@/state/sesi';
 import { useSinkron } from '@/state/sinkron';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 const IKON: Record<ButirStatusPrivasi['nada'], React.ComponentProps<typeof Ionicons>['name']> = {
   terjaga: 'lock-closed-outline',
@@ -146,7 +146,7 @@ export default function PrivasiScreen() {
                   borderTopColor: colors.border,
                 }}
               >
-                <Ionicons name={IKON[b.nada]} size={22} color={WARNA_STATUS[b.nada]} />
+                <Ionicons name={IKON[b.nada]} size={ukuranIkon.baris} color={WARNA_STATUS[b.nada]} />
                 <View style={{ flex: 1, gap: spacing.xs }}>
                   <Text style={{ ...typography.bodySedang, color: colors.text }}>{b.judul}</Text>
                   <Text style={{ ...typography.label, color: WARNA_STATUS[b.nada] }}>{b.status}</Text>
@@ -264,12 +264,12 @@ function BarisKendali({
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Ionicons name={ikon} size={22} color={colors.textMuted} />
+      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.textMuted} />
       <View style={{ flex: 1, gap: spacing.xxs }}>
         <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
         <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{keterangan}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.textFaint} />
+      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.textFaint} />
     </Pressable>
   );
 }

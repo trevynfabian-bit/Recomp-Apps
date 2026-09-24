@@ -10,7 +10,7 @@ import {
 } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -234,8 +234,8 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
           >
             <View
               style={{
-                width: 40,
-                height: 4,
+                width: ukuran.pegangan.lebar,
+                height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
                 backgroundColor: colors.border,
               }}

@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import type { KecukupanTren } from '@recomp/logika';
 import { JENDELA_HARI } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   kecukupan: KecukupanTren;
@@ -37,9 +37,9 @@ export function CatatanKecukupan({ kecukupan, untuk }: Props) {
     >
       <View
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
+          width: ukuran.titikKecil,
+          height: ukuran.titikKecil,
+          borderRadius: radius.pill,
           backgroundColor: colors.textFaint,
           marginTop: 5,
         }}

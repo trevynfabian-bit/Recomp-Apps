@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   label: string;
@@ -21,7 +21,7 @@ export function Pill({ label, warna = colors.textMuted, diKartu = false }: Props
       style={{
         alignSelf: 'flex-start',
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs + 1,
+        paddingVertical: ukuran.chip.vertikal,
         borderRadius: radius.pill,
         borderWidth: 1,
         borderColor: warna + '55',

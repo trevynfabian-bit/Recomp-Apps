@@ -301,9 +301,11 @@ namanya.
 
 Aturan:
 
-- Tidak ada angka jarak mentah. Nilai 3 dan 5 (11 kejadian) dibulatkan ke
-  `xxs`/`xs`; `spacing.xs + 1` (12 kejadian, padding vertikal pill) menjadi
-  token `ukuran.pillVertikal` di Fase 2, bukan aritmetika di tempat.
+- Tidak ada angka jarak mentah dan tidak ada aritmetika `spacing.x + n`.
+  Ukuran kecil yang berulang punya nama di `ukuran` (`src/theme/tokens.ts`):
+  `pegangan` 40×4, `titik` 8, `titikKecil` 6, `track` 6, `trackTebal` 8,
+  `chip` 5/10, `celahTitik` 5. Ikon memakai `ukuranIkon`: `mini` 14, `kecil` 18
+  (chevron, status), `sedang` 20 (aksi), `baris` 22 (ikon depan baris).
 - Layar: `paddingHorizontal: lg`, `paddingTop: insets.top + lg`,
   `paddingBottom: insets.bottom + xxl`, `gap: xl` antar-blok. Satu kerangka
   layar bersama (Fase 3) memegang aturan ini.

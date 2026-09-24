@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { formatMakro, rasio } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import type { WidgetCoach } from '@/types/domain';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 /** Ukuran sparkline; cukup untuk melihat bentuk, bukan untuk membaca nilai. */
 const SPARK_LEBAR = 88;
@@ -109,7 +109,7 @@ function IsiMakro({ widget }: { widget: Extract<WidgetCoach, { jenis: 'makro' }>
                 menghilang pada dua makro yang paling perlu diawasi. */}
             <View
               style={{
-                height: 6,
+                height: ukuran.track,
                 borderRadius: radius.pill,
                 backgroundColor: colors.surfaceSunken,
                 overflow: 'hidden',

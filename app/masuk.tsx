@@ -6,7 +6,7 @@ import { emailSah } from '@recomp/logika';
 import { TombolUtama } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { KesalahanAturUlang, KesalahanMasuk, useSesi } from '@/state/sesi';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /**
  * Layar masuk.
@@ -108,7 +108,7 @@ export default function MasukScreen() {
               backgroundColor: colors.surface,
             }}
           >
-            <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+            <Ionicons name="time-outline" size={ukuranIkon.kecil} color={colors.textMuted} />
             <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
               {info}
             </Text>
@@ -177,7 +177,7 @@ export default function MasukScreen() {
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name={tampilSandi ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
+                <Ionicons name={tampilSandi ? 'eye-off-outline' : 'eye-outline'} size={ukuranIkon.sedang} color={colors.textMuted} />
               </Pressable>
             </View>
           </Isian>
@@ -187,7 +187,7 @@ export default function MasukScreen() {
               accessibilityLiveRegion="polite"
               style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}
             >
-              <Ionicons name="information-circle-outline" size={18} color={colors.aksenTeks.coral} />
+              <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.aksenTeks.coral} />
               <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
                 {galat}
               </Text>
@@ -237,7 +237,7 @@ export default function MasukScreen() {
             Belum punya akun? Akun dibuat di web Recomp Coach, lalu dipakai di sini.
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="lock-closed-outline" size={14} color={colors.textFaint} />
+            <Ionicons name="lock-closed-outline" size={ukuranIkon.mini} color={colors.textFaint} />
             <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
               Data kesehatan hanya terbaca oleh akun Anda.
             </Text>

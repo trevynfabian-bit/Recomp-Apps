@@ -6,7 +6,7 @@ import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
@@ -240,8 +240,8 @@ export function KartuTimbangPagi({
             <View style={{ alignItems: 'center', gap: spacing.xs }}>
               <View
                 style={{
-                  width: 40,
-                  height: 4,
+                  width: ukuran.pegangan.lebar,
+                  height: ukuran.pegangan.tinggi,
                   borderRadius: radius.pill,
                   backgroundColor: colors.border,
                   marginBottom: spacing.sm,

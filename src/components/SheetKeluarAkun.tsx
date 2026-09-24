@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { KerangkaSheet } from './KerangkaSheet';
 import { TombolBertepi, TombolUtama } from './Tombol';
-import { colors, spacing, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -65,7 +65,7 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
 function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>['name']; children: React.ReactNode }) {
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-      <Ionicons name={ikon} size={20} color={colors.textMuted} />
+      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.textMuted} />
       <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
         {children}
       </Text>

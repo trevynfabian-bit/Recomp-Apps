@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { arahSesuaiFase, formatDesimal } from '@recomp/logika';
 import type { Fase, SinyalArah } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   sinyal: SinyalArah;
@@ -53,9 +53,9 @@ export function LabelSinyalArah({ sinyal, fase, tampilan = 'penuh' }: Props) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: spacing.xs + 1,
+            gap: ukuran.celahTitik,
             paddingHorizontal: spacing.md,
-            paddingVertical: spacing.xs + 1,
+            paddingVertical: ukuran.chip.vertikal,
             borderRadius: radius.pill,
             backgroundColor: warna + '1A',
             borderWidth: 1,
