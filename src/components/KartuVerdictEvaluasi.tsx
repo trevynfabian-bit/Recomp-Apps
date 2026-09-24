@@ -74,7 +74,7 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
       <View style={{ gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Text style={{ ...typography.title, color: colors.text, flex: 1 }}>{hasil.judul}</Text>
-          <Pill label={`KEYAKINAN ${hasil.keyakinan.toUpperCase()}`} warna={warnaKeyakinan(hasil.keyakinan)} />
+          <Pill diKartu label={`KEYAKINAN ${hasil.keyakinan.toUpperCase()}`} warna={warnaKeyakinan(hasil.keyakinan)} />
         </View>
         <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>
           {hasil.ringkas}

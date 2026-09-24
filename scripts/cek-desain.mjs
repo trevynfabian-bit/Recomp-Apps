@@ -10,6 +10,13 @@
  *    (`cek:kontras`) dan tidak ikut bila palet berubah. Pengecualian dicatat
  *    di sini dengan alasannya. Konfigurasi app juga harus gelap, supaya
  *    splash, latar sistem, dan papan ketik tidak berkedip terang.
+ * 3. TIPOGRAFI DARI SATU SKALA (docs/desain/arah-visual.md bab 2). Ukuran huruf
+ *    hanya dari `typography`; ketebalan tidak ditimpa manual setelah
+ *    `...typography.x` (pakai varian bernama `labelBiasa`/`bodySedang`/
+ *    `bodyTebal`); ketebalan di luar 500–800 dilarang.
+ * 4. JARAK DARI SATU SKALA (bab 3). Angka mentah untuk jarak dan tinggi baris
+ *    dijaga dengan PLAFON: jumlahnya boleh turun, tidak boleh naik. Plafon
+ *    diturunkan setiap kali sisa-sisanya dibereskan.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -18,6 +25,12 @@ let gagal = 0;
 function cek(nama, lulus, rincian = '') {
   console.log(`${lulus ? '✓' : '✗'} ${nama}${!lulus && rincian ? ` — ${rincian}` : ''}`);
   if (!lulus) gagal += 1;
+}
+/** Baris `berkas:n` yang cocok dengan pola. */
+function cariBaris(berkas, pola) {
+  return readFileSync(berkas, 'utf8')
+    .split('\n')
+    .flatMap((baris, i) => (pola.test(baris) ? [`${berkas}:${i + 1}`] : []));
 }
 function berkasTsx(dir) {
   return readdirSync(dir).flatMap((n) => {
@@ -74,6 +87,56 @@ cek(`app.json: latar = colors.bg (${bg})`, Boolean(bg) && app.backgroundColor ==
 const tataLetak = readFileSync('app/_layout.tsx', 'utf8');
 cek('status bar terang di atas latar gelap', /<StatusBar style="light" \/>/.test(tataLetak));
 cek('latar tiap layar dari colors.bg', /contentStyle: \{ backgroundColor: colors\.bg \}/.test(tataLetak));
+
+console.log('\nTipografi dari satu skala');
+// Ukuran huruf mentah yang sah, masing-masing dengan alasan.
+const UKURAN_BOLEH = [
+  { berkas: 'src/components/KartuTimbangPagi.tsx', alasan: 'angka berat yang bisa diketik: input, bukan HeroNumber' },
+  { berkas: 'src/components/SheetBatasPinggang.tsx', alasan: 'angka batas yang bisa diketik: input, bukan HeroNumber' },
+  { berkas: 'src/components/SheetHubungkanSumber.tsx', alasan: 'glyph centang dekoratif, disembunyikan dari pembaca layar' },
+  { berkas: 'src/components/SheetImporRiwayat.tsx', alasan: 'pratinjau CSV mentah dalam Menlo (teks mesin, bukan UI)' },
+];
+const semuaUi = [...layar, ...berkasTsx('src/components')].filter(
+  (p) => !BOLEH.some((b) => b.berkas === p),
+);
+const ukuranMentah = semuaUi
+  .filter((p) => !UKURAN_BOLEH.some((b) => b.berkas === p))
+  .flatMap((p) => cariBaris(p, /fontSize:\s*\d/));
+cek('ukuran huruf hanya dari typography', ukuranMentah.length === 0, ukuranMentah.slice(0, 5).join(' | '));
+
+// Ketebalan yang ditimpa tepat setelah gaya tipografi (satu baris maupun banyak baris).
+const timpaBobot = semuaUi.flatMap((p) => {
+  const isi = readFileSync(p, 'utf8');
+  const hasil = [];
+  const pola = /\.\.\.typography\.(\w+),\s*(?:[a-zA-Z]+: [^,{}]+,\s*)*?fontWeight: '(\d+)'/g;
+  for (const m of isi.matchAll(pola)) {
+    // Sel padat MatriksTarget menunggu Fase 5 (docs/desain/audit-token-layar.md §5).
+    if (p.endsWith('MatriksTarget.tsx')) continue;
+    hasil.push(`${p}:${isi.slice(0, m.index).split('\n').length} ${m[1]}+${m[2]}`);
+  }
+  return hasil;
+});
+cek('ketebalan tidak ditimpa setelah typography (pakai varian bernama)', timpaBobot.length === 0, timpaBobot.slice(0, 5).join(' | '));
+const bobotTerlarang = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '(100|200|300|400|900)'/));
+cek('ketebalan hanya 500, 600, 700, 800', bobotTerlarang.length === 0, bobotTerlarang.slice(0, 5).join(' | '));
+
+console.log('\nJarak dari satu skala (plafon, hanya boleh turun)');
+const PLAFON = { lineHeight: 88, jarak: 9 };
+const tinggiBaris = semuaUi.flatMap((p) => cariBaris(p, /lineHeight: \d/));
+const jarakMentah = semuaUi.flatMap((p) => cariBaris(p, /\b(gap|rowGap|columnGap|margin\w*|padding\w*): \d/));
+cek(
+  `lineHeight mentah ${tinggiBaris.length} ≤ ${PLAFON.lineHeight}`,
+  tinggiBaris.length <= PLAFON.lineHeight,
+  'tinggi baris baru harus ikut gaya tipografi',
+);
+cek(
+  `jarak mentah ${jarakMentah.length} ≤ ${PLAFON.jarak}`,
+  jarakMentah.length <= PLAFON.jarak,
+  `jarak baru harus dari spacing: ${jarakMentah.slice(-3).join(' | ')}`,
+);
+if (tinggiBaris.length < PLAFON.lineHeight || jarakMentah.length < PLAFON.jarak) {
+  console.log('  (plafon bisa diturunkan: ubah PLAFON di scripts/cek-desain.mjs)');
+}
 
 console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan desain lulus');
 process.exit(gagal ? 1 : 0);

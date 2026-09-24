@@ -125,7 +125,7 @@ export default function ArahVisualScreen() {
                 <Text style={{ ...usulanTipografi.bodySedang, color: p.teks }}>{p.nama}</Text>
                 <Text style={{ ...usulanTipografi.labelBiasa, color: colors.textFaint }}>{p.arti}</Text>
               </View>
-              <Pill label={p.nama} warna={p.teks} />
+              <Pill diKartu label={p.nama} warna={p.teks} />
             </View>
           ))}
         </Card>

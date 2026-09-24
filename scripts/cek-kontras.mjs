@@ -10,6 +10,11 @@
  * Latar bertint (mis. banner `amber + '14'` di atas `bg`) ikut dihitung sebagai
  * WARNA HASIL CAMPURAN, bukan sebagai latar dasarnya — teks di dalam banner
  * berdiri di atas campuran itu, bukan di atas `bg`.
+ *
+ * Nama di daftar memakai kunci `colors` di kode; padanannya dengan peran
+ * semantik di docs/desain/arah-visual.md bab 1: aksen & peringatan = amber,
+ * sukses = jade/aksenTeks.jade, bahaya = coral/aksenTeks.coral,
+ * info = macro.karbo/macroTeks.karbo, teksDiAtasIsian = bg.
  */
 import { copyFileSync, mkdtempSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -123,6 +128,17 @@ const PASANGAN = [
   // memasang textFaint di sana lagi, pasangannya harus ditambahkan ke sini dan
   // akan langsung gagal.
   ['textMuted di pilihan terpilih', c.textMuted, PILIHAN_AMBER, false],
+
+  // Pill status, satu baris per peran di arah-visual bab 1.3. Di atas `bg`
+  // pill bertint (warna + '1A'); di atas kartu/sheet pill memakai `diKartu`
+  // (tanpa isian), sehingga teksnya berdiri langsung di atas `surface`.
+  // Pill bertint di atas surface SENGAJA tidak ada: jade/coral/karbo di sana
+  // hanya ~3,9:1.
+  ['sukses: pill jade di bg', c.aksenTeks.jade, campur(c.aksenTeks.jade, '1A', c.bg), false],
+  ['bahaya: pill coral di bg', c.aksenTeks.coral, campur(c.aksenTeks.coral, '1A', c.bg), false],
+  ['info: pill karbo di bg', c.macroTeks.karbo, campur(c.macroTeks.karbo, '1A', c.bg), false],
+  ['peringatan: pill amber di bg', c.amber, campur(c.amber, '1A', c.bg), false],
+  ['pill textMuted di kartu (tanpa isian)', c.textMuted, c.surface, false],
 
   ['text di gelembung pengguna', c.text, GELEMBUNG_PENGGUNA, false],
   ['textFaint di gelembung pengguna', c.textFaint, GELEMBUNG_PENGGUNA, false],

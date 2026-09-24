@@ -90,7 +90,7 @@ export function KartuBodyFat({
         <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
           Body fat
         </Text>
-        <Pill label="ESTIMASI" warna={colors.amber} />
+        <Pill diKartu label="ESTIMASI" warna={colors.amber} />
       </View>
 
       {/* Angka, lalu rentangnya. Rentang tidak disembunyikan di balik info icon:
@@ -258,7 +258,7 @@ function KartuKosong({
         <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
           Body fat
         </Text>
-        <Pill label="ESTIMASI" warna={colors.textMuted} />
+        <Pill diKartu label="ESTIMASI" warna={colors.textMuted} />
       </View>
       <Text style={{ ...typography.body, color: colors.textMuted }}>Belum bisa dihitung</Text>
       <Text style={{ ...typography.caption, color: colors.textFaint, lineHeight: 16 }}>

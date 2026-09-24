@@ -110,6 +110,11 @@ Aturan pakai yang lahir dari verifikasi:
   `teksSamar` (3,94:1, gagal).
 - Pasangan baru di layar wajib ditambahkan ke `cek:kontras` bersamaan dengan
   kodenya.
+- **Pill di atas kartu/sheet tanpa isian** (`<Pill diKartu />`). Tint 10% di
+  atas `permukaan` menurunkan teks jade/coral/karbo ke ≈3,9:1 dan `teksRedup`
+  ke 4,45:1. Ditemukan saat penjaga diselaraskan; `KartuVerdictEvaluasi`,
+  `KartuBodyFat`, dan `SheetCatatFoto` sudah diperbaiki. Pill bertint hanya di
+  atas `latar` (≈5,3:1).
 
 ### 1.6 Mode terang (arah, difinalkan di Fase 3)
 
@@ -294,3 +299,15 @@ pengembangan (`__DEV__`). Data dari `src/mocks/dailyLog.ts`.
 Varian tipografi di layar ini masih didefinisikan lokal (`usulanTipografi`);
 Fase 2 memindahkannya ke `src/theme/tokens.ts` dan layar contoh ikut memakai
 token resmi.
+
+---
+
+## 5. Penjaga otomatis
+
+| Skrip | Menjaga | Bab |
+|---|---|---|
+| `npm run cek:kontras` | Setiap pasangan teks/latar dan mark/track yang ada di layar, termasuk latar bertint, pill status per peran, dan label di atas isian | 1 |
+| `npm run cek:desain` | Satu angka hero per layar; warna hanya dari `src/theme`; app.json gelap; ukuran huruf hanya dari `typography`; tidak ada penimpaan ketebalan setelah `...typography.x`; ketebalan 500–800; plafon `lineHeight` dan jarak mentah yang hanya boleh turun | 1–3 |
+
+Pengecualian selalu dicatat **di dalam skripnya** beserta alasannya, bukan di
+kode layar.

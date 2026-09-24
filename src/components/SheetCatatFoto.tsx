@@ -132,6 +132,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
               <View style={{ gap: spacing.lg }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                   <Pill
+                    diKartu
                     label={`Estimasi AI · keyakinan ${keyakinan}`}
                     warna={
                       keyakinan === 'tinggi'
