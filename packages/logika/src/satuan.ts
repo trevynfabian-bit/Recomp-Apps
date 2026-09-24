@@ -63,6 +63,12 @@ export function simpanBerat(nilai: number, satuan: Satuan): number {
  */
 export const RENTANG_TINGGI_CM = { min: 100, maks: 250 };
 
+/**
+ * Rentang masuk akal berat badan, dalam kg. Sama dengan CHECK
+ * `daily_logs_berat_masuk_akal`; penjaga salah ketik, bukan penilaian.
+ */
+export const RENTANG_BERAT_KG = { min: 30, maks: 250 };
+
 /** Rentang masuk akal batas pinggang, dalam cm. Sama dengan CHECK di database. */
 export const RENTANG_BATAS_PINGGANG_CM = { min: 50, maks: 160 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { formatMakro } from '@recomp/logika';
+import { formatMakro, RENTANG_TINGGI_CM } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
@@ -11,8 +11,8 @@ import { Isian } from './Isian';
 import { uraiAngka } from './Pemilih';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
-const TINGGI_MIN = 100;
-const TINGGI_MAKS = 250;
+const TINGGI_MIN = RENTANG_TINGGI_CM.min;
+const TINGGI_MAKS = RENTANG_TINGGI_CM.maks;
 
 type StatusSimpan = 'idle' | 'menyimpan' | 'tersimpan' | 'gagal';
 

@@ -4,7 +4,7 @@ import { Card, Panel } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
+import { formatDesimal, formatTanggalPanjang, RENTANG_BERAT_KG } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
@@ -16,8 +16,9 @@ import { KerangkaSheet } from './KerangkaSheet';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
 const LANGKAH_KG = 0.1;
-const BERAT_MIN = 30;
-const BERAT_MAKS = 250;
+/** Sama dengan CHECK database (`RENTANG_BERAT_KG`). */
+const BERAT_MIN = RENTANG_BERAT_KG.min;
+const BERAT_MAKS = RENTANG_BERAT_KG.maks;
 
 /**
  * Selisih terhadap timbangan terakhir yang dianggap tidak wajar untuk semalam.

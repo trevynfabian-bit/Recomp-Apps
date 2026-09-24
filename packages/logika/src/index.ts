@@ -115,6 +115,7 @@ export {
   periksaBatasPinggang,
   periksaTinggi,
   RENTANG_BATAS_PINGGANG_CM,
+  RENTANG_BERAT_KG,
   RENTANG_TINGGI_CM,
   simpanBerat,
   simpanPanjang,

@@ -186,5 +186,42 @@ cek(
   statusBatasPinggang(85.9, 86, null).keadaan === 'aman',
 );
 
+console.log('\nRentang isian = CHECK database');
+{
+  // Batas yang hanya ada di satu sisi menolak di sisi lain dengan pesan yang
+  // tidak bisa dibaca pengguna. CHECK dibaca dari teks migrasi (definisi
+  // TERAKHIR untuk tiap kolom menang), lalu dibandingkan dengan konstanta TS.
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const kerja = mkdtempSync(join(tmpdir(), 'rentang-'));
+  for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerja, b));
+  execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
+    ['satuan.ts', 'ukuran.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
+    { cwd: kerja, stdio: 'pipe' });
+  const { RENTANG_TINGGI_CM, RENTANG_BERAT_KG, RENTANG_BATAS_PINGGANG_CM } = require(join(kerja, 'keluar', 'satuan.js'));
+  const { RENTANG_UKURAN_CM } = require(join(kerja, 'keluar', 'ukuran.js'));
+
+  const sql = readdirSync('supabase/migrations').sort().map((b) => readFileSync(join('supabase/migrations', b), 'utf8')).join('\n');
+  const rentangSql = {};
+  for (const m of sql.matchAll(/check\s*\(\s*([a-z_]+) is null or \1 between ([\d.]+) and ([\d.]+)\s*\)/g)) {
+    rentangSql[m[1]] = { min: Number(m[2]), maks: Number(m[3]) };
+  }
+  const pasangan = [
+    ...Object.entries(RENTANG_UKURAN_CM).map(([k, v]) => [`body_measurements.${k}`, k, v]),
+    ['profiles.tinggi_cm', 'tinggi_cm', RENTANG_TINGGI_CM],
+    ['profiles.batas_pinggang_cm', 'batas_pinggang_cm', RENTANG_BATAS_PINGGANG_CM],
+    ['daily_logs.berat_pagi_kg', 'berat_pagi_kg', RENTANG_BERAT_KG],
+  ];
+  for (const [nama, kolom, ts] of pasangan) {
+    const db = rentangSql[kolom];
+    cek(`${nama}: TS ${ts.min}–${ts.maks} = database ${db ? `${db.min}–${db.maks}` : '(tidak ditemukan)'}`,
+      !!db && db.min === ts.min && db.maks === ts.maks);
+  }
+  // Komponen tidak boleh punya angka batas sendiri.
+  for (const [berkas, pola] of [
+    ['src/components/KartuTimbangPagi.tsx', /BERAT_(MIN|MAKS)\s*=\s*\d/],
+    ['src/components/SheetLengkapiProfil.tsx', /TINGGI_(MIN|MAKS)\s*=\s*\d/],
+  ]) cek(`${berkas.split('/').pop()} memakai rentang bersama, bukan angka sendiri`, !pola.test(readFileSync(berkas, 'utf8')));
+}
+
 console.log(gagal === 0 ? '\n✓ Semua pemeriksaan riwayat ukuran lulus' : `\n✗ ${gagal} pemeriksaan gagal`);
 process.exit(gagal === 0 ? 0 : 1);
