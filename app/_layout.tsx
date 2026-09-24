@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppState, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BannerDataMasuk, BannerEksporSiap } from '@/components';
@@ -12,7 +12,7 @@ import { PenyediaProfil } from '@/state/profil';
 import { PenyediaSesi, useSesi } from '@/state/sesi';
 import { PenyediaSinkron } from '@/state/sinkron';
 import { PenyediaTarget } from '@/state/target';
-import { colors, PenyediaSkema, useSkema } from '@/theme';
+import { colors, PenyediaSkema, useSkema, type Skema } from '@/theme';
 
 /**
  * Root layout. Warna disetel eksplisit lewat `screenOptions` (bukan tema
@@ -41,6 +41,7 @@ function TumpukanAkar() {
   const { status, pengguna } = useSesi();
   const skema = useSkema();
   const sudahMasuk = status === 'masuk';
+  usePulihkanRute(skema);
 
   // Jadwal pengingat disegarkan saat app dibuka dan setiap kali kembali ke
   // depan: hari bisa berganti, dan berat bisa masuk dari perangkat lain.
@@ -106,4 +107,35 @@ function TumpukanAkar() {
       </PenyediaTarget>
     </PenyediaProfil>
   );
+}
+
+/**
+ * Navigator dipasang ulang saat skema berganti (lihat `PenyediaSkema`), yang
+ * mengembalikan navigasi ke layar awal. Hook ini mengingat rute terakhir dan
+ * membukanya lagi, jadi pengguna yang sedang di Pengaturan tetap di Pengaturan
+ * ketika HP berpindah ke mode gelap saat senja. Tumpukan "kembali" tidak ikut
+ * dipulihkan: layar yang dipulihkan menjadi satu-satunya di atas tab.
+ */
+function usePulihkanRute(skema: Skema) {
+  const rute = usePathname();
+  const router = useRouter();
+  const ruteTerakhir = useRef(rute);
+  const skemaSebelumnya = useRef(skema);
+
+  // Sengaja SEBELUM efek pencatat rute di bawah: efek berjalan menurut urutan
+  // deklarasi, jadi di sini `ruteTerakhir` masih rute sebelum pemasangan ulang.
+  useEffect(() => {
+    if (skemaSebelumnya.current === skema) return;
+    skemaSebelumnya.current = skema;
+    const tujuan = ruteTerakhir.current;
+    if (tujuan && tujuan !== '/') {
+      // Tunggu navigator baru terpasang sebelum berpindah.
+      const bingkai = requestAnimationFrame(() => router.replace(tujuan as never));
+      return () => cancelAnimationFrame(bingkai);
+    }
+  }, [skema, router]);
+
+  useEffect(() => {
+    ruteTerakhir.current = rute;
+  }, [rute]);
 }

@@ -206,10 +206,13 @@ diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
 - `colors.x` tidak boleh disimpan di konstanta tingkat modul (nilainya membeku
   di skema saat modul dimuat). Pakai getter atau fungsi. `cek:desain` menolak
   pelanggarannya.
-- Saat skema berganti **sambil app terbuka**, posisi navigasi kembali ke awal.
-  Data per akun tidak hilang karena providernya ada di atas navigator. Pergantian
-  skema umumnya terjadi saat app di latar belakang, jadi biaya ini dipilih
-  dibanding mengubah puluhan layar menjadi pembaca konteks.
+- Saat skema berganti **sambil app terbuka**, navigator dipasang ulang lalu
+  `usePulihkanRute` (`app/_layout.tsx`) membuka kembali layar yang sedang
+  dilihat. Data per akun tidak hilang karena providernya ada di atas navigator.
+  Yang tidak dipulihkan hanya tumpukan "kembali" di bawah layar itu; biaya ini
+  dipilih dibanding mengubah puluhan layar menjadi pembaca konteks.
+- Deteksi sistem ada di satu fungsi murni, `skemaDariSistem()`: hanya `light`
+  yang memilih terang; `null`/`unspecified` jatuh ke gelap.
 
 **Angka hero di mode terang (Fase 3).** Amber teks kecil `#8A5A00` terlihat
 cokelat pada ukuran 64 px. Karena hero adalah teks besar (ambang 3:1), peran

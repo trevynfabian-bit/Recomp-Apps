@@ -1,8 +1,17 @@
 import { createContext, useContext } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, type ColorSchemeName } from 'react-native';
 import { terapkanSkema, type Skema } from './colors';
 
 const KonteksSkema = createContext<Skema>('gelap');
+
+/**
+ * Setelan tampilan sistem → skema app. Hanya 'light' yang eksplisit memilih
+ * terang; `null`/'unspecified' (sistem lama, web tanpa preferensi) jatuh ke
+ * gelap, mode utama app. Murni, supaya bisa diuji tanpa perangkat.
+ */
+export function skemaDariSistem(sistem: ColorSchemeName | 'unspecified' | undefined): Skema {
+  return sistem === 'light' ? 'terang' : 'gelap';
+}
 
 /**
  * Skema warna yang berlaku, mengikuti setelan terang/gelap sistem.
@@ -14,11 +23,11 @@ const KonteksSkema = createContext<Skema>('gelap');
  * Layar yang sudah terpasang tidak ikut dirender ulang hanya karena `colors`
  * berubah; `TumpukanAkar` memasang ulang navigator dengan `key={skema}` agar
  * semuanya membaca palet baru. State per akun (profil, target, dst.) ada di
- * atas navigator dan tidak hilang; yang kembali ke awal hanya posisi navigasi.
+ * atas navigator dan tidak hilang, dan `usePulihkanRute` membuka kembali layar
+ * yang sedang dilihat setelah pemasangan ulang.
  */
 export function PenyediaSkema({ children }: { children: React.ReactNode }) {
-  const sistem = useColorScheme();
-  const skema: Skema = sistem === 'light' ? 'terang' : 'gelap';
+  const skema = skemaDariSistem(useColorScheme());
   // Sengaja di dalam render, bukan efek: anak-anak di bawah harus sudah
   // membaca palet baru pada render yang sama. Idempoten.
   terapkanSkema(skema);
