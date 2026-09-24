@@ -178,7 +178,7 @@ export default function WidgetPengingatScreen() {
         gap: spacing.xl,
       }}
     >
-      <HeaderLayar kembali judul="Widget & pengingat" />
+      <HeaderLayar kembali judul="Widget & pengingat" subjudul="Notifikasi per jenis, widget layar kunci" />
 
       {/* --- Notifikasi per jenis ------------------------------------------ */}
       <View>

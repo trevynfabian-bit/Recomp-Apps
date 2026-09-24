@@ -119,9 +119,9 @@ disusun ulang di tiap layar (N1, N2):
 
 | Bagian | Aturan |
 |---|---|
-| Kembali | `TombolIkon` bulat `chevron-back`, hanya di layar tumpukan; `kembali={fungsi}` bila perlu konfirmasi dulu |
+| Kembali | `TombolIkon` bulat, hanya di layar tumpukan: `chevron-back` (‹) untuk rute dorong, `close` (✕, `jenisKembali="tutup"`) untuk rute modal; `kembali={fungsi}` bila perlu konfirmasi dulu |
 | Judul | `title`, **selalu** `accessibilityRole="header"`; layar tab diawali label tabnya |
-| Subjudul | satu baris `label` `teksSamar`: tanggal, sumber, atau jumlah |
+| Subjudul | satu baris `label` `teksSamar`: tanggal, sumber, atau jumlah; teks tetap ≤ 40 karakter supaya tidak terpotong di iPhone terkecil. Layar yang dibuka dari baris Setelan memakai keterangan baris itu (mis. "Apa yang disimpan & siapa yang membaca") |
 | Aksi | paling banyak satu di kanan: `Pill` fase, `Tombol ukuran="kecil"`, atau `TombolIkon` |
 | Bawah | slot opsional di bawah subjudul (mis. `IndikatorSinkron` di Hari Ini) |
 
@@ -131,7 +131,10 @@ Diterapkan ke semua 17 layar app (5 tab, 10 layar tumpukan, 2 layar
 pengembangan); hanya layar masuk (publik, judul `display`) yang tidak memakainya.
 Coach kini memindahkan fase ke subjudul ("Lean Gain · judul utas") supaya aksi
 kanan tetap satu (Riwayat). Subjudul selalu satu baris. `cek:desain` menolak
-layar tanpa `HeaderLayar`.
+layar tanpa `HeaderLayar`, tombol kembali di layar tab, layar tumpukan tanpa
+kembali, ‹/✕ yang tidak cocok dengan jenis rutenya, dan subjudul tertulis
+lebih dari 40 karakter (Fase 5: tiga subjudul dipendekkan, Widget & pengingat
+diberi subjudul).
 
 ## 7. Kembali & aksi atas
 

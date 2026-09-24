@@ -345,6 +345,48 @@ const tanpaHeader = layar
   .filter((p) => (readFileSync(p, 'utf8').match(/<HeaderLayar\b/g) ?? []).length === 0);
 cek('setiap layar memakai HeaderLayar (kecuali layar masuk)', tanpaHeader.length === 0, tanpaHeader.join(', '));
 
+/**
+ * Kepala layar yang konsisten (peta-navigasi §6):
+ * - layar tab tanpa tombol kembali; layar tumpukan selalu dengan;
+ * - rute modal menutup dengan ✕ (`jenisKembali="tutup"`), rute dorong dengan ‹;
+ * - subjudul tertulis muat satu baris di iPhone terkecil (≤ 40 karakter),
+ *   karena HeaderLayar memotongnya dengan elipsis.
+ * Layar peraga dilewati: ia sengaja memperagakan header layar lain.
+ */
+const MAKS_SUBJUDUL = 40;
+const jenisRute = Object.fromEntries(
+  [...tataLetak.matchAll(/\{ nama: '([\w-]+)', jenis: '(dorong|modal)' \}/g)].map((m) => [m[1], m[2]]),
+);
+const kepalaSalah = layar
+  .filter((p) => !/_layout\.tsx$|masuk\.tsx$|peraga\.tsx$/.test(p))
+  .flatMap((p) => {
+    const sf = ts.createSourceFile(p, readFileSync(p, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const tab = p.includes('(tabs)');
+    const rute = p.replace(/^app[\\/]/, '').replace('.tsx', '');
+    const hasil = [];
+    (function kunjungi(n) {
+      if ((ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)) && n.tagName.getText(sf) === 'HeaderLayar') {
+        const atribut = Object.fromEntries(
+          n.attributes.properties.filter(ts.isJsxAttribute).map((a) => [a.name.getText(sf), a.initializer]),
+        );
+        const di = `${p}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1}`;
+        const punyaKembali = 'kembali' in atribut;
+        const tutup = atribut.jenisKembali?.getText(sf) === '"tutup"';
+        if (tab && punyaKembali) hasil.push(`${di}  layar tab tidak punya tombol kembali`);
+        if (!tab && !punyaKembali) hasil.push(`${di}  layar tumpukan wajib punya kembali`);
+        if (!tab && jenisRute[rute] === 'modal' && !tutup) hasil.push(`${di}  rute modal: jenisKembali="tutup"`);
+        if (!tab && jenisRute[rute] === 'dorong' && tutup) hasil.push(`${di}  rute dorong memakai ‹, bukan ✕`);
+        const sub = atribut.subjudul;
+        if (sub && ts.isStringLiteral(sub) && sub.text.length > MAKS_SUBJUDUL) {
+          hasil.push(`${di}  subjudul ${sub.text.length} karakter (maks ${MAKS_SUBJUDUL}): "${sub.text}"`);
+        }
+      }
+      ts.forEachChild(n, kunjungi);
+    })(sf);
+    return hasil;
+  });
+cek('kepala layar: kembali/tutup menurut jenis rute, subjudul satu baris', kepalaSalah.length === 0, kepalaSalah);
+
 // Setiap Pressable harus terbukti mencapai 44 pt: token ukuran (TAP_MIN,
 // KONTROL_* + sisaSentuh, ukuran.tombolLangkah), hitSlop, padding ≥ md, flex
 // penuh, atau membungkus seluruh Card. Tombol bersama (Tombol, TombolIkon)

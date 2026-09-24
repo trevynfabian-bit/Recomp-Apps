@@ -63,7 +63,7 @@ export default function ImporRiwayatScreen() {
       <HeaderLayar
         kembali
         judul="Impor riwayat"
-        subjudul="Sekali saja, supaya tren tidak mulai dari nol"
+        subjudul="Sekali saja, agar tren punya riwayat"
       />
 
       <View style={{ gap: spacing.md }}>

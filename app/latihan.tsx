@@ -75,7 +75,7 @@ export default function LatihanScreen() {
       <HeaderLayar
         kembali
         judul="Latihan"
-        subjudul="Dibaca dari Hevy · dicatat di Hevy, bukan di sini"
+        subjudul="Dari Hevy · dicatat di Hevy"
       />
 
       <KartuHero

@@ -108,7 +108,7 @@ export default function PrivasiScreen() {
       <HeaderLayar
         kembali
         judul="Privasi"
-        subjudul="Apa yang disimpan, dan siapa yang bisa membacanya"
+        subjudul="Apa yang disimpan & siapa yang membaca"
       />
 
       <View>
