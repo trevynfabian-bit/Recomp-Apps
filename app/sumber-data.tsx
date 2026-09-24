@@ -30,9 +30,11 @@ import { colors, spacing, typography } from '@/theme';
  *
  * Fase 3 sisi frontend: koneksi berasal dari data tiruan di penyedia sinkron
  * bersama (`useSinkron`), dan alur menghubungkan/memutuskan memakai fungsi tiruan yang
- * DISUNTIKKAN ke sheet-nya (`mockHubungkan`, `mockPutuskan`). Task backend cukup
- * menukar kedua fungsi itu dan sumber daftar koneksinya dengan
- * `health_connections`, izin HealthKit, dan OAuth yang sebenarnya.
+ * DISUNTIKKAN ke sheet-nya (`mockHubungkan`, `mockPutuskan`). Pasangan server-nya
+ * sudah ada di `@/data/sumberData` (`hubungkanSumber` lewat Edge Function
+ * `hubungkan-sumber`, `putuskanSumber` lewat RPC `putuskan_sumber`); yang tersisa
+ * adalah layar izin OAuth di perangkat dan daftar koneksi dari `health_connections`,
+ * ditukar bersamaan supaya daftar dan tindakannya tidak berbeda sumber.
  */
 export default function SumberDataScreen() {
   const insets = useSafeAreaInsets();

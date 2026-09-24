@@ -1179,6 +1179,15 @@ export type WorkoutRow = {
   created_at: string;
 };
 
+/** Hasil `putuskan_sumber`: status baru dan berapa yang ikut dihapus. */
+export type PutuskanSumberRow = {
+  sumber: HealthConnectionRow['sumber'];
+  status: 'terputus';
+  diputus_pada: string;
+  data_dihapus: number;
+  latihan_dihapus: number;
+};
+
 /** Satu gerakan dari `e1rm_per_gerakan`. */
 export type E1rmGerakanRow = {
   latihan: string;
@@ -1539,6 +1548,10 @@ export type Database = {
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
         Returns: RiwayatUkuranRow;
+      };
+      putuskan_sumber: {
+        Args: { p_sumber: string; p_hapus_data?: boolean };
+        Returns: PutuskanSumberRow;
       };
       e1rm_per_gerakan: {
         Args: { p_dari: string; p_sampai: string };

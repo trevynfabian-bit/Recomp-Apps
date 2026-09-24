@@ -47,7 +47,11 @@ as $$
        'public.ikuti_auto_deteksi(date)'::regprocedure,
        -- Menurunkan pengguna dari auth.uid(), tanpa argumen; hanya menyiapkan
        -- akun yang belum punya tipe hari sama sekali.
-       'public.siapkan_data_awal_saya()'::regprocedure
+       'public.siapkan_data_awal_saya()'::regprocedure,
+       -- Menurunkan pengguna dari auth.uid(); argumennya hanya nama sumber &
+       -- pilihan hapus data. DEFINER karena baris koneksi ber-token hanya boleh
+       -- diubah server, dan rahasianya ikut terhapus lewat pemicu.
+       'public.putuskan_sumber(text, boolean)'::regprocedure
      )
 $$;
 

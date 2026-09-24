@@ -194,6 +194,30 @@ console.log('\nTanda tangan WHOOP');
   cek('perbandingan waktu-tetap: sama/beda', (await S.samaWaktuTetap('abc', 'abc')) && !(await S.samaWaktuTetap('abc', 'abd')));
 }
 
+console.log('\nMenyambungkan sumber');
+{
+  const P = S.periksaPermintaanHubungkan;
+  cek('Hevy: kunci dipangkas & diterima', JSON.stringify(P({ sumber: 'hevy', kunci_api: '  abcd-1234-efgh  ' })) === JSON.stringify({ sumber: 'hevy', kunciApi: 'abcd-1234-efgh' }));
+  cek('Hevy: kunci pendek / berspasi ditolak dengan petunjuk', P({ sumber: 'hevy', kunci_api: 'abc' }).galat?.includes('Settings') && !!P({ sumber: 'hevy', kunci_api: 'abcd 1234 efgh' }).galat);
+  cek('Strava: kode + alamat kembali https diterima', P({ sumber: 'strava', kode: 'k0de', redirect_uri: 'https://recomp.app/oauth' }).kode === 'k0de');
+  cek('WHOOP: alamat kembali skema app diterima', P({ sumber: 'whoop', kode: 'k', redirect_uri: 'recomp://oauth/whoop' }).sumber === 'whoop');
+  cek('alamat kembali http biasa ditolak', !!P({ sumber: 'whoop', kode: 'k', redirect_uri: 'http://recomp.app/oauth' }).galat);
+  cek('kode kosong ditolak', !!P({ sumber: 'strava', kode: ' ', redirect_uri: 'https://recomp.app/oauth' }).galat);
+  cek('Apple Health & sumber asing ditolak', !!P({ sumber: 'apple_health' }).galat && !!P({ sumber: 'fitbit' }).galat && !!P(null).galat);
+  const galatP = [P({ sumber: 'hevy', kunci_api: 'rahasia sekali' }), P({ sumber: 'strava', kode: 'k k' , redirect_uri: 'x' })];
+  cek('galat tidak mengutip kunci atau kode', galatP.every((g) => !g.galat.includes('rahasia') && !g.galat.includes('k k')));
+
+  const T = S.tokenDariJawabanOAuth;
+  const sekarang = Date.parse('2026-09-24T00:00:00Z');
+  const strava = T('strava', { access_token: 'a', refresh_token: 'r', expires_at: 1790000000, athlete: { id: 12345 } }, sekarang);
+  cek('Strava: kedaluwarsa dari expires_at & id atlet', strava.kedaluwarsa_pada === new Date(1790000000 * 1000).toISOString() && strava.akun_eksternal === '12345');
+  const whoop = T('whoop', { access_token: 'a', refresh_token: 'r', expires_in: 3600, scope: 'offline read:workout read:recovery' }, sekarang);
+  cek('WHOOP: kedaluwarsa dari expires_in, cakupan dipisah, tanpa id akun',
+    whoop.kedaluwarsa_pada === '2026-09-24T01:00:00.000Z' && whoop.cakupan.join(',') === 'offline,read:workout,read:recovery' && whoop.akun_eksternal === null);
+  cek('tanpa access_token → null', T('whoop', { refresh_token: 'r' }) === null && T('strava', null) === null);
+  cek('refresh token kosong → null (bukan string kosong)', T('whoop', { access_token: 'a', refresh_token: '' }, sekarang).refresh_token === null);
+}
+
 console.log('\nWebhook & cron memakai normalisasi & pembuktian yang sama');
 {
   const hevy = readFileSync('supabase/functions/sinkron-hevy/index.ts', 'utf8');

@@ -73,7 +73,7 @@ export async function tandaTanganWhoopSah(
 // Token
 // ---------------------------------------------------------------------------
 
-const URL_TOKEN: Record<SumberOAuth, string> = {
+export const URL_TOKEN: Record<SumberOAuth, string> = {
   strava: 'https://www.strava.com/oauth/token',
   whoop: 'https://api.prod.whoop.com/oauth/oauth2/token',
 };
@@ -191,6 +191,83 @@ export async function ambilJson<T>(url: string, token: string): Promise<T | null
   if (jawab.status === 401 || jawab.status === 403) throw new GalatIzin(`API menolak token (${jawab.status}).`);
   if (!jawab.ok) throw new GalatSementara(`API menjawab ${jawab.status}.`);
   return (await jawab.json()) as T;
+}
+
+// ---------------------------------------------------------------------------
+// Menyambungkan sumber (Edge Function `hubungkan-sumber`)
+// ---------------------------------------------------------------------------
+
+export type PermintaanHubungkan =
+  | { sumber: SumberOAuth; kode: string; redirectUri: string }
+  | { sumber: 'hevy'; kunciApi: string };
+
+/**
+ * Periksa badan permintaan dari app SEBELUM apa pun dikirim ke layanan luar.
+ * WHOOP/Strava membawa kode izin OAuth + alamat kembali yang dipakai saat
+ * meminta izin (harus sama persis saat ditukar); Hevy membawa kunci API.
+ * Galatnya kalimat untuk pengguna; kode & kunci tidak pernah dikutip balik.
+ */
+export function periksaPermintaanHubungkan(b: unknown): PermintaanHubungkan | { galat: string } {
+  if (!b || typeof b !== 'object') return { galat: 'Permintaan tidak lengkap.' };
+  const x = b as Record<string, unknown>;
+  const teks = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+  if (x.sumber === 'hevy') {
+    const kunci = teks(x.kunci_api);
+    if (kunci.length < 8 || kunci.length > 200 || /\s/.test(kunci)) {
+      return { galat: 'Kunci API Hevy belum benar. Salin lagi dari Hevy (Settings → Developer).' };
+    }
+    return { sumber: 'hevy', kunciApi: kunci };
+  }
+  if (x.sumber === 'whoop' || x.sumber === 'strava') {
+    const kode = teks(x.kode);
+    const redirectUri = teks(x.redirect_uri);
+    if (kode.length < 1 || kode.length > 512 || /\s/.test(kode)) return { galat: 'Kode izin tidak terbaca. Hubungkan lagi dari awal.' };
+    // https atau skema app (recomp://); http biasa tidak, karena kodenya bisa disadap.
+    if (!/^(https:\/\/|(?!https?:)[a-z][a-z0-9+.-]*:\/\/)\S{1,480}$/i.test(redirectUri)) {
+      return { galat: 'Alamat kembali dari layar izin tidak terbaca. Hubungkan lagi dari awal.' };
+    }
+    return { sumber: x.sumber, kode, redirectUri };
+  }
+  return { galat: 'Sumber ini tidak disambungkan lewat sini.' };
+}
+
+export type TokenBaru = {
+  access_token: string;
+  refresh_token: string | null;
+  kedaluwarsa_pada: string;
+  cakupan: string[];
+  /** Id akun luar bila jawaban token membawanya (Strava); WHOOP lewat profil. */
+  akun_eksternal: string | null;
+};
+
+/**
+ * Jawaban penukaran kode OAuth → bentuk simpanan. Strava memberi `expires_at`
+ * (detik epoch) dan `athlete.id`; WHOOP memberi `expires_in` dan `scope`
+ * (dipisah spasi), tanpa id pengguna. `null` bila tidak ada token akses.
+ */
+export function tokenDariJawabanOAuth(sumber: SumberOAuth, j: unknown, sekarangMs: number = Date.now()): TokenBaru | null {
+  if (!j || typeof j !== 'object') return null;
+  const t = j as {
+    access_token?: unknown;
+    refresh_token?: unknown;
+    expires_at?: unknown;
+    expires_in?: unknown;
+    scope?: unknown;
+    athlete?: { id?: unknown } | null;
+  };
+  if (typeof t.access_token !== 'string' || t.access_token.length === 0) return null;
+  const kedaluwarsaMs =
+    typeof t.expires_at === 'number'
+      ? t.expires_at * 1000
+      : sekarangMs + (typeof t.expires_in === 'number' ? t.expires_in : 3600) * 1000;
+  const akun = sumber === 'strava' && t.athlete?.id != null ? String(t.athlete.id) : null;
+  return {
+    access_token: t.access_token,
+    refresh_token: typeof t.refresh_token === 'string' && t.refresh_token.length > 0 ? t.refresh_token : null,
+    kedaluwarsa_pada: new Date(kedaluwarsaMs).toISOString(),
+    cakupan: typeof t.scope === 'string' ? t.scope.split(/[\s,]+/).filter(Boolean) : [],
+    akun_eksternal: akun,
+  };
 }
 
 // ---------------------------------------------------------------------------
