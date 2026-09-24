@@ -223,6 +223,7 @@ export {
   potongBatch,
   UKURAN_BATCH_IMPOR,
   uraiCsv,
+  uraiCsvRinci,
   uraiCsvHevy,
   uraiCsvUkuran,
   uraiTanggal,

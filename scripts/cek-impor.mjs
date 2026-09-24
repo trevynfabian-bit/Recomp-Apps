@@ -19,7 +19,7 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['impor.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { potongBatch, UKURAN_BATCH_IMPOR, uraiCsv, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } =
+const { potongBatch, UKURAN_BATCH_IMPOR, uraiCsv, uraiCsvRinci, uraiCsvHevy, uraiCsvUkuran, uraiTanggal, uraiWaktuHevy } =
   require(join(kerja, 'keluar', 'impor.js'));
 const { RENTANG_UKURAN_CM } = require(join(kerja, 'keluar', 'ukuran.js'));
 
@@ -50,6 +50,14 @@ console.log('\nCSV');
     sama(uraiCsv('tanggal;pinggang\n2026-09-01;85,5\n'), [['tanggal', 'pinggang'], ['2026-09-01', '85,5']]));
   cek('BOM dibuang & CRLF diterima', sama(uraiCsv('﻿a,b\r\n1,2\r\n'), [['a', 'b'], ['1', '2']]));
   cek('baris kosong dibuang', sama(uraiCsv('a\n\n1\n\n'), [['a'], ['1']]));
+  // Kutip yang tidak ditutup menelan sisa berkas: baris hilang tanpa laporan.
+  cek('kutip lengkap → kutipTerbuka null', uraiCsvRinci('a,b\n"x, y",2\n3,4\n').kutipTerbuka === null);
+  cek('kutip tidak ditutup → nomor baris tempat ia dibuka', uraiCsvRinci('a,b\n1,2\n"x,1\n2,3\n4,5\n').kutipTerbuka === 3);
+  cek('CRLF & baris baru di dalam kutip dihitung benar', uraiCsvRinci('a,b\r\n"ok\nlagi",2\r\n5,"putus\r\n6,7\r\n').kutipTerbuka === 4);
+  const hevyPutus = uraiCsvHevy('title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps\n"Push,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,0,normal,80,8\nPush,22 Sep 2026 07:00,22 Sep 2026 08:00,Bench,1,normal,80,8\n');
+  cek('Hevy: kutip tidak ditutup → berkas ditolak menyebut barisnya', hevyPutus.galat?.startsWith('Tanda kutip di baris 2 tidak ditutup'), JSON.stringify(hevyPutus).slice(0, 120));
+  const ukuranPutus = uraiCsvUkuran('tanggal,pinggang\n2026-09-01,"85\n2026-09-08,84\n', '2026-09-24');
+  cek('Ukuran: kutip tidak ditutup → berkas ditolak', ukuranPutus.galat?.startsWith('Tanda kutip di baris 2 tidak ditutup'), JSON.stringify(ukuranPutus).slice(0, 120));
 }
 
 console.log('\nWaktu & tanggal');

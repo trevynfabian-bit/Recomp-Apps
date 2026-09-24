@@ -184,6 +184,9 @@ function tambahHari(tanggal: string, n: number): string {
  */
 export const AMBANG_ARAH_KEKUATAN = 0.02;
 
+/** 1 / ambang (50): perbandingan ambang tanpa pecahan. */
+const PEMBAGI_AMBANG_KEKUATAN = Math.round(1 / AMBANG_ARAH_KEKUATAN);
+
 export type ArahGerakan = {
   latihan: string;
   awalKg: number;
@@ -227,8 +230,12 @@ export function arahKekuatan(sesi: SesiLatihan[]): ArahKekuatan {
       const awalKg = t[0];
       const akhirKg = t[t.length - 1];
       const selisihKg = bulat1(akhirKg - awalKg);
-      const relatif = awalKg > 0 ? (akhirKg - awalKg) / awalKg : 0;
-      const arah = Math.abs(relatif) < AMBANG_ARAH_KEKUATAN ? 'datar' : relatif > 0 ? 'naik' : 'turun';
+      // Dibandingkan dalam persepuluhan kg (bilangan bulat): 107,1 − 105 dalam
+      // pecahan biner adalah 2,0999…, jadi kenaikan TEPAT 2% terbaca datar.
+      // `e1rm_epley` di SQL menghitung dengan `numeric`; dengan ini keduanya sama.
+      const awal10 = Math.round(awalKg * 10);
+      const beda10 = Math.round(akhirKg * 10) - awal10;
+      const arah = Math.abs(beda10) * PEMBAGI_AMBANG_KEKUATAN < awal10 ? 'datar' : beda10 > 0 ? 'naik' : 'turun';
       return { latihan, awalKg, akhirKg, selisihKg, arah, jumlahSesi: t.length } as ArahGerakan;
     })
     .sort((a, b) => URUT_ARAH[a.arah] - URUT_ARAH[b.arah] || a.latihan.localeCompare(b.latihan));

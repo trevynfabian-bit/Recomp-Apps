@@ -46,13 +46,30 @@ function tebakPemisah(teks: string): ',' | ';' {
  * pernah cocok dengan apa pun.
  */
 export function uraiCsv(teks: string, pemisah: ',' | ';' = tebakPemisah(teks)): string[][] {
-  const t = teks.replace(/^﻿/, '');
+  return uraiCsvRinci(teks, pemisah).baris;
+}
+
+/**
+ * Seperti `uraiCsv`, ditambah nomor baris berkas tempat tanda kutip dibuka
+ * tetapi tidak pernah ditutup (`null` bila semua tertutup). Kutip yang tidak
+ * ditutup menelan SELURUH sisa berkas ke dalam satu sel: puluhan baris akan
+ * hilang tanpa dilaporkan satu per satu. Pengurai impor menolak berkas seperti
+ * itu dengan menyebut barisnya.
+ */
+export function uraiCsvRinci(
+  teks: string,
+  pemisah: ',' | ';' = tebakPemisah(teks),
+): { baris: string[][]; kutipTerbuka: number | null } {
+  const t = teks.replace(/^\uFEFF/, '');
   const baris: string[][] = [];
   let kolom: string[] = [];
   let sel = '';
   let dalamKutip = false;
+  let barisBerkas = 1;
+  let kutipDibukaDi = 0;
   for (let i = 0; i < t.length; i += 1) {
     const c = t[i];
+    if (c === '\n') barisBerkas += 1;
     if (dalamKutip) {
       if (c === '"' && t[i + 1] === '"') {
         sel += '"';
@@ -64,11 +81,15 @@ export function uraiCsv(teks: string, pemisah: ',' | ';' = tebakPemisah(teks)): 
       }
     } else if (c === '"') {
       dalamKutip = true;
+      kutipDibukaDi = barisBerkas;
     } else if (c === pemisah) {
       kolom.push(sel);
       sel = '';
     } else if (c === '\n' || c === '\r') {
-      if (c === '\r' && t[i + 1] === '\n') i += 1;
+      if (c === '\r' && t[i + 1] === '\n') {
+        i += 1;
+        barisBerkas += 1;
+      }
       kolom.push(sel);
       baris.push(kolom);
       kolom = [];
@@ -82,7 +103,12 @@ export function uraiCsv(teks: string, pemisah: ',' | ';' = tebakPemisah(teks)): 
     baris.push(kolom);
   }
   // Baris kosong (mis. baris baru di akhir berkas) bukan data.
-  return baris.filter((b) => b.some((s) => s.trim().length > 0));
+  return { baris: baris.filter((b) => b.some((s) => s.trim().length > 0)), kutipTerbuka: dalamKutip ? kutipDibukaDi : null };
+}
+
+/** Kalimat galat untuk kutip yang tidak ditutup; sama untuk semua pengurai impor. */
+function galatKutipTerbuka(baris: number): string {
+  return `Tanda kutip di baris ${baris} tidak ditutup, jadi baris sesudahnya tidak bisa dibaca. Periksa berkasnya, lalu impor lagi.`;
 }
 
 /** Angka dengan desimal koma ATAU titik; `null` bila kosong, NaN bila bukan angka. */
@@ -150,7 +176,8 @@ const KOLOM_HEVY = ['title', 'start_time', 'exercise_title', 'set_index', 'reps'
  * 5 km akan tercatat sebagai set yang gagal.
  */
 export function uraiCsvHevy(teks: string): HasilImporHevy | { galat: string } {
-  const baris = uraiCsv(teks);
+  const { baris, kutipTerbuka } = uraiCsvRinci(teks);
+  if (kutipTerbuka !== null) return { galat: galatKutipTerbuka(kutipTerbuka) };
   if (baris.length === 0) return { galat: 'Berkasnya kosong.' };
 
   const judul = baris[0].map((j) => j.trim().toLowerCase());
@@ -318,7 +345,8 @@ export function uraiTanggal(s: string): string | null {
  * sama dengan aturan satu pencatatan per tanggal di `body_measurements`.
  */
 export function uraiCsvUkuran(teks: string, hariIni: string): HasilImporUkuran | { galat: string } {
-  const baris = uraiCsv(teks);
+  const { baris, kutipTerbuka } = uraiCsvRinci(teks);
+  if (kutipTerbuka !== null) return { galat: galatKutipTerbuka(kutipTerbuka) };
   if (baris.length === 0) return { galat: 'Berkasnya kosong.' };
 
   const judul = baris[0].map(normalkanJudul);
