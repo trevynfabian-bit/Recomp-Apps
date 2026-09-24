@@ -91,6 +91,7 @@ export default function LatihanScreen() {
           ikon="barbell-outline"
           judul="Belum ada latihan dari Hevy"
           keterangan="Latihan yang Anda catat di Hevy masuk otomatis setiap jam setelah Hevy dihubungkan di Sumber data."
+          aksi={{ label: 'Buka Sumber data', onPress: () => router.push('/sumber-data') }}
         />
       ) : (
         kelompok.map((k) => (

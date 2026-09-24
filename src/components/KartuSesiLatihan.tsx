@@ -1,10 +1,12 @@
+import { Fragment } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 import { formatAngka, formatBeban, formatJam, ringkasSesi } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card } from './Card';
+import { Card, Pemisah } from './Card';
 import { ketukRingan } from '@/lib/haptics';
 import { METADATA_SUMBER } from '@/lib/sumber';
-import { colors, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
 
 type Props = {
   sesi: SesiLatihan;
@@ -57,46 +59,55 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
-            {formatAngka(r.volumeKg)} kg
-          </Text>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{formatAngka(r.volumeKg)} kg</Text>
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>volume</Text>
         </View>
-        <Text style={{ ...typography.body, color: colors.teksSamar }} accessibilityElementsHidden>
-          {terbuka ? '⌃' : '⌄'}
-        </Text>
+        <Ionicons
+          name={terbuka ? 'chevron-up' : 'chevron-down'}
+          size={ukuranIkon.kecil}
+          color={colors.teksSamar}
+          accessibilityElementsHidden
+        />
       </Pressable>
 
       {terbuka ? (
-        <View style={{ borderTopWidth: 1, borderTopColor: colors.garis }}>
+        <View>
           {r.latihan.map((l, i) => (
-            <View
-              key={`${l.latihan}-${i}`}
-              accessible
-              accessibilityLabel={
-                `${l.latihan}: ${l.set}.` +
-                (l.e1rmKg !== null ? ` e1RM estimasi ${formatBeban(l.e1rmKg)} dari ${l.setTerbaik}.` : '')
-              }
-              style={{
-                flexDirection: 'row',
-                gap: spacing.md,
-                paddingHorizontal: spacing.lg,
-                paddingVertical: spacing.md,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.garis,
-              }}
-            >
-              <View style={{ flex: 1, gap: spacing.xxs }}>
-                <Text style={{ ...typography.label, color: colors.teks }}>{l.latihan}</Text>
-                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{l.set}</Text>
-              </View>
-              {l.e1rmKg !== null ? (
-                <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: colors.teks }}>≈ {formatBeban(l.e1rmKg)}</Text>
-                  <Text style={{ ...typography.caption, color: estimasi.warna }}>e1RM · estimasi</Text>
+            <Fragment key={`${l.latihan}-${i}`}>
+              {/* Pemisah penuh di bawah kepala kartu, bertakuk di antara latihan. */}
+              <Pemisah arah={i === 0 ? 'penuh' : 'horizontal'} />
+              <View
+                accessible
+                accessibilityLabel={
+                  `${l.latihan}: ${l.set}.` +
+                  (l.e1rmKg !== null ? ` e1RM estimasi ${formatBeban(l.e1rmKg)} dari ${l.setTerbaik}.` : '')
+                }
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.md,
+                  paddingHorizontal: spacing.lg,
+                  paddingVertical: spacing.md,
+                }}
+              >
+                <View style={{ flex: 1, gap: spacing.xxs }}>
+                  <Text style={{ ...typography.label, color: colors.teks }}>{l.latihan}</Text>
+                  <Text
+                    style={{
+                      ...typography.labelBiasa,
+                      color: colors.teksRedup,
+                    }}
+                  >
+                    {l.set}
+                  </Text>
                 </View>
-              ) : null}
-            </View>
+                {l.e1rmKg !== null ? (
+                  <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
+                    <Text style={{ ...typography.label, color: colors.teks }}>≈ {formatBeban(l.e1rmKg)}</Text>
+                    <Text style={{ ...typography.caption, color: estimasi.warna }}>e1RM · estimasi</Text>
+                  </View>
+                ) : null}
+              </View>
+            </Fragment>
           ))}
         </View>
       ) : null}
