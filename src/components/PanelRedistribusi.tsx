@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { formatAngka, hitungRedistribusi, KELIPATAN_KCAL } from '@recomp/logika';
+import { formatAngka, formatTanggalPanjang, hitungRedistribusi, KELIPATAN_KCAL } from '@recomp/logika';
 import type { BudgetMingguan, HasilRedistribusi, OpsiRedistribusi } from '@recomp/logika';
 import { Card, Panel } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -151,7 +151,7 @@ export function PanelRedistribusi({
                     key={h.tanggal}
                     label={hariSingkat(h.tanggal)}
                     terpilih={aktif}
-                    aksesLabel={`Bebankan ke ${h.tanggal}`}
+                    aksesLabel={`Bebankan ke ${formatTanggalPanjang(h.tanggal)}`}
                     nonaktif={sudahDipakai}
                     onPress={() => setTanggalTumpuk(h.tanggal)}
                   />

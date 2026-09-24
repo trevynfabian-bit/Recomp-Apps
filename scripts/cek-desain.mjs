@@ -251,6 +251,17 @@ const keadaanSalah = [...layar, ...berkasTsx('src/components')].flatMap((p) => {
 });
 cek('keadaan kontrol lewat aria-* (radio: aria-checked)', keadaanSalah.length === 0, keadaanSalah);
 
+// Label pembaca layar menyebut tanggal dengan kata ("Rabu, 23 September"),
+// bukan ISO mentah ("2026-09-23") yang dibacakan angka demi angka.
+const tanggalMentah = [...layar, ...berkasTsx('src/components')].flatMap((p) =>
+  readFileSync(p, 'utf8')
+    .split('\n')
+    .flatMap((b, i) =>
+      /(aksesLabel|accessibilityLabel)=\{`[^`]*\$\{\w+\.tanggal\}/.test(b) ? [`${p}:${i + 1}  tanggal ISO di label → formatTanggalPanjang`] : [],
+    ),
+);
+cek('label aksesibilitas tidak memuat tanggal ISO mentah', tanggalMentah.length === 0, tanggalMentah);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
