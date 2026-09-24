@@ -95,3 +95,10 @@ function mundurSehari(tanggal: string): string {
   t.setUTCDate(t.getUTCDate() - 1);
   return t.toISOString().slice(0, 10);
 }
+
+/**
+ * Panjang pertanyaan coach paling banyak (karakter). SAMA dengan CHECK
+ * `pesan_teks_wajar` di `pesan_coach`; dipakai klien (menolak sebelum
+ * mengirim) dan Edge Function coach-chat. Dijaga `cek:prompt`.
+ */
+export const MAKS_PERTANYAAN_COACH = 8000;

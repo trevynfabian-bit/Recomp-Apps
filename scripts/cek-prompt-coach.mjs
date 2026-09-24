@@ -595,6 +595,16 @@ console.log('\nSifat endpoint yang dibaca dari sumbernya');
     'pertanyaan disimpan SEBELUM model dipanggil (kuota menolak sebelum ada biaya)',
     src.indexOf("peran: 'pengguna'") < src.indexOf('messages.stream'),
   );
+  {
+    const sqlTeks = readFileSync('supabase/migrations/20260922002600_percakapan_coach.sql', 'utf8');
+    const batasDb = Number(/pesan_teks_wajar check \(char_length\(teks\) <= (\d+)\)/.exec(sqlTeks)?.[1]);
+    const batasTs = Number(/export const MAKS_PERTANYAAN_COACH = (\d+);/.exec(readFileSync('packages/logika/src/percakapan.ts', 'utf8'))?.[1]);
+    cek(`batas panjang pertanyaan TS ${batasTs} = CHECK database ${batasDb}, dipakai Edge Function & klien`,
+      batasTs === batasDb && src.includes('const MAKS_PERTANYAAN = MAKS_PERTANYAAN_COACH;') &&
+      readFileSync('src/data/coach.ts', 'utf8').includes('MAKS_PERTANYAAN_COACH'));
+    cek('utas hilang/milik orang lain/id cacat → 404 yang sama, bukan 502',
+      /galatPesan\.code === '23503' \|\| galatPesan\.code === '42501' \|\| galatPesan\.code === '22P02'[\s\S]{0,200}404/.test(src));
+  }
   cek(
     'kunci API tidak pernah ikut ke jawaban maupun log',
     !/console\.(log|error)\([^)]*kunciAi/.test(src),

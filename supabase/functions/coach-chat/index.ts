@@ -57,6 +57,7 @@ import Anthropic from 'npm:@anthropic-ai/sdk@0.127.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { periksaBatasMedis, periksaJawabanMedis } from '../_shared/logika/batasMedis.ts';
 import { hasilLabDariServer, type BarisHasilLabServer } from '../_shared/logika/hasilLab.ts';
+import { MAKS_PERTANYAAN_COACH } from '../_shared/logika/percakapan.ts';
 import {
   BETA_FALLBACK,
   jalankanTool,
@@ -74,8 +75,8 @@ const KEPALA_CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-/** Batas panjang pertanyaan; sama dengan CHECK `pesan_teks_wajar` di database. */
-const MAKS_PERTANYAAN = 8000;
+/** Batas panjang pertanyaan; sama dengan CHECK `pesan_teks_wajar` (dijaga cek:prompt). */
+const MAKS_PERTANYAAN = MAKS_PERTANYAAN_COACH;
 
 /** Berapa kali putaran pemanggilan fungsi dibolehkan sebelum dihentikan. */
 const MAKS_PUTARAN_TOOL = 6;
@@ -197,6 +198,12 @@ Deno.serve(async (req: Request) => {
         { galat: 'Batas pertanyaan hari ini sudah tercapai. Coach bisa ditanya lagi besok.', kuota_habis: true },
         429,
       );
+    }
+    // Utas yang tidak ada, sudah dihapus, milik orang lain, atau id-nya cacat:
+    // satu jawaban yang sama (tanpa membocorkan mana yang benar), dan mencoba
+    // lagi tidak akan menolong, jadi bukan 502.
+    if (galatPesan.code === '23503' || galatPesan.code === '42501' || galatPesan.code === '22P02') {
+      return jawab({ galat: 'Percakapan ini sudah tidak ada. Mulai percakapan baru.', percakapan_hilang: true }, 404);
     }
     console.error('gagal menyimpan pertanyaan', galatPesan);
     return jawab({ galat: 'Gagal menyimpan pertanyaan' }, 502);

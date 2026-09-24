@@ -74,6 +74,7 @@ export {
   labelTanggalRelatif,
   MAKS_JUDUL,
   tanggalDariWaktu,
+  MAKS_PERTANYAAN_COACH,
 } from './percakapan.ts';
 
 export { estimasiBodyFatNavy, komposisiTubuh, KETIDAKPASTIAN_BF } from './bodyFat.ts';

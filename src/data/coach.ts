@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { DISCLAIMER_COACH, periksaBatasMedis } from '@recomp/logika';
+import { DISCLAIMER_COACH, formatAngka, MAKS_PERTANYAAN_COACH, periksaBatasMedis } from '@recomp/logika';
 import type { PenolakanMedis } from '@recomp/logika';
 import type { AngkaKonteksRow, KonteksCoachRow, KuotaCoachRow } from '@/types/database';
 import type { RujukanData, WidgetCoach } from '@/types/domain';
@@ -52,7 +52,7 @@ export async function konteksCoach(
   });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanCoach('Server tidak mengembalikan konteks.', true);
+  if (!data) throw new KesalahanCoach('Data Coach belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const k = data as KonteksCoachRow;
 
@@ -167,6 +167,14 @@ export async function tanyakanKeCoach(
   percakapanId: string | null = null,
   persenLemak: number | null = null,
 ): Promise<HasilTanya> {
+  // Batas yang sama dengan server & CHECK `pesan_teks_wajar`: ditolak di sini
+  // dengan kalimat yang jelas, bukan setelah perjalanan ke server.
+  if (pertanyaan.trim().length > MAKS_PERTANYAAN_COACH) {
+    throw new KesalahanCoach(
+      `Pertanyaannya lebih dari ${formatAngka(MAKS_PERTANYAAN_COACH)} karakter. Persingkat, lalu kirim lagi.`,
+      false,
+    );
+  }
   const periksa = periksaPertanyaan(pertanyaan);
   if (periksa.ditolak) {
     return {
@@ -192,6 +200,12 @@ export async function tanyakanKeCoach(
     }
     if (status === 401) {
       throw new KesalahanCoach('Sesi Anda berakhir. Masuk lagi untuk memakai Coach.', false);
+    }
+    if (status === 404) {
+      throw new KesalahanCoach('Percakapan ini sudah tidak ada. Mulai percakapan baru.', false);
+    }
+    if (status === 400) {
+      throw new KesalahanCoach('Pertanyaan ini belum bisa dikirim. Periksa isinya, lalu kirim lagi.', false);
     }
     throw new KesalahanCoach(
       'Coach sedang tidak bisa dihubungi. Coba lagi.',
@@ -259,6 +273,6 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanCoach 
     case 'PGRST301':
       return new KesalahanCoach('Sesi Anda berakhir. Masuk lagi untuk memakai Coach.', false);
     default:
-      return new KesalahanCoach('Gagal memuat data Coach. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanCoach('Data Coach belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
 }
