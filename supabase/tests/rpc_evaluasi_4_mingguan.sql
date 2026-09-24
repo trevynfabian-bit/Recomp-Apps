@@ -7,8 +7,9 @@
 --   • periode = empat pekan yang SUDAH selesai; pekan berjalan tidak ikut;
 --   • ambang berat diskalakan ke panjang periode (0,8 kg, bukan 0,2 kg);
 --   • ujung tren yang ditopang terlalu sedikit timbangan → `belum jelas`;
---   • sumbu kekuatan selalu `belum jelas` dan menyebut sebabnya, sehingga
---     keyakinan tidak pernah `tinggi` untuk sekarang.
+--   • tanpa gerakan berbeban yang diulang, sumbu kekuatan `belum jelas` dan
+--     menyebut sebabnya, sehingga keyakinan tidak `tinggi`;
+--   • dengan set Hevy, sumbu kekuatan dibaca dari e1RM gerakan yang diulang.
 --
 -- Tanggalnya relatif terhadap Senin pekan berjalan, jadi uji ini tetap berlaku
 -- kapan pun ia dijalankan.
@@ -85,8 +86,8 @@ begin
     format('arah pinggang = %s', e->'sumbu'->'pinggang'->>'arah');
 end $$;
 
--- 3. Sumbu KEKUATAN dinyatakan belum jelas beserta sebabnya — dan karena itu
---    keyakinannya tidak pernah `tinggi`, walau empat pekan datanya penuh.
+-- 3. Tanpa set latihan, sumbu KEKUATAN dinyatakan belum jelas beserta sebabnya,
+--    dan karena itu keyakinannya tidak `tinggi`, walau empat pekan datanya penuh.
 do $$
 declare e jsonb;
 begin
@@ -101,6 +102,60 @@ begin
   assert (e->>'keyakinan') = 'sedang', format('keyakinan = %s, seharusnya sedang', e->>'keyakinan');
   assert (e->>'penentu') is not null, 'penentu tidak disebut';
 end $$;
+
+-- 3b. Dengan set Hevy: e1RM gerakan yang diulang menentukan sumbu kekuatan.
+--     Bench 80 → 85 kg × 8 (naik), Squat 100 → 101 kg × 5 (+1%, datar),
+--     OHP hanya sekali (tidak ikut), dan sesi di pekan BERJALAN diabaikan.
+reset role;
+do $$
+declare
+  v_senin date := public.awal_minggu((now() at time zone 'Asia/Jakarta')::date);
+  v_dari date := v_senin - 28;
+  u uuid := 'cccc2222-0000-0000-0000-000000000022';
+  w1 uuid; w2 uuid; w3 uuid;
+begin
+  insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+  values (u, v_dari + 2, 'Push A', 'angkat_beban', 'hevy', 'uji-eval-1') returning id into w1;
+  insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+  values (u, v_dari + 20, 'Push B', 'angkat_beban', 'hevy', 'uji-eval-2') returning id into w2;
+  insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id)
+  values (u, v_senin, 'Push C', 'angkat_beban', 'hevy', 'uji-eval-3') returning id into w3;
+  insert into public.workout_sets (workout_id, user_id, latihan, latihan_ke, set_ke, beban_kg, reps) values
+    (w1, u, 'Bench Press', 1, 1, 80, 8), (w1, u, 'Squat', 2, 1, 100, 5), (w1, u, 'Overhead Press', 3, 1, 50, 8),
+    (w2, u, 'Bench Press', 1, 1, 85, 8), (w2, u, 'Squat', 2, 1, 101, 5),
+    -- Pekan berjalan: Squat anjlok, tetapi tidak boleh ikut dinilai.
+    (w3, u, 'Squat', 1, 1, 60, 5);
+end $$;
+set request.jwt.claim.sub = 'cccc2222-0000-0000-0000-000000000022';
+set role authenticated;
+
+do $$
+declare e jsonb; k jsonb;
+begin
+  e := public.evaluasi_4_mingguan();
+  k := e->'sumbu'->'kekuatan';
+  assert k->>'arah' = 'naik', format('kekuatan %s, seharusnya naik', k);
+  assert (k->>'naik')::int = 1 and (k->>'datar')::int = 1 and (k->>'turun')::int = 0,
+    format('hitungan gerakan %s, seharusnya 1 naik, 1 datar', k);
+  assert (k->>'jumlah_gerakan')::int = 2, format('jumlah gerakan %s, seharusnya 2 (OHP sekali tidak ikut)', k->>'jumlah_gerakan');
+  assert k->>'sebab' is null, 'sebab seharusnya kosong saat kekuatan terbaca';
+  assert e->>'kode' = public.kode_evaluasi((e->>'fase')::public.fase_program, e->'sumbu'->'berat'->>'arah',
+    e->'sumbu'->'pinggang'->>'arah', k->>'arah', (e->>'pekan_data')::int)->>'kode', 'kode tidak lewat pohon keputusan';
+  assert e->>'keyakinan' = 'tinggi', format('keyakinan %s, seharusnya tinggi saat ketiga sumbu terbaca', e->>'keyakinan');
+end $$;
+
+-- Pengguna lain tidak ikut membaca set A.
+set request.jwt.claim.sub = 'cccc3333-0000-0000-0000-000000000033';
+do $$
+begin
+  assert public.evaluasi_4_mingguan()->'sumbu'->'kekuatan'->>'arah' = 'belum jelas', 'B membaca set latihan A';
+end $$;
+
+-- Bersihkan supaya uji berikutnya tetap tentang berat & pinggang.
+reset role;
+delete from public.workouts where external_id like 'uji-eval-%';
+set request.jwt.claim.sub = 'cccc2222-0000-0000-0000-000000000022';
+set role authenticated;
 
 -- 4. Pekan BERJALAN tidak ikut: lonjakan berat pekan ini tidak mengubah
 --    verdict. Verdict yang berubah Selasa lalu berubah lagi Kamis tidak akan
@@ -210,4 +265,4 @@ begin
     'authenticated seharusnya boleh menjalankan evaluasinya';
 end $$;
 
-select '✓ evaluasi 4 mingguan: periode = pekan yang sudah selesai, ambang diskalakan, kekuatan jujur belum terbaca' as hasil;
+select '✓ evaluasi 4 mingguan: periode = pekan yang sudah selesai, ambang diskalakan, kekuatan dari e1RM gerakan yang diulang (atau jujur belum terbaca)' as hasil;

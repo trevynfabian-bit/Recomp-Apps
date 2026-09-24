@@ -124,6 +124,11 @@ console.log('\nArah kekuatan (keterangan awam)');
   cek('urutan: naik, turun, datar', h.gerakan.map((g) => g.arah).join(',') === 'naik,turun,datar');
   const kecil = arahKekuatan([sesi('x', '2026-09-01T07:00:00+07:00', [['Row', 100, 5]]), sesi('y', '2026-09-08T07:00:00+07:00', [['Row', 101.5, 5]])]);
   cek('di bawah ambang 2% → datar', kecil.gerakan[0]?.arah === 'datar');
+  // 107,1 − 105 dalam pecahan biner = 2,0999…; kenaikan TEPAT 2% harus terbaca naik (sama dengan SQL).
+  const tepat = arahKekuatan([sesi('x', '2026-09-01T07:00:00+07:00', [['Row', 105, 1]]), sesi('y', '2026-09-08T07:00:00+07:00', [['Row', 107.1, 1]])]);
+  cek('tepat +2% (105 → 107,1) → naik', tepat.gerakan[0]?.arah === 'naik', JSON.stringify(tepat.gerakan[0]));
+  const tepatTurun = arahKekuatan([sesi('x', '2026-09-01T07:00:00+07:00', [['Row', 105, 1]]), sesi('y', '2026-09-08T07:00:00+07:00', [['Row', 102.9, 1]])]);
+  cek('tepat −2% (105 → 102,9) → turun', tepatTurun.gerakan[0]?.arah === 'turun', JSON.stringify(tepatTurun.gerakan[0]));
   cek('seri naik = turun → kalimat stabil', h.kalimat?.startsWith('Kekuatan cenderung stabil'), h.kalimat);
   cek('tanpa gerakan berulang → kalimat null', arahKekuatan([data[0]]).kalimat === null);
   const r = ringkasArahKekuatan(h);

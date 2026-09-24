@@ -604,7 +604,16 @@ export type Evaluasi4MingguanRow = {
       ambang_cm: number;
       jumlah_pencatatan: number;
     };
-    kekuatan: { arah: ArahMetrikDb; sebab: string };
+    /** Dari e1RM gerakan yang diulang dalam periode (`arah_kekuatan_periode`). */
+    kekuatan: {
+      arah: ArahMetrikDb;
+      naik: number;
+      turun: number;
+      datar: number;
+      jumlah_gerakan: number;
+      /** Terisi hanya bila `belum jelas`: kenapa kekuatan belum bisa dibaca. */
+      sebab: string | null;
+    };
   };
   kode: string;
   penentu: string;

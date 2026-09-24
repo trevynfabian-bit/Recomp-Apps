@@ -13,10 +13,10 @@ import type { Evaluasi4MingguanRow, EvaluasiPeriodikRow } from '@/types/database
  * hanya ada satu penyusun kalimat. `npm run cek:paritas` membuktikan kode dan
  * keyakinan kedua sisi identik untuk seluruh 960 kombinasi masukan.
  *
- * Satu hal yang perlu terlihat di layar, bukan disembunyikan: sumbu kekuatan
- * selalu `belum jelas` sampai data beban latihan tersedia, jadi keyakinan
- * evaluasi tidak pernah `tinggi` untuk sekarang. `sumbu.kekuatan.sebab`
- * menyebut alasannya.
+ * Sumbu kekuatan diturunkan server dari e1RM gerakan yang diulang dalam
+ * periode (`arah_kekuatan_periode`, kembar dengan `arahKekuatan`). Tanpa
+ * gerakan berbeban yang diulang ia `belum jelas`, dan `sumbu.kekuatan.sebab`
+ * menyebut alasannya, bukan disembunyikan.
  */
 
 export class KesalahanEvaluasi extends Error {
@@ -49,7 +49,7 @@ export async function evaluasiEmpatPekan(acuan: string | null = null): Promise<S
   const { data, error } = await supabase.rpc('evaluasi_4_mingguan', { p_sampai: acuan });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanEvaluasi('Server tidak mengembalikan evaluasi.', true);
+  if (!data) throw new KesalahanEvaluasi('Evaluasi belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const j = data as Evaluasi4MingguanRow;
   const hasil = evaluasi4Mingguan({

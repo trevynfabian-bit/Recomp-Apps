@@ -1923,6 +1923,77 @@ try {
     console.log();
   }
 
+  // --- Arah kekuatan: arah_kekuatan_periode (SQL) = arahKekuatan (TS) -------
+  {
+    const { arahKekuatan, ringkasArahKekuatan } = muatLogikaTs();
+    const UID_KUAT = '99999999-8888-8888-8888-999999999998';
+    sql(`insert into auth.users (id, email) values ('${UID_KUAT}', 'paritas-kekuatan@contoh.test');`);
+    // [tanggal, jam WIB, [[latihan, [[beban, reps], ...]], ...]]
+    const SKENARIO = [
+      ['tepat +2%', [['2026-09-01', '07:00', [['Row', [[105, 1]]]]], ['2026-09-08', '07:00', [['Row', [[107.1, 1]]]]]]],
+      ['tepat −2%', [['2026-09-01', '07:00', [['Row', [[105, 1]]]]], ['2026-09-08', '07:00', [['Row', [[102.9, 1]]]]]]],
+      ['+1,9% datar', [['2026-09-01', '07:00', [['Row', [[105, 1]]]]], ['2026-09-08', '07:00', [['Row', [[107, 1]]]]]]],
+      ['campuran seri', [
+        ['2026-09-01', '07:00', [['Bench', [[80, 8]]], ['Squat', [[100, 5]]], ['OHP', [[50, 8]]], ['Dip', [[null, 10]]], ['Curl', [[20, 15]]]]],
+        ['2026-09-08', '07:00', [['Bench', [[85, 8]]], ['Squat', [[95, 5]]], ['Dip', [[null, 12]]], ['Curl', [[22, 15]]]]],
+      ]],
+      ['gerakan dua kali satu sesi', [
+        ['2026-09-01', '07:00', [['Row', [[60, 10]]], ['Bench', [[80, 5]]], ['Row', [[70, 5]]]]],
+        ['2026-09-08', '07:00', [['Row', [[72, 5]]]]],
+      ]],
+      ['set terbaik per kemunculan', [
+        ['2026-09-01', '07:00', [['Squat', [[100, 5], [110, 3], [60, 12]]]]],
+        ['2026-09-08', '07:00', [['Squat', [[105, 5], [90, 8]]]]],
+      ]],
+      ['urutan jam dalam satu hari', [
+        ['2026-09-01', '18:00', [['Deadlift', [[140, 3]]]]],
+        ['2026-09-01', '07:00', [['Deadlift', [[150, 3]]]]],
+      ]],
+      ['mayoritas turun', [
+        ['2026-09-01', '07:00', [['A', [[100, 5]]], ['B', [[100, 5]]], ['C', [[100, 5]]]]],
+        ['2026-09-08', '07:00', [['A', [[90, 5]]], ['B', [[95, 5]]], ['C', [[110, 5]]]]],
+      ]],
+      ['tanpa gerakan berulang', [['2026-09-01', '07:00', [['Row', [[60, 8]]]]]]],
+    ];
+    let gagalKuat = 0;
+    console.log('kasus kekuatan               SQL arah    TS arah     SQL n/t/d  TS n/t/d');
+    console.log('─'.repeat(78));
+    for (const [label, sesi] of SKENARIO) {
+      sql(`delete from public.workouts where user_id = '${UID_KUAT}';`);
+      const tsSesi = sesi.map(([tgl, jam, latihan], i) => {
+        const mulai = `${tgl}T${jam}:00+07:00`;
+        const sets = latihan.map(([nama, daftar], k) =>
+          daftar.map(([b, r], j) => `(w${i}, '${UID_KUAT}', '${nama}', ${k + 1}, ${j + 1}, ${b === null ? 'null' : b}, ${r})`).join(', '));
+        sql(`do $$ declare w${i} uuid; begin
+          insert into public.workouts (user_id, tanggal, nama, jenis, sumber, external_id, waktu_mulai)
+          values ('${UID_KUAT}', date '${tgl}', 'S${i}', 'angkat_beban', 'hevy', 'paritas-${i}', timestamptz '${mulai}') returning id into w${i};
+          insert into public.workout_sets (workout_id, user_id, latihan, latihan_ke, set_ke, beban_kg, reps) values ${sets.join(', ')};
+        end $$;`);
+        return {
+          id: `s${i}`, mulai, nama: `S${i}`, durasi_menit: 60,
+          latihan: latihan.map(([nama, daftar]) => ({
+            latihan: nama,
+            sets: daftar.map(([b, r], j) => ({ set_ke: j + 1, beban_kg: b, reps: r, jarak_km: null, durasi_detik: null, tipe: 'normal' })),
+          })),
+        };
+      });
+      const q = JSON.parse(sql(`set request.jwt.claim.sub = '${UID_KUAT}';
+        select public.arah_kekuatan_periode(date '2026-08-31', date '2026-09-13')::text;`).split('\n').pop());
+      const a = arahKekuatan(tsSesi);
+      const r = ringkasArahKekuatan(a);
+      const cocok = q.arah === r.arah && q.naik === a.naik && q.turun === a.turun && q.datar === a.datar && q.jumlah_gerakan === a.gerakan.length;
+      if (!cocok) gagalKuat += 1;
+      console.log(`${cocok ? '✓' : '✗'} ${label.padEnd(26)} ${String(q.arah).padEnd(11)} ${r.arah.padEnd(11)} ${`${q.naik}/${q.turun}/${q.datar}`.padEnd(10)} ${a.naik}/${a.turun}/${a.datar}`);
+    }
+    sql(`delete from public.workouts where user_id = '${UID_KUAT}';`);
+    if (gagalKuat > 0) {
+      console.error(`✗ ${gagalKuat} kasus arah kekuatan: SQL dan TypeScript tidak sejalan.`);
+      process.exit(1);
+    }
+    console.log(`\n✓ ${SKENARIO.length} kasus cocok — arah kekuatan di SQL dan TypeScript sejalan.`);
+    console.log();
+  }
+
   // --- Tipe baris TS (src/types/database.ts) = kolom tabel sebenarnya -------
   // Kolom yang ditambah di migrasi tapi lupa di tipe (atau sebaliknya) tidak
   // membuat typecheck gagal — klien diam-diam membaca `undefined`.
