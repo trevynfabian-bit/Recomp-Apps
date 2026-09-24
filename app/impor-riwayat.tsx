@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatWaktuRelatif } from '@recomp/logika';
 import { Card, HeaderLayar, SectionHeader, SheetEksporData, SheetImporRiwayat, type SumberImpor, Tombol } from '@/components';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuranIkon } from '@/theme';
 import { useEkspor } from '@/state/ekspor';
 
 type StatusImpor = { selesaiPada: string; ringkas: string } | null;
@@ -80,9 +81,12 @@ export default function ImporRiwayatScreen() {
               </View>
               {s ? (
                 <View style={{ gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>
-                    ✓ Diimpor {formatWaktuRelatif(s.selesaiPada, sekarang)}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                    <Ionicons name="checkmark-circle" size={ukuranIkon.kecil} color={colors.status.sukses.teks} />
+                    <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>
+                      Diimpor {formatWaktuRelatif(s.selesaiPada, sekarang)}
+                    </Text>
+                  </View>
                   <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{s.ringkas}</Text>
                 </View>
               ) : null}

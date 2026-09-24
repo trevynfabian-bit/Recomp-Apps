@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import * as DocumentPicker from 'expo-document-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 import {
   formatAngka,
@@ -23,7 +26,7 @@ import {
   mockJalankanImpor,
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
-import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, typography, ukuran, ukuranIkon } from '@/theme';
 import { Panel } from './Card';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
@@ -78,6 +81,10 @@ const MAKS_DILEWATI_TAMPIL = 5;
 export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
   const [langkah, setLangkah] = useState<Langkah>({ jenis: 'masukan' });
   const [teks, setTeks] = useState('');
+  /** Nama berkas yang dipilih; `null` bila isinya ditempel atau contoh. */
+  const [namaBerkas, setNamaBerkas] = useState<string | null>(null);
+  const [memilih, setMemilih] = useState(false);
+  const router = useRouter();
   const [galat, setGalat] = useState<string | null>(null);
   const [rentang, setRentang] = useState<(typeof RENTANG_APPLE_HEALTH)[number]['kunci']>('365');
 
@@ -85,13 +92,42 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
     if (sumber === null) return;
     setLangkah({ jenis: 'masukan' });
     setTeks('');
+    setNamaBerkas(null);
     setGalat(null);
     setRentang('365');
   }, [sumber]);
 
   if (sumber === null) return null;
 
-  function periksa() {
+  /**
+   * Pilih berkas CSV dari perangkat (Files/iCloud Drive/unduhan), baca isinya,
+   * lalu langsung ke pratinjau: memilih berkas adalah jalan utama, menempel
+   * isi adalah cadangan. Membatalkan pemilihan tidak dihitung galat.
+   */
+  async function pilihBerkas() {
+    setMemilih(true);
+    try {
+      const hasil = await DocumentPicker.getDocumentAsync({
+        type: ['text/csv', 'text/comma-separated-values', 'text/plain', 'application/vnd.ms-excel'],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (hasil.canceled || hasil.assets.length === 0) return;
+      const aset = hasil.assets[0];
+      // Web memberi objek File; iOS/Android memberi URI berkas salinan di cache.
+      const isi = aset.file ? await aset.file.text() : await (await fetch(aset.uri)).text();
+      setTeks(isi);
+      setNamaBerkas(aset.name);
+      setGalat(null);
+      periksa(isi);
+    } catch {
+      setGalat('Berkas belum bisa dibaca. Coba pilih lagi, atau tempel isinya di kolom di bawah.');
+    } finally {
+      setMemilih(false);
+    }
+  }
+
+  function periksa(isiTeks: string = teks) {
     if (sumber === null) return;
     if (sumber === 'apple_health') {
       const r = RENTANG_APPLE_HEALTH.find((x) => x.kunci === rentang)!;
@@ -114,7 +150,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
     }
 
     if (sumber === 'hevy_csv') {
-      const h = uraiCsvHevy(teks);
+      const h = uraiCsvHevy(isiTeks);
       if ('galat' in h) return setGalat(h.galat);
       if (h.sesi.length === 0) return setGalat('Tidak ada satu pun set yang bisa diimpor.');
       const dari = tanggalDariWaktu(h.sesi[0].mulai);
@@ -133,7 +169,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       return;
     }
 
-    const u = uraiCsvUkuran(teks, tanggalHariIni());
+    const u = uraiCsvUkuran(isiTeks, tanggalHariIni());
     if ('galat' in u) return setGalat(u.galat);
     if (u.baris.length === 0) return setGalat('Tidak ada satu pun baris ukuran yang bisa diimpor.');
     setLangkah({
@@ -196,7 +232,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               onPilih={setRentang}
             />
             <View style={{ gap: spacing.sm }}>
-              <Tombol label="Lihat pratinjau" onPress={periksa} />
+              <Tombol label="Lihat pratinjau" onPress={() => periksa()} />
               <Tombol varian="bertepi" label="Nanti saja" onPress={onTutup} />
             </View>
           </>
@@ -204,15 +240,23 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           <>
             <Teks>
               {sumber === 'hevy_csv'
-                ? 'Di Hevy: Profil › Settings › Export & Import Data › Export Workouts. Tempel isi berkas CSV-nya di sini.'
-                : 'Tempel tabel ukuran lama: satu baris per tanggal, kolom Tanggal lalu Pinggang, Dada, Leher, Lengan kiri/kanan, Paha kiri/kanan (cm). Boleh dari Excel.'}
+                ? 'Di Hevy: Profil › Settings › Export & Import Data › Export Workouts, lalu pilih berkas CSV-nya di sini.'
+                : 'Tabel ukuran lama: satu baris per tanggal, kolom Tanggal lalu Pinggang, Dada, Leher, Lengan kiri/kanan, Paha kiri/kanan (cm). Simpan dari Excel sebagai CSV.'}
             </Teks>
+            <Tombol
+              label="Pilih berkas CSV"
+              ikon="document-attach-outline"
+              memproses={memilih}
+              onPress={() => void pilihBerkas()}
+            />
+            <Teks redup>Atau tempel isinya:</Teks>
             <Isian
               mono
               label="Isi berkas CSV"
               value={teks}
               onChangeText={(t) => {
                 setTeks(t);
+                setNamaBerkas(null);
                 if (galat) setGalat(null);
               }}
               placeholder="Tempel isi CSV di sini"
@@ -228,7 +272,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               }}
             />
             <View style={{ gap: spacing.sm }}>
-              <Tombol label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
+              <Tombol varian="bertepi" label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={() => periksa()} />
               <Tombol varian="bertepi" label="Nanti saja" onPress={onTutup} />
             </View>
           </>
@@ -276,7 +320,9 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
         <View style={{ gap: spacing.md, paddingVertical: spacing.md }}>
           <View
             accessibilityRole="progressbar"
-            accessibilityValue={{ min: 0, max: langkah.p.jumlah, now: langkah.selesai }}
+            aria-valuemin={0}
+            aria-valuemax={langkah.p.jumlah}
+            aria-valuenow={langkah.selesai}
             style={{ height: ukuran.trackTebal, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung, overflow: 'hidden' }}
           >
             <View
@@ -295,20 +341,54 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
 
       {langkah.jenis === 'selesai' ? (
         <>
-          <Text
-            accessibilityLiveRegion="polite"
-            style={{ ...typography.bodyTebal, color: colors.status.sukses.teks }}
-          >
-            ✓ {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
-          </Text>
-          <Teks>{langkah.p.ringkas}</Teks>
-          {langkah.p.dilewati.length > 0 ? (
-            <Teks redup>{`${langkah.p.dilewati.length} baris dilewati, seperti di pratinjau.`}</Teks>
-          ) : null}
-          <Tombol label="Selesai" onPress={onTutup} />
+          <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Ionicons name="checkmark-circle" size={ukuranIkon.sedang} color={colors.status.sukses.teks} />
+            <Text style={{ ...typography.bodyTebal, color: colors.status.sukses.teks, flex: 1 }}>
+              {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
+            </Text>
+          </View>
+          {/* Ringkasan hasil: apa yang masuk, dari mana, dan apa yang tidak. */}
+          <Panel style={{ gap: spacing.sm }}>
+            {namaBerkas ? <BarisRingkas label="Berkas" nilai={namaBerkas} /> : null}
+            <BarisRingkas label="Masuk" nilai={langkah.p.ringkas} />
+            <BarisRingkas
+              label="Dilewati"
+              nilai={langkah.p.dilewati.length > 0 ? `${langkah.p.dilewati.length} baris, seperti di pratinjau` : 'tidak ada'}
+            />
+            <BarisRingkas label="Duplikat" nilai="tidak digandakan; catatan yang sudah ada tidak ditimpa" />
+          </Panel>
+          <View style={{ gap: spacing.sm }}>
+            <Tombol label="Selesai" onPress={onTutup} />
+            <Tombol
+              varian="bertepi"
+              label={TUJUAN[sumber].label}
+              onPress={() => {
+                onTutup();
+                router.navigate(TUJUAN[sumber].rute);
+              }}
+            />
+          </View>
         </>
       ) : null}
     </KerangkaSheet>
+  );
+}
+
+/** Tempat hasil impor terlihat di app, per sumber. */
+const TUJUAN: Record<SumberImpor, { label: string; rute: '/latihan' | '/ukuran' | '/tren' }> = {
+  hevy_csv: { label: 'Lihat di Latihan', rute: '/latihan' },
+  apple_health: { label: 'Lihat di Tren', rute: '/tren' },
+  ukuran_lama: { label: 'Lihat di Ukuran tubuh', rute: '/ukuran' },
+};
+
+function BarisRingkas({ label, nilai }: { label: string; nilai: string }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing.md }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, width: ukuran.kolomTabel.lebar, textTransform: 'uppercase' }}>
+        {label}
+      </Text>
+      <Text style={{ ...typography.labelBiasa, color: colors.teks, flex: 1 }}>{nilai}</Text>
+    </View>
   );
 }
 
