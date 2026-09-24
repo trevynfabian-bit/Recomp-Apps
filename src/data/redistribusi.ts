@@ -275,7 +275,9 @@ function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 
       return new KesalahanRedistribusi(
         /protein/i.test(error.message)
           ? 'Target protein tidak bisa diturunkan pada hari yang kalorinya sudah diatur ulang.'
-          : 'Pembagian kalori ini belum utuh. Muat ulang budget, lalu coba lagi.',
+          : /alasan/i.test(error.message)
+            ? 'Alasan maksimal 500 karakter.'
+            : 'Pembagian kalori ini belum utuh. Muat ulang budget, lalu coba lagi.',
         false,
       );
     case '28000':
