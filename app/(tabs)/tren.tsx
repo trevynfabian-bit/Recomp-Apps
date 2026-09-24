@@ -25,6 +25,7 @@ import {
   GrafikTren,
   HeroNumber,
   LabelSinyalArah,
+  Pemisah,
   PenandaSumber,
   Pill,
   SectionHeader,
@@ -140,14 +141,14 @@ export default function TrenScreen() {
             unit={sinyal.perubahanKg !== null ? 'kg' : ''}
             warna={warnaArah}
           />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <StatKecil
             label="Sepekan lalu"
             nilai={sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—'}
             unit="kg"
             warna={colors.teksRedup}
           />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <StatKecil
             label="Terakhir"
             nilai={terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—'}

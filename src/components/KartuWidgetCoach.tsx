@@ -4,6 +4,7 @@ import { formatMakro, rasio } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import type { WidgetCoach } from '@/types/domain';
 import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { Card } from './Card';
 
 /** Ukuran sparkline; cukup untuk melihat bentuk, bukan untuk membaca nilai. */
 const SPARK_LEBAR = 88;
@@ -28,17 +29,7 @@ type Props = {
  */
 export function KartuWidgetCoach({ widget }: Props) {
   return (
-    <View
-      style={{
-        maxWidth: '88%',
-        gap: spacing.md,
-        padding: spacing.lg,
-        borderRadius: radius.lg,
-        backgroundColor: colors.permukaan,
-        borderWidth: 1,
-        borderColor: colors.garis,
-      }}
-    >
+    <Card bayangan={false} style={{ maxWidth: '88%', gap: spacing.md }}>
       {widget.jenis === 'angka' ? <IsiAngka widget={widget} /> : <IsiMakro widget={widget} />}
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -47,7 +38,7 @@ export function KartuWidgetCoach({ widget }: Props) {
           · dihitung app lewat {widget.fungsi}
         </Text>
       </View>
-    </View>
+    </Card>
   );
 }
 

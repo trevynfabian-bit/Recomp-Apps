@@ -13,6 +13,7 @@ import { KerangkaSheet } from './KerangkaSheet';
 import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { Panel } from './Card';
 
 /** Jam akhir pekan yang ditawarkan saat sakelarnya pertama dinyalakan. */
 const GESER_AKHIR_PEKAN_MENIT = 60;
@@ -60,14 +61,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
       </Text>
 
       {saran && saran.saranMenit !== draf.hariKerjaMenit ? (
-        <View
-          style={{
-            gap: spacing.sm,
-            padding: spacing.md,
-            borderRadius: radius.md,
-            backgroundColor: colors.permukaanCekung,
-          }}
-        >
+        <Panel>
           <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Biasanya Anda timbang sekitar {formatJamMenit(saran.kebiasaanMenit)} ({saran.dasar} pagi terakhir).
           </Text>
@@ -83,7 +77,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
           >
             <Text style={{ ...typography.label, color: colors.aksen.teks }}>Pakai {formatJamMenit(saran.saranMenit)}</Text>
           </Pressable>
-        </View>
+        </Panel>
       ) : null}
 
       <PengaturJam

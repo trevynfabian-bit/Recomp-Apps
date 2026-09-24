@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View } from 'react-native';
-import { Card } from './Card';
+import { Card, Panel } from './Card';
 import { PenandaSumber } from './PenandaSumber';
 import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -299,14 +299,7 @@ export function KartuTimbangPagi({
 
             {/* Asal angka yang sedang diubah, plus akibat menyimpannya. */}
             {jenisSumber !== null ? (
-              <View
-                style={{
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
+              <Panel>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <Text style={{ ...typography.caption, color: colors.teksSamar }}>Asal angka</Text>
                   <PenandaSumber
@@ -320,7 +313,7 @@ export function KartuTimbangPagi({
                     menggantinya dengan catatan manual Anda.
                   </Text>
                 ) : null}
-              </View>
+              </Panel>
             ) : null}
 
             {/* Timbangan sebelumnya beserta asalnya masing-masing. */}
@@ -357,18 +350,7 @@ export function KartuTimbangPagi({
 
             {/* Penjaga salah ketik: lompatan tak wajar diminta dikonfirmasi. */}
             {status === 'konfirmasi' ? (
-              <View
-                style={{
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: tint(colors.aksen.isian, 'tepi'),
-                  // Tint di atas `surface` membuat teks redup di dalamnya jatuh
-                  // ke 3,9:1; warnanya cukup dibawa tepi dan judulnya.
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
+              <Panel nada="aksen">
                 <Text style={{ ...typography.label, color: colors.aksen.teks }}>
                   Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
                 </Text>
@@ -376,27 +358,18 @@ export function KartuTimbangPagi({
                   Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
                   lanjutkan bila memang benar.
                 </Text>
-              </View>
+              </Panel>
             ) : null}
 
             {status === 'gagal' ? (
-              <View
-                style={{
-                  gap: spacing.xs,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
+              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
                 <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
                 <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Angka Anda masih tersimpan di layar ini. Coba lagi.
                 </Text>
-              </View>
+              </Panel>
             ) : null}
 
             <View style={{ gap: spacing.md }}>

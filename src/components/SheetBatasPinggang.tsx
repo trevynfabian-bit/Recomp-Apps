@@ -4,6 +4,7 @@ import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
+import { Panel } from './Card';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -187,19 +188,7 @@ export function SheetBatasPinggang({
               </Text>
             ) : (
               /* Jarak ke pinggang sekarang — arti sebenarnya dari angka di atas. */
-              <View
-                style={{
-                  gap: spacing.xs,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  // Latarnya tetap surfaceSunken di kedua keadaan; yang berubah
-                  // cuma tepinya, supaya teks redup di dalamnya tidak ikut
-                  // kehilangan kontras saat keadaannya berubah.
-                  backgroundColor: colors.permukaanCekung,
-                  borderWidth: 1,
-                  borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent',
-                }}
-              >
+              <Panel style={{ gap: spacing.xs, borderWidth: 1, borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent' }}>
                 <Text
                   style={{
                     ...typography.label,
@@ -218,7 +207,7 @@ export function SheetBatasPinggang({
                     ? ' Menetapkan batas di bawah angka sekarang boleh saja — artinya sinyalnya aktif sejak hari ini.'
                     : ''}
                 </Text>
-              </View>
+              </Panel>
             )}
 
             {/* Jangkar siap pakai */}
@@ -265,23 +254,14 @@ export function SheetBatasPinggang({
             </Text>
 
             {status === 'gagal' ? (
-              <View
-                style={{
-                  gap: spacing.xs,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
+              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
                 <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
                 <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Angka Anda masih ada di layar ini. Coba lagi.
                 </Text>
-              </View>
+              </Panel>
             ) : null}
 
             <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>

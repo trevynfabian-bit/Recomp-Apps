@@ -3,7 +3,8 @@ import { formatRentangTanggal } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import { ketukRingan } from '@/lib/haptics';
 import type { RingkasanMingguan } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { Card } from './Card';
 
 type Props = {
   ringkasan: RingkasanMingguan;
@@ -25,16 +26,7 @@ type Props = {
  */
 export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
   return (
-    <View
-      style={{
-        gap: spacing.lg,
-        padding: spacing.lg,
-        borderRadius: radius.lg,
-        backgroundColor: colors.permukaan,
-        borderWidth: 1,
-        borderColor: tint(colors.aksen.isian, 'tepi'),
-      }}
-    >
+    <Card bayangan={false} nada="aksen" style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.xxs }}>
         <Text style={{ ...typography.caption, color: colors.aksen.teks, textTransform: 'uppercase' }}>
           Ringkasan mingguan
@@ -95,7 +87,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
           ))}
         </View>
       ) : null}
-    </View>
+    </Card>
   );
 }
 

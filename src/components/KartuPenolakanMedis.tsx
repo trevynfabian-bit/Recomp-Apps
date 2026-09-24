@@ -1,6 +1,7 @@
 import { Text, View } from 'react-native';
 import type { PenolakanMedis } from '@recomp/logika';
-import { colors, radius, spacing, tint, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
+import { Card } from './Card';
 
 type Props = {
   penolakan: PenolakanMedis;
@@ -22,16 +23,7 @@ type Props = {
  */
 export function KartuPenolakanMedis({ penolakan }: Props) {
   return (
-    <View
-      style={{
-        gap: spacing.md,
-        padding: spacing.lg,
-        borderRadius: radius.lg,
-        backgroundColor: colors.permukaan,
-        borderWidth: 1,
-        borderColor: tint(colors.aksen.isian, 'tepi'),
-      }}
-    >
+    <Card bayangan={false} nada="aksen" style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <Text style={{ ...typography.body, color: colors.aksen.teks }}>▲</Text>
         <Text style={{ ...typography.bodyTebal, color: colors.aksen.teks, flex: 1 }}>
@@ -63,6 +55,6 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
         Ditolak karena pertanyaan Anda memuat kata “{penolakan.pemicu}”. Kalau maksud Anda bukan
         soal obat atau kondisi medis, coba tulis ulang tanpa kata itu.
       </Text>
-    </View>
+    </Card>
   );
 }

@@ -22,6 +22,7 @@ import {
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { Panel } from './Card';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
 export type SumberImpor = 'hevy_csv' | 'apple_health' | 'ukuran_lama';
@@ -361,14 +362,7 @@ function DaftarDilewati({ dilewati }: { dilewati: BarisDilewati[] }) {
   const tampil = dilewati.slice(0, MAKS_DILEWATI_TAMPIL);
   const sisa = dilewati.length - tampil.length;
   return (
-    <View
-      style={{
-        gap: spacing.xs,
-        padding: spacing.md,
-        borderRadius: radius.md,
-        backgroundColor: colors.permukaanCekung,
-      }}
-    >
+    <Panel style={{ gap: spacing.xs }}>
       <Text style={{ ...typography.label, color: colors.aksen.teks }}>
         {dilewati.length} baris dilewati
       </Text>
@@ -380,7 +374,7 @@ function DaftarDilewati({ dilewati }: { dilewati: BarisDilewati[] }) {
       {sisa > 0 ? (
         <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>dan {sisa} lainnya</Text>
       ) : null}
-    </View>
+    </Panel>
   );
 }
 

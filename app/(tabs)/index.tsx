@@ -11,6 +11,7 @@ import {
   LegendaSumber,
   PanelRingkasanMakro,
   PemilihTipeHari,
+  Pemisah,
   PenandaSumber,
   Pill,
   SectionHeader,
@@ -186,9 +187,9 @@ export default function LogHarianScreen() {
           }}
         >
           <StatKecil label="Sisa protein" nilai={sisaProtein !== null ? formatMakro(sisaProtein) : '–'} unit={sisaProtein !== null ? 'g' : ''} warna={colors.status.sukses.teks} />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <StatKecil label="Sisa lemak" nilai={sisaLemak !== null ? formatMakro(sisaLemak) : '–'} unit={sisaLemak !== null ? 'g' : ''} warna={colors.teks} />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.teks} kecil />
         </View>
       </Card>

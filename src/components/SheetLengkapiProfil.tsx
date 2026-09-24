@@ -5,6 +5,7 @@ import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
+import { Panel } from './Card';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
 const TINGGI_MIN = 100;
@@ -179,25 +180,14 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
             </View>
 
             {status === 'gagal' ? (
-              <View
-                style={{
-                  gap: spacing.xs,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
-                  // Tint di atas `surface` menjatuhkan kontras teks redup di
-                  // dalamnya ke bawah AA; warnanya cukup dibawa tepi & judul.
-                  backgroundColor: colors.permukaanCekung,
-                }}
-              >
+              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
                 <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
                 <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Isian Anda masih ada di layar ini. Coba lagi.
                 </Text>
-              </View>
+              </Panel>
             ) : null}
 
             <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>

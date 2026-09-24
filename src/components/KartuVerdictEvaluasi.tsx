@@ -3,7 +3,8 @@ import { formatRentangTanggal, PEKAN_EVALUASI, type ArahMetrik } from '@recomp/l
 import { PenandaSumber } from './PenandaSumber';
 import { Pill } from './Pill';
 import type { EvaluasiEmpatPekan } from '@/types/domain';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
+import { Card, Panel } from './Card';
 
 type Props = {
   evaluasi: EvaluasiEmpatPekan;
@@ -26,16 +27,7 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
   const { hasil } = evaluasi;
 
   return (
-    <View
-      style={{
-        gap: spacing.lg,
-        padding: spacing.lg,
-        borderRadius: radius.lg,
-        backgroundColor: colors.permukaan,
-        borderWidth: 1,
-        borderColor: colors.garis,
-      }}
-    >
+    <Card bayangan={false} style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.xxs }}>
         <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Evaluasi {PEKAN_EVALUASI} mingguan
@@ -84,22 +76,15 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
         </Text>
       </View>
 
-      <View
-        style={{
-          gap: spacing.xs,
-          padding: spacing.md,
-          borderRadius: radius.md,
-          backgroundColor: colors.permukaanCekung,
-        }}
-      >
+      <Panel style={{ gap: spacing.xs }}>
         <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Rekomendasi
         </Text>
         <Text style={{ ...typography.body, color: colors.teks }}>
           {hasil.rekomendasi}
         </Text>
-      </View>
-    </View>
+      </Panel>
+    </Card>
   );
 }
 

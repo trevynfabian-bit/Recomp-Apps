@@ -66,7 +66,10 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
 2. **Kartu & kontainer** ✓ `Card nada` (aksen/sukses/peringatan/bahaya: tepi
    bertint), `Pemisah` (horizontal/penuh/vertikal; 3 salinan lokal dihapus),
    `DaftarBaris` (pemisah otomatis; dipakai 6 daftar di Pengaturan, Privasi,
-   Widget & pengingat), `Panel` (area cekung di dalam kartu).
+   Widget & pengingat), `Panel` (area cekung di dalam kartu). Diterapkan: 4 kartu
+   chat buatan sendiri → `Card bayangan={false}` (2 dengan `nada="aksen"`), 14
+   panel → `Panel` (4 dengan `nada="bahaya"/"aksen"`, 3 dengan tepi bersyarat),
+   7 pemisah vertikal → `Pemisah arah="vertikal"`.
 3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks
    dan angka; pindahkan `TextInput` langsung.
 4. **Umpan balik status**: `KeadaanKosong`, `KeadaanGagal`, `IndikatorMemuat`.

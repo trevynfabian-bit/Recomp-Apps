@@ -12,6 +12,7 @@ import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import { Tombol } from './Tombol';
+import { Panel } from './Card';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -314,14 +315,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
             </View>
 
             {/* Ringkas apa yang sebenarnya akan tersimpan. */}
-            <View
-              style={{
-                padding: spacing.md,
-                borderRadius: radius.md,
-                backgroundColor: colors.permukaanCekung,
-                gap: spacing.xs,
-              }}
-            >
+            <Panel style={{ gap: spacing.xs }}>
               <Text style={{ ...typography.label, color: colors.teks }}>
                 {dasar === null
                   ? 'Pencatatan pertama'
@@ -334,7 +328,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                     ? `Field terisi pencatatan ${formatTanggalPanjang(tanggal)} yang sudah ada; selisih di kanan tetap dihitung terhadap pencatatan sebelumnya.`
                     : 'Field terisi ukuran pencatatan sebelumnya; yang tidak Anda sentuh tersimpan apa adanya.'}
               </Text>
-            </View>
+            </Panel>
 
             {!semuaValid ? (
               <Keterangan nada="coral">
@@ -567,24 +561,12 @@ function Kotak({
   const dasar = nada === 'amber' ? colors.status.peringatan.isian : colors.status.bahaya.isian;
   const teks = nada === 'amber' ? colors.status.peringatan.teks : colors.status.bahaya.teks;
   return (
-    <View
-      // Isian memakai surfaceSunken, bukan tint warnanya: tint 8% di atas
-      // `surface` menaikkan luminansi latar sampai teks redup di dalamnya
-      // jatuh ke 3,9:1. Warnanya tetap terbaca dari tepi dan judulnya.
-      style={{
-        gap: spacing.xs,
-        padding: spacing.md,
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: tint(dasar, 'tepi'),
-        backgroundColor: colors.permukaanCekung,
-      }}
-    >
+    <Panel style={{ gap: spacing.xs, borderWidth: 1, borderColor: tint(dasar, 'tepi') }}>
       <Text style={{ ...typography.label, color: teks }}>{judul}</Text>
       <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         {children}
       </Text>
-    </View>
+    </Panel>
   );
 }
 

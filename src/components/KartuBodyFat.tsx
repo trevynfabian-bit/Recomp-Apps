@@ -6,7 +6,7 @@ import {
   komposisiTubuh,
   type HasilBodyFat,
 } from '@recomp/logika';
-import { Card } from './Card';
+import { Card, Pemisah } from './Card';
 import { Pill } from './Pill';
 import type { Profile, UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -133,7 +133,7 @@ export function KartuBodyFat({
             nilai={komposisi.lemakKg}
             warna={colors.macroTeks.lemak}
           />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <BagianKomposisi
             label="Massa bebas lemak"
             nilai={komposisi.bebasLemakKg}

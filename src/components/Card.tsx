@@ -15,6 +15,8 @@ type Props = {
   /** `flat` menghilangkan padding dalam untuk kartu yang mengatur isinya sendiri. */
   flat?: boolean;
   nada?: NadaKartu;
+  /** `false` untuk kartu di dalam alur chat, sejajar dengan gelembung yang datar. */
+  bayangan?: boolean;
 };
 
 function warnaNada(nada: NadaKartu): string {
@@ -22,7 +24,7 @@ function warnaNada(nada: NadaKartu): string {
 }
 
 /** Permukaan kartu standar: permukaan + tepi halus + radius lg + bayangan kartu. */
-export function Card({ children, style, flat = false, nada }: Props) {
+export function Card({ children, style, flat = false, nada, bayangan: berbayang = true }: Props) {
   return (
     <View
       style={[
@@ -32,7 +34,7 @@ export function Card({ children, style, flat = false, nada }: Props) {
           borderWidth: 1,
           borderColor: nada ? tint(warnaNada(nada), 'tepi') : colors.garis,
           padding: flat ? 0 : spacing.lg,
-          ...bayangan.kartu,
+          ...(berbayang ? bayangan.kartu : null),
         },
         style,
       ]}
@@ -86,7 +88,16 @@ export function DaftarBaris({ children, style }: { children: React.ReactNode; st
  * ringkasan kecil. Satu tingkat di bawah permukaan kartu, radius `md`
  * (lebih kecil dari radius kartu supaya sudutnya sejajar).
  */
-export function Panel({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Panel({
+  children,
+  style,
+  nada,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** Panel peringatan/konfirmasi di dalam kartu: tepi bertint, latar tetap cekung. */
+  nada?: NadaKartu;
+}) {
   return (
     <View
       style={[
@@ -95,6 +106,8 @@ export function Panel({ children, style }: { children: React.ReactNode; style?: 
           borderRadius: radius.md,
           padding: spacing.md,
           gap: spacing.sm,
+          borderWidth: nada ? 1 : 0,
+          borderColor: nada ? tint(warnaNada(nada), 'tepi') : 'transparent',
         },
         style,
       ]}

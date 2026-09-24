@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { formatAngka, hitungRedistribusi, KELIPATAN_KCAL } from '@recomp/logika';
 import type { BudgetMingguan, HasilRedistribusi, OpsiRedistribusi } from '@recomp/logika';
-import { Card } from './Card';
+import { Card, Panel } from './Card';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
@@ -70,18 +70,12 @@ export function PanelRedistribusi({
         </Text>
 
         {sudahDipakai ? (
-          <View
-            style={{
-              padding: spacing.md,
-              borderRadius: radius.md,
-              backgroundColor: colors.permukaanCekung,
-            }}
-          >
+          <Panel>
             <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               Redistribusi minggu ini sudah dipakai. Jatahnya satu kali per minggu, supaya
               target tidak terus bergeser sepanjang pekan.
             </Text>
-          </View>
+          </Panel>
         ) : null}
 
         <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">

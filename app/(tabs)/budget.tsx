@@ -23,11 +23,12 @@ import {
   KartuTdee,
   MeterBudget,
   PanelRedistribusi,
-  StatusRedistribusi,
   PemilihFase,
-  SheetGantiFase,
+  Pemisah,
   Pill,
   SectionHeader,
+  SheetGantiFase,
+  StatusRedistribusi,
 } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
@@ -173,7 +174,7 @@ export default function BudgetScreen() {
           }}
         >
           <StatKecil label="Hari tersisa" nilai={String(budget.hariTersisa)} unit="hari" warna={colors.teks} />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           <StatKecil
             label="Dibagi rata"
             nilai={budget.sisaPerHari !== null ? formatAngka(budget.sisaPerHari) : '—'}
@@ -182,7 +183,7 @@ export default function BudgetScreen() {
               budget.sisaPerHari !== null && budget.sisaPerHari < 0 ? colors.status.bahaya.teks : colors.teks
             }
           />
-          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <Pemisah arah="vertikal" />
           {/* Pembanding: berapa jatah per hari kalau minggu ini berjalan sesuai rencana. */}
           <StatKecil
             label="Rencana"
