@@ -211,7 +211,7 @@ export default function TargetHarianScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        style={{ flex: 1, backgroundColor: colors.bg }}
+        style={{ flex: 1, backgroundColor: colors.latar }}
         contentContainerStyle={{
           paddingTop: insets.top + spacing.lg,
           paddingBottom: insets.bottom + spacing.xxl,
@@ -231,21 +231,21 @@ export default function TargetHarianScreen() {
               width: TAP_MIN,
               height: TAP_MIN,
               borderRadius: radius.pill,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.permukaan,
               borderWidth: 1,
-              borderColor: colors.borderKuat,
+              borderColor: colors.garisKontrol,
               alignItems: 'center',
               justifyContent: 'center',
               opacity: pressed ? 0.6 : 1,
             })}
           >
-            <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+            <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
               Target per tipe hari
             </Text>
-            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+            <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
               Angka absolut, berlaku mulai hari ini
             </Text>
           </View>
@@ -266,8 +266,8 @@ export default function TargetHarianScreen() {
                   />
                 ) : (
                   <View style={{ gap: spacing.md }}>
-                    <Text style={{ ...typography.caption, color: colors.textMuted }}>TARGET KALORI HARI INI</Text>
-                    <Text style={{ ...typography.title, color: colors.text }}>
+                    <Text style={{ ...typography.caption, color: colors.teksRedup }}>TARGET KALORI HARI INI</Text>
+                    <Text style={{ ...typography.title, color: colors.teks }}>
                       {namaTipeHariIni} · {profil.fase_aktif} belum diisi
                     </Text>
                     <TombolUtama
@@ -291,10 +291,10 @@ export default function TargetHarianScreen() {
               />
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                 <View style={{ flex: 1, gap: spacing.xxs }}>
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>FASE AKTIF</Text>
-                  <Text style={{ ...typography.bodyTebal, color: colors.text }}>{profil.fase_aktif}</Text>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>FASE AKTIF</Text>
+                  <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{profil.fase_aktif}</Text>
                   {faseMulai ? (
-                    <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+                    <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
                       sejak {formatTanggalPanjang(faseMulai).split(', ')[1]}
                     </Text>
                   ) : null}
@@ -312,11 +312,11 @@ export default function TargetHarianScreen() {
                     justifyContent: 'center',
                     borderRadius: radius.pill,
                     borderWidth: 1,
-                    borderColor: colors.borderKuat,
+                    borderColor: colors.garisKontrol,
                     opacity: pressed ? 0.6 : 1,
                   })}
                 >
-                  <Text style={{ ...typography.label, color: colors.text }}>Ganti fase</Text>
+                  <Text style={{ ...typography.label, color: colors.teks }}>Ganti fase</Text>
                 </Pressable>
               </Card>
             </View>
@@ -348,7 +348,7 @@ export default function TargetHarianScreen() {
 
         <View style={{ gap: spacing.sm, display: matriks ? 'none' : 'flex' }}>
           <PilihFase terpilih={fase} aktif={profil.fase_aktif} diubah={faseDiubah} onPilih={setFase} />
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {fase === profil.fase_aktif
               ? `${fase} adalah fase aktif; angka ini yang dipakai Hari Ini.`
               : `${fase} belum aktif. Angka ini dipakai saat Anda berpindah ke ${fase}.`}
@@ -387,7 +387,7 @@ export default function TargetHarianScreen() {
 
         <View style={{ gap: spacing.sm }}>
           {status.jenis === 'tersimpan' ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.sukses.teks }}>
               {status.jumlah === 1 ? 'Satu target tersimpan' : `${status.jumlah} target tersimpan`}. Berlaku mulai hari ini; hari
               yang sudah lewat tetap memakai target saat itu.
               {status.hariDiredistribusiTetap > 0
@@ -396,12 +396,12 @@ export default function TargetHarianScreen() {
             </Text>
           ) : null}
           {status.jenis === 'gagal' ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
               {status.pesan}
             </Text>
           ) : null}
           {cobaSimpan && adaTidakSah ? (
-            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+            <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
               Ada isian yang perlu diperbaiki sebelum disimpan.
             </Text>
           ) : null}
@@ -429,7 +429,7 @@ export default function TargetHarianScreen() {
               }}
             />
           )}
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Karbo tidak ditargetkan: yang tersisa dari kalori setelah protein dan lemak ditampilkan sebagai gambaran.
           </Text>
         </View>
@@ -453,8 +453,8 @@ export default function TargetHarianScreen() {
       ) : null}
 
       <KerangkaSheet terbuka={konfirmasiKeluar} onTutup={() => setKonfirmasiKeluar(false)} label="Perubahan belum disimpan">
-        <Text style={{ ...typography.title, color: colors.text }}>Buang perubahan?</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.title, color: colors.teks }}>Buang perubahan?</Text>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {berubah.length === 1 ? 'Satu target' : `${berubah.length} target`} belum disimpan. Target yang berlaku tetap
           seperti sebelumnya.
         </Text>
@@ -487,7 +487,7 @@ function KartuTargetBaca({
   onSunting: () => void;
 }) {
   return (
-    <Card style={{ gap: spacing.md, borderWidth: hariIni ? 1 : 0, borderColor: colors.amber }}>
+    <Card style={{ gap: spacing.md, borderWidth: hariIni ? 1 : 0, borderColor: colors.aksen.isian }}>
       {/* Isinya satu elemen bagi pembaca layar; tombol Sunting tetap terpisah. */}
       <View
         accessible
@@ -495,22 +495,22 @@ function KartuTargetBaca({
         style={{ gap: spacing.md }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
             {dayType.nama}
-            {dayType.is_default ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · bawaan</Text> : null}
+            {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · bawaan</Text> : null}
           </Text>
-          {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
+          {hariIni ? <Pill label="Hari ini" warna={colors.aksen.teks} /> : null}
         </View>
         {/* Angka kartu sengaja sekunder: angka utama layar ini ada di atas. */}
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{formatAngka(target.target_kalori)}</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint }}>kcal</Text>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{formatAngka(target.target_kalori)}</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar }}>kcal</Text>
         </View>
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Protein {formatMakro(target.target_protein_g)} g · Lemak {formatMakro(target.target_lemak_g)} g · Sat fat ≤
           {formatMakro(target.batas_sat_fat_g)} g · sisa karbo {formatAngka(karboTersisaG(target))} g
         </Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </View>
@@ -523,7 +523,7 @@ function KartuTargetBaca({
         }}
         style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
       >
-        <Text style={{ ...typography.label, color: colors.amber }}>Sunting target ini</Text>
+        <Text style={{ ...typography.label, color: colors.aksen.teks }}>Sunting target ini</Text>
       </Pressable>
     </Card>
   );
@@ -547,21 +547,21 @@ function KartuTargetKosong({
   onIsi: () => void;
 }) {
   return (
-    <Card style={{ gap: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: hariIni ? colors.amber : colors.borderKuat }}>
+    <Card style={{ gap: spacing.md, borderWidth: 1, borderStyle: 'dashed', borderColor: hariIni ? colors.aksen.isian : colors.garisKontrol }}>
       <View
         accessible
         accessibilityLabel={`${dayType.nama}${hariIni ? ', hari ini' : ''}: target fase ${fase} belum diisi. ${aturanDeteksiTipeHari(dayType)}`}
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{dayType.nama}</Text>
-          {hariIni ? <Pill label="Hari ini" warna={colors.amber} /> : null}
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{dayType.nama}</Text>
+          {hariIni ? <Pill label="Hari ini" warna={colors.aksen.teks} /> : null}
         </View>
-        <Text style={{ ...typography.bodyTebal, color: colors.textMuted }}>Belum diisi</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.teksRedup }}>Belum diisi</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Hari bertipe {dayType.nama} di fase {fase} belum punya target, jadi Hari Ini belum bisa menghitung sisanya.
         </Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
           {aturanDeteksiTipeHari(dayType)}
         </Text>
       </View>
@@ -590,12 +590,12 @@ function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'
               justifyContent: 'center',
               borderRadius: radius.pill,
               borderWidth: 1,
-              borderColor: aktif ? colors.amber : colors.borderKuat,
-              backgroundColor: aktif ? colors.amber + '1A' : 'transparent',
+              borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+              backgroundColor: aktif ? colors.aksen.isian + '1A' : 'transparent',
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>{t.label}</Text>
+            <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>{t.label}</Text>
           </Pressable>
         );
       })}
@@ -617,7 +617,7 @@ function PilihFase({
   return (
     <View
       accessibilityRole="tablist"
-      style={{ flexDirection: 'row', padding: 3, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken }}
+      style={{ flexDirection: 'row', padding: 3, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung }}
     >
       {FASE.map((f) => {
         const dipilih = f === terpilih;
@@ -640,17 +640,17 @@ function PilihFase({
               flexDirection: 'row',
               gap: spacing.xs,
               borderRadius: radius.pill,
-              backgroundColor: dipilih ? colors.surface : 'transparent',
+              backgroundColor: dipilih ? colors.permukaan : 'transparent',
               borderWidth: dipilih ? 1 : 0,
-              borderColor: colors.borderKuat,
+              borderColor: colors.garisKontrol,
             }}
           >
-            <Text style={{ ...typography.label, color: dipilih ? colors.text : colors.textMuted }}>
+            <Text style={{ ...typography.label, color: dipilih ? colors.teks : colors.teksRedup }}>
               {f}
-              {f === aktif ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · aktif</Text> : null}
+              {f === aktif ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · aktif</Text> : null}
             </Text>
             {/* Titik = belum disimpan; label aksesibilitas menyebutnya dengan kata. */}
-            {diubah.has(f) ? <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: colors.amber }} /> : null}
+            {diubah.has(f) ? <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }} /> : null}
           </Pressable>
         );
       })}
@@ -689,9 +689,9 @@ function BarisTarget({
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
-        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
           {dayType.nama}
-          {dayType.is_default ? <Text style={{ color: colors.textFaint, fontWeight: '500' }}> · bawaan</Text> : null}
+          {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · bawaan</Text> : null}
         </Text>
         {diubah ? (
           <Pressable
@@ -709,7 +709,7 @@ function BarisTarget({
             hitSlop={8}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
-            <Text style={{ ...typography.label, color: colors.amber }}>Kembalikan</Text>
+            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Kembalikan</Text>
           </Pressable>
         ) : null}
       </View>
@@ -733,14 +733,14 @@ function BarisTarget({
       {galatTampil.length > 0 ? (
         <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
           {galatTampil.map((k) => (
-            <Text key={k.kunci} style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+            <Text key={k.kunci} style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
               {galat[k.kunci]}
             </Text>
           ))}
         </View>
       ) : null}
 
-      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
         {hasil.sah
           ? `Sisa untuk karbo ${formatAngka(hasil.karboG)} g${diubah && tersimpan ? ` · tersimpan ${formatAngka(tersimpan.target_kalori)} kcal, protein ${formatMakro(tersimpan.target_protein_g)} g` : ''}`
           : 'Sisa untuk karbo muncul setelah isian lengkap.'}

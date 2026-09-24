@@ -159,7 +159,7 @@ export default function CoachScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={insets.bottom + 48}
     >
@@ -172,12 +172,12 @@ export default function CoachScreen() {
           paddingBottom: spacing.md,
           gap: spacing.xs,
           borderBottomWidth: 1,
-          borderBottomColor: colors.border,
+          borderBottomColor: colors.garis,
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.title, color: colors.text, flex: 1 }}>Coach</Text>
-          <Pill label={profil.fase_aktif.toUpperCase()} warna={colors.amber} />
+          <Text style={{ ...typography.title, color: colors.teks, flex: 1 }}>Coach</Text>
+          <Pill label={profil.fase_aktif.toUpperCase()} warna={colors.aksen.teks} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Riwayat percakapan"
@@ -191,17 +191,17 @@ export default function CoachScreen() {
               paddingHorizontal: spacing.md,
               borderRadius: radius.pill,
               borderWidth: 1,
-              borderColor: colors.borderKuat,
-              backgroundColor: colors.surfaceSunken,
+              borderColor: colors.garisKontrol,
+              backgroundColor: colors.permukaanCekung,
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <Text style={{ ...typography.label, color: colors.textMuted }}>Riwayat</Text>
+            <Text style={{ ...typography.label, color: colors.teksRedup }}>Riwayat</Text>
           </Pressable>
         </View>
         {/* Baris kedua: judul utas yang sedang dibuka, supaya tidak tersesat
             setelah berpindah dari riwayat. */}
-        <Text style={{ ...typography.caption, color: colors.textFaint }} numberOfLines={1}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }} numberOfLines={1}>
           {aktif && !kosong
             ? aktif.judul
             : `Membaca data Anda sampai ${formatTanggalPanjang(tanggalHariIni())}`}
@@ -210,7 +210,7 @@ export default function CoachScreen() {
         {/* Disclaimer berdiri TETAP di kepala layar, bukan hanya muncul saat
             menolak: batas itu perlu diketahui sebelum pertanyaannya diketik,
             bukan sesudah pengguna telanjur mengetiknya. */}
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {DISCLAIMER_COACH}
         </Text>
       </View>
@@ -231,13 +231,13 @@ export default function CoachScreen() {
       >
         {kosong ? (
           <View style={{ alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg }}>
-            <Text style={{ ...typography.body, color: colors.textMuted, textAlign: 'center' }}>
+            <Text style={{ ...typography.body, color: colors.teksRedup, textAlign: 'center' }}>
               Belum ada percakapan
             </Text>
             <Text
               style={{
                 ...typography.caption,
-                color: colors.textFaint,
+                color: colors.teksSamar,
                 textAlign: 'center',
               }}
             >
@@ -295,12 +295,12 @@ export default function CoachScreen() {
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
                 borderWidth: 1,
-                borderColor: colors.borderKuat,
-                backgroundColor: colors.surfaceSunken,
+                borderColor: colors.garisKontrol,
+                backgroundColor: colors.permukaanCekung,
                 opacity: pressed ? 0.7 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: colors.textMuted }}>{s}</Text>
+              <Text style={{ ...typography.label, color: colors.teksRedup }}>{s}</Text>
             </Pressable>
           ))}
         </ScrollView>

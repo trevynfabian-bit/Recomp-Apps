@@ -130,7 +130,7 @@ export default function BudgetScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: spacing.xxl,
@@ -140,12 +140,12 @@ export default function BudgetScreen() {
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Budget mingguan</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Budget mingguan</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Mulai {formatTanggalPanjang(budget.mingguMulai)}
           </Text>
         </View>
-        <Pill label={profil.fase_aktif} warna={colors.aksenTeks.jade} />
+        <Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />
       </View>
 
       {/* Angka utama: sisa jatah minggu ini */}
@@ -155,7 +155,7 @@ export default function BudgetScreen() {
           nilai={formatAngka(Math.abs(budget.sisa))}
           unit="kcal"
           keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
-          warna={lewat ? colors.coral : colors.amber}
+          warna={lewat ? colors.status.bahaya.isian : colors.aksen.teks}
         />
 
         {/* Meter laju: sisa saja tidak menjawab "apakah lajunya wajar". */}
@@ -169,26 +169,26 @@ export default function BudgetScreen() {
             marginTop: spacing.xl,
             paddingTop: spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: colors.border,
+            borderTopColor: colors.garis,
           }}
         >
-          <StatKecil label="Hari tersisa" nilai={String(budget.hariTersisa)} unit="hari" warna={colors.text} />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <StatKecil label="Hari tersisa" nilai={String(budget.hariTersisa)} unit="hari" warna={colors.teks} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
           <StatKecil
             label="Dibagi rata"
             nilai={budget.sisaPerHari !== null ? formatAngka(budget.sisaPerHari) : '—'}
             unit="kcal/hari"
             warna={
-              budget.sisaPerHari !== null && budget.sisaPerHari < 0 ? colors.aksenTeks.coral : colors.text
+              budget.sisaPerHari !== null && budget.sisaPerHari < 0 ? colors.status.bahaya.teks : colors.teks
             }
           />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
           {/* Pembanding: berapa jatah per hari kalau minggu ini berjalan sesuai rencana. */}
           <StatKecil
             label="Rencana"
             nilai={budget.rencanaPerHari !== null ? formatAngka(budget.rencanaPerHari) : '—'}
             unit="kcal/hari"
-            warna={colors.textMuted}
+            warna={colors.teksRedup}
           />
         </View>
       </Card>
@@ -216,21 +216,21 @@ export default function BudgetScreen() {
               alignItems: 'center',
               padding: spacing.lg,
               borderTopWidth: 1,
-              borderTopColor: colors.border,
-              backgroundColor: colors.surfaceSunken,
+              borderTopColor: colors.garis,
+              backgroundColor: colors.permukaanCekung,
             }}
           >
             <View style={{ gap: spacing.xxs }}>
-              <Text style={{ ...typography.label, color: colors.text }}>Total minggu</Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>Total minggu</Text>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 tercatat {formatAngka(budget.terpakai)} · proyeksi {formatAngka(budget.targetMendatang)}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
-              <Text style={{ ...typography.label, color: colors.text }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>
                 {formatAngka(budget.budgetTotal)} kcal
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>jatah</Text>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>jatah</Text>
             </View>
           </View>
         </Card>
@@ -245,7 +245,7 @@ export default function BudgetScreen() {
         {catatanRedistribusi && !redistribusi ? (
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.labelBiasa, color: colors.textMuted, marginBottom: spacing.sm }}
+            style={{ ...typography.labelBiasa, color: colors.teksRedup, marginBottom: spacing.sm }}
           >
             {catatanRedistribusi}
           </Text>
@@ -289,7 +289,7 @@ export default function BudgetScreen() {
 
       {/* Kenapa angkanya begitu — perhitungannya bisa ditelusuri */}
       <Card>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Budget mingguan adalah JUMLAH target harian sepanjang minggu, jadi minggu dengan
           lebih banyak hari latihan memang punya jatah lebih besar — itu bukan kebocoran.
           Target harian sendiri mengikuti tipe hari pada fase {profil.fase_aktif}.
@@ -302,10 +302,10 @@ export default function BudgetScreen() {
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
           }}
         >
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Data tiruan · redistribusi menyusul
           </Text>
         </View>
@@ -324,10 +324,10 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
 
   const warnaSelisih =
     hari.selisih === null
-      ? colors.textFaint
+      ? colors.teksSamar
       : hari.selisih > 0
-        ? colors.aksenTeks.coral
-        : colors.aksenTeks.jade;
+        ? colors.status.bahaya.teks
+        : colors.status.sukses.teks;
 
   return (
     <View
@@ -337,27 +337,27 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         justifyContent: 'space-between',
         padding: spacing.lg,
         borderTopWidth: pertama ? 0 : 1,
-        borderTopColor: colors.border,
+        borderTopColor: colors.garis,
         // Hari yang belum berjalan diredupkan: angkanya proyeksi, bukan catatan.
         opacity: hari.proyeksi ? 0.55 : 1,
-        backgroundColor: iniHariIni ? colors.amber + '0F' : 'transparent',
+        backgroundColor: iniHariIni ? colors.aksen.isian + '0F' : 'transparent',
       }}
     >
       <View style={{ flex: 1, gap: spacing.xxs }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.label, color: colors.text }}>
+          <Text style={{ ...typography.label, color: colors.teks }}>
             {namaHariSingkat(hari.tanggal)}
           </Text>
           {iniHariIni ? (
-            <Text style={{ ...typography.caption, color: colors.amber }}>HARI INI</Text>
+            <Text style={{ ...typography.caption, color: colors.aksen.teks }}>HARI INI</Text>
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {hari.namaTipeHari} · {formatAngka(hari.nilaiKalori)} kcal
           </Text>
           {hari.proyeksi ? (
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>proyeksi</Text>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>proyeksi</Text>
           ) : hari.selisih !== null && hari.selisih !== 0 ? (
             <Text style={{ ...typography.caption, color: warnaSelisih }}>
               {hari.selisih > 0 ? '+' : '−'}
@@ -371,13 +371,13 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         <Text
           style={{
             ...typography.label,
-            color: hari.sisaBerjalan < 0 ? colors.aksenTeks.coral : colors.text,
+            color: hari.sisaBerjalan < 0 ? colors.status.bahaya.teks : colors.teks,
           }}
         >
           {hari.sisaBerjalan < 0 ? '−' : ''}
           {formatAngka(Math.abs(hari.sisaBerjalan))}
         </Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>sisa</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>sisa</Text>
       </View>
     </View>
   );
@@ -406,14 +406,14 @@ function StatKecil({
   return (
     <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xxs }}>
       <Text
-        style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}
+        style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}
         numberOfLines={1}
       >
         {label}
       </Text>
       <View style={{ alignItems: 'center' }}>
         <Text style={{ ...typography.title, color: warna }}>{nilai}</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
       </View>
     </View>
   );

@@ -100,11 +100,11 @@ export function SheetBatasPinggang({
         <View
           style={{
             maxHeight: '88%',
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
           }}
         >
           <View
@@ -120,10 +120,10 @@ export function SheetBatasPinggang({
                 width: ukuran.pegangan.lebar,
                 height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
-                backgroundColor: colors.border,
+                backgroundColor: colors.garis,
               }}
             />
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Batas pinggang
             </Text>
           </View>
@@ -164,12 +164,12 @@ export function SheetBatasPinggang({
                     // Lebar eksplisit: tanpa ini input di web memakai lebar
                     // bawaannya dan mendorong tombol + keluar layar.
                     width: 140,
-                    color: valid ? colors.text : colors.aksenTeks.coral,
+                    color: valid ? colors.teks : colors.status.bahaya.teks,
                     textAlign: 'center',
                     padding: 0,
                   }}
                 />
-                <Text style={{ ...typography.title, color: colors.textFaint }}>cm</Text>
+                <Text style={{ ...typography.title, color: colors.teksSamar }}>cm</Text>
               </View>
               <TombolGeser
                 label="+"
@@ -180,7 +180,7 @@ export function SheetBatasPinggang({
 
             {!valid ? (
               <Text
-                style={{ ...typography.caption, color: colors.aksenTeks.coral, textAlign: 'center' }}
+                style={{ ...typography.caption, color: colors.status.bahaya.teks, textAlign: 'center' }}
               >
                 Masukkan batas antara {BATAS_MIN} dan {BATAS_MAKS} cm.
               </Text>
@@ -194,15 +194,15 @@ export function SheetBatasPinggang({
                   // Latarnya tetap surfaceSunken di kedua keadaan; yang berubah
                   // cuma tepinya, supaya teks redup di dalamnya tidak ikut
                   // kehilangan kontras saat keadaannya berubah.
-                  backgroundColor: colors.surfaceSunken,
+                  backgroundColor: colors.permukaanCekung,
                   borderWidth: 1,
-                  borderColor: sudahLewat ? colors.coral + '55' : 'transparent',
+                  borderColor: sudahLewat ? colors.status.bahaya.isian + '55' : 'transparent',
                 }}
               >
                 <Text
                   style={{
                     ...typography.label,
-                    color: sudahLewat ? colors.aksenTeks.coral : colors.text,
+                    color: sudahLewat ? colors.status.bahaya.teks : colors.teks,
                   }}
                 >
                   {sisa === 0
@@ -211,7 +211,7 @@ export function SheetBatasPinggang({
                       ? `Sudah ${formatDesimal(Math.abs(sisa!))} cm di atas batas ini`
                       : `Sisa ${formatDesimal(sisa!)} cm sampai batas`}
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Pinggang terakhir Anda {formatDesimal(pinggangSekarangCm)} cm.
                   {sudahLewat
                     ? ' Menetapkan batas di bawah angka sekarang boleh saja — artinya sinyalnya aktif sejak hari ini.'
@@ -222,7 +222,7 @@ export function SheetBatasPinggang({
 
             {/* Jangkar siap pakai */}
             <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                 Pilih cepat
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -241,12 +241,12 @@ export function SheetBatasPinggang({
                       paddingHorizontal: spacing.lg,
                       borderRadius: radius.pill,
                       borderWidth: 1,
-                      borderColor: colors.borderKuat,
-                      backgroundColor: colors.surfaceSunken,
+                      borderColor: colors.garisKontrol,
+                      backgroundColor: colors.permukaanCekung,
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
-                    <Text style={{ ...typography.label, color: colors.textMuted }}>
+                    <Text style={{ ...typography.label, color: colors.teksRedup }}>
                       {formatDesimal(s.nilai)} · {s.label}
                     </Text>
                   </Pressable>
@@ -255,7 +255,7 @@ export function SheetBatasPinggang({
             </View>
 
             {/* Apa arti batas ini, supaya tidak terbaca sebagai target. */}
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               Batas ini bukan target dan bukan penilaian atas tubuh Anda — ia garis keputusan. Saat
               Lean Gain, sebagian kenaikan berat memang lemak; yang perlu diputuskan adalah berapa
               banyak yang masih bersedia Anda terima sebelum beralih ke Cut. Menetapkannya SEKARANG,
@@ -270,14 +270,14 @@ export function SheetBatasPinggang({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.coral + '55',
-                  backgroundColor: colors.surfaceSunken,
+                  borderColor: colors.status.bahaya.isian + '55',
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
-                <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Angka Anda masih ada di layar ini. Coba lagi.
                 </Text>
               </View>
@@ -293,7 +293,7 @@ export function SheetBatasPinggang({
                   flexDirection: 'row',
                   gap: spacing.sm,
                   backgroundColor:
-                    status === 'tersimpan' ? colors.jade : valid ? colors.amber : colors.surfaceSunken,
+                    status === 'tersimpan' ? colors.status.sukses.isian : valid ? colors.aksen.isian : colors.permukaanCekung,
                   borderRadius: radius.lg,
                   minHeight: TAP_MIN,
                   paddingVertical: spacing.lg,
@@ -309,7 +309,7 @@ export function SheetBatasPinggang({
                 <Text
                   style={{
                     ...typography.bodyTebal,
-                    color: status === 'tersimpan' || valid ? colors.diAtasIsian : colors.textFaint,
+                    color: status === 'tersimpan' || valid ? colors.diAtasIsian : colors.teksSamar,
                   }}
                 >
                   {labelSimpan(status)}
@@ -322,7 +322,7 @@ export function SheetBatasPinggang({
                 onPress={onTutup}
                 style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ ...typography.label, color: colors.textFaint }}>Batal</Text>
+                <Text style={{ ...typography.label, color: colors.teksSamar }}>Batal</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -351,15 +351,15 @@ function TombolGeser({
         width: 56,
         height: 56,
         borderRadius: radius.pill,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
+        borderColor: colors.garisKontrol,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.display, color: colors.text, lineHeight: 36 }}>{label}</Text>
+      <Text style={{ ...typography.display, color: colors.teks, lineHeight: 36 }}>{label}</Text>
     </Pressable>
   );
 }

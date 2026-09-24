@@ -89,7 +89,7 @@ export function PratinjauWidget({ ringkasan, tampilkanAngka, sekarang }: Props) 
       </View>
 
       {tampilkanAngka && ringkasan.dihitungPada ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.md }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, marginTop: spacing.md }}>
           dihitung server {formatJam(ringkasan.dihitungPada)}
         </Text>
       ) : null}

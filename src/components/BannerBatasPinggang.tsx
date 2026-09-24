@@ -41,8 +41,8 @@ export function BannerBatasPinggang({
   }
 
   const lewat = status.keadaan === 'lewat';
-  const dasar = lewat ? colors.coral : colors.amber;
-  const teksJudul = lewat ? colors.aksenTeks.coral : colors.amber;
+  const dasar = lewat ? colors.status.bahaya.isian : colors.status.peringatan.isian;
+  const teksJudul = lewat ? colors.status.bahaya.teks : colors.status.peringatan.teks;
 
   const judul = lewat
     ? status.selisihCm === 0
@@ -70,7 +70,7 @@ export function BannerBatasPinggang({
         </Text>
       </View>
 
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         Pinggang terakhir {formatDesimal(pinggangCm)} cm, batas yang Anda tetapkan{' '}
         {formatDesimal(batasCm)} cm.
         {status.lajuPerPekan !== null && status.lajuPerPekan !== 0
@@ -83,7 +83,7 @@ export function BannerBatasPinggang({
           : ''}
       </Text>
 
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         {pesanKeputusan(lewat, fase)}
       </Text>
 
@@ -148,7 +148,7 @@ function TombolAksi({
         justifyContent: 'center',
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: utama ? warna : colors.borderKuat,
+        borderColor: utama ? warna : colors.garisKontrol,
         backgroundColor: utama ? warna : 'transparent',
         opacity: pressed ? 0.75 : 1,
       })}
@@ -156,7 +156,7 @@ function TombolAksi({
       <Text
         style={{
           ...typography.label,
-          color: utama ? colors.diAtasIsian : colors.textMuted,
+          color: utama ? colors.diAtasIsian : colors.teksRedup,
         }}
       >
         {label}

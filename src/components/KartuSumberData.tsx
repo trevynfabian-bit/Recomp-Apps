@@ -30,19 +30,19 @@ const HIT_SLOP_TAUTAN = Math.ceil((TAP_MIN - 18) / 2);
  */
 const WARNA_TINGKAT: Record<TingkatKesehatan, string> = {
   get sehat() {
-    return colors.aksenTeks.jade;
+    return colors.status.sukses.teks;
   },
   get menunggu() {
-    return colors.textMuted;
+    return colors.teksRedup;
   },
   get terlambat() {
-    return colors.amber;
+    return colors.status.peringatan.teks;
   },
   get bermasalah() {
-    return colors.aksenTeks.coral;
+    return colors.status.bahaya.teks;
   },
   get belum() {
-    return colors.textFaint;
+    return colors.teksSamar;
   },
 };
 
@@ -75,7 +75,7 @@ export function KartuSumberData({
         borderColor:
           kesehatan.tingkat === 'bermasalah' || kesehatan.tingkat === 'terlambat'
             ? warna + '66'
-            : colors.border,
+            : colors.garis,
       }}
     >
       <View
@@ -84,7 +84,7 @@ export function KartuSumberData({
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text, flexShrink: 1 }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks, flexShrink: 1 }}>
             {profil.nama}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
@@ -93,14 +93,14 @@ export function KartuSumberData({
           </View>
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{profil.jalur}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{profil.jalur}</Text>
 
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           {kesehatan.keterangan}
         </Text>
 
         {koneksi.status === 'terhubung' && koneksi.masukHariIni.length > 0 ? (
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Hari ini: {koneksi.masukHariIni.map((m) => `${formatAngka(m.jumlah)} ${m.label}`).join(' · ')}
           </Text>
         ) : null}
@@ -117,7 +117,7 @@ export function KartuSumberData({
           hitSlop={{ top: HIT_SLOP_TAUTAN, bottom: HIT_SLOP_TAUTAN, left: spacing.sm, right: spacing.lg }}
           style={({ pressed }) => ({ alignSelf: 'flex-start', opacity: pressed ? 0.6 : 1 })}
         >
-          <Text style={{ ...typography.label, color: colors.amber }}>{tautan.label} ›</Text>
+          <Text style={{ ...typography.label, color: colors.aksen.teks }}>{tautan.label} ›</Text>
         </Pressable>
       ) : null}
 
@@ -176,7 +176,7 @@ function AksiKartu({
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.label, color: colors.textFaint }}>Putuskan</Text>
+      <Text style={{ ...typography.label, color: colors.teksSamar }}>Putuskan</Text>
     </Pressable>
   );
 }

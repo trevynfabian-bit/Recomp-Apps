@@ -11,7 +11,7 @@ type Props = {
 };
 
 /** Field angka kecil dengan label & unit, dipakai form koreksi hasil AI. */
-export function InputAngka({ label, nilai, unit, onUbah, warna = colors.textMuted }: Props) {
+export function InputAngka({ label, nilai, unit, onUbah, warna = colors.teksRedup }: Props) {
   return (
     <View style={{ flex: 1, gap: spacing.xs }}>
       <Text style={{ ...typography.caption, color: warna }}>{label}</Text>
@@ -20,10 +20,10 @@ export function InputAngka({ label, nilai, unit, onUbah, warna = colors.textMute
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.xs,
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.permukaanCekung,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: colors.borderKuat,
+          borderColor: colors.garisKontrol,
           paddingHorizontal: spacing.md,
         }}
       >
@@ -40,11 +40,11 @@ export function InputAngka({ label, nilai, unit, onUbah, warna = colors.textMute
             ...angkaTabular,
             flex: 1,
             minWidth: 0,
-            color: colors.text,
+            color: colors.teks,
             paddingVertical: spacing.md,
           }}
         />
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
       </View>
     </View>
   );

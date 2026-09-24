@@ -146,21 +146,21 @@ export function KartuTimbangPagi({
         <Card>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ gap: spacing.xs }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                 Timbang pagi
               </Text>
 
               {beratKg !== null ? (
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
-                  <Text style={{ ...typography.display, color: colors.text }}>
+                  <Text style={{ ...typography.display, color: colors.teks }}>
                     {formatDesimal(beratKg)}
                   </Text>
-                  <Text style={{ ...typography.label, color: colors.textFaint }}>kg</Text>
+                  <Text style={{ ...typography.label, color: colors.teksSamar }}>kg</Text>
                   {selisih !== null && Math.abs(selisih) >= 0.05 ? (
                     <Text
                       style={{
                         ...typography.label,
-                        color: selisih > 0 ? colors.amber : colors.aksenTeks.jade,
+                        color: selisih > 0 ? colors.aksen.teks : colors.status.sukses.teks,
                       }}
                     >
                       {selisih > 0 ? '+' : '−'}
@@ -169,7 +169,7 @@ export function KartuTimbangPagi({
                   ) : null}
                 </View>
               ) : (
-                <Text style={{ ...typography.display, color: colors.textFaint }}>—</Text>
+                <Text style={{ ...typography.display, color: colors.teksSamar }}>—</Text>
               )}
 
               {jenisSumber !== null ? (
@@ -178,17 +178,17 @@ export function KartuTimbangPagi({
                     jenis={jenisSumber}
                     detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
                   />
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                     {baruTersimpan ? '' : 'ketuk untuk ubah'}
                   </Text>
                   {baruTersimpan ? (
-                    <Text style={{ ...typography.caption, color: colors.aksenTeks.jade }}>
+                    <Text style={{ ...typography.caption, color: colors.status.sukses.teks }}>
                       ✓ Tersimpan
                     </Text>
                   ) : null}
                 </View>
               ) : (
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Belum ditimbang · ketuk untuk catat
                 </Text>
               )}
@@ -199,12 +199,12 @@ export function KartuTimbangPagi({
                 width: 44,
                 height: 44,
                 borderRadius: radius.pill,
-                backgroundColor: colors.amber + '22',
+                backgroundColor: colors.aksen.isian + '22',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ ...typography.title, color: colors.amber }}>
+              <Text style={{ ...typography.title, color: colors.aksen.teks }}>
                 {beratKg === null ? '+' : '›'}
               </Text>
             </View>
@@ -227,11 +227,11 @@ export function KartuTimbangPagi({
           <Pressable
             onPress={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: colors.surface,
+              backgroundColor: colors.permukaan,
               borderTopLeftRadius: radius.xl,
               borderTopRightRadius: radius.xl,
               borderTopWidth: 1,
-              borderColor: colors.border,
+              borderColor: colors.garis,
               padding: spacing.xl,
               paddingBottom: spacing.xxl + spacing.lg,
               gap: spacing.xl,
@@ -243,11 +243,11 @@ export function KartuTimbangPagi({
                   width: ukuran.pegangan.lebar,
                   height: ukuran.pegangan.tinggi,
                   borderRadius: radius.pill,
-                  backgroundColor: colors.border,
+                  backgroundColor: colors.garis,
                   marginBottom: spacing.sm,
                 }}
               />
-              <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                 Berat pagi
               </Text>
             </View>
@@ -279,19 +279,19 @@ export function KartuTimbangPagi({
                     // Lebar eksplisit: tanpa ini input memakai lebar bawaan
                     // (~20 karakter) dan mendorong tombol + keluar layar.
                     width: 140,
-                    color: valid ? colors.text : colors.aksenTeks.coral,
+                    color: valid ? colors.teks : colors.status.bahaya.teks,
                     textAlign: 'center',
                     padding: 0,
                   }}
                 />
-                <Text style={{ ...typography.title, color: colors.textFaint }}>kg</Text>
+                <Text style={{ ...typography.title, color: colors.teksSamar }}>kg</Text>
               </View>
 
               <TombolGeser label="+" onPress={() => geser(LANGKAH_KG)} />
             </View>
 
             {!valid ? (
-              <Text style={{ ...typography.caption, color: colors.aksenTeks.coral, textAlign: 'center' }}>
+              <Text style={{ ...typography.caption, color: colors.status.bahaya.teks, textAlign: 'center' }}>
                 Masukkan berat antara {BERAT_MIN} dan {BERAT_MAKS} kg
               </Text>
             ) : null}
@@ -303,18 +303,18 @@ export function KartuTimbangPagi({
                   gap: spacing.sm,
                   padding: spacing.md,
                   borderRadius: radius.md,
-                  backgroundColor: colors.surfaceSunken,
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>Asal angka</Text>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>Asal angka</Text>
                   <PenandaSumber
                     jenis={jenisSumber}
                     detail={jenisSumber === 'sinkron' ? 'Apple Health' : undefined}
                   />
                 </View>
                 {jenisSumber === 'sinkron' ? (
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                     Angka ini ditarik dari Apple Health. Menyimpan di sini akan
                     menggantinya dengan catatan manual Anda.
                   </Text>
@@ -325,7 +325,7 @@ export function KartuTimbangPagi({
             {/* Timbangan sebelumnya beserta asalnya masing-masing. */}
             {riwayat.length > 0 ? (
               <View style={{ gap: spacing.sm }}>
-                <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                   Timbangan sebelumnya
                 </Text>
                 {riwayat.map((r) => (
@@ -338,18 +338,18 @@ export function KartuTimbangPagi({
                       gap: spacing.sm,
                     }}
                   >
-                    <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }}>
+                    <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }}>
                       {formatTanggalPanjang(r.tanggal)}
                     </Text>
                     <PenandaSumber jenis={sumberBerat(r.sumber_berat) ?? 'manual'} />
-                    <Text style={{ ...typography.label, color: colors.text, width: 56, textAlign: 'right' }}>
+                    <Text style={{ ...typography.label, color: colors.teks, width: 56, textAlign: 'right' }}>
                       {formatDesimal(r.berat_pagi_kg)}
                     </Text>
                   </View>
                 ))}
               </View>
             ) : (
-              <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
                 Belum ada catatan berat sebelumnya
               </Text>
             )}
@@ -362,16 +362,16 @@ export function KartuTimbangPagi({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.amber + '55',
+                  borderColor: colors.aksen.isian + '55',
                   // Tint di atas `surface` membuat teks redup di dalamnya jatuh
                   // ke 3,9:1; warnanya cukup dibawa tepi dan judulnya.
-                  backgroundColor: colors.surfaceSunken,
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
-                <Text style={{ ...typography.label, color: colors.amber }}>
+                <Text style={{ ...typography.label, color: colors.aksen.teks }}>
                   Beda {formatDesimal(lompatan)} kg dari timbangan terakhir
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Lompatan sebesar ini biasanya salah ketik. Periksa sekali lagi, atau
                   lanjutkan bila memang benar.
                 </Text>
@@ -385,14 +385,14 @@ export function KartuTimbangPagi({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.coral + '55',
-                  backgroundColor: colors.surfaceSunken,
+                  borderColor: colors.status.bahaya.isian + '55',
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
-                <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Angka Anda masih tersimpan di layar ini. Coba lagi.
                 </Text>
               </View>
@@ -409,10 +409,10 @@ export function KartuTimbangPagi({
                   gap: spacing.sm,
                   backgroundColor:
                     status === 'tersimpan'
-                      ? colors.jade
+                      ? colors.status.sukses.isian
                       : valid
-                        ? colors.amber
-                        : colors.surfaceSunken,
+                        ? colors.aksen.isian
+                        : colors.permukaanCekung,
                   borderRadius: radius.lg,
                   minHeight: TAP_MIN,
                   justifyContent: 'center',
@@ -429,7 +429,7 @@ export function KartuTimbangPagi({
                   style={{
                     ...typography.bodyTebal,
                     color:
-                      status === 'tersimpan' || valid ? colors.diAtasIsian : colors.textFaint,
+                      status === 'tersimpan' || valid ? colors.diAtasIsian : colors.teksSamar,
                   }}
                 >
                   {labelTombolSimpan(status, perluKonfirmasi)}
@@ -444,7 +444,7 @@ export function KartuTimbangPagi({
                 }
                 style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
               >
-                <Text style={{ ...typography.label, color: colors.textFaint }}>
+                <Text style={{ ...typography.label, color: colors.teksSamar }}>
                   {status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
                 </Text>
               </Pressable>
@@ -467,15 +467,15 @@ function TombolGeser({ label, onPress }: { label: string; onPress: () => void })
         width: 56,
         height: 56,
         borderRadius: radius.pill,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
+        borderColor: colors.garisKontrol,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.display, color: colors.text, lineHeight: 36 }}>{label}</Text>
+      <Text style={{ ...typography.display, color: colors.teks, lineHeight: 36 }}>{label}</Text>
     </Pressable>
   );
 }

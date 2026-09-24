@@ -16,7 +16,7 @@ export function Placeholder({ judul, keterangan, fase }: Props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.bg,
+        backgroundColor: colors.latar,
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: insets.top,
@@ -24,11 +24,11 @@ export function Placeholder({ judul, keterangan, fase }: Props) {
         gap: spacing.sm,
       }}
     >
-      <Text style={{ ...typography.caption, color: colors.amber, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.aksen.teks, textTransform: 'uppercase' }}>
         {fase}
       </Text>
-      <Text style={{ ...typography.display, color: colors.text }}>{judul}</Text>
-      <Text style={{ ...typography.body, color: colors.textFaint, textAlign: 'center' }}>
+      <Text style={{ ...typography.display, color: colors.teks }}>{judul}</Text>
+      <Text style={{ ...typography.body, color: colors.teksSamar, textAlign: 'center' }}>
         {keterangan}
       </Text>
     </View>

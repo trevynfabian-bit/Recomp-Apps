@@ -34,8 +34,8 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
 
   return (
     <KerangkaSheet terbuka onTutup={memproses ? null : onTutup} label="Keluar dari akun">
-      <Text style={{ ...typography.title, color: colors.text }}>Keluar dari akun?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.title, color: colors.teks }}>Keluar dari akun?</Text>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Semua data tetap tersimpan di akun Anda dan kembali utuh saat masuk lagi.
       </Text>
 
@@ -65,8 +65,8 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
 function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>['name']; children: React.ReactNode }) {
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.textMuted} />
-      <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
+      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.teksRedup} />
+      <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>
         {children}
       </Text>
     </View>

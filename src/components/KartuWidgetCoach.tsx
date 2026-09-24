@@ -34,16 +34,16 @@ export function KartuWidgetCoach({ widget }: Props) {
         gap: spacing.md,
         padding: spacing.lg,
         borderRadius: radius.lg,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.garis,
       }}
     >
       {widget.jenis === 'angka' ? <IsiAngka widget={widget} /> : <IsiMakro widget={widget} />}
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <PenandaSumber jenis={widget.sumber} />
-        <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>
           · dihitung app lewat {widget.fungsi}
         </Text>
       </View>
@@ -55,14 +55,14 @@ export function KartuWidgetCoach({ widget }: Props) {
 function IsiAngka({ widget }: { widget: Extract<WidgetCoach, { jenis: 'angka' }> }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         {widget.label}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs, flex: 1 }}>
-          <Text style={{ ...typography.display, color: colors.text }}>{widget.nilai}</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint }}>{widget.unit}</Text>
+          <Text style={{ ...typography.display, color: colors.teks }}>{widget.nilai}</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar }}>{widget.unit}</Text>
         </View>
 
         {widget.deret && widget.deret.length > 1 ? <Sparkline nilai={widget.deret} /> : null}
@@ -75,7 +75,7 @@ function IsiAngka({ widget }: { widget: Extract<WidgetCoach, { jenis: 'angka' }>
       ) : null}
 
       {widget.keterangan ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {widget.keterangan}
         </Text>
       ) : null}
@@ -87,7 +87,7 @@ function IsiAngka({ widget }: { widget: Extract<WidgetCoach, { jenis: 'angka' }>
 function IsiMakro({ widget }: { widget: Extract<WidgetCoach, { jenis: 'makro' }> }) {
   return (
     <View style={{ gap: spacing.md }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         {widget.label}
       </Text>
 
@@ -99,7 +99,7 @@ function IsiMakro({ widget }: { widget: Extract<WidgetCoach, { jenis: 'makro' }>
               <Text style={{ ...typography.caption, color: colors.macroTeks[b.kunci] }}>
                 {b.nama}
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textMuted }}>
+              <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                 {formatMakro(b.terpakai)} / {formatMakro(b.target)}
               </Text>
             </View>
@@ -111,7 +111,7 @@ function IsiMakro({ widget }: { widget: Extract<WidgetCoach, { jenis: 'makro' }>
               style={{
                 height: ukuran.track,
                 borderRadius: radius.pill,
-                backgroundColor: colors.surfaceSunken,
+                backgroundColor: colors.permukaanCekung,
                 overflow: 'hidden',
               }}
             >
@@ -150,7 +150,7 @@ function Sparkline({ nilai }: { nilai: number[] }) {
     <Svg width={SPARK_LEBAR} height={SPARK_TINGGI}>
       <Path
         d={jalur}
-        stroke={colors.amber}
+        stroke={colors.aksen.isian}
         strokeWidth={2}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -160,8 +160,8 @@ function Sparkline({ nilai }: { nilai: number[] }) {
         cx={x(nilai.length - 1)}
         cy={y(nilai[nilai.length - 1])}
         r={4}
-        fill={colors.amber}
-        stroke={colors.surface}
+        fill={colors.aksen.isian}
+        stroke={colors.permukaan}
         strokeWidth={2}
       />
     </Svg>
@@ -176,7 +176,7 @@ function Sparkline({ nilai }: { nilai: number[] }) {
  * arahnya ditentukan pengirim kartu, bukan disimpulkan dari tandanya.
  */
 function warnaDelta(arah: 'sesuai' | 'berlawanan' | 'netral' | undefined): string {
-  if (arah === 'sesuai') return colors.aksenTeks.jade;
-  if (arah === 'berlawanan') return colors.amber;
-  return colors.textMuted;
+  if (arah === 'sesuai') return colors.status.sukses.teks;
+  if (arah === 'berlawanan') return colors.status.peringatan.teks;
+  return colors.teksRedup;
 }

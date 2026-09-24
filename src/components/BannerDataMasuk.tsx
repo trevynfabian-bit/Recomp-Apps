@@ -56,9 +56,9 @@ export function BannerDataMasuk() {
           paddingHorizontal: spacing.lg,
           paddingVertical: spacing.md,
           borderRadius: radius.lg,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.permukaan,
           borderWidth: 1,
-          borderColor: colors.borderKuat,
+          borderColor: colors.garisKontrol,
           opacity: pressed ? 0.8 : 1,
           shadowColor: '#000',
           shadowOpacity: 0.4,
@@ -68,7 +68,7 @@ export function BannerDataMasuk() {
         })}
       >
         <PenandaSumber jenis="sinkron" detail={nama} />
-        <Text style={{ ...typography.label, color: colors.text }}>Masuk: {isi}</Text>
+        <Text style={{ ...typography.label, color: colors.teks }}>Masuk: {isi}</Text>
       </Pressable>
     </View>
   );

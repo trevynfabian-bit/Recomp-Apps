@@ -33,14 +33,14 @@ export function DaftarRujukan({ rujukan }: Props) {
         gap: spacing.sm,
         padding: spacing.md,
         borderRadius: radius.md,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
         borderWidth: 1,
         // Tepi amber saat ada estimasi di dalamnya: peringatan itu harus
         // terbaca sebelum daftarnya dibaca, bukan sesudah.
-        borderColor: adaEstimasi ? colors.amber + '55' : colors.border,
+        borderColor: adaEstimasi ? colors.aksen.isian + '55' : colors.garis,
       }}
     >
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         Angka yang dipakai
       </Text>
 
@@ -54,15 +54,15 @@ export function DaftarRujukan({ rujukan }: Props) {
               gap: spacing.sm,
             }}
           >
-            <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }}>
+            <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }}>
               {r.label}
             </Text>
-            <Text style={{ ...typography.label, color: colors.text }}>{r.nilai}</Text>
+            <Text style={{ ...typography.label, color: colors.teks }}>{r.nilai}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             <PenandaSumber jenis={r.jenis} />
             {r.dasar ? (
-              <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>
                 · {r.dasar}
               </Text>
             ) : null}
@@ -71,7 +71,7 @@ export function DaftarRujukan({ rujukan }: Props) {
       ))}
 
       {adaEstimasi ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {METADATA_SUMBER.estimasi.penjelasan}
         </Text>
       ) : null}

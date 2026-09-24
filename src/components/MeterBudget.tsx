@@ -27,10 +27,10 @@ export function MeterBudget({ budget, laju }: Props) {
 
   const lewatBudget = budget.sisa < 0;
   const warnaIsian = lewatBudget
-    ? colors.coral
+    ? colors.status.bahaya.isian
     : laju.status === 'lebih cepat'
       ? colors.macro.satFat
-      : colors.amber;
+      : colors.aksen.isian;
 
   return (
     <View style={{ gap: spacing.sm }}>
@@ -38,7 +38,7 @@ export function MeterBudget({ budget, laju }: Props) {
         style={{
           height: 12,
           borderRadius: radius.pill,
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.permukaanCekung,
           overflow: 'hidden',
         }}
       >
@@ -59,27 +59,27 @@ export function MeterBudget({ budget, laju }: Props) {
               top: -2,
               width: 2,
               height: 16,
-              backgroundColor: colors.text,
+              backgroundColor: colors.teks,
             }}
           />
         ) : null}
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           terpakai {formatAngka(budget.terpakai)}
         </Text>
         {laju.status !== 'belum mulai' ? (
-          <Text style={{ ...typography.caption, color: colors.textMuted }}>
+          <Text style={{ ...typography.caption, color: colors.teksRedup }}>
             │ laju semestinya {formatAngka(laju.seharusnya)}
           </Text>
         ) : null}
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {formatAngka(budget.budgetTotal)}
         </Text>
       </View>
 
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         {kalimatLaju(laju)}
       </Text>
     </View>

@@ -31,16 +31,16 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
         gap: spacing.lg,
         padding: spacing.lg,
         borderRadius: radius.lg,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.garis,
       }}
     >
       <View style={{ gap: spacing.xxs }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Evaluasi {PEKAN_EVALUASI} mingguan
         </Text>
-        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
           {formatRentangTanggal(evaluasi.periode.dari, evaluasi.periode.sampai)}
         </Text>
       </View>
@@ -54,15 +54,15 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
           >
             {/* Panah SELALU berpasangan dengan katanya — bentuk saja tidak
                 cukup, dan warna saja apalagi. */}
-            <Text style={{ ...typography.title, color: colors.textMuted, width: 20 }}>
+            <Text style={{ ...typography.title, color: colors.teksRedup, width: 20 }}>
               {panah(s.arah)}
             </Text>
             <View style={{ flex: 1, gap: spacing.xxs }}>
-              <Text style={{ ...typography.label, color: colors.text }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>
                 {s.label} {kataArah(s.arah)}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>{s.nilai}</Text>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>{s.nilai}</Text>
                 <PenandaSumber jenis={s.sumber} />
               </View>
             </View>
@@ -73,13 +73,13 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
       {/* Verdict */}
       <View style={{ gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.title, color: colors.text, flex: 1 }}>{hasil.judul}</Text>
+          <Text style={{ ...typography.title, color: colors.teks, flex: 1 }}>{hasil.judul}</Text>
           <Pill diKartu label={`KEYAKINAN ${hasil.keyakinan.toUpperCase()}`} warna={warnaKeyakinan(hasil.keyakinan)} />
         </View>
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {hasil.ringkas}
         </Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Penentu: {hasil.penentu}
         </Text>
       </View>
@@ -89,13 +89,13 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
           gap: spacing.xs,
           padding: spacing.md,
           borderRadius: radius.md,
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.permukaanCekung,
         }}
       >
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Rekomendasi
         </Text>
-        <Text style={{ ...typography.body, color: colors.text }}>
+        <Text style={{ ...typography.body, color: colors.teks }}>
           {hasil.rekomendasi}
         </Text>
       </View>
@@ -119,7 +119,7 @@ function kataArah(arah: ArahMetrik): string {
  * melainkan pemberitahuan bahwa datanya belum cukup untuk bertindak jauh.
  */
 function warnaKeyakinan(keyakinan: 'rendah' | 'sedang' | 'tinggi'): string {
-  if (keyakinan === 'tinggi') return colors.aksenTeks.jade;
-  if (keyakinan === 'sedang') return colors.textMuted;
-  return colors.amber;
+  if (keyakinan === 'tinggi') return colors.status.sukses.teks;
+  if (keyakinan === 'sedang') return colors.teksRedup;
+  return colors.status.peringatan.teks;
 }

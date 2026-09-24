@@ -16,10 +16,10 @@ type Props = {
  * SATU angka utama per layar (prinsip desain PRD): label kecil di atas,
  * angka raksasa di tengah, keterangan redup di bawah.
  */
-export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.amber }: Props) {
+export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.aksen.teks }: Props) {
   return (
     <View style={{ alignItems: 'center', gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         {label}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
@@ -29,12 +29,12 @@ export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.ambe
         >
           {nilai}
         </Text>
-        <Text style={{ ...typography.title, color: colors.textFaint, paddingBottom: spacing.md }}>
+        <Text style={{ ...typography.title, color: colors.teksSamar, paddingBottom: spacing.md }}>
           {unit}
         </Text>
       </View>
       {keterangan ? (
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted, textAlign: 'center' }}>{keterangan}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup, textAlign: 'center' }}>{keterangan}</Text>
       ) : null}
     </View>
   );

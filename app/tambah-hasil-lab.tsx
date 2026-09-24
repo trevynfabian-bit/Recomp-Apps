@@ -122,8 +122,8 @@ export default function TambahHasilLabScreen() {
 
   if (id && !asal && statusMuat === 'memuat') {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg }}>
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Memuat hasil lab…
         </Text>
       </View>
@@ -132,9 +132,9 @@ export default function TambahHasilLabScreen() {
 
   if (id && !asal) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
-        <Text style={{ ...typography.title, color: colors.text }}>Hasil lab ini tidak ditemukan</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
+        <Text style={{ ...typography.title, color: colors.teks }}>Hasil lab ini tidak ditemukan</Text>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
         </Text>
         <TombolBertepi label="Kembali ke riwayat" onPress={() => router.back()} />
@@ -146,7 +146,7 @@ export default function TambahHasilLabScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        style={{ flex: 1, backgroundColor: colors.bg }}
+        style={{ flex: 1, backgroundColor: colors.latar }}
         contentContainerStyle={{
           paddingTop: insets.top + spacing.lg,
           paddingBottom: insets.bottom + spacing.xxl,
@@ -166,27 +166,27 @@ export default function TambahHasilLabScreen() {
               width: TAP_MIN,
               height: TAP_MIN,
               borderRadius: radius.pill,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.permukaan,
               borderWidth: 1,
-              borderColor: colors.borderKuat,
+              borderColor: colors.garisKontrol,
               alignItems: 'center',
               justifyContent: 'center',
               opacity: pressed ? 0.6 : 1,
             })}
           >
-            <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+            <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
               {asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
             </Text>
-            <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>Salin dari kertas hasilnya</Text>
+            <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>Salin dari kertas hasilnya</Text>
           </View>
         </View>
 
         <View style={{ gap: spacing.sm }}>
           <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} tampilan="pill" />
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Tulis angka dan rentang rujukan persis seperti tercetak; tersimpan sebagai data mentah, tanpa dibulatkan.
             Rentang rujukan boleh dikosongkan bila tidak ada di kertasnya; app tidak mengisinya sendiri.
           </Text>
@@ -218,11 +218,11 @@ export default function TambahHasilLabScreen() {
                   justifyContent: 'center',
                   borderRadius: radius.pill,
                   borderWidth: 1,
-                  borderColor: isian.nama === t.nama ? colors.amber : colors.borderKuat,
+                  borderColor: isian.nama === t.nama ? colors.aksen.isian : colors.garisKontrol,
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <Text style={{ ...typography.label, color: isian.nama === t.nama ? colors.text : colors.textMuted }}>{t.nama}</Text>
+                <Text style={{ ...typography.label, color: isian.nama === t.nama ? colors.teks : colors.teksRedup }}>{t.nama}</Text>
               </Pressable>
             ))}
           </View>
@@ -242,7 +242,7 @@ export default function TambahHasilLabScreen() {
               onPress={() => ubah({ tanggal: hariIniTertulis() })}
               style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN - 8, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
             >
-              <Text style={{ ...typography.label, color: colors.amber }}>Hari ini</Text>
+              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Hari ini</Text>
             </Pressable>
           </View>
           <Kolom
@@ -256,7 +256,7 @@ export default function TambahHasilLabScreen() {
         </View>
 
         <View style={{ gap: spacing.md }}>
-          <Text style={{ ...typography.caption, color: colors.textMuted }}>PENANDA</Text>
+          <Text style={{ ...typography.caption, color: colors.teksRedup }}>PENANDA</Text>
           {tampil && galat.penanda ? <TeksGalat teks={galat.penanda} /> : null}
           {isian.penanda.map((p, i) => (
             <KartuPenanda
@@ -289,8 +289,8 @@ export default function TambahHasilLabScreen() {
       </ScrollView>
 
       <KerangkaSheet terbuka={konfirmasiBatal} onTutup={() => setKonfirmasiBatal(false)} label="Isian belum disimpan">
-        <Text style={{ ...typography.title, color: colors.text }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.title, color: colors.teks }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {asal
             ? 'Perubahan belum disimpan. Entri yang tersimpan tetap seperti sebelumnya.'
             : 'Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.'}
@@ -329,7 +329,7 @@ function KartuPenanda({
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.label, color: colors.textMuted }}>Penanda {ke}</Text>
+        <Text style={{ ...typography.label, color: colors.teksRedup }}>Penanda {ke}</Text>
         {onHapus ? (
           <Pressable
             accessibilityRole="button"
@@ -342,7 +342,7 @@ function KartuPenanda({
             hitSlop={8}
             style={({ pressed }) => ({ width: TAP_MIN - 8, height: TAP_MIN - 8, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
           >
-            <Ionicons name="close" size={ukuranIkon.sedang} color={colors.textMuted} />
+            <Ionicons name="close" size={ukuranIkon.sedang} color={colors.teksRedup} />
           </Pressable>
         ) : null}
       </View>
@@ -355,7 +355,7 @@ function KartuPenanda({
           <Kolom label="Satuan" aksesLabel={`${nama}: satuan`} nilai={isian.satuan} onUbah={(t) => onUbah({ satuan: t })} placeholder="mis. mg/dL" galat={galat?.satuan} nonaktif={nonaktif} />
         </View>
       </View>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>RENTANG RUJUKAN DARI LAB</Text>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>RENTANG RUJUKAN DARI LAB</Text>
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <View style={{ flex: 1 }}>
           <Kolom label="Batas bawah" aksesLabel={`${nama}: batas bawah rujukan`} nilai={isian.rujukanMin} onUbah={(t) => onUbah({ rujukanMin: t })} placeholder="kosong" keyboardType="decimal-pad" galat={galat?.rujukanMin} nonaktif={nonaktif} />
@@ -390,26 +390,26 @@ function Kolom({
 }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textMuted }}>{label}</Text>
+      <Text style={{ ...typography.caption, color: colors.teksRedup }}>{label}</Text>
       <TextInput
         value={nilai}
         onChangeText={onUbah}
         editable={!nonaktif}
         placeholder={placeholder}
-        placeholderTextColor={colors.textFaint}
+        placeholderTextColor={colors.teksSamar}
         keyboardType={keyboardType}
         autoCorrect={false}
         accessibilityLabel={aksesLabel ?? label}
         accessibilityHint={galat}
         style={{
           ...typography.body,
-          color: colors.text,
+          color: colors.teks,
           minHeight: TAP_MIN,
           paddingHorizontal: spacing.md,
           borderRadius: radius.md,
           borderWidth: galat ? 2 : 1,
-          borderColor: galat ? colors.coral : colors.borderKuat,
-          backgroundColor: colors.surfaceSunken,
+          borderColor: galat ? colors.status.bahaya.isian : colors.garisKontrol,
+          backgroundColor: colors.permukaanCekung,
         }}
       />
       {galat ? <TeksGalat teks={galat} /> : null}
@@ -419,7 +419,7 @@ function Kolom({
 
 function TeksGalat({ teks }: { teks: string }) {
   return (
-    <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+    <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
       {teks}
     </Text>
   );

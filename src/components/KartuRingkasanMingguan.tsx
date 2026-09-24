@@ -30,19 +30,19 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
         gap: spacing.lg,
         padding: spacing.lg,
         borderRadius: radius.lg,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.amber + '55',
+        borderColor: colors.aksen.isian + '55',
       }}
     >
       <View style={{ gap: spacing.xxs }}>
-        <Text style={{ ...typography.caption, color: colors.amber, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.aksen.teks, textTransform: 'uppercase' }}>
           Ringkasan mingguan
         </Text>
-        <Text style={{ ...typography.bodyTebal, color: colors.text }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
           {formatRentangTanggal(ringkasan.periode.dari, ringkasan.periode.sampai)}
         </Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           dibuat otomatis tiap Senin pagi
         </Text>
       </View>
@@ -51,8 +51,8 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
         {ringkasan.poin.map((p) => (
           <View key={p.label} style={{ flexBasis: '46%', flexGrow: 1, gap: spacing.xxs }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>{p.label}</Text>
-            <Text style={{ ...typography.title, color: colors.text }}>{p.nilai}</Text>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>{p.label}</Text>
+            <Text style={{ ...typography.title, color: colors.teks }}>{p.nilai}</Text>
             {p.delta ? (
               <Text style={{ ...typography.caption, color: warnaArah(p.arah) }}>{p.delta}</Text>
             ) : null}
@@ -61,13 +61,13 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
         ))}
       </View>
 
-      <Text style={{ ...typography.body, color: colors.text }}>
+      <Text style={{ ...typography.body, color: colors.teks }}>
         {ringkasan.bacaan}
       </Text>
 
       {ringkasan.lanjutan && ringkasan.lanjutan.length > 0 ? (
         <View style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
             Tanya lanjutan
           </Text>
           {ringkasan.lanjutan.map((t) => (
@@ -85,12 +85,12 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.md,
                 borderWidth: 1,
-                borderColor: colors.borderKuat,
-                backgroundColor: colors.surfaceSunken,
+                borderColor: colors.garisKontrol,
+                backgroundColor: colors.permukaanCekung,
                 opacity: pressed ? 0.7 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: colors.textMuted }}>{t}</Text>
+              <Text style={{ ...typography.label, color: colors.teksRedup }}>{t}</Text>
             </Pressable>
           ))}
         </View>
@@ -101,7 +101,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
 
 /** Arah ditentukan pengirim, bukan disimpulkan dari tanda angkanya. */
 function warnaArah(arah: 'sesuai' | 'berlawanan' | 'netral' | undefined): string {
-  if (arah === 'sesuai') return colors.aksenTeks.jade;
-  if (arah === 'berlawanan') return colors.amber;
-  return colors.textMuted;
+  if (arah === 'sesuai') return colors.status.sukses.teks;
+  if (arah === 'berlawanan') return colors.status.peringatan.teks;
+  return colors.teksRedup;
 }

@@ -19,11 +19,11 @@ export function SectionHeader({ judul, aksi }: Props) {
         paddingHorizontal: spacing.xs,
       }}
     >
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         {judul}
       </Text>
       {aksi ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{aksi}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{aksi}</Text>
       ) : null}
     </View>
   );

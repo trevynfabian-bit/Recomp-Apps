@@ -8,11 +8,11 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.amber,
-        tabBarInactiveTintColor: colors.textFaint,
+        tabBarActiveTintColor: colors.aksen.teks,
+        tabBarInactiveTintColor: colors.teksSamar,
         tabBarStyle: {
-          backgroundColor: colors.bg,
-          borderTopColor: colors.border,
+          backgroundColor: colors.latar,
+          borderTopColor: colors.garis,
         },
         tabBarLabelStyle: { ...typography.caption, textTransform: 'none' },
       }}

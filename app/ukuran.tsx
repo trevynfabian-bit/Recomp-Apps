@@ -107,7 +107,7 @@ export default function UkuranScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: spacing.xxl,
@@ -127,19 +127,19 @@ export default function UkuranScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Ukuran tubuh</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Ukuran tubuh</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Terakhir {formatTanggalPanjang(terbaru.tanggal)}
           </Text>
         </View>
@@ -158,7 +158,7 @@ export default function UkuranScreen() {
               ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
               : undefined
           }
-          warna={colors.text}
+          warna={colors.teks}
         />
 
         <View style={{ alignItems: 'center', marginTop: spacing.md }}>
@@ -184,17 +184,17 @@ export default function UkuranScreen() {
               marginTop: spacing.xs,
               borderRadius: radius.pill,
               borderWidth: 1,
-              borderColor: colors.borderKuat,
-              backgroundColor: colors.surfaceSunken,
+              borderColor: colors.garisKontrol,
+              backgroundColor: colors.permukaanCekung,
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {profil.batas_pinggang_cm !== null
                 ? `batas yang Anda tetapkan ${formatDesimal(profil.batas_pinggang_cm)} cm`
                 : 'batas pinggang belum ditetapkan'}
             </Text>
-            <Text style={{ ...typography.label, color: colors.amber }}>
+            <Text style={{ ...typography.label, color: colors.aksen.teks }}>
               {profil.batas_pinggang_cm !== null ? 'Ubah' : 'Tetapkan'}
             </Text>
           </Pressable>
@@ -227,7 +227,7 @@ export default function UkuranScreen() {
           minHeight: TAP_MIN,
           paddingVertical: spacing.lg,
           borderRadius: radius.lg,
-          backgroundColor: colors.amber,
+          backgroundColor: colors.aksen.isian,
           opacity: pressed ? 0.8 : 1,
         })}
       >
@@ -262,20 +262,20 @@ export default function UkuranScreen() {
                 justifyContent: 'space-between',
                 padding: spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.border,
+                borderTopColor: colors.garis,
               }}
             >
-              <Text style={{ ...typography.body, color: colors.text }}>{b.label}</Text>
+              <Text style={{ ...typography.body, color: colors.teks }}>{b.label}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
                 {b.selisih !== null && b.selisih !== 0 ? (
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                     {selisihTeks(b.selisih)}
                   </Text>
                 ) : null}
-                <Text style={{ ...typography.title, color: colors.text }}>
+                <Text style={{ ...typography.title, color: colors.teks }}>
                   {formatDesimal(b.nilai)}
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>cm</Text>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
               </View>
             </View>
           ))}
@@ -286,7 +286,7 @@ export default function UkuranScreen() {
       <RiwayatPerubahan catatan={catatan} bagian={BAGIAN} />
 
       <Card>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Ukuran melengkapi berat, bukan menggantikannya. Berat bisa datar sementara pinggang
           mengecil dan lengan membesar — itu justru rekomposisi yang berhasil, dan tidak akan
           terlihat sama sekali dari timbangan. Lengan dan paha dicatat kiri dan kanan terpisah
@@ -300,10 +300,10 @@ export default function UkuranScreen() {
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
           }}
         >
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Data tiruan · estimasi body fat memakai metode Navy
           </Text>
         </View>

@@ -74,11 +74,11 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
         <View
           style={{
             maxHeight: '88%',
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
           }}
         >
           <View
@@ -94,10 +94,10 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                 width: ukuran.pegangan.lebar,
                 height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
-                backgroundColor: colors.border,
+                backgroundColor: colors.garis,
               }}
             />
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Data untuk estimasi body fat
             </Text>
           </View>
@@ -106,14 +106,14 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
           >
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               Dua data ini dipakai rumus Navy dan disimpan di profil, jadi cukup diisi sekali.
               Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
             </Text>
 
             {/* Tinggi badan */}
             <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.body, color: colors.text }}>Tinggi badan</Text>
+              <Text style={{ ...typography.body, color: colors.teks }}>Tinggi badan</Text>
               <View
                 style={{
                   flexDirection: 'row',
@@ -122,8 +122,8 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   paddingHorizontal: spacing.lg,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: tinggi === '' || tinggiValid ? colors.borderKuat : colors.coral,
-                  backgroundColor: colors.surfaceSunken,
+                  borderColor: tinggi === '' || tinggiValid ? colors.garisKontrol : colors.status.bahaya.isian,
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
                 <TextInput
@@ -142,12 +142,12 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                     // bawaannya dan mendorong unit keluar baris.
                     width: 96,
                     paddingVertical: spacing.md,
-                    color: tinggi === '' || tinggiValid ? colors.text : colors.aksenTeks.coral,
+                    color: tinggi === '' || tinggiValid ? colors.teks : colors.status.bahaya.teks,
                   }}
                 />
-                <Text style={{ ...typography.label, color: colors.textFaint }}>cm</Text>
+                <Text style={{ ...typography.label, color: colors.teksSamar }}>cm</Text>
               </View>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 {tinggi !== '' && !tinggiValid
                   ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.`
                   : 'Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda.'}
@@ -156,7 +156,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
 
             {/* Jenis kelamin */}
             <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.body, color: colors.text }}>Jenis kelamin</Text>
+              <Text style={{ ...typography.body, color: colors.teks }}>Jenis kelamin</Text>
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 {(['pria', 'wanita'] as const).map((nilai) => (
                   <PilihanKelamin
@@ -170,7 +170,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   />
                 ))}
               </View>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 Rumus Navy memakai konstanta yang berbeda untuk pria dan wanita. Versi wanita juga
                 butuh lingkar pinggul, yang belum dicatat app ini — jadi untuk sekarang estimasinya
                 baru bisa dihitung untuk pria.
@@ -184,16 +184,16 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.coral + '55',
+                  borderColor: colors.status.bahaya.isian + '55',
                   // Tint di atas `surface` menjatuhkan kontras teks redup di
                   // dalamnya ke bawah AA; warnanya cukup dibawa tepi & judul.
-                  backgroundColor: colors.surfaceSunken,
+                  backgroundColor: colors.permukaanCekung,
                 }}
               >
-                <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   Gagal menyimpan
                 </Text>
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Isian Anda masih ada di layar ini. Coba lagi.
                 </Text>
               </View>
@@ -210,10 +210,10 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   gap: spacing.sm,
                   backgroundColor:
                     status === 'tersimpan'
-                      ? colors.jade
+                      ? colors.status.sukses.isian
                       : bisaSimpan
-                        ? colors.amber
-                        : colors.surfaceSunken,
+                        ? colors.aksen.isian
+                        : colors.permukaanCekung,
                   borderRadius: radius.lg,
                   minHeight: TAP_MIN,
                   paddingVertical: spacing.lg,
@@ -229,7 +229,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                 <Text
                   style={{
                     ...typography.bodyTebal,
-                    color: status === 'tersimpan' || bisaSimpan ? colors.diAtasIsian : colors.textFaint,
+                    color: status === 'tersimpan' || bisaSimpan ? colors.diAtasIsian : colors.teksSamar,
                   }}
                 >
                   {labelSimpan(status)}
@@ -242,7 +242,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                 onPress={onTutup}
                 style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ ...typography.label, color: colors.textFaint }}>Nanti saja</Text>
+                <Text style={{ ...typography.label, color: colors.teksSamar }}>Nanti saja</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -277,8 +277,8 @@ function PilihanKelamin({
         paddingHorizontal: spacing.lg,
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: aktif ? colors.amber : colors.borderKuat,
-        backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
+        borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+        backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
         opacity: pressed ? 0.7 : 1,
       })}
     >
@@ -288,16 +288,16 @@ function PilihanKelamin({
           height: 18,
           borderRadius: 9,
           borderWidth: 2,
-          borderColor: aktif ? colors.amber : colors.borderKuat,
+          borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         {aktif ? (
-          <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }} />
+          <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }} />
         ) : null}
       </View>
-      <Text style={{ ...typography.body, color: aktif ? colors.text : colors.textMuted }}>
+      <Text style={{ ...typography.body, color: aktif ? colors.teks : colors.teksRedup }}>
         {label}
       </Text>
     </Pressable>

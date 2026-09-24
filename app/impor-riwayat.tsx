@@ -53,7 +53,7 @@ export default function ImporRiwayatScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -73,19 +73,19 @@ export default function ImporRiwayatScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={{ ...typography.title, color: colors.text }}>Impor riwayat</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Impor riwayat</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Sekali saja, supaya tren tidak mulai dari nol
           </Text>
         </View>
@@ -97,17 +97,17 @@ export default function ImporRiwayatScreen() {
           return (
             <Card key={k.sumber} style={{ gap: spacing.md }}>
               <View style={{ gap: spacing.xs }}>
-                <Text style={{ ...typography.bodyTebal, color: colors.text }}>{k.judul}</Text>
-                <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+                <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{k.judul}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
                   {k.isi}
                 </Text>
               </View>
               {s ? (
                 <View style={{ gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: colors.aksenTeks.jade }}>
+                  <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>
                     ✓ Diimpor {formatWaktuRelatif(s.selesaiPada, sekarang)}
                   </Text>
-                  <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{s.ringkas}</Text>
+                  <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{s.ringkas}</Text>
                 </View>
               ) : null}
               {s ? (

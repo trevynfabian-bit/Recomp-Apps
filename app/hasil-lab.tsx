@@ -65,7 +65,7 @@ export default function HasilLabScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -85,21 +85,21 @@ export default function HasilLabScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
             Hasil lab
           </Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             {statusMuat === 'memuat'
               ? 'Memuat…'
               : statusMuat === 'gagal'
@@ -112,8 +112,8 @@ export default function HasilLabScreen() {
       </View>
 
       <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-        <Ionicons name="flask-outline" size={ukuranIkon.sedang} color={colors.textMuted} />
-        <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
+        <Ionicons name="flask-outline" size={ukuranIkon.sedang} color={colors.teksRedup} />
+        <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>
           Dibaca coach sebagai konteks, bukan dasar saran dosis atau diagnosis. Semua angka di sini data mentah yang
           Anda salin; app tidak memperkirakan atau membulatkannya. Rentang rujukan adalah milik laboratorium yang
           memeriksa; artinya dibicarakan dengan dokter.
@@ -122,8 +122,8 @@ export default function HasilLabScreen() {
 
       {statusMuat === 'gagal' ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>Hasil lab belum termuat</Text>
-          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>Hasil lab belum termuat</Text>
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {pesanGagal}
           </Text>
           <TombolBertepi label="Coba lagi" onPress={muatUlang} />
@@ -132,15 +132,15 @@ export default function HasilLabScreen() {
 
       {statusMuat === 'siap' && kelompok.length === 0 ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>Belum ada hasil lab</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>Belum ada hasil lab</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Hasil lab yang Anda tambahkan akan tampil di sini, dikelompokkan per tahun, dan dibaca coach sebagai konteks.
           </Text>
         </Card>
       ) : null}
 
       {statusHapus === 'terhapus' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.sukses.teks }}>
           Hasil lab dihapus.
         </Text>
       ) : null}
@@ -173,14 +173,14 @@ export default function HasilLabScreen() {
       >
         {akanDihapus ? (
           <>
-            <Text style={{ ...typography.title, color: colors.text }}>Hapus hasil lab ini?</Text>
-            <Text style={{ ...typography.body, color: colors.textMuted }}>
+            <Text style={{ ...typography.title, color: colors.teks }}>Hapus hasil lab ini?</Text>
+            <Text style={{ ...typography.body, color: colors.teksRedup }}>
               {akanDihapus.nama}, {formatTanggalPanjang(akanDihapus.tanggal).split(', ')[1]} {akanDihapus.tanggal.slice(0, 4)} ·{' '}
               {akanDihapus.penanda.length} penanda. Coach tidak lagi membacanya sebagai konteks, dan penghapusan ini tidak
               bisa dibatalkan.
             </Text>
             {statusHapus === 'gagal' ? (
-              <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+              <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
                 {pesanGagalHapus}
               </Text>
             ) : null}
@@ -209,18 +209,18 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
         style={{ gap: spacing.sm }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
-          <Text style={{ flex: 1, ...typography.bodyTebal, color: colors.text }}>{hasil.nama}</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{tanggal}</Text>
+          <Text style={{ flex: 1, ...typography.bodyTebal, color: colors.teks }}>{hasil.nama}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{tanggal}</Text>
         </View>
         {hasil.laboratorium ? (
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{hasil.laboratorium}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{hasil.laboratorium}</Text>
         ) : null}
         <PenandaSumber jenis={SUMBER_HASIL_LAB.jenis} detail={SUMBER_HASIL_LAB.detail} />
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{ringkasan}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{ringkasan}</Text>
         {r.diLuarRentang.length > 0 ? (
           <View style={{ gap: spacing.xxs }}>
             {r.diLuarRentang.map((p) => (
-              <Text key={p.nama} style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+              <Text key={p.nama} style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
                 · {p.nama}: {posisiPenanda(p)} rujukan
               </Text>
             ))}
@@ -240,7 +240,7 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
           }}
           style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
         >
-          <Text style={{ ...typography.label, color: colors.text }}>
+          <Text style={{ ...typography.label, color: colors.teks }}>
             {nilaiTerbuka ? 'Sembunyikan nilai' : `Lihat ${hasil.penanda.length} nilai`}
           </Text>
         </Pressable>
@@ -253,7 +253,7 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
           }}
           style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
         >
-          <Text style={{ ...typography.label, color: colors.amber }}>Ubah</Text>
+          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -264,7 +264,7 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
           }}
           style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
         >
-          <Text style={{ ...typography.label, color: colors.aksenTeks.coral }}>Hapus</Text>
+          <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>Hapus</Text>
         </Pressable>
       </View>
     </Card>
@@ -278,16 +278,16 @@ function KartuHasilLab({ hasil, onUbah, onHapus }: { hasil: HasilLab; onUbah: ()
  */
 function DataMentahLab({ hasil }: { hasil: HasilLab }) {
   return (
-    <View style={{ gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>DATA MENTAH · SEPERTI TERTULIS DI HASIL LAB</Text>
+    <View style={{ gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.garis }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>DATA MENTAH · SEPERTI TERTULIS DI HASIL LAB</Text>
       <View accessibilityRole="list" style={{ gap: spacing.sm }}>
         {barisDataMentahLab(hasil).map((b) => (
           <View key={b.nama} accessible accessibilityLabel={b.aksesLabel} style={{ gap: spacing.xxs }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: spacing.md }}>
-              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>{b.nama}</Text>
-              <Text style={{ ...typography.label, color: colors.text }}>{b.nilai}</Text>
+              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>{b.nama}</Text>
+              <Text style={{ ...typography.label, color: colors.teks }}>{b.nilai}</Text>
             </View>
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {b.rujukan}
               {b.posisi === 'di atas rentang' || b.posisi === 'di bawah rentang' ? ` · ${b.posisi}` : ''}
             </Text>

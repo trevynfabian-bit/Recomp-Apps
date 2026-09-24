@@ -32,16 +32,16 @@ export function InputTarget({
   return (
     // Dua kolom per baris; lebar minimum menjaga label panjang tidak terpotong.
     <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: 130, gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textMuted }}>{label}</Text>
+      <Text style={{ ...typography.caption, color: colors.teksRedup }}>{label}</Text>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.xs,
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.permukaanCekung,
           borderRadius: radius.md,
           borderWidth: ditandai ? 2 : 1,
-          borderColor: ditandai ? colors.coral : colors.borderKuat,
+          borderColor: ditandai ? colors.status.bahaya.isian : colors.garisKontrol,
           paddingHorizontal: spacing.md,
         }}
       >
@@ -55,9 +55,9 @@ export function InputTarget({
           selectTextOnFocus
           accessibilityLabel={aksesLabel}
           accessibilityHint={ditandai ? 'Isian ini perlu diperbaiki; keterangannya di bawah kartu' : undefined}
-          style={{ ...typography.body, flex: 1, minWidth: 0, minHeight: TAP_MIN, color: colors.text, paddingVertical: spacing.sm }}
+          style={{ ...typography.body, flex: 1, minWidth: 0, minHeight: TAP_MIN, color: colors.teks, paddingVertical: spacing.sm }}
         />
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
       </View>
     </View>
   );

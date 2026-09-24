@@ -9,21 +9,21 @@ export const METADATA_SUMBER: Record<
   manual: {
     label: 'Manual',
     get warna() {
-      return colors.aksenTeks.jade;
+      return colors.status.sukses.teks;
     },
     penjelasan: 'Anda catat sendiri — data mentah.',
   },
   sinkron: {
     label: 'Sinkron',
     get warna() {
-      return colors.textMuted;
+      return colors.teksRedup;
     },
     penjelasan: 'Ditarik dari perangkat atau layanan — data mentah.',
   },
   estimasi: {
     label: 'Estimasi',
     get warna() {
-      return colors.amber;
+      return colors.status.peringatan.teks;
     },
     penjelasan: 'Hasil perkiraan, bukan catatan asli — periksa bila terasa meleset.',
   },

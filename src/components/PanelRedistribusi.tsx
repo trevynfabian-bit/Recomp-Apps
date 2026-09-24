@@ -50,7 +50,7 @@ export function PanelRedistribusi({
   if (!adaYangPerlu) {
     return (
       <Card>
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {mendatang.length === 0
             ? 'Minggu ini sudah habis — tidak ada hari tersisa untuk diatur.'
             : 'Jatah minggu ini sudah pas dengan rencana. Tidak ada yang perlu dipindah.'}
@@ -63,7 +63,7 @@ export function PanelRedistribusi({
     <Card>
       <View style={{ gap: spacing.lg }}>
         {/* Duduk perkaranya dulu, baru pilihannya */}
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {perlu < 0
             ? `Bila sisa minggu dijalani sesuai rencana, minggu ini tutup ${formatAngka(Math.abs(perlu))} kcal di atas jatah.`
             : `Masih ada ${formatAngka(perlu)} kcal jatah menganggur sampai akhir minggu.`}
@@ -74,10 +74,10 @@ export function PanelRedistribusi({
             style={{
               padding: spacing.md,
               borderRadius: radius.md,
-              backgroundColor: colors.surfaceSunken,
+              backgroundColor: colors.permukaanCekung,
             }}
           >
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               Redistribusi minggu ini sudah dipakai. Jatahnya satu kali per minggu, supaya
               target tidak terus bergeser sepanjang pekan.
             </Text>
@@ -108,8 +108,8 @@ export function PanelRedistribusi({
                   paddingVertical: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: aktif ? colors.amber : colors.borderKuat,
-                  backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
+                  borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                  backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
                   opacity: sudahDipakai ? 0.5 : pressed ? 0.7 : 1,
                 })}
               >
@@ -119,22 +119,22 @@ export function PanelRedistribusi({
                     height: 18,
                     borderRadius: 9,
                     borderWidth: 2,
-                    borderColor: aktif ? colors.amber : colors.borderKuat,
+                    borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
                   {aktif ? (
-                    <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }} />
+                    <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }} />
                   ) : null}
                 </View>
                 <View style={{ flex: 1, gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
+                  <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>
                     {o.judul}
                   </Text>
                   {/* textMuted, bukan textFaint: di atas latar terpilih yang
                       bertint amber, textFaint cuma 3,94:1 — di bawah AA. */}
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>{o.ringkas}</Text>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>{o.ringkas}</Text>
                 </View>
               </Pressable>
             );
@@ -144,7 +144,7 @@ export function PanelRedistribusi({
         {/* Pilih hari sasaran, hanya relevan untuk "tumpuk satu hari" */}
         {opsi === 'tumpuk_satu_hari' ? (
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Bebankan ke
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -167,12 +167,12 @@ export function PanelRedistribusi({
                       paddingHorizontal: spacing.lg,
                       borderRadius: radius.pill,
                       borderWidth: 1,
-                      borderColor: aktif ? colors.amber : colors.borderKuat,
-                      backgroundColor: aktif ? colors.amber : colors.surfaceSunken,
+                      borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                      backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
-                    <Text style={{ ...typography.label, color: aktif ? colors.diAtasIsian : colors.textMuted }}>
+                    <Text style={{ ...typography.label, color: aktif ? colors.diAtasIsian : colors.teksRedup }}>
                       {hariSingkat(h.tanggal)}
                     </Text>
                   </Pressable>
@@ -185,7 +185,7 @@ export function PanelRedistribusi({
         {/* Pratinjau: apa yang akan berubah, SEBELUM diterapkan */}
         {opsi !== 'abaikan' ? (
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Pratinjau target baru
             </Text>
             {hasil.hari
@@ -195,25 +195,25 @@ export function PanelRedistribusi({
                   key={h.tanggal}
                   style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
                 >
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                     {hariSingkat(h.tanggal)} · {h.namaTipeHari}
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                    <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                       {formatAngka(h.targetLama)}
                     </Text>
-                    <Text style={{ ...typography.caption, color: colors.textFaint }}>→</Text>
-                    <Text style={{ ...typography.label, color: colors.text }}>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>→</Text>
+                    <Text style={{ ...typography.label, color: colors.teks }}>
                       {formatAngka(h.targetBaru)}
                     </Text>
                     {h.kenaLantai ? (
-                      <Text style={{ ...typography.caption, color: colors.amber }}>lantai</Text>
+                      <Text style={{ ...typography.caption, color: colors.aksen.teks }}>lantai</Text>
                     ) : null}
                   </View>
                 </View>
               ))}
 
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {hasil.alasan} Target dibulatkan ke {KELIPATAN_KCAL} kcal, tidak pernah turun di
               bawah {formatAngka(batasBawahKalori)} kcal, dan protein tidak ikut dipotong.
             </Text>
@@ -234,14 +234,14 @@ export function PanelRedistribusi({
             alignItems: 'center',
             borderRadius: radius.lg,
             paddingVertical: spacing.lg,
-            backgroundColor: sudahDipakai ? colors.surfaceSunken : colors.amber,
+            backgroundColor: sudahDipakai ? colors.permukaanCekung : colors.aksen.isian,
             opacity: pressed ? 0.8 : 1,
           })}
         >
           <Text
             style={{
               ...typography.bodyTebal,
-              color: sudahDipakai ? colors.textFaint : colors.diAtasIsian,
+              color: sudahDipakai ? colors.teksSamar : colors.diAtasIsian,
             }}
           >
             {sudahDipakai ? 'Sudah dipakai minggu ini' : opsi === 'abaikan' ? 'Biarkan apa adanya' : 'Terapkan'}

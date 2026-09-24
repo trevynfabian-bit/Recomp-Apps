@@ -9,19 +9,19 @@ import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 /** Warna titik status; SELALU disertai label, tidak pernah warna saja. */
 const WARNA: Record<TingkatSinkronApp, string> = {
   get langsung() {
-    return colors.aksenTeks.jade;
+    return colors.status.sukses.teks;
   },
   get menyinkron() {
-    return colors.textMuted;
+    return colors.teksRedup;
   },
   get menyambung() {
-    return colors.textMuted;
+    return colors.teksRedup;
   },
   get perhatian() {
-    return colors.aksenTeks.coral;
+    return colors.status.bahaya.teks;
   },
   get terputus() {
-    return colors.amber;
+    return colors.status.peringatan.teks;
   },
 };
 
@@ -59,9 +59,9 @@ export function IndikatorSinkron() {
         minHeight: 24,
         paddingHorizontal: ukuran.chip.horizontal,
         borderRadius: radius.pill,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: status.tingkat === 'langsung' ? colors.border : warna + '66',
+        borderColor: status.tingkat === 'langsung' ? colors.garis : warna + '66',
         opacity: pressed ? 0.6 : 1,
       })}
     >
@@ -70,7 +70,7 @@ export function IndikatorSinkron() {
       ) : (
         <View style={{ width: 7, height: 7, borderRadius: radius.pill, backgroundColor: warna }} />
       )}
-      <Text style={{ ...typography.caption, color: status.tingkat === 'langsung' ? colors.textMuted : warna }}>
+      <Text style={{ ...typography.caption, color: status.tingkat === 'langsung' ? colors.teksRedup : warna }}>
         {status.label}
       </Text>
     </Pressable>

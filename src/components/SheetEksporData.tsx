@@ -57,14 +57,14 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
 
   return (
     <KerangkaSheet terbuka onTutup={menyerahkan ? null : onTutup} label="Ekspor data">
-      <Text style={{ ...typography.title, color: colors.text }}>Ekspor data saya</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.title, color: colors.teks }}>Ekspor data saya</Text>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Satu berkas ZIP berisi CSV per jenis data dan satu JSON lengkap — terbaca di spreadsheet mana pun, tanpa
         app ini.
       </Text>
 
       {isi === null ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
           {isiGagal
             ? 'Isi berkas belum bisa dihitung sekarang; berkasnya tetap bisa disiapkan.'
             : 'Menghitung isi berkas…'}
@@ -73,25 +73,25 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       <View accessibilityRole="list" style={{ gap: spacing.xs }}>
         {(isi ?? []).map((b) => (
           <View key={b.label} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{b.label}</Text>
-            <Text style={{ ...typography.label, color: colors.text }}>{formatAngka(b.jumlah)}</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{b.label}</Text>
+            <Text style={{ ...typography.label, color: colors.teks }}>{formatAngka(b.jumlah)}</Text>
           </View>
         ))}
       </View>
 
       {status.jenis === 'memproses' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Berkas sedang disiapkan. Sheet ini boleh ditutup; ada pemberitahuan saat berkasnya siap.
         </Text>
       ) : null}
 
       {status.jenis === 'siap' ? (
         <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs }}>
-          <Text style={{ ...typography.bodySedang, color: colors.text }}>Berkas siap</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.bodySedang, color: colors.teks }}>Berkas siap</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {status.namaBerkas} · {formatUkuranBerkas(status.ukuranByte)} · disiapkan pukul {jam(status.dibuatPada)}
           </Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Berkas ini berisi data kesehatan Anda. Setelah {web ? 'diunduh' : 'dibagikan'}, penjagaannya mengikuti
             tempat tujuannya.
           </Text>
@@ -99,7 +99,7 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       ) : null}
 
       {status.jenis === 'diserahkan' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.aksenTeks.jade }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.status.sukses.teks }}>
           {status.cara === 'diunduh'
             ? 'Berkas sudah diunduh.'
             : 'Berkas sudah dibagikan. Salinan sementaranya di perangkat ini sudah dihapus.'}
@@ -107,12 +107,12 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       ) : null}
 
       {status.jenis === 'gagal' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
           Berkas belum bisa disiapkan. Periksa koneksi lalu coba lagi.
         </Text>
       ) : null}
       {galatSerah ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
           Berkas belum bisa {web ? 'diunduh' : 'dibagikan'}. Berkasnya masih siap; coba lagi.
         </Text>
       ) : null}

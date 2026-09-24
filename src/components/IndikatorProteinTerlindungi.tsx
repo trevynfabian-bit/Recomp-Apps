@@ -26,7 +26,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
   if (proteksi.hari.length === 0) return null;
 
   const totalProtein = proteksi.hari.reduce((n, h) => n + h.proteinG, 0);
-  const warna = proteksi.utuh ? colors.aksenTeks.jade : colors.aksenTeks.coral;
+  const warna = proteksi.utuh ? colors.status.sukses.teks : colors.status.bahaya.teks;
 
   return (
     <Card>
@@ -51,12 +51,12 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
               {proteksi.utuh ? 'Protein terlindungi' : 'Protein ikut berubah'}
             </Text>
           </View>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {formatMakro(totalProtein)} g sepanjang sisa minggu
           </Text>
         </View>
 
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {proteksi.utuh
             ? sudahRedistribusi
               ? 'Redistribusi tadi hanya menggeser kalori. Target protein tiap hari tetap sama persis.'
@@ -67,14 +67,14 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
         {/* Bukti per hari: kalori berubah, protein tidak. */}
         <View style={{ gap: spacing.sm }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Hari
             </Text>
             <View style={{ flexDirection: 'row', gap: spacing.lg }}>
               <Text
                 style={{
                   ...typography.caption,
-                  color: colors.textFaint,
+                  color: colors.teksSamar,
                   textTransform: 'uppercase',
                   width: 86,
                   textAlign: 'right',
@@ -85,7 +85,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
               <Text
                 style={{
                   ...typography.caption,
-                  color: colors.textFaint,
+                  color: colors.teksSamar,
                   textTransform: 'uppercase',
                   width: 54,
                   textAlign: 'right',
@@ -104,14 +104,14 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                 key={h.tanggal}
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }} numberOfLines={1}>
+                <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }} numberOfLines={1}>
                   {hariSingkat(h.tanggal)} · {h.namaTipeHari}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: spacing.lg }}>
                   <Text
                     style={{
                       ...typography.caption,
-                      color: kaloriBerubah ? colors.amber : colors.textFaint,
+                      color: kaloriBerubah ? colors.aksen.teks : colors.teksSamar,
                       width: 86,
                       textAlign: 'right',
                     }}
@@ -123,7 +123,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                   <Text
                     style={{
                       ...typography.caption,
-                      color: proteinBerubah ? colors.aksenTeks.coral : colors.aksenTeks.jade,
+                      color: proteinBerubah ? colors.status.bahaya.teks : colors.status.sukses.teks,
                       width: 54,
                       textAlign: 'right',
                     }}
@@ -136,7 +136,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
           })}
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Protein dijaga karena ia yang menahan otot saat kalori dikurangi. Memotongnya untuk
           menutup kelebihan kalori justru membuang hal yang sedang dibangun.
         </Text>

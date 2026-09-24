@@ -82,14 +82,14 @@ export default function TrenScreen() {
   const cocok = arahSesuaiFase(sinyal.arah, profil.fase_aktif);
   const warnaArah =
     cocok === 'sesuai'
-      ? colors.aksenTeks.jade
+      ? colors.status.sukses.teks
       : cocok === 'berlawanan'
-        ? colors.amber
-        : colors.textMuted;
+        ? colors.status.peringatan.teks
+        : colors.teksRedup;
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: spacing.xxl,
@@ -99,12 +99,12 @@ export default function TrenScreen() {
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Tren berat</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Tren berat</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             {formatTanggalPanjang(hariIni)}
           </Text>
         </View>
-        <Pill label={profil.fase_aktif} warna={colors.aksenTeks.jade} />
+        <Pill label={profil.fase_aktif} warna={colors.status.sukses.teks} />
       </View>
 
       {/* Angka utama: rata-rata 7 hari, bukan berat hari ini */}
@@ -118,7 +118,7 @@ export default function TrenScreen() {
               ? `dari ${rata.jumlahTimbangan} timbangan dalam ${JENDELA_HARI} hari terakhir`
               : 'belum ada timbangan dalam sepekan terakhir'
           }
-          warna={colors.text}
+          warna={colors.teks}
         />
 
         <View
@@ -127,7 +127,7 @@ export default function TrenScreen() {
             marginTop: spacing.xl,
             paddingTop: spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: colors.border,
+            borderTopColor: colors.garis,
           }}
         >
           <StatKecil
@@ -140,19 +140,19 @@ export default function TrenScreen() {
             unit={sinyal.perubahanKg !== null ? 'kg' : ''}
             warna={warnaArah}
           />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
           <StatKecil
             label="Sepekan lalu"
             nilai={sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—'}
             unit="kg"
-            warna={colors.textMuted}
+            warna={colors.teksRedup}
           />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
           <StatKecil
             label="Terakhir"
             nilai={terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—'}
             unit="kg"
-            warna={colors.textMuted}
+            warna={colors.teksRedup}
           />
         </View>
 
@@ -185,7 +185,7 @@ export default function TrenScreen() {
               </Text>
             </View>
             {posisi.bawahKg !== null && posisi.atasKg !== null && kecukupan.cukupRataRata ? (
-              <Text style={{ ...typography.body, color: colors.textMuted }}>
+              <Text style={{ ...typography.body, color: colors.teksRedup }}>
                 Rentang hari ini {formatDesimal(posisi.bawahKg)}–{formatDesimal(posisi.atasKg)} kg;
                 rata-rata Anda {rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'} kg
                 {posisi.selisihKg !== null && posisi.selisihKg !== 0
@@ -193,13 +193,13 @@ export default function TrenScreen() {
                   : '.'}
               </Text>
             ) : (
-              <Text style={{ ...typography.body, color: colors.textMuted }}>
+              <Text style={{ ...typography.body, color: colors.teksRedup }}>
                 {faseBaruDimulai && jangkar
                   ? `Fase ${profil.fase_aktif} dimulai ${formatTanggalPanjang(jangkar.tanggal)}; posisinya terbaca mulai timbangan berikutnya.`
                   : 'Belum cukup data untuk menilai posisi terhadap koridor.'}
               </Text>
             )}
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {jangkar && jangkar.beratKg !== null
                 ? `Koridor memakai laju ${persenLaju(profil.fase_aktif)} berat badan per minggu sejak fase dimulai (${formatTanggalPanjang(jangkar.tanggal)}, ${formatDesimal(jangkar.beratKg)} kg). Ini rentang yang bisa dipertahankan, bukan nilai benar-salah.`
                 : `Koridor fase ${profil.fase_aktif} digambar setelah timbangan pertama di fase ini.`}
@@ -215,7 +215,7 @@ export default function TrenScreen() {
           <View style={{ gap: spacing.md }}>
             <LabelSinyalArah sinyal={sinyal} fase={profil.fase_aktif} />
             <CatatanKecukupan kecukupan={kecukupan} untuk="arah" />
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               Dihitung dari rata-rata {JENDELA_HARI} hari dibanding rata-rata {JENDELA_HARI} hari
               sebelumnya — rata-rata lawan rata-rata, supaya satu hari yang aneh tidak
               mengubah kesimpulan.
@@ -234,12 +234,12 @@ export default function TrenScreen() {
         <Card>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ gap: spacing.xxs, flex: 1 }}>
-              <Text style={{ ...typography.label, color: colors.text }}>Ukuran tubuh</Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>Ukuran tubuh</Text>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 Pinggang, dada, lengan, paha, leher — yang tidak terlihat dari timbangan
               </Text>
             </View>
-            <Text style={{ ...typography.title, color: colors.amber }}>›</Text>
+            <Text style={{ ...typography.title, color: colors.aksen.teks }}>›</Text>
           </View>
         </Card>
       </Pressable>
@@ -258,16 +258,16 @@ export default function TrenScreen() {
                 paddingVertical: spacing.md,
                 paddingHorizontal: spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.border,
+                borderTopColor: colors.garis,
               }}
             >
               <View style={{ flex: 1, gap: spacing.xxs }}>
-                <Text style={{ ...typography.label, color: colors.text }}>
+                <Text style={{ ...typography.label, color: colors.teks }}>
                   {formatTanggalPanjang(t.tanggal)}
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   {asalHari(t.tanggal)}
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                     rata-rata {t.rataRataKg !== null ? formatDesimal(t.rataRataKg) : '—'} kg
                   </Text>
                 </View>
@@ -275,7 +275,7 @@ export default function TrenScreen() {
               <Text
                 style={{
                   ...typography.title,
-                  color: t.beratHarianKg !== null ? colors.text : colors.textFaint,
+                  color: t.beratHarianKg !== null ? colors.teks : colors.teksSamar,
                 }}
               >
                 {t.beratHarianKg !== null ? formatDesimal(t.beratHarianKg) : '—'}
@@ -291,10 +291,10 @@ export default function TrenScreen() {
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
           }}
         >
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Data tiruan · grafik & koridor menyusul
           </Text>
         </View>
@@ -305,7 +305,7 @@ export default function TrenScreen() {
 
 /** Warna status koridor; di dalam = jade, di luar = amber (fakta, bukan alarm). */
 function warnaKoridor(posisi: string): string {
-  return posisi === 'di dalam koridor' ? colors.aksenTeks.jade : colors.amber;
+  return posisi === 'di dalam koridor' ? colors.status.sukses.teks : colors.status.peringatan.teks;
 }
 
 /** Kapitalkan huruf pertama untuk dipakai sebagai judul status. */
@@ -342,14 +342,14 @@ function StatKecil({
   return (
     <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs }}>
       <Text
-        style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}
+        style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}
         numberOfLines={1}
       >
         {label}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
         <Text style={{ ...typography.title, color: warna }}>{nilai}</Text>
-        {unit ? <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text> : null}
+        {unit ? <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text> : null}
       </View>
     </View>
   );

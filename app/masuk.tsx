@@ -77,7 +77,7 @@ export default function MasukScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        style={{ backgroundColor: colors.bg }}
+        style={{ backgroundColor: colors.latar }}
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',
@@ -88,10 +88,10 @@ export default function MasukScreen() {
         }}
       >
         <View style={{ gap: spacing.sm }}>
-          <Text accessibilityRole="header" style={{ ...typography.display, color: colors.text }}>
+          <Text accessibilityRole="header" style={{ ...typography.display, color: colors.teks }}>
             Recomp Coach
           </Text>
-          <Text style={{ ...typography.body, color: colors.textMuted }}>
+          <Text style={{ ...typography.body, color: colors.teksRedup }}>
             Masuk dengan akun yang sama dengan web.
           </Text>
         </View>
@@ -105,11 +105,11 @@ export default function MasukScreen() {
               alignItems: 'flex-start',
               padding: spacing.md,
               borderRadius: radius.md,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.permukaan,
             }}
           >
-            <Ionicons name="time-outline" size={ukuranIkon.kecil} color={colors.textMuted} />
-            <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
+            <Ionicons name="time-outline" size={ukuranIkon.kecil} color={colors.teksRedup} />
+            <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>
               {info}
             </Text>
           </View>
@@ -134,7 +134,7 @@ export default function MasukScreen() {
               onSubmitEditing={() => refSandi.current?.focus()}
               accessibilityLabel="Email"
               placeholder="nama@contoh.id"
-              placeholderTextColor={colors.textFaint}
+              placeholderTextColor={colors.teksSamar}
               style={gayaIsian}
             />
           </Isian>
@@ -177,7 +177,7 @@ export default function MasukScreen() {
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name={tampilSandi ? 'eye-off-outline' : 'eye-outline'} size={ukuranIkon.sedang} color={colors.textMuted} />
+                <Ionicons name={tampilSandi ? 'eye-off-outline' : 'eye-outline'} size={ukuranIkon.sedang} color={colors.teksRedup} />
               </Pressable>
             </View>
           </Isian>
@@ -187,8 +187,8 @@ export default function MasukScreen() {
               accessibilityLiveRegion="polite"
               style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}
             >
-              <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.aksenTeks.coral} />
-              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.aksenTeks.coral }}>
+              <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
+              <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
                 {galat}
               </Text>
             </View>
@@ -211,7 +211,7 @@ export default function MasukScreen() {
               opacity: pressed || aturUlang === 'mengirim' ? 0.6 : 1,
             })}
           >
-            <Text style={{ ...typography.bodySedang, color: colors.amber }}>
+            <Text style={{ ...typography.bodySedang, color: colors.aksen.teks }}>
               {aturUlang === 'mengirim' ? 'Mengirim tautan…' : 'Lupa kata sandi?'}
             </Text>
           </Pressable>
@@ -221,7 +221,7 @@ export default function MasukScreen() {
               accessibilityLiveRegion="polite"
               style={{
                 ...typography.labelBiasa,
-                color: aturUlang === 'terkirim' ? colors.textMuted : colors.aksenTeks.coral,
+                color: aturUlang === 'terkirim' ? colors.teksRedup : colors.status.bahaya.teks,
                 textAlign: 'center',
               }}
             >
@@ -233,12 +233,12 @@ export default function MasukScreen() {
         </View>
 
         <View style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint, textAlign: 'center' }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar, textAlign: 'center' }}>
             Belum punya akun? Akun dibuat di web Recomp Coach, lalu dipakai di sini.
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="lock-closed-outline" size={ukuranIkon.mini} color={colors.textFaint} />
-            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+            <Ionicons name="lock-closed-outline" size={ukuranIkon.mini} color={colors.teksSamar} />
+            <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
               Data kesehatan hanya terbaca oleh akun Anda.
             </Text>
           </View>
@@ -251,7 +251,7 @@ export default function MasukScreen() {
 function Isian({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text style={{ ...typography.label, color: colors.textMuted }}>{label}</Text>
+      <Text style={{ ...typography.label, color: colors.teksRedup }}>{label}</Text>
       {children}
     </View>
   );
@@ -260,7 +260,7 @@ function Isian({ label, children }: { label: string; children: React.ReactNode }
 const gayaIsian = {
   ...typography.body,
   get color() {
-    return colors.text;
+    return colors.teks;
   },
   minHeight: TAP_MIN,
   paddingHorizontal: spacing.md,
@@ -268,9 +268,9 @@ const gayaIsian = {
   borderRadius: radius.md,
   borderWidth: 1,
   get borderColor() {
-    return colors.borderKuat;
+    return colors.garisKontrol;
   },
   get backgroundColor() {
-    return colors.surfaceSunken;
+    return colors.permukaanCekung;
   },
 } as const;

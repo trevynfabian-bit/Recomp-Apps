@@ -96,17 +96,17 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
       >
         <View
           style={{
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
             maxHeight: '88%',
           }}
         >
           <View style={{ alignItems: 'center', paddingTop: spacing.md }}>
             <View
-              style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.border }}
+              style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.garis }}
             />
           </View>
 
@@ -119,7 +119,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
             keyboardShouldPersistTaps="handled"
           >
             <View style={{ gap: spacing.xs, alignItems: 'center' }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                 Catat makan via foto
               </Text>
             </View>
@@ -136,27 +136,27 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                     label={`Estimasi AI · keyakinan ${keyakinan}`}
                     warna={
                       keyakinan === 'tinggi'
-                        ? colors.aksenTeks.jade
+                        ? colors.status.sukses.teks
                         : keyakinan === 'sedang'
-                          ? colors.amber
-                          : colors.aksenTeks.coral
+                          ? colors.status.peringatan.teks
+                          : colors.status.bahaya.teks
                     }
                   />
                 </View>
 
                 <View style={{ gap: spacing.xs }}>
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>Nama makanan</Text>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>Nama makanan</Text>
                   <TextInput
                     value={nama}
                     onChangeText={setNama}
                     accessibilityLabel="Nama makanan"
                     style={{
                       ...typography.body,
-                      color: colors.text,
-                      backgroundColor: colors.surfaceSunken,
+                      color: colors.teks,
+                      backgroundColor: colors.permukaanCekung,
                       borderRadius: radius.md,
                       borderWidth: 1,
-                      borderColor: colors.borderKuat,
+                      borderColor: colors.garisKontrol,
                       paddingHorizontal: spacing.md,
                       paddingVertical: spacing.md,
                     }}
@@ -176,7 +176,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                   <View style={{ flex: 1 }} />
                 </View>
 
-                <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                   Angka di atas adalah tebakan dari foto. Periksa dan koreksi bila perlu —
                   entri ini akan disimpan bertanda estimasi.
                 </Text>
@@ -206,15 +206,15 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
           borderRadius: radius.lg,
           borderWidth: 2,
           borderStyle: 'dashed',
-          borderColor: colors.border,
-          backgroundColor: colors.surfaceSunken,
+          borderColor: colors.garis,
+          backgroundColor: colors.permukaanCekung,
           alignItems: 'center',
           justifyContent: 'center',
           gap: spacing.sm,
         }}
       >
-        <Text style={{ ...typography.display, color: colors.textFaint }}>📷</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.display, color: colors.teksSamar }}>📷</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Belum ada foto
         </Text>
       </View>
@@ -222,7 +222,7 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
       <TombolUtama label="Ambil foto" aktif onPress={onMulai} />
       <TombolSekunder label="Pilih dari galeri" onPress={onMulai} />
 
-      <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
         Fase 1 memakai hasil analisis tiruan — kamera & AI asli dipasang di Fase 4.
       </Text>
     </View>
@@ -233,9 +233,9 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
 function TahapMenganalisis() {
   return (
     <View style={{ height: 240, alignItems: 'center', justifyContent: 'center', gap: spacing.lg }}>
-      <ActivityIndicator size="large" color={colors.amber} />
-      <Text style={{ ...typography.body, color: colors.textMuted }}>Menganalisis foto…</Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
+      <ActivityIndicator size="large" color={colors.aksen.teks} />
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>Menganalisis foto…</Text>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
         Hasilnya berupa estimasi dan masih bisa Anda koreksi.
       </Text>
     </View>
@@ -257,7 +257,7 @@ function TombolUtama({
       disabled={!aktif}
       onPress={onPress}
       style={({ pressed }) => ({
-        backgroundColor: aktif ? colors.amber : colors.surfaceSunken,
+        backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
         borderRadius: radius.lg,
         minHeight: TAP_MIN,
         justifyContent: 'center',
@@ -267,7 +267,7 @@ function TombolUtama({
       })}
     >
       <Text
-        style={{ ...typography.bodyTebal, color: aktif ? colors.diAtasIsian : colors.textFaint }}
+        style={{ ...typography.bodyTebal, color: aktif ? colors.diAtasIsian : colors.teksSamar }}
       >
         {label}
       </Text>
@@ -283,8 +283,8 @@ function TombolSekunder({ label, onPress }: { label: string; onPress: () => void
       style={({ pressed }) => ({
         borderRadius: radius.lg,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
-        backgroundColor: colors.surfaceSunken,
+        borderColor: colors.garisKontrol,
+        backgroundColor: colors.permukaanCekung,
         minHeight: TAP_MIN,
         justifyContent: 'center',
         paddingVertical: spacing.lg,
@@ -292,7 +292,7 @@ function TombolSekunder({ label, onPress }: { label: string; onPress: () => void
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ ...typography.bodySedang, color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.bodySedang, color: colors.teks }}>{label}</Text>
     </Pressable>
   );
 }
@@ -304,7 +304,7 @@ function TombolTeks({ label, onPress }: { label: string; onPress: () => void }) 
       onPress={onPress}
       style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Text style={{ ...typography.label, color: colors.textFaint }}>{label}</Text>
+      <Text style={{ ...typography.label, color: colors.teksSamar }}>{label}</Text>
     </Pressable>
   );
 }

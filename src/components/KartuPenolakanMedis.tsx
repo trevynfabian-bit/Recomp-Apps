@@ -27,30 +27,30 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
         gap: spacing.md,
         padding: spacing.lg,
         borderRadius: radius.lg,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.amber + '55',
+        borderColor: colors.aksen.isian + '55',
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Text style={{ ...typography.body, color: colors.amber }}>▲</Text>
-        <Text style={{ ...typography.bodyTebal, color: colors.amber, flex: 1 }}>
+        <Text style={{ ...typography.body, color: colors.aksen.teks }}>▲</Text>
+        <Text style={{ ...typography.bodyTebal, color: colors.aksen.teks, flex: 1 }}>
           {penolakan.judul}
         </Text>
       </View>
 
-      <Text style={{ ...typography.body, color: colors.text }}>
+      <Text style={{ ...typography.body, color: colors.teks }}>
         {penolakan.alasan}
       </Text>
 
       <View style={{ gap: spacing.sm }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Yang masih bisa saya bantu
         </Text>
         {penolakan.bisaDibantu.map((b) => (
           <View key={b} style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>·</Text>
-            <Text style={{ ...typography.caption, color: colors.textMuted, flex: 1 }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>·</Text>
+            <Text style={{ ...typography.caption, color: colors.teksRedup, flex: 1 }}>
               {b}
             </Text>
           </View>
@@ -59,7 +59,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
 
       {/* Kata pemicunya disebut: kalau penolakannya salah tangkap, pengguna
           perlu tahu kata mana yang harus ia hindari saat menulis ulang. */}
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         Ditolak karena pertanyaan Anda memuat kata “{penolakan.pemicu}”. Kalau maksud Anda bukan
         soal obat atau kondisi medis, coba tulis ulang tanpa kata itu.
       </Text>

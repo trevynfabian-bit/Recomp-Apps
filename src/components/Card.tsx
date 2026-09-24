@@ -14,10 +14,10 @@ export function Card({ children, style, flat = false }: Props) {
     <View
       style={[
         {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.permukaan,
           borderRadius: radius.lg,
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: colors.garis,
           padding: flat ? 0 : spacing.lg,
           ...BAYANGAN_KARTU,
         },

@@ -170,7 +170,7 @@ export default function WidgetPengingatScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -190,17 +190,17 @@ export default function WidgetPengingatScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
-        <Text style={{ ...typography.title, color: colors.text }}>Widget & pengingat</Text>
+        <Text style={{ ...typography.title, color: colors.teks }}>Widget & pengingat</Text>
       </View>
 
       {/* --- Notifikasi per jenis ------------------------------------------ */}
@@ -235,8 +235,8 @@ export default function WidgetPengingatScreen() {
                     opacity: pressed ? 0.6 : 1,
                   })}
                 >
-                  <Text style={{ ...typography.label, color: colors.textMuted }}>Jam</Text>
-                  <Text style={{ ...typography.label, color: colors.text }}>{ringkasJadwal(jadwal)} ›</Text>
+                  <Text style={{ ...typography.label, color: colors.teksRedup }}>Jam</Text>
+                  <Text style={{ ...typography.label, color: colors.teks }}>{ringkasJadwal(jadwal)} ›</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -246,8 +246,8 @@ export default function WidgetPengingatScreen() {
 
       {izin === 'ditolak' && aktif.length > 0 ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.label, color: colors.text }}>Notifikasi dimatikan di iPhone</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.label, color: colors.teks }}>Notifikasi dimatikan di iPhone</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Pengingat di atas baru terkirim setelah notifikasi untuk Recomp diizinkan di Pengaturan.
           </Text>
           <Pressable
@@ -258,7 +258,7 @@ export default function WidgetPengingatScreen() {
             }}
             style={({ pressed }) => ({ minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
           >
-            <Text style={{ ...typography.label, color: colors.aksenTeks.jade }}>Buka Pengaturan ›</Text>
+            <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>Buka Pengaturan ›</Text>
           </Pressable>
         </Card>
       ) : null}
@@ -275,7 +275,7 @@ export default function WidgetPengingatScreen() {
           </View>
         ) : (
           <Card>
-            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
               Tidak ada notifikasi yang dikirim. Widget layar kunci tetap diperbarui seperti biasa.
             </Text>
           </Card>
@@ -283,8 +283,8 @@ export default function WidgetPengingatScreen() {
       </View>
 
       <Card style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.label, color: colors.text }}>Nada selalu netral, tanpa angka</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text style={{ ...typography.label, color: colors.teks }}>Nada selalu netral, tanpa angka</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Tidak ada notifikasi &ldquo;melebihi target&rdquo; atau peringatan berwarna. Berat, kalori, dan
           ukuran tubuh juga tidak pernah ikut di notifikasi — layar kunci bisa dibaca orang lain. Angkanya
           dibaca di app, tanpa penilaian.
@@ -304,7 +304,7 @@ export default function WidgetPengingatScreen() {
             onUbah={(v) => ubah({ widgetTampilkanAngka: v })}
             tanpaPadding
           />
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Memasang widget: tahan layar kunci › Sesuaikan › Layar Kunci › ketuk area widget › pilih Recomp.
           </Text>
         </Card>
@@ -343,8 +343,8 @@ function BarisSakelar({
       }}
     >
       <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+        <Text style={{ ...typography.bodySedang, color: colors.teks }}>{judul}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
           {keterangan}
         </Text>
       </View>
@@ -355,8 +355,8 @@ function BarisSakelar({
           ketukRingan();
           onUbah(v);
         }}
-        trackColor={{ true: colors.jade, false: colors.surfaceSunken }}
-        thumbColor={colors.text}
+        trackColor={{ true: colors.status.sukses.isian, false: colors.permukaanCekung }}
+        thumbColor={colors.teks}
       />
     </View>
   );
@@ -378,7 +378,7 @@ function PemilihSkenario({
 }) {
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         Pratinjau keadaan
       </Text>
       <ScrollView
@@ -407,12 +407,12 @@ function PemilihSkenario({
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
                 borderWidth: 1,
-                borderColor: aktif ? colors.borderKuat : colors.border,
-                backgroundColor: aktif ? colors.surfaceSunken : 'transparent',
+                borderColor: aktif ? colors.garisKontrol : colors.garis,
+                backgroundColor: aktif ? colors.permukaanCekung : 'transparent',
                 opacity: pressed ? 0.7 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
+              <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>
                 {LABEL_SKENARIO_WIDGET[s]}
               </Text>
             </Pressable>
@@ -431,22 +431,22 @@ function PratinjauNotif({ waktu, judul, isi }: { waktu: string; judul: string; i
       style={{
         padding: spacing.md,
         borderRadius: radius.lg,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.garis,
         gap: spacing.xxs,
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>Recomp</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{waktu}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>Recomp</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{waktu}</Text>
       </View>
-      <Text style={{ ...typography.label, color: colors.text }}>{judul}</Text>
-      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{isi}</Text>
+      <Text style={{ ...typography.label, color: colors.teks }}>{judul}</Text>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{isi}</Text>
     </View>
   );
 }
 
 function Pemisah() {
-  return <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: spacing.lg }} />;
+  return <View style={{ height: 1, backgroundColor: colors.garis, marginHorizontal: spacing.lg }} />;
 }

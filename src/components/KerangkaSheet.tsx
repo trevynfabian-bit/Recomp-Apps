@@ -35,16 +35,16 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
         <View
           style={{
             maxHeight: '88%',
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
           }}
         >
           <View style={{ alignItems: 'center', paddingVertical: spacing.md, gap: spacing.sm }}>
-            <View style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.border }} />
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <View style={{ width: ukuran.pegangan.lebar, height: ukuran.pegangan.tinggi, borderRadius: radius.pill, backgroundColor: colors.garis }} />
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               {label}
             </Text>
           </View>

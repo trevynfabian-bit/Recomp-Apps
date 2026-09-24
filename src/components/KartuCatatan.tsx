@@ -69,12 +69,12 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
             <Text
               style={{
                 ...typography.body,
-                color: catatan ? colors.textMuted : colors.textFaint,
+                color: catatan ? colors.teksRedup : colors.teksSamar,
               }}
             >
               {catatan ?? 'Belum ada catatan untuk hari ini.'}
             </Text>
-            <Text style={{ ...typography.caption, color: colors.amber }}>
+            <Text style={{ ...typography.caption, color: colors.aksen.teks }}>
               {catatan ? 'Ketuk untuk ubah' : 'Ketuk untuk menulis'}
             </Text>
           </View>
@@ -94,29 +94,29 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
           autoFocus
           maxLength={MAKS_KARAKTER}
           placeholder="Tidur, energi, cedera, atau apa pun yang menjelaskan angka hari ini…"
-          placeholderTextColor={colors.textFaint}
+          placeholderTextColor={colors.teksSamar}
           accessibilityLabel="Catatan hari ini"
           style={{
             ...typography.body,
-            color: colors.text,
+            color: colors.teks,
             minHeight: 96,
             textAlignVertical: 'top',
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
             borderRadius: radius.md,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             padding: spacing.md,
           }}
         />
 
         {galat ? (
-          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral }}>
+          <Text style={{ ...typography.caption, color: colors.status.bahaya.teks }}>
             {galat}
           </Text>
         ) : null}
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {draf.length} / {MAKS_KARAKTER}
           </Text>
 
@@ -133,7 +133,7 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
                 opacity: pressed ? 0.6 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: colors.textFaint }}>Batal</Text>
+              <Text style={{ ...typography.label, color: colors.teksSamar }}>Batal</Text>
             </Pressable>
 
             <Pressable
@@ -145,14 +145,14 @@ export function KartuCatatan({ catatan, onSimpan }: Props) {
                 justifyContent: 'center',
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
-                backgroundColor: menyimpan ? colors.surfaceSunken : colors.amber,
+                backgroundColor: menyimpan ? colors.permukaanCekung : colors.aksen.isian,
                 opacity: pressed ? 0.8 : 1,
               })}
             >
               <Text
                 style={{
                   ...typography.label,
-                  color: menyimpan ? colors.textFaint : colors.diAtasIsian,
+                  color: menyimpan ? colors.teksSamar : colors.diAtasIsian,
                 }}
               >
                 {menyimpan ? 'Menyimpan…' : 'Simpan'}

@@ -58,11 +58,11 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
               {/* Huruf biasa tanpa renggang: "Maintenance" dalam huruf kapital terpotong di lebar ponsel. */}
               <Text
                 numberOfLines={1}
-                style={{ ...typography.caption, letterSpacing: 0, fontWeight: '700', color: f === faseAktif ? colors.text : colors.textMuted }}
+                style={{ ...typography.caption, letterSpacing: 0, fontWeight: '700', color: f === faseAktif ? colors.teks : colors.teksRedup }}
               >
                 {f}
               </Text>
-              <Text style={{ ...typography.caption, fontWeight: '500', color: colors.amber, minHeight: 14 }}>
+              <Text style={{ ...typography.caption, fontWeight: '500', color: colors.aksen.teks, minHeight: 14 }}>
                 {f === faseAktif ? 'aktif' : ''}
               </Text>
             </Pressable>
@@ -81,12 +81,12 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
                 paddingHorizontal: spacing.md,
                 paddingVertical: spacing.sm,
                 borderTopWidth: 1,
-                borderTopColor: colors.border,
+                borderTopColor: colors.garis,
               }}
             >
               <View style={{ width: LEBAR_NAMA, gap: spacing.xxs }}>
-                <Text style={{ ...typography.label, color: colors.text }}>{b.nama}</Text>
-                {hariIni ? <Text style={{ ...typography.caption, fontWeight: '500', color: colors.amber }}>hari ini</Text> : null}
+                <Text style={{ ...typography.label, color: colors.teks }}>{b.nama}</Text>
+                {hariIni ? <Text style={{ ...typography.caption, fontWeight: '500', color: colors.aksen.teks }}>hari ini</Text> : null}
               </View>
               {b.sel.map((s) => {
                 const aktif = s.fase === faseAktif;
@@ -112,21 +112,21 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
                       justifyContent: 'center',
                       paddingVertical: spacing.xs,
                       borderRadius: radius.sm,
-                      backgroundColor: aktif ? colors.surfaceSunken : 'transparent',
+                      backgroundColor: aktif ? colors.permukaanCekung : 'transparent',
                       opacity: pressed ? 0.6 : 1,
                     })}
                   >
                     {s.target ? (
                       <>
-                        <Text style={{ ...typography.label, fontWeight: '700', color: colors.text }}>
+                        <Text style={{ ...typography.label, fontWeight: '700', color: colors.teks }}>
                           {formatAngka(s.target.target_kalori)}
                         </Text>
-                        <Text style={{ ...typography.caption, fontWeight: '500', color: colors.textFaint }}>
+                        <Text style={{ ...typography.caption, fontWeight: '500', color: colors.teksSamar }}>
                           P {formatMakro(s.target.target_protein_g)}
                         </Text>
                       </>
                     ) : (
-                      <Text style={{ ...typography.label, color: colors.textFaint }}>–</Text>
+                      <Text style={{ ...typography.label, color: colors.teksSamar }}>–</Text>
                     )}
                   </Pressable>
                 );
@@ -136,15 +136,15 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
         })}
       </Card>
 
-      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
         Angka atas: kalori (kcal). P: protein (g). Ketuk nama fase untuk melihat rinciannya, atau angka untuk menyuntingnya.
         {baris.some((b) => b.sel.some((s) => s.target === null)) ? ' Tanda – berarti target belum diisi.' : ''}
       </Text>
 
       {janggal.length > 0 ? (
         <View accessibilityLiveRegion="polite" style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-          <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.textMuted} />
-          <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
+          <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.teksRedup} />
+          <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>
             {janggal.map((j) => j.kalimat).join(' ')} Periksa lagi bila tidak disengaja.
           </Text>
         </View>

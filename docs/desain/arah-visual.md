@@ -47,9 +47,9 @@ makna.
 | Status | Isian | Teks kecil | Arti | Contoh saat ini |
 |---|---|---|---|---|
 | `sukses` | jade `#1B998B` | `#1DA697` | on-track, tersambung, tersimpan | `IndikatorSinkron` segar, fase aktif |
-| `peringatan` | amber `#F0A202` | `#F0A202` | mendekati batas, perlu perhatian | `BannerBatasPinggang` "mendekati" |
+| `peringatan` | amber `#F0A202` | `#F0A202` | mendekati batas, perlu perhatian, angka perkiraan | `BannerBatasPinggang` "mendekati", sumber terlambat, penanda estimasi, keyakinan sedang/rendah, arah berlawanan fase |
 | `bahaya` | coral `#E24E1B` | `#E97147` | batas terlampaui, galat, hapus | `BannerBatasPinggang` "lewat", `TombolUtama merusak` |
-| `info` | karbo `#7C6AE8` | `#9587EC` | keterangan netral yang perlu dibedakan dari teks biasa | penanda estimasi, catatan sumber |
+| `info` | karbo `#7C6AE8` | `#9587EC` | keterangan netral yang perlu dibedakan dari teks biasa | belum dipakai di luar makro karbo; disiapkan untuk catatan netral |
 
 `peringatan` sengaja berbagi hue dengan `aksen`. Membedakannya dengan warna
 keempat (kuning) akan menambah suara di layar gelap yang sudah punya tiga

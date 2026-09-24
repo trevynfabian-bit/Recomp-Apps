@@ -41,7 +41,7 @@ export function TombolUtama({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: radius.md,
-        backgroundColor: merusak ? colors.coral : colors.amber,
+        backgroundColor: merusak ? colors.status.bahaya.isian : colors.aksen.isian,
         opacity: nonaktif ? 0.45 : pressed ? 0.8 : 1,
       })}
     >
@@ -76,11 +76,11 @@ export function TombolBertepi({ label, onPress, aksesLabel, nonaktif = false }: 
         justifyContent: 'center',
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
+        borderColor: colors.garisKontrol,
         opacity: nonaktif ? 0.45 : pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.bodySedang, color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.bodySedang, color: colors.teks }}>{label}</Text>
     </Pressable>
   );
 }

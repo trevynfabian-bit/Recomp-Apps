@@ -51,24 +51,24 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
         })}
       >
         <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>{sesi.nama}</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{sesi.nama}</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             {formatJam(sesi.mulai)} · {sesi.durasi_menit} menit · {r.jumlahLatihan} latihan · {r.jumlahSet} set
           </Text>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.text }}>
+          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
             {formatAngka(r.volumeKg)} kg
           </Text>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>volume</Text>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>volume</Text>
         </View>
-        <Text style={{ ...typography.body, color: colors.textFaint }} accessibilityElementsHidden>
+        <Text style={{ ...typography.body, color: colors.teksSamar }} accessibilityElementsHidden>
           {terbuka ? '⌃' : '⌄'}
         </Text>
       </Pressable>
 
       {terbuka ? (
-        <View style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+        <View style={{ borderTopWidth: 1, borderTopColor: colors.garis }}>
           {r.latihan.map((l, i) => (
             <View
               key={`${l.latihan}-${i}`}
@@ -83,16 +83,16 @@ export function KartuSesiLatihan({ sesi, terbuka, onAlih }: Props) {
                 paddingHorizontal: spacing.lg,
                 paddingVertical: spacing.md,
                 borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.border,
+                borderTopColor: colors.garis,
               }}
             >
               <View style={{ flex: 1, gap: spacing.xxs }}>
-                <Text style={{ ...typography.label, color: colors.text }}>{l.latihan}</Text>
-                <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{l.set}</Text>
+                <Text style={{ ...typography.label, color: colors.teks }}>{l.latihan}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{l.set}</Text>
               </View>
               {l.e1rmKg !== null ? (
                 <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: colors.text }}>≈ {formatBeban(l.e1rmKg)}</Text>
+                  <Text style={{ ...typography.label, color: colors.teks }}>≈ {formatBeban(l.e1rmKg)}</Text>
                   <Text style={{ ...typography.caption, color: estimasi.warna }}>e1RM · estimasi</Text>
                 </View>
               ) : null}

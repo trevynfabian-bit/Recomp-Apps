@@ -49,19 +49,19 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
 
   return (
     <KerangkaSheet terbuka onTutup={status === 'memproses' ? null : onTutup} label="Hapus akun">
-      <Text style={{ ...typography.title, color: colors.text }}>Hapus akun & semua data?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.title, color: colors.teks }}>Hapus akun & semua data?</Text>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Profil, catatan harian, makanan, ukuran, latihan, data dari perangkat, percakapan coach, dan hasil lab
         dihapus dari server. Tidak bisa dibatalkan.
       </Text>
-      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
         Izin Apple Health di iPhone dan kunci API di Hevy tetap ada di tempatnya sampai Anda mencabutnya di sana.
       </Text>
 
       <TombolBertepi label="Ekspor data dulu" onPress={onEksporDulu} nonaktif={status === 'memproses'} />
 
       <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.label, color: colors.textMuted }}>
+        <Text style={{ ...typography.label, color: colors.teksRedup }}>
           Ketik &ldquo;{KATA_KONFIRMASI_HAPUS}&rdquo; untuk melanjutkan
         </Text>
         <TextInput
@@ -72,22 +72,22 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
           autoCorrect={false}
           accessibilityLabel={`Ketik ${KATA_KONFIRMASI_HAPUS} untuk melanjutkan`}
           placeholder={KATA_KONFIRMASI_HAPUS}
-          placeholderTextColor={colors.textFaint}
+          placeholderTextColor={colors.teksSamar}
           style={{
             ...typography.body,
-            color: colors.text,
+            color: colors.teks,
             paddingHorizontal: spacing.md,
             paddingVertical: spacing.md,
             borderRadius: radius.md,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
-            backgroundColor: colors.surfaceSunken,
+            borderColor: colors.garisKontrol,
+            backgroundColor: colors.permukaanCekung,
           }}
         />
       </View>
 
       {status === 'gagal' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
           Akun belum terhapus. Periksa koneksi lalu coba lagi.
         </Text>
       ) : null}

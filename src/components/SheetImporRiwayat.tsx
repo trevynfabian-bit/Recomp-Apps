@@ -178,7 +178,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       onTutup={langkah.jenis === 'proses' ? null : onTutup}
       label="Impor riwayat"
     >
-      <Text style={{ ...typography.title, color: colors.text }}>{JUDUL[sumber]}</Text>
+      <Text style={{ ...typography.title, color: colors.teks }}>{JUDUL[sumber]}</Text>
 
       {langkah.jenis === 'masukan' ? (
         sumber === 'apple_health' ? (
@@ -210,11 +210,11 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                       justifyContent: 'center',
                       borderRadius: radius.md,
                       borderWidth: 1,
-                      borderColor: aktif ? colors.amber : colors.borderKuat,
-                      backgroundColor: aktif ? colors.amber + '22' : 'transparent',
+                      borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                      backgroundColor: aktif ? colors.aksen.isian + '22' : 'transparent',
                     }}
                   >
-                    <Text style={{ ...typography.label, color: aktif ? colors.amber : colors.text }}>{r.label}</Text>
+                    <Text style={{ ...typography.label, color: aktif ? colors.aksen.teks : colors.teks }}>{r.label}</Text>
                   </Pressable>
                 );
               })}
@@ -239,7 +239,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               }}
               multiline
               placeholder="Tempel isi CSV di sini"
-              placeholderTextColor={colors.textFaint}
+              placeholderTextColor={colors.teksSamar}
               accessibilityLabel="Isi berkas CSV"
               autoCapitalize="none"
               autoCorrect={false}
@@ -250,16 +250,16 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                 padding: spacing.md,
                 borderRadius: radius.md,
                 borderWidth: 1,
-                borderColor: galat ? colors.coral : colors.borderKuat,
-                backgroundColor: colors.surfaceSunken,
-                color: colors.text,
+                borderColor: galat ? colors.status.bahaya.isian : colors.garisKontrol,
+                backgroundColor: colors.permukaanCekung,
+                color: colors.teks,
                 fontFamily: 'Menlo',
                 fontSize: 12,
                 textAlignVertical: 'top',
               }}
             />
             {galat ? (
-              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                 {galat}
               </Text>
             ) : null}
@@ -273,7 +273,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               hitSlop={spacing.md}
               style={{ alignSelf: 'flex-start' }}
             >
-              <Text style={{ ...typography.label, color: colors.amber }}>Pakai berkas contoh</Text>
+              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Pakai berkas contoh</Text>
             </Pressable>
             <View style={{ gap: spacing.sm }}>
               <TombolUtama label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
@@ -286,10 +286,10 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       {langkah.jenis === 'pratinjau' ? (
         <>
           <View style={{ gap: spacing.xs }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Akan diimpor
             </Text>
-            <Text style={{ ...typography.bodyTebal, color: colors.text }}>{langkah.p.ringkas}</Text>
+            <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{langkah.p.ringkas}</Text>
           </View>
           {langkah.p.catatan.map((c) => (
             <Teks key={c}>{c}</Teks>
@@ -297,7 +297,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           {langkah.p.dilewati.length > 0 ? <DaftarDilewati dilewati={langkah.p.dilewati} /> : null}
           <Teks redup>Mengimpor ulang tidak menggandakan data, dan tidak menimpa yang sudah tercatat di app.</Teks>
           {galat ? (
-            <Text accessibilityRole="alert" style={{ ...typography.labelBiasa, color: colors.text }}>
+            <Text accessibilityRole="alert" style={{ ...typography.labelBiasa, color: colors.teks }}>
               {galat}
             </Text>
           ) : null}
@@ -325,17 +325,17 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           <View
             accessibilityRole="progressbar"
             accessibilityValue={{ min: 0, max: langkah.p.jumlah, now: langkah.selesai }}
-            style={{ height: ukuran.trackTebal, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken, overflow: 'hidden' }}
+            style={{ height: ukuran.trackTebal, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung, overflow: 'hidden' }}
           >
             <View
               style={{
                 width: `${langkah.p.jumlah === 0 ? 100 : (langkah.selesai / langkah.p.jumlah) * 100}%`,
                 height: '100%',
-                backgroundColor: colors.amber,
+                backgroundColor: colors.aksen.isian,
               }}
             />
           </View>
-          <Text style={{ ...typography.label, color: colors.textMuted }}>
+          <Text style={{ ...typography.label, color: colors.teksRedup }}>
             Mengimpor… {formatAngka(langkah.selesai)} dari {formatAngka(langkah.p.jumlah)} {langkah.p.satuan}
           </Text>
         </View>
@@ -345,7 +345,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
         <>
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.bodyTebal, color: colors.aksenTeks.jade }}
+            style={{ ...typography.bodyTebal, color: colors.status.sukses.teks }}
           >
             ✓ {formatAngka(langkah.p.jumlah)} {langkah.p.satuan} diimpor
           </Text>
@@ -369,19 +369,19 @@ function DaftarDilewati({ dilewati }: { dilewati: BarisDilewati[] }) {
         gap: spacing.xs,
         padding: spacing.md,
         borderRadius: radius.md,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
       }}
     >
-      <Text style={{ ...typography.label, color: colors.amber }}>
+      <Text style={{ ...typography.label, color: colors.aksen.teks }}>
         {dilewati.length} baris dilewati
       </Text>
       {tampil.map((d) => (
-        <Text key={`${d.baris}-${d.alasan}`} style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text key={`${d.baris}-${d.alasan}`} style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Baris {d.baris} — {d.alasan}
         </Text>
       ))}
       {sisa > 0 ? (
-        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>dan {sisa} lainnya</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>dan {sisa} lainnya</Text>
       ) : null}
     </View>
   );
@@ -392,7 +392,7 @@ function Teks({ children, redup = false }: { children: React.ReactNode; redup?: 
     <Text
       style={{
         ...typography.labelBiasa,
-        color: redup ? colors.textFaint : colors.textMuted,
+        color: redup ? colors.teksSamar : colors.teksRedup,
       }}
     >
       {children}

@@ -22,19 +22,19 @@ const usulanTipografi = typography;
 /** Palet semantik bab 1: peran → warna isian & warna teks kecil. */
 /** Dibaca saat render: `colors` berganti isi saat skema berganti. */
 const peran = (): { nama: string; isian: string; teks: string; arti: string }[] => [
-  { nama: 'aksen', isian: colors.amber, teks: colors.amber, arti: 'CTA, angka hero, tab aktif' },
-  { nama: 'sukses', isian: colors.jade, teks: colors.aksenTeks.jade, arti: 'on-track, tersambung' },
-  { nama: 'peringatan', isian: colors.amber, teks: colors.amber, arti: 'mendekati batas' },
-  { nama: 'bahaya', isian: colors.coral, teks: colors.aksenTeks.coral, arti: 'lewat batas, hapus' },
+  { nama: 'aksen', isian: colors.aksen.isian, teks: colors.aksen.isian, arti: 'CTA, angka hero, tab aktif' },
+  { nama: 'sukses', isian: colors.status.sukses.isian, teks: colors.status.sukses.teks, arti: 'on-track, tersambung' },
+  { nama: 'peringatan', isian: colors.aksen.isian, teks: colors.aksen.isian, arti: 'mendekati batas' },
+  { nama: 'bahaya', isian: colors.status.bahaya.isian, teks: colors.status.bahaya.teks, arti: 'lewat batas, hapus' },
   { nama: 'info', isian: colors.macro.karbo, teks: colors.macroTeks.karbo, arti: 'estimasi, keterangan' },
 ];
 
 const netral = (): { nama: string; warna: string }[] => [
-  { nama: 'latar', warna: colors.bg },
-  { nama: 'permukaan', warna: colors.surface },
-  { nama: 'permukaanCekung', warna: colors.surfaceSunken },
-  { nama: 'garis', warna: colors.border },
-  { nama: 'garisKontrol', warna: colors.borderKuat },
+  { nama: 'latar', warna: colors.latar },
+  { nama: 'permukaan', warna: colors.permukaan },
+  { nama: 'permukaanCekung', warna: colors.permukaanCekung },
+  { nama: 'garis', warna: colors.garis },
+  { nama: 'garisKontrol', warna: colors.garisKontrol },
 ];
 
 const JARAK = Object.entries(spacing).map(([nama, nilai]) => ({ nama, nilai }));
@@ -50,7 +50,7 @@ export default function ArahVisualScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -70,21 +70,21 @@ export default function ArahVisualScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text accessibilityRole="header" style={{ ...usulanTipografi.title, color: colors.text }}>
+          <Text accessibilityRole="header" style={{ ...usulanTipografi.title, color: colors.teks }}>
             Arah visual
           </Text>
-          <Text style={{ ...usulanTipografi.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...usulanTipografi.labelBiasa, color: colors.teksSamar }}>
             Layar acuan · data tiruan
           </Text>
         </View>
@@ -113,7 +113,7 @@ export default function ArahVisualScreen() {
               <View style={{ width: 32, height: 32, borderRadius: radius.md, backgroundColor: p.isian }} />
               <View style={{ flex: 1, gap: spacing.xxs }}>
                 <Text style={{ ...usulanTipografi.bodySedang, color: p.teks }}>{p.nama}</Text>
-                <Text style={{ ...usulanTipografi.labelBiasa, color: colors.textFaint }}>{p.arti}</Text>
+                <Text style={{ ...usulanTipografi.labelBiasa, color: colors.teksSamar }}>{p.arti}</Text>
               </View>
               <Pill diKartu label={p.nama} warna={p.teks} />
             </View>
@@ -135,31 +135,31 @@ export default function ArahVisualScreen() {
                   borderRadius: radius.md,
                   backgroundColor: n.warna,
                   borderWidth: 1,
-                  borderColor: colors.border,
+                  borderColor: colors.garis,
                 }}
               />
             ))}
           </View>
-          <Text style={{ ...usulanTipografi.body, color: colors.text }}>teks — isi utama</Text>
-          <Text style={{ ...usulanTipografi.body, color: colors.textMuted }}>teksRedup — pendukung</Text>
-          <Text style={{ ...usulanTipografi.body, color: colors.textFaint }}>teksSamar — label & unit</Text>
+          <Text style={{ ...usulanTipografi.body, color: colors.teks }}>teks — isi utama</Text>
+          <Text style={{ ...usulanTipografi.body, color: colors.teksRedup }}>teksRedup — pendukung</Text>
+          <Text style={{ ...usulanTipografi.body, color: colors.teksSamar }}>teksSamar — label & unit</Text>
         </Card>
       </View>
 
       <View>
         <SectionHeader judul="Tipografi" aksi="ukuran / tinggi baris" />
         <Card style={{ gap: spacing.md }}>
-          <Text style={{ ...usulanTipografi.display, color: colors.text }}>Display 34/40</Text>
-          <Text style={{ ...usulanTipografi.title, color: colors.text }}>Title 20/26</Text>
-          <Text style={{ ...usulanTipografi.bodyTebal, color: colors.text }}>Body tebal 16/24 · 700</Text>
-          <Text style={{ ...usulanTipografi.bodySedang, color: colors.text }}>Body sedang 16/24 · 600</Text>
-          <Text style={{ ...usulanTipografi.body, color: colors.text }}>Body 16/24 · 500</Text>
-          <Text style={{ ...usulanTipografi.label, color: colors.textMuted }}>Label 13/19 · 600</Text>
-          <Text style={{ ...usulanTipografi.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...usulanTipografi.display, color: colors.teks }}>Display 34/40</Text>
+          <Text style={{ ...usulanTipografi.title, color: colors.teks }}>Title 20/26</Text>
+          <Text style={{ ...usulanTipografi.bodyTebal, color: colors.teks }}>Body tebal 16/24 · 700</Text>
+          <Text style={{ ...usulanTipografi.bodySedang, color: colors.teks }}>Body sedang 16/24 · 600</Text>
+          <Text style={{ ...usulanTipografi.body, color: colors.teks }}>Body 16/24 · 500</Text>
+          <Text style={{ ...usulanTipografi.label, color: colors.teksRedup }}>Label 13/19 · 600</Text>
+          <Text style={{ ...usulanTipografi.labelBiasa, color: colors.teksRedup }}>
             Label biasa 13/19 · 500 — teks keterangan dua baris atau lebih memakai gaya ini, dengan tinggi baris yang
             sudah dibawa tokennya.
           </Text>
-          <Text style={{ ...usulanTipografi.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+          <Text style={{ ...usulanTipografi.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
             Caption 11/16 · label grup
           </Text>
         </Card>
@@ -170,9 +170,9 @@ export default function ArahVisualScreen() {
         <Card style={{ gap: spacing.sm }}>
           {JARAK.map((j) => (
             <View key={j.nama} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Text style={{ ...usulanTipografi.label, color: colors.textMuted, width: 40 }}>{j.nama}</Text>
-              <View style={{ width: j.nilai * 4, height: 8, borderRadius: radius.pill, backgroundColor: colors.amber }} />
-              <Text style={{ ...usulanTipografi.caption, color: colors.textFaint }}>{j.nilai}</Text>
+              <Text style={{ ...usulanTipografi.label, color: colors.teksRedup, width: 40 }}>{j.nama}</Text>
+              <View style={{ width: j.nilai * 4, height: 8, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }} />
+              <Text style={{ ...usulanTipografi.caption, color: colors.teksSamar }}>{j.nilai}</Text>
             </View>
           ))}
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
@@ -183,14 +183,14 @@ export default function ArahVisualScreen() {
                   flex: 1,
                   height: 48,
                   borderRadius: radius[r],
-                  backgroundColor: colors.surfaceSunken,
+                  backgroundColor: colors.permukaanCekung,
                   borderWidth: 1,
-                  borderColor: colors.borderKuat,
+                  borderColor: colors.garisKontrol,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <Text style={{ ...usulanTipografi.caption, color: colors.textFaint }}>{r}</Text>
+                <Text style={{ ...usulanTipografi.caption, color: colors.teksSamar }}>{r}</Text>
               </View>
             ))}
           </View>

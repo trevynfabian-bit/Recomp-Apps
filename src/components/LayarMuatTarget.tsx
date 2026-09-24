@@ -23,7 +23,7 @@ export function LayarMuatTarget({ pesanGagal, onCobaLagi, onKeluar }: Props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.bg,
+        backgroundColor: colors.latar,
         justifyContent: 'center',
         paddingTop: insets.top + spacing.xl,
         paddingBottom: insets.bottom + spacing.xl,
@@ -33,16 +33,16 @@ export function LayarMuatTarget({ pesanGagal, onCobaLagi, onKeluar }: Props) {
     >
       {pesanGagal === null ? (
         <View accessibilityLiveRegion="polite" style={{ alignItems: 'center', gap: spacing.md }}>
-          <ActivityIndicator color={colors.amber} />
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>Memuat target harian…</Text>
+          <ActivityIndicator color={colors.aksen.teks} />
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>Memuat target harian…</Text>
         </View>
       ) : (
         <>
           <View accessibilityLiveRegion="polite" style={{ gap: spacing.sm }}>
-            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+            <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
               Target harian belum termuat
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted }}>{pesanGagal}</Text>
+            <Text style={{ ...typography.body, color: colors.teksRedup }}>{pesanGagal}</Text>
           </View>
           <View style={{ gap: spacing.sm }}>
             <TombolUtama label="Coba lagi" onPress={onCobaLagi} />

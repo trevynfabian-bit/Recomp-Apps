@@ -53,8 +53,8 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
 
   return (
     <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Pengingat timbang">
-      <Text style={{ ...typography.title, color: colors.text }}>Jam pengingat</Text>
-      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+      <Text style={{ ...typography.title, color: colors.teks }}>Jam pengingat</Text>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
         Pengingat hanya muncul di pagi yang belum ada timbangannya. Pilih jam sedikit sesudah Anda
         biasanya timbang.
       </Text>
@@ -65,10 +65,10 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
             gap: spacing.sm,
             padding: spacing.md,
             borderRadius: radius.md,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
           }}
         >
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Biasanya Anda timbang sekitar {formatJamMenit(saran.kebiasaanMenit)} ({saran.dasar} pagi terakhir).
           </Text>
           <Pressable
@@ -81,7 +81,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
             hitSlop={spacing.md}
             style={{ alignSelf: 'flex-start' }}
           >
-            <Text style={{ ...typography.label, color: colors.amber }}>Pakai {formatJamMenit(saran.saranMenit)}</Text>
+            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Pakai {formatJamMenit(saran.saranMenit)}</Text>
           </Pressable>
         </View>
       ) : null}
@@ -93,7 +93,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
       />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Text style={{ ...typography.body, color: colors.text, flex: 1 }}>Jam lain di akhir pekan</Text>
+        <Text style={{ ...typography.body, color: colors.teks, flex: 1 }}>Jam lain di akhir pekan</Text>
         <Switch
           accessibilityLabel="Jam lain di akhir pekan"
           value={bedaAkhirPekan}
@@ -104,8 +104,8 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
               akhirPekanMenit: v ? geserJamTimbang(d.hariKerjaMenit, GESER_AKHIR_PEKAN_MENIT) : null,
             }));
           }}
-          trackColor={{ true: colors.jade, false: colors.surfaceSunken }}
-          thumbColor={colors.text}
+          trackColor={{ true: colors.status.sukses.isian, false: colors.permukaanCekung }}
+          thumbColor={colors.teks}
         />
       </View>
 
@@ -117,7 +117,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
         />
       ) : null}
 
-      <Text style={{ ...typography.label, color: colors.textFaint }}>{ringkasJadwal(draf)}</Text>
+      <Text style={{ ...typography.label, color: colors.teksSamar }}>{ringkasJadwal(draf)}</Text>
 
       <View style={{ gap: spacing.sm }}>
         <TombolUtama
@@ -146,10 +146,10 @@ function PengaturJam({ label, menit, onUbah }: { label: string; menit: number; o
       onAccessibilityAction={(e) => geser(e.nativeEvent.actionName === 'increment' ? 1 : -1)}
       style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
     >
-      <Text style={{ ...typography.label, color: colors.textMuted }}>{label}</Text>
+      <Text style={{ ...typography.label, color: colors.teksRedup }}>{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <TombolGeser label="−" nonaktif={menit <= RENTANG_JAM_TIMBANG.min} onPress={() => geser(-1)} />
-        <Text style={{ ...typography.title, color: colors.text, minWidth: 72, textAlign: 'center' }}>{jam}</Text>
+        <Text style={{ ...typography.title, color: colors.teks, minWidth: 72, textAlign: 'center' }}>{jam}</Text>
         <TombolGeser label="+" nonaktif={menit >= RENTANG_JAM_TIMBANG.maks} onPress={() => geser(1)} />
       </View>
     </View>
@@ -172,13 +172,13 @@ function TombolGeser({ label, onPress, nonaktif }: { label: string; onPress: () 
         height: TAP_MIN,
         borderRadius: radius.pill,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
+        borderColor: colors.garisKontrol,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: nonaktif ? 0.35 : pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.title, color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.title, color: colors.teks }}>{label}</Text>
     </Pressable>
   );
 }

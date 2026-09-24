@@ -112,21 +112,21 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
     >
       {langkah.jenis === 'penjelasan' ? (
         <>
-          <Text style={{ ...typography.title, color: colors.text }}>Hubungkan {profil.nama}</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>Hubungkan {profil.nama}</Text>
 
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Yang dibaca
             </Text>
             {profil.membawa.map((m) => (
               <View key={m} style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-                <View style={{ width: 5, height: 5, borderRadius: radius.pill, backgroundColor: colors.textMuted }} />
-                <Text style={{ ...typography.body, color: colors.text }}>{kapital(m)}</Text>
+                <View style={{ width: 5, height: 5, borderRadius: radius.pill, backgroundColor: colors.teksRedup }} />
+                <Text style={{ ...typography.body, color: colors.teks }}>{kapital(m)}</Text>
               </View>
             ))}
           </View>
 
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {profil.caraHubungkan}
           </Text>
 
@@ -140,7 +140,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
                     if (galatKunci) setGalatKunci(null);
                   }}
                   placeholder="Tempel kunci API Hevy"
-                  placeholderTextColor={colors.textFaint}
+                  placeholderTextColor={colors.teksSamar}
                   accessibilityLabel="Kunci API Hevy"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -154,9 +154,9 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
                     paddingHorizontal: spacing.md,
                     borderRadius: radius.md,
                     borderWidth: 1,
-                    borderColor: galatKunci ? colors.coral : colors.borderKuat,
-                    backgroundColor: colors.surfaceSunken,
-                    color: colors.text,
+                    borderColor: galatKunci ? colors.status.bahaya.isian : colors.garisKontrol,
+                    backgroundColor: colors.permukaanCekung,
+                    color: colors.teks,
                     ...typography.body,
                   }}
                 />
@@ -166,20 +166,20 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
                   onPress={() => setTampilkanKunci((v) => !v)}
                   style={{ minHeight: TAP_MIN, minWidth: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
                 >
-                  <Text style={{ ...typography.label, color: colors.textMuted }}>
+                  <Text style={{ ...typography.label, color: colors.teksRedup }}>
                     {tampilkanKunci ? 'Sembunyikan' : 'Tampilkan'}
                   </Text>
                 </Pressable>
               </View>
               {galatKunci ? (
-                <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+                <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
                   {galatKunci}
                 </Text>
               ) : null}
             </View>
           ) : null}
 
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Data tersimpan di akun Anda dan hanya bisa dibaca akun Anda. Kalori dari beberapa
             perangkat tidak pernah dijumlahkan.
           </Text>
@@ -203,10 +203,10 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
 
       {langkah.jenis === 'proses' ? (
         <View style={{ alignItems: 'center', gap: spacing.lg, paddingVertical: spacing.xl }}>
-          <ActivityIndicator color={colors.amber} size="large" />
+          <ActivityIndicator color={colors.aksen.teks} size="large" />
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.body, color: colors.text, textAlign: 'center' }}
+            style={{ ...typography.body, color: colors.teks, textAlign: 'center' }}
           >
             {profil.otorisasi === 'healthkit'
               ? 'Menunggu izin dari Apple Health…'
@@ -227,29 +227,29 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
       {langkah.jenis === 'berhasil' ? (
         <>
           <View style={{ alignItems: 'center', gap: spacing.sm, paddingTop: spacing.md }}>
-            <Text style={{ fontSize: 40, color: colors.aksenTeks.jade }} accessibilityElementsHidden>
+            <Text style={{ fontSize: 40, color: colors.status.sukses.teks }} accessibilityElementsHidden>
               ✓
             </Text>
             <Text
               accessibilityLiveRegion="polite"
-              style={{ ...typography.title, color: colors.text, textAlign: 'center' }}
+              style={{ ...typography.title, color: colors.teks, textAlign: 'center' }}
             >
               {profil.nama} terhubung
             </Text>
           </View>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             {profil.mekanisme === 'webhook'
               ? `Data pertama masuk saat ada aktivitas baru di ${profil.nama}.`
               : 'Data pertama sedang ditarik. Statusnya terlihat di halaman Sumber data.'}
           </Text>
           {profil.otorisasi === 'healthkit' ? (
-            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
               iOS tidak memberi tahu app jenis data mana yang tidak Anda izinkan. Kalau salah satunya
               tidak pernah muncul, ubah izinnya di Pengaturan › Kesehatan › Akses Data & Perangkat.
             </Text>
           ) : null}
           {langkah.kunciSamar ? (
-            <Text style={{ ...typography.label, color: colors.textFaint }}>
+            <Text style={{ ...typography.label, color: colors.teksSamar }}>
               Kunci tersimpan: {langkah.kunciSamar}
             </Text>
           ) : null}
@@ -287,11 +287,11 @@ function GagalHubungkan({
     <>
       <Text
         accessibilityLiveRegion="polite"
-        style={{ ...typography.title, color: netral ? colors.text : colors.aksenTeks.coral }}
+        style={{ ...typography.title, color: netral ? colors.teks : colors.status.bahaya.teks }}
       >
         {pesan.judul}
       </Text>
-      <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
         {pesan.keterangan}
       </Text>
       <View style={{ gap: spacing.sm }}>

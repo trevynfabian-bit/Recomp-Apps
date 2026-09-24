@@ -38,12 +38,12 @@ export function PanelRingkasanMakro({ macros, jumlahEstimasi = 0 }: Props) {
           {jumlahEstimasi > 0 ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
               <PenandaSumber jenis="estimasi" />
-              <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>
                 Total di atas memuat {jumlahEstimasi} entri hasil perkiraan.
               </Text>
             </View>
           ) : null}
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Sat fat dihitung sebagai BATAS, bukan sasaran. Karbo sengaja tidak
             ditargetkan — hanya dicatat.
           </Text>
@@ -71,7 +71,7 @@ function SakelarMode({
       accessibilityRole="radiogroup"
       style={{
         flexDirection: 'row',
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
         borderRadius: radius.pill,
         padding: spacing.xs,
         gap: spacing.xs,
@@ -97,16 +97,16 @@ function SakelarMode({
               borderRadius: radius.pill,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: aktif ? colors.surface : 'transparent',
+              backgroundColor: aktif ? colors.permukaan : 'transparent',
               borderWidth: 1,
-              borderColor: aktif ? colors.border : 'transparent',
+              borderColor: aktif ? colors.garis : 'transparent',
               opacity: pressed ? 0.7 : 1,
             })}
           >
             <Text
               style={{
                 ...typography.label,
-                color: aktif ? colors.text : colors.textFaint,
+                color: aktif ? colors.teks : colors.teksSamar,
               }}
             >
               {o.label}

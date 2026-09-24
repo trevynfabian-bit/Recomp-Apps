@@ -63,15 +63,15 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
     const terbaru = [...riwayatFase].reverse().slice(0, 3);
     return (
       <KerangkaSheet terbuka onTutup={onTutup} label="Fase">
-        <Text style={{ ...typography.title, color: colors.text }}>Fase program</Text>
+        <Text style={{ ...typography.title, color: colors.teks }}>Fase program</Text>
         <PemilihFase terpilih={profil.fase_aktif} onPilih={setCalon} />
         <View style={{ gap: spacing.xs }}>
-          <Text style={{ ...typography.caption, color: colors.textMuted }}>RIWAYAT</Text>
+          <Text style={{ ...typography.caption, color: colors.teksRedup }}>RIWAYAT</Text>
           <View accessibilityRole="list" style={{ gap: spacing.xs }}>
             {terbaru.map((p) => (
               <View key={`${p.fase}-${p.mulai}`} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md }}>
-                <Text style={{ ...typography.label, color: p.selesai === null ? colors.text : colors.textMuted }}>{p.fase}</Text>
-                <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+                <Text style={{ ...typography.label, color: p.selesai === null ? colors.teks : colors.teksRedup }}>{p.fase}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
                   {p.selesai === null
                     ? `sejak ${tanggalRingkas(p.mulai)}`
                     : `${tanggalRingkas(p.mulai)} – ${tanggalRingkas(p.selesai)}`}
@@ -107,13 +107,13 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
 
   return (
     <KerangkaSheet terbuka onTutup={onTutup} label="Ganti fase">
-      <Text style={{ ...typography.title, color: colors.text }}>Ganti ke {calon}?</Text>
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.title, color: colors.teks }}>Ganti ke {calon}?</Text>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Mulai hari ini, {tanggalRingkas(tanggal)}. Hari yang sudah lewat tetap memakai target {profil.fase_aktif}.
       </Text>
 
       <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.caption, color: colors.textMuted }}>TARGET HARIAN</Text>
+        <Text style={{ ...typography.caption, color: colors.teksRedup }}>TARGET HARIAN</Text>
         <View accessibilityRole="list" style={{ gap: spacing.sm }}>
           {tipeHari.map((d) => {
             const lama = cariTarget(d.id, profil.fase_aktif);
@@ -125,8 +125,8 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
                 accessibilityLabel={`${d.nama}: ${kalori(lama)} menjadi ${kalori(baru)}, protein ${protein(lama)} menjadi ${protein(baru)}`}
                 style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md }}
               >
-                <Text style={{ ...typography.label, color: colors.text }}>{d.nama}</Text>
-                <Text style={{ ...typography.labelBiasa, color: colors.textMuted, textAlign: 'right' }}>
+                <Text style={{ ...typography.label, color: colors.teks }}>{d.nama}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup, textAlign: 'right' }}>
                   {lama || baru
                     ? `${lama ? formatAngka(lama.target_kalori) : '–'} → ${baru ? formatAngka(baru.target_kalori) : '–'} kcal · P ${lama ? formatMakro(lama.target_protein_g) : '–'} → ${baru ? formatMakro(baru.target_protein_g) : '–'} g`
                     : 'belum diisi'}
@@ -169,8 +169,8 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
 function Butir({ ikon, children }: { ikon: React.ComponentProps<typeof Ionicons>['name']; children: React.ReactNode }) {
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.textMuted} />
-      <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.textMuted }}>
+      <Ionicons name={ikon} size={ukuranIkon.sedang} color={colors.teksRedup} />
+      <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.teksRedup }}>
         {children}
       </Text>
     </View>

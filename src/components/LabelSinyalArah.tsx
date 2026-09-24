@@ -26,10 +26,10 @@ export function LabelSinyalArah({ sinyal, fase, tampilan = 'penuh' }: Props) {
   const cocok = arahSesuaiFase(sinyal.arah, fase);
   const warna =
     cocok === 'sesuai'
-      ? colors.aksenTeks.jade
+      ? colors.status.sukses.teks
       : cocok === 'berlawanan'
-        ? colors.amber
-        : colors.textMuted;
+        ? colors.status.peringatan.teks
+        : colors.teksRedup;
 
   const panah =
     sinyal.arah === 'naik' ? '↑' : sinyal.arah === 'turun' ? '↓' : sinyal.arah === 'datar' ? '→' : '·';
@@ -71,13 +71,13 @@ export function LabelSinyalArah({ sinyal, fase, tampilan = 'penuh' }: Props) {
         </View>
 
         {cocok !== 'belum bisa dinilai' ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {kalimatKecocokan(cocok, fase)}
           </Text>
         ) : null}
       </View>
 
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         {kalimatSinyal(sinyal)}
       </Text>
     </View>

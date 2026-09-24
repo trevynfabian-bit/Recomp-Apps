@@ -57,7 +57,7 @@ function TumpukanAkar() {
 
   // Sesi tersimpan sedang dibaca: layar kosong sewarna latar, bukan kilasan
   // layar masuk yang lalu hilang.
-  if (status === 'memuat') return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  if (status === 'memuat') return <View style={{ flex: 1, backgroundColor: colors.latar }} />;
 
   // State per akun dimulai dari nol setiap pengguna berganti (termasuk
   // keluar): akun berikutnya di perangkat ini tidak mewarisi profil, target,
@@ -75,7 +75,7 @@ function TumpukanAkar() {
                   key={skema}
                   screenOptions={{
                     headerShown: false,
-                    contentStyle: { backgroundColor: colors.bg },
+                    contentStyle: { backgroundColor: colors.latar },
                   }}
                 >
                   <Stack.Protected guard={sudahMasuk}>

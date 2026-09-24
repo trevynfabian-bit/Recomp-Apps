@@ -85,7 +85,7 @@ export function GrafikUkuran({ titik, label }: Props) {
                   x2={lebar - PAD_KANAN}
                   y1={y(t)}
                   y2={y(t)}
-                  stroke={colors.border}
+                  stroke={colors.garis}
                   strokeWidth={1}
                 />
               ))}
@@ -93,7 +93,7 @@ export function GrafikUkuran({ titik, label }: Props) {
               {titik.length > 1 ? (
                 <Path
                   d={jalur}
-                  stroke={colors.amber}
+                  stroke={colors.aksen.isian}
                   strokeWidth={2}
                   strokeLinejoin="round"
                   strokeLinecap="round"
@@ -108,8 +108,8 @@ export function GrafikUkuran({ titik, label }: Props) {
                   cx={x(i)}
                   cy={y(t.nilai)}
                   r={aktif === i ? 6 : 4}
-                  fill={colors.amber}
-                  stroke={colors.surface}
+                  fill={colors.aksen.isian}
+                  stroke={colors.permukaan}
                   strokeWidth={2}
                 />
               ))}
@@ -121,7 +121,7 @@ export function GrafikUkuran({ titik, label }: Props) {
                 key={t}
                 style={{
                   ...typography.caption,
-                  color: colors.textFaint,
+                  color: colors.teksSamar,
                   position: 'absolute',
                   left: 0,
                   width: PAD_KIRI - 6,
@@ -138,7 +138,7 @@ export function GrafikUkuran({ titik, label }: Props) {
               <Text
                 style={{
                   ...typography.label,
-                  color: colors.text,
+                  color: colors.teks,
                   position: 'absolute',
                   right: PAD_KANAN,
                   top: Math.max(y(terakhir.nilai) - 26, 0),
@@ -167,7 +167,7 @@ export function GrafikUkuran({ titik, label }: Props) {
       </View>
 
       {/* Baris keterangan: titik yang disorot, atau rentang tanggalnya. */}
-      <Text style={{ ...typography.caption, color: colors.textFaint, textAlign: 'center' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
         {disorot
           ? `${formatTanggalPanjang(disorot.tanggal)} · ${formatDesimal(disorot.nilai)} cm`
           : titik.length > 1

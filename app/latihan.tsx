@@ -65,7 +65,7 @@ export default function LatihanScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -85,19 +85,19 @@ export default function LatihanScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Latihan</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Latihan</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Dibaca dari Hevy · dicatat di Hevy, bukan di sini
           </Text>
         </View>
@@ -112,10 +112,10 @@ export default function LatihanScreen() {
 
       {kelompok.length === 0 ? (
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodySedang, color: colors.text }}>
+          <Text style={{ ...typography.bodySedang, color: colors.teks }}>
             Belum ada latihan dari Hevy
           </Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Latihan yang Anda catat di Hevy masuk otomatis setiap jam setelah Hevy dihubungkan di
             Sumber data.
           </Text>
@@ -134,8 +134,8 @@ export default function LatihanScreen() {
       )}
 
       <Card style={{ gap: spacing.sm }}>
-        <Text style={{ ...typography.label, color: colors.text }}>Tentang e1RM</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+        <Text style={{ ...typography.label, color: colors.teks }}>Tentang e1RM</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Perkiraan beban maksimal untuk satu repetisi, dihitung dengan rumus Epley dari set terbaik
           tiap latihan. Hanya set dengan paling banyak {MAKS_REPS_E1RM} repetisi yang dipakai; di atas
           itu, perkiraannya terlalu jauh dari beban sebenarnya. Latihan berat badan (BB) tidak

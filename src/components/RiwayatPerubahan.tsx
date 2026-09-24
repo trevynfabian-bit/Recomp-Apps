@@ -73,15 +73,15 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                 paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
                 borderWidth: 1,
-                borderColor: aktif ? colors.amber : colors.borderKuat,
-                backgroundColor: aktif ? colors.amber + '1A' : colors.surfaceSunken,
+                borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                backgroundColor: aktif ? colors.aksen.isian + '1A' : colors.permukaanCekung,
                 opacity: pressed ? 0.7 : 1,
               })}
             >
               <Text
                 style={{
                   ...typography.label,
-                  color: aktif ? colors.amber : colors.textMuted,
+                  color: aktif ? colors.aksen.teks : colors.teksRedup,
                 }}
               >
                 {b.label}
@@ -95,16 +95,16 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
         {/* Total sejak pencatatan pertama — jawaban paling ringkas. */}
         {ringkasan.totalSelisih !== null && ringkasan.awal ? (
           <View style={{ gap: spacing.xs }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               {label} sejak awal
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
-              <Text style={{ ...typography.display, color: colors.text }}>
+              <Text style={{ ...typography.display, color: colors.teks }}>
                 {teksSelisih(ringkasan.totalSelisih)}
               </Text>
-              <Text style={{ ...typography.label, color: colors.textFaint }}>cm</Text>
+              <Text style={{ ...typography.label, color: colors.teksSamar }}>cm</Text>
             </View>
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {formatDesimal(ringkasan.awal.nilai)} → {formatDesimal(ringkasan.akhir!.nilai)} cm
               dalam {ringkasan.rentangHari} hari
             </Text>
@@ -126,28 +126,28 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                   gap: spacing.md,
                   paddingVertical: spacing.md,
                   borderTopWidth: i === 0 ? 0 : 1,
-                  borderTopColor: colors.border,
+                  borderTopColor: colors.garis,
                 }}
               >
                 <View style={{ flex: 1, gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: colors.text }}>
+                  <Text style={{ ...typography.label, color: colors.teks }}>
                     {formatTanggalPanjang(p.ke)}
                   </Text>
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                     {p.jarakHari} hari dari {formatTanggalPanjang(p.dari)}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end', gap: spacing.xxs }}>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
-                    <Text style={{ ...typography.title, color: colors.text }}>
+                    <Text style={{ ...typography.title, color: colors.teks }}>
                       {teksSelisih(p.selisih)}
                     </Text>
-                    <Text style={{ ...typography.caption, color: colors.textFaint }}>cm</Text>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
                   </View>
                   {/* Laju ditampilkan HANYA saat selangnya bukan sepekan: di
                       selang 7 hari ia cuma mengulang angka di atasnya. */}
                   {p.jarakHari !== 7 ? (
-                    <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                       setara {teksSelisih(p.lajuPerPekan)} cm / pekan
                     </Text>
                   ) : null}
@@ -156,7 +156,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
             ))}
           </View>
         ) : (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Perubahan baru bisa dihitung setelah ada pencatatan kedua. Catat lagi pekan depan dan
             baris perbandingannya muncul di sini.
           </Text>

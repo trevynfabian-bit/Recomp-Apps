@@ -45,11 +45,11 @@ export function SheetRiwayatPercakapan({
         <View
           style={{
             maxHeight: '80%',
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
           }}
         >
           <View
@@ -65,10 +65,10 @@ export function SheetRiwayatPercakapan({
                 width: ukuran.pegangan.lebar,
                 height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
-                backgroundColor: colors.border,
+                backgroundColor: colors.garis,
               }}
             />
-            <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
               Riwayat percakapan
             </Text>
           </View>
@@ -89,7 +89,7 @@ export function SheetRiwayatPercakapan({
                 minHeight: TAP_MIN,
                 paddingVertical: spacing.md,
                 borderRadius: radius.lg,
-                backgroundColor: colors.amber,
+                backgroundColor: colors.aksen.isian,
                 opacity: pressed ? 0.8 : 1,
               })}
             >
@@ -102,7 +102,7 @@ export function SheetRiwayatPercakapan({
               <Text
                 style={{
                   ...typography.caption,
-                  color: colors.textFaint,
+                  color: colors.teksSamar,
                   textAlign: 'center',
                   paddingVertical: spacing.xl,
                 }}
@@ -130,26 +130,26 @@ export function SheetRiwayatPercakapan({
                       padding: spacing.md,
                       borderRadius: radius.md,
                       borderWidth: 1,
-                      borderColor: aktif ? colors.amber : colors.borderKuat,
-                      backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
+                      borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                      backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >
                     <Text
                       numberOfLines={2}
-                      style={{ ...typography.body, color: aktif ? colors.text : colors.textMuted }}
+                      style={{ ...typography.body, color: aktif ? colors.teks : colors.teksRedup }}
                     >
                       {p.judul}
                     </Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                         {labelTanggalRelatif(tanggal, hariIni)} · {formatJam(p.diperbaruiPada)}
                       </Text>
-                      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                         · {p.pesan.length} pesan
                       </Text>
                       {aktif ? (
-                        <Text style={{ ...typography.caption, color: colors.amber }}>· dibuka</Text>
+                        <Text style={{ ...typography.caption, color: colors.aksen.teks }}>· dibuka</Text>
                       ) : null}
                     </View>
                   </Pressable>
@@ -164,7 +164,7 @@ export function SheetRiwayatPercakapan({
               onPress={onTutup}
               style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Text style={{ ...typography.label, color: colors.textFaint }}>Tutup</Text>
+              <Text style={{ ...typography.label, color: colors.teksSamar }}>Tutup</Text>
             </Pressable>
           </View>
         </View>

@@ -37,21 +37,21 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
               paddingHorizontal: spacing.md,
               paddingVertical: ukuran.chip.vertikal,
               borderRadius: radius.pill,
-              backgroundColor: colors.aksenTeks.jade + '1A',
+              backgroundColor: colors.status.sukses.teks + '1A',
               borderWidth: 1,
-              borderColor: colors.aksenTeks.jade + '55',
+              borderColor: colors.status.sukses.teks + '55',
             }}
           >
-            <Text style={{ ...typography.label, color: colors.aksenTeks.jade }}>
+            <Text style={{ ...typography.label, color: colors.status.sukses.teks }}>
               {NAMA_OPSI[hasil.opsi] ?? hasil.opsi}
             </Text>
           </View>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             diterapkan {formatTanggalPanjang(diterapkanPada)}
           </Text>
         </View>
 
-        <Text style={{ ...typography.body, color: colors.textMuted }}>
+        <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {formatAngka(Math.abs(hasil.terserap))} kcal {arah} ke {berubah.length} hari.
           Target di bawah sudah memakai angka baru ini.
         </Text>
@@ -62,24 +62,24 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
               key={h.tanggal}
               style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <Text style={{ ...typography.caption, color: colors.textMuted }}>
+              <Text style={{ ...typography.caption, color: colors.teksRedup }}>
                 {hariSingkat(h.tanggal)} · {h.namaTipeHari}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                 <Text
                   style={{
                     ...typography.caption,
-                    color: colors.textFaint,
+                    color: colors.teksSamar,
                     textDecorationLine: 'line-through',
                   }}
                 >
                   {formatAngka(h.targetLama)}
                 </Text>
-                <Text style={{ ...typography.label, color: colors.text }}>
+                <Text style={{ ...typography.label, color: colors.teks }}>
                   {formatAngka(h.targetBaru)}
                 </Text>
                 {h.kenaLantai ? (
-                  <Text style={{ ...typography.caption, color: colors.amber }}>lantai</Text>
+                  <Text style={{ ...typography.caption, color: colors.aksen.teks }}>lantai</Text>
                 ) : null}
               </View>
             </View>
@@ -87,12 +87,12 @@ export function StatusRedistribusi({ hasil, diterapkanPada }: Props) {
         </View>
 
         {hasil.tersisa !== 0 || hasil.dibatasiLantai ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {hasil.alasan}
           </Text>
         ) : null}
 
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Jatah redistribusi satu kali per minggu sudah terpakai. Ia akan kembali tersedia
           Senin depan, supaya target tidak terus bergeser sepanjang pekan.
         </Text>

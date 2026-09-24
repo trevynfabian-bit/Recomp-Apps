@@ -64,14 +64,14 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
       onTutup={status === 'memproses' ? null : onTutup}
       label="Sumber data"
     >
-      <Text style={{ ...typography.title, color: colors.text }}>Putuskan {profil.nama}?</Text>
+      <Text style={{ ...typography.title, color: colors.teks }}>Putuskan {profil.nama}?</Text>
 
-      <Text style={{ ...typography.body, color: colors.textMuted }}>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>
         {kapital(gabung(profil.membawa))} yang baru dari {profil.nama} berhenti masuk. Yang sudah
         tercatat tetap tersimpan, kecuali Anda memilih menghapusnya.
       </Text>
 
-      <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+      <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
         {akibatLain}
       </Text>
 
@@ -83,10 +83,10 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
           paddingVertical: spacing.sm,
           borderTopWidth: 1,
           borderBottomWidth: 1,
-          borderColor: colors.border,
+          borderColor: colors.garis,
         }}
       >
-        <Text style={{ ...typography.body, color: colors.text, flex: 1 }}>
+        <Text style={{ ...typography.body, color: colors.teks, flex: 1 }}>
           Hapus juga data {profil.nama} yang sudah masuk
         </Text>
         <Switch
@@ -94,22 +94,22 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
           value={hapusData}
           onValueChange={setHapusData}
           disabled={status === 'memproses'}
-          trackColor={{ true: colors.coral, false: colors.surfaceSunken }}
-          thumbColor={colors.text}
+          trackColor={{ true: colors.status.bahaya.isian, false: colors.permukaanCekung }}
+          thumbColor={colors.teks}
         />
       </View>
 
       {hapusData ? (
         <Text
           accessibilityLiveRegion="polite"
-          style={{ ...typography.label, color: colors.aksenTeks.coral }}
+          style={{ ...typography.label, color: colors.status.bahaya.teks }}
         >
           Tidak bisa dibatalkan. Rata-rata 7 hari, tren, dan budget dihitung ulang tanpa data ini.
         </Text>
       ) : null}
 
       {status === 'gagal' ? (
-        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.aksenTeks.coral }}>
+        <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
           Gagal memutuskan. Periksa koneksi lalu coba lagi.
         </Text>
       ) : null}

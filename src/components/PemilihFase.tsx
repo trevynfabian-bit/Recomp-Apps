@@ -53,8 +53,8 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                   paddingVertical: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: aktif ? colors.amber : colors.borderKuat,
-                  backgroundColor: aktif ? colors.amber + '14' : colors.surfaceSunken,
+                  borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
+                  backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
@@ -65,32 +65,32 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                     height: 18,
                     borderRadius: 9,
                     borderWidth: 2,
-                    borderColor: aktif ? colors.amber : colors.borderKuat,
+                    borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
                   {aktif ? (
                     <View
-                      style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.amber }}
+                      style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }}
                     />
                   ) : null}
                 </View>
 
                 <View style={{ flex: 1, gap: spacing.xxs }}>
-                  <Text style={{ ...typography.label, color: aktif ? colors.text : colors.textMuted }}>
+                  <Text style={{ ...typography.label, color: aktif ? colors.teks : colors.teksRedup }}>
                     {f.nilai}
                   </Text>
                   {/* textMuted, bukan textFaint: di atas latar terpilih yang
                       bertint amber, textFaint cuma 3,94:1 — di bawah AA. */}
-                  <Text style={{ ...typography.caption, color: colors.textMuted }}>{f.ringkas}</Text>
+                  <Text style={{ ...typography.caption, color: colors.teksRedup }}>{f.ringkas}</Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Fase {terpilih} menargetkan laju {persen(laju.min)} s/d {persen(laju.maks)} berat badan
           per minggu. Menggantinya mengubah target harian tiap tipe hari, koridor di layar Tren,
           dan budget mingguan sekaligus.

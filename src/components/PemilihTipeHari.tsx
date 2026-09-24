@@ -73,15 +73,15 @@ export function PemilihTipeHari({
                   paddingVertical: spacing.md,
                   borderRadius: radius.pill,
                   borderWidth: 1,
-                  borderColor: aktif ? colors.amber : colors.border,
-                  backgroundColor: aktif ? colors.amber : colors.surfaceSunken,
+                  borderColor: aktif ? colors.aksen.isian : colors.garis,
+                  backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
                 <Text
                   style={{
                     ...typography.label,
-                    color: aktif ? colors.diAtasIsian : colors.textMuted,
+                    color: aktif ? colors.diAtasIsian : colors.teksRedup,
                   }}
                 >
                   {dt.nama}
@@ -98,7 +98,7 @@ export function PemilihTipeHari({
               flexDirection: 'row',
               paddingTop: spacing.lg,
               borderTopWidth: 1,
-              borderTopColor: colors.border,
+              borderTopColor: colors.garis,
             }}
           >
             <TargetRingkas label="Kalori" nilai={formatAngka(target.target_kalori)} unit="kcal" warna={colors.macroTeks.kalori} />
@@ -108,8 +108,8 @@ export function PemilihTipeHari({
           </View>
         ) : (
           // Belum diisi: dikatakan apa adanya, bukan diisi angka tipe hari lain.
-          <View style={{ paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
-            <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <View style={{ paddingTop: spacing.lg, borderTopWidth: 1, borderTopColor: colors.garis }}>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
               Target {daftar.find((d) => d.id === terpilihId)?.nama ?? 'tipe hari ini'} untuk fase {fase} belum diisi.
             </Text>
           </View>
@@ -119,7 +119,7 @@ export function PemilihTipeHari({
         <View style={{ gap: spacing.sm }}>
           {override ? (
             <View style={{ gap: spacing.md }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 Diubah manual.{' '}
                 {deteksi.nama
                   ? `Dari workout, tipe hari ini terbaca ${deteksi.nama} — ${alasan}.`
@@ -139,23 +139,23 @@ export function PemilihTipeHari({
                   paddingHorizontal: spacing.lg,
                   borderRadius: radius.pill,
                   borderWidth: 1,
-                  borderColor: colors.amber + '55',
-                  backgroundColor: colors.amber + '1A',
+                  borderColor: colors.aksen.isian + '55',
+                  backgroundColor: colors.aksen.isian + '1A',
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <Text style={{ ...typography.label, color: colors.amber }}>Ikuti auto lagi</Text>
+                <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ikuti auto lagi</Text>
               </Pressable>
             </View>
           ) : (
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {deteksi.dasar.length > 0
                 ? `Terdeteksi otomatis dari workout · ${alasan}`
                 : `${alasan} · dianggap ${deteksi.nama ?? 'Rest'}`}
             </Text>
           )}
 
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Target absolut dari day_type_targets · fase {fase}
           </Text>
         </View>
@@ -178,10 +178,10 @@ function TargetRingkas({
 }) {
   return (
     <View style={{ flex: 1, gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>{label}</Text>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
         <Text style={{ ...typography.bodyTebal, color: warna }}>{nilai}</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
       </View>
     </View>
   );

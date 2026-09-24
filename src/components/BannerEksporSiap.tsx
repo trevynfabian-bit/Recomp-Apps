@@ -47,9 +47,9 @@ export function BannerEksporSiap() {
           paddingRight: spacing.xs,
           paddingVertical: spacing.sm,
           borderRadius: radius.lg,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.permukaan,
           borderWidth: 1,
-          borderColor: colors.borderKuat,
+          borderColor: colors.garisKontrol,
           shadowColor: '#000',
           shadowOpacity: 0.4,
           shadowRadius: 12,
@@ -57,10 +57,10 @@ export function BannerEksporSiap() {
           elevation: 6,
         }}
       >
-        <Ionicons name="document-attach-outline" size={ukuranIkon.baris} color={colors.textMuted} />
+        <Ionicons name="document-attach-outline" size={ukuranIkon.baris} color={colors.teksRedup} />
         <View style={{ flex: 1, gap: spacing.xxs }}>
-          <Text style={{ ...typography.label, color: colors.text }}>{NOTIF_EKSPOR_SIAP.judul}</Text>
-          <Text style={{ ...typography.caption, color: gagal ? colors.aksenTeks.coral : colors.textMuted }}>
+          <Text style={{ ...typography.label, color: colors.teks }}>{NOTIF_EKSPOR_SIAP.judul}</Text>
+          <Text style={{ ...typography.caption, color: gagal ? colors.status.bahaya.teks : colors.teksRedup }}>
             {gagal ? `Belum bisa ${web ? 'diunduh' : 'dibagikan'}; coba lagi.` : 'Berisi data kesehatan Anda.'}
           </Text>
         </View>
@@ -88,7 +88,7 @@ export function BannerEksporSiap() {
             opacity: pressed || memproses ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.label, color: colors.amber }}>{web ? 'Unduh' : 'Bagikan'}</Text>
+          <Text style={{ ...typography.label, color: colors.aksen.teks }}>{web ? 'Unduh' : 'Bagikan'}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -105,7 +105,7 @@ export function BannerEksporSiap() {
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Ionicons name="close" size={ukuranIkon.sedang} color={colors.textMuted} />
+          <Ionicons name="close" size={ukuranIkon.sedang} color={colors.teksRedup} />
         </Pressable>
       </View>
     </View>

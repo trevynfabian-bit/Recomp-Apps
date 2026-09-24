@@ -125,7 +125,7 @@ export default function LogHarianScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: spacing.xxl,
@@ -136,8 +136,8 @@ export default function LogHarianScreen() {
       {/* Header: sapaan + tanggal + fase aktif */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Hai, {profil.nama}</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Hai, {profil.nama}</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             {formatTanggalPanjang(log.tanggal)}
           </Text>
           {/* Seberapa segar angka di bawahnya; ketuk untuk membuka Sumber data. */}
@@ -145,7 +145,7 @@ export default function LogHarianScreen() {
             <IndikatorSinkron />
           </View>
         </View>
-        <Pill label={fase} warna={colors.aksenTeks.jade} />
+        <Pill label={fase} warna={colors.status.sukses.teks} />
       </View>
 
       {/* Angka utama: sisa kalori hari ini */}
@@ -156,15 +156,15 @@ export default function LogHarianScreen() {
             nilai={formatAngka(sisaKalori)}
             unit="kcal"
             keterangan={`${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal`}
-            warna={sisaKalori >= 0 ? colors.amber : colors.coral}
+            warna={sisaKalori >= 0 ? colors.aksen.teks : colors.status.bahaya.isian}
           />
         ) : (
           <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>
-            <Text style={{ ...typography.caption, color: colors.textMuted }}>SISA KALORI HARI INI</Text>
-            <Text style={{ ...typography.title, color: colors.text }}>
+            <Text style={{ ...typography.caption, color: colors.teksRedup }}>SISA KALORI HARI INI</Text>
+            <Text style={{ ...typography.title, color: colors.teks }}>
               Target {dayType.nama} · {fase} belum diisi
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted }}>
+            <Text style={{ ...typography.body, color: colors.teksRedup }}>
               Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
               tetap tersimpan seperti biasa.
             </Text>
@@ -182,14 +182,14 @@ export default function LogHarianScreen() {
             marginTop: spacing.xl,
             paddingTop: spacing.lg,
             borderTopWidth: 1,
-            borderTopColor: colors.border,
+            borderTopColor: colors.garis,
           }}
         >
-          <StatKecil label="Sisa protein" nilai={sisaProtein !== null ? formatMakro(sisaProtein) : '–'} unit={sisaProtein !== null ? 'g' : ''} warna={colors.aksenTeks.jade} />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
-          <StatKecil label="Sisa lemak" nilai={sisaLemak !== null ? formatMakro(sisaLemak) : '–'} unit={sisaLemak !== null ? 'g' : ''} warna={colors.text} />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
-          <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.text} kecil />
+          <StatKecil label="Sisa protein" nilai={sisaProtein !== null ? formatMakro(sisaProtein) : '–'} unit={sisaProtein !== null ? 'g' : ''} warna={colors.status.sukses.teks} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <StatKecil label="Sisa lemak" nilai={sisaLemak !== null ? formatMakro(sisaLemak) : '–'} unit={sisaLemak !== null ? 'g' : ''} warna={colors.teks} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
+          <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.teks} kecil />
         </View>
       </Card>
 
@@ -221,7 +221,7 @@ export default function LogHarianScreen() {
           onPress={() => router.push('/target-harian')}
           style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
         >
-          <Text style={{ ...typography.label, color: colors.amber }}>Target semua tipe hari ›</Text>
+          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Target semua tipe hari ›</Text>
         </Pressable>
       </View>
 
@@ -251,23 +251,23 @@ export default function LogHarianScreen() {
                 justifyContent: 'space-between',
                 padding: spacing.lg,
                 borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.border,
+                borderTopColor: colors.garis,
               }}
             >
               <View style={{ flex: 1, gap: spacing.xs, paddingRight: spacing.md }}>
-                <Text style={{ ...typography.body, color: colors.text }} numberOfLines={1}>
+                <Text style={{ ...typography.body, color: colors.teks }} numberOfLines={1}>
                   {food.nama_makanan}
                 </Text>
                 {/* Asal tiap entri ditandai, termasuk yang dicatat manual. */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <PenandaSumber jenis={sumberMakanan(food.sumber)} />
-                  <Text style={{ ...typography.caption, color: colors.textFaint }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                     P {formatMakro(food.protein_g)}g · L {formatMakro(food.lemak_g)}g · K{' '}
                     {formatMakro(food.karbo_g)}g
                   </Text>
                 </View>
               </View>
-              <Text style={{ ...typography.label, color: colors.amber }}>
+              <Text style={{ ...typography.label, color: colors.aksen.teks }}>
                 {formatAngka(food.kalori)} kcal
               </Text>
             </View>
@@ -287,12 +287,12 @@ export default function LogHarianScreen() {
               gap: spacing.sm,
               padding: spacing.lg,
               borderTopWidth: 1,
-              borderTopColor: colors.border,
+              borderTopColor: colors.garis,
               opacity: pressed ? 0.6 : 1,
             })}
           >
             <Text style={{ ...typography.body }}>📷</Text>
-            <Text style={{ ...typography.label, color: colors.amber }}>Catat makan via foto</Text>
+            <Text style={{ ...typography.label, color: colors.aksen.teks }}>Catat makan via foto</Text>
           </Pressable>
         </Card>
       </View>
@@ -324,10 +324,10 @@ export default function LogHarianScreen() {
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
             borderRadius: radius.pill,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
           }}
         >
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Data tiruan · belum tersambung Supabase
           </Text>
         </View>
@@ -352,12 +352,12 @@ function StatKecil({
 }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
         {label}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
         <Text style={{ ...(kecil ? typography.body : typography.title), color: warna }}>{nilai}</Text>
-        {unit ? <Text style={{ ...typography.caption, color: colors.textFaint }}>{unit}</Text> : null}
+        {unit ? <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text> : null}
       </View>
     </View>
   );

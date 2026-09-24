@@ -47,7 +47,7 @@ export function GelembungPesan({
       <View style={{ gap: spacing.xs }}>
         <KartuPenolakanMedis penolakan={pesan.penolakan} />
         {tampilkanJam ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {formatJam(pesan.waktu)}
           </Text>
         ) : null}
@@ -61,7 +61,7 @@ export function GelembungPesan({
       <View style={{ gap: spacing.xs }}>
         <KartuVerdictEvaluasi evaluasi={pesan.evaluasi} />
         {tampilkanJam ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {formatJam(pesan.waktu)}
           </Text>
         ) : null}
@@ -75,7 +75,7 @@ export function GelembungPesan({
       <View style={{ gap: spacing.xs }}>
         <KartuRingkasanMingguan ringkasan={pesan.ringkasan} onTanya={onTanya ?? (() => {})} />
         {tampilkanJam ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {formatJam(pesan.waktu)}
           </Text>
         ) : null}
@@ -102,20 +102,20 @@ export function GelembungPesan({
           // yang tetap terbaca tanpa warna.
           borderBottomRightRadius: dariPengguna ? radius.sm : radius.lg,
           borderBottomLeftRadius: dariPengguna ? radius.lg : radius.sm,
-          backgroundColor: dariPengguna ? colors.amber + '14' : colors.surface,
+          backgroundColor: dariPengguna ? colors.aksen.isian + '14' : colors.permukaan,
           borderWidth: 1,
           borderColor: gagal
-            ? colors.coral + '55'
+            ? colors.status.bahaya.isian + '55'
             : dariPengguna
-              ? colors.amber + '33'
-              : colors.border,
+              ? colors.aksen.isian + '33'
+              : colors.garis,
           opacity: pesan.status === 'mengirim' ? 0.6 : 1,
         }}
       >
         <Text
           style={{
             ...typography.body,
-            color: colors.text,
+            color: colors.teks,
             // 24px pada teks 16px: jawaban coach sering lima kalimat, dan
             // lineHeight rapat membuatnya terbaca seperti dinding.
           }}
@@ -137,14 +137,14 @@ export function GelembungPesan({
       ) : null}
 
       {tampilkanJam && !gagal ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {formatJam(pesan.waktu)}
         </Text>
       ) : null}
 
       {gagal ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text style={{ ...typography.caption, color: colors.aksenTeks.coral }}>
+          <Text style={{ ...typography.caption, color: colors.status.bahaya.teks }}>
             Gagal terkirim
           </Text>
           {onCobaLagi ? (
@@ -162,7 +162,7 @@ export function GelembungPesan({
                 opacity: pressed ? 0.6 : 1,
               })}
             >
-              <Text style={{ ...typography.label, color: colors.amber }}>Coba lagi</Text>
+              <Text style={{ ...typography.label, color: colors.aksen.teks }}>Coba lagi</Text>
             </Pressable>
           ) : null}
         </View>
@@ -190,12 +190,12 @@ export function GelembungMengetik() {
           paddingVertical: spacing.md,
           borderRadius: radius.lg,
           borderBottomLeftRadius: radius.sm,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.permukaan,
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: colors.garis,
         }}
       >
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Coach sedang membaca data Anda…
         </Text>
       </View>
@@ -213,9 +213,9 @@ export function GelembungMengetik() {
 export function PemisahTanggal({ label }: { label: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>{label}</Text>
-      <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.garis }} />
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>{label}</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: colors.garis }} />
     </View>
   );
 }

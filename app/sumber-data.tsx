@@ -96,7 +96,7 @@ export default function SumberDataScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -116,19 +116,19 @@ export default function SumberDataScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View>
-          <Text style={{ ...typography.title, color: colors.text }}>Sumber data</Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.title, color: colors.teks }}>Sumber data</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Apple Health, WHOOP, Strava, Hevy
           </Text>
         </View>
@@ -139,7 +139,7 @@ export default function SumberDataScreen() {
         nilai={String(ringkasan.aktif)}
         unit={`dari ${ringkasan.total}`}
         keterangan={keteranganHero}
-        warna={ringkasan.perluPerhatian > 0 ? colors.amber : colors.aksenTeks.jade}
+        warna={ringkasan.perluPerhatian > 0 ? colors.aksen.teks : colors.status.sukses.teks}
       />
 
       <View style={{ gap: spacing.md }}>
@@ -179,12 +179,12 @@ export default function SumberDataScreen() {
           })}
         >
           <View style={{ flex: 1, gap: spacing.xxs }}>
-            <Text style={{ ...typography.bodySedang, color: colors.text }}>Impor riwayat lama</Text>
-            <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+            <Text style={{ ...typography.bodySedang, color: colors.teks }}>Impor riwayat lama</Text>
+            <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
               Sekali saja: Hevy CSV, Apple Health, ukuran tubuh
             </Text>
           </View>
-          <Text style={{ ...typography.title, color: colors.textFaint }}>›</Text>
+          <Text style={{ ...typography.title, color: colors.teksSamar }}>›</Text>
         </Pressable>
       </Card>
 
@@ -194,11 +194,11 @@ export default function SumberDataScreen() {
       <View>
         <SectionHeader judul="Tanpa hitungan ganda" />
         <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Kalau dua perangkat mencatat olahraga yang sama, hanya sumber dengan prioritas
             tertinggi yang dihitung untuk olahraga itu di hari itu.
           </Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Langkah dan energi aktif memakai total dari satu sumber saja, tidak pernah
             dijumlahkan antar perangkat.
           </Text>

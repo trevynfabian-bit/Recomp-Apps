@@ -23,13 +23,13 @@ const IKON: Record<ButirStatusPrivasi['nada'], React.ComponentProps<typeof Ionic
 
 const WARNA_STATUS: Record<ButirStatusPrivasi['nada'], string> = {
   get terjaga() {
-    return colors.aksenTeks.jade;
+    return colors.status.sukses.teks;
   },
   get info() {
-    return colors.textMuted;
+    return colors.teksRedup;
   },
   get terlihat() {
-    return colors.amber;
+    return colors.status.peringatan.teks;
   },
 };
 
@@ -89,7 +89,7 @@ export default function PrivasiScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.bg }}
+      style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
         paddingBottom: insets.bottom + spacing.xxl,
@@ -109,21 +109,21 @@ export default function PrivasiScreen() {
             width: TAP_MIN,
             height: TAP_MIN,
             borderRadius: radius.pill,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
+            borderColor: colors.garisKontrol,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Text style={{ ...typography.title, color: colors.text }}>‹</Text>
+          <Text style={{ ...typography.title, color: colors.teks }}>‹</Text>
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
+          <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
             Privasi
           </Text>
-          <Text style={{ ...typography.label, color: colors.textFaint, marginTop: spacing.xxs }}>
+          <Text style={{ ...typography.label, color: colors.teksSamar, marginTop: spacing.xxs }}>
             Apa yang disimpan, dan siapa yang bisa membacanya
           </Text>
         </View>
@@ -143,14 +143,14 @@ export default function PrivasiScreen() {
                   gap: spacing.md,
                   padding: spacing.lg,
                   borderTopWidth: i === 0 ? 0 : 1,
-                  borderTopColor: colors.border,
+                  borderTopColor: colors.garis,
                 }}
               >
                 <Ionicons name={IKON[b.nada]} size={ukuranIkon.baris} color={WARNA_STATUS[b.nada]} />
                 <View style={{ flex: 1, gap: spacing.xs }}>
-                  <Text style={{ ...typography.bodySedang, color: colors.text }}>{b.judul}</Text>
+                  <Text style={{ ...typography.bodySedang, color: colors.teks }}>{b.judul}</Text>
                   <Text style={{ ...typography.label, color: WARNA_STATUS[b.nada] }}>{b.status}</Text>
-                  <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>
+                  <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
                     {b.penjelasan}
                   </Text>
                 </View>
@@ -165,11 +165,11 @@ export default function PrivasiScreen() {
         <Card style={{ gap: spacing.md }}>
           {DATA_TERSIMPAN.map((d) => (
             <View key={d.judul} style={{ gap: spacing.xxs }}>
-              <Text style={{ ...typography.label, color: colors.text }}>{d.judul}</Text>
-              <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>{d.isi}</Text>
+              <Text style={{ ...typography.label, color: colors.teks }}>{d.judul}</Text>
+              <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{d.isi}</Text>
             </View>
           ))}
-          <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>
+          <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
             Semuanya disimpan di database Supabase milik app ini. App tidak memuat iklan atau pelacak analitik pihak
             ketiga; selain ekspor yang Anda minta sendiri, data hanya dikirim keluar ke penyedia model AI saat coach,
             ringkasan mingguan, atau foto makanan dipakai.
@@ -211,7 +211,7 @@ export default function PrivasiScreen() {
         {pesanTiruan ? (
           <Text
             accessibilityLiveRegion="polite"
-            style={{ ...typography.labelBiasa, color: colors.textFaint, marginTop: spacing.sm }}
+            style={{ ...typography.labelBiasa, color: colors.teksSamar, marginTop: spacing.sm }}
           >
             {pesanTiruan}
           </Text>
@@ -264,16 +264,16 @@ function BarisKendali({
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.textMuted} />
+      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.teksRedup} />
       <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text style={{ ...typography.bodySedang, color: colors.text }}>{judul}</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.textFaint }}>{keterangan}</Text>
+        <Text style={{ ...typography.bodySedang, color: colors.teks }}>{judul}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{keterangan}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.textFaint} />
+      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />
     </Pressable>
   );
 }
 
 function Pemisah() {
-  return <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: spacing.lg }} />;
+  return <View style={{ height: 1, backgroundColor: colors.garis, marginHorizontal: spacing.lg }} />;
 }

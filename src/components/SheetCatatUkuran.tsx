@@ -215,11 +215,11 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
         <View
           style={{
             maxHeight: '88%',
-            backgroundColor: colors.surface,
+            backgroundColor: colors.permukaan,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             borderTopWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.garis,
           }}
         >
           {/* Kepala sheet tidak ikut menggulung; beri jarak agar baris teratas
@@ -237,13 +237,13 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                 width: ukuran.pegangan.lebar,
                 height: ukuran.pegangan.tinggi,
                 borderRadius: radius.pill,
-                backgroundColor: colors.border,
+                backgroundColor: colors.garis,
               }}
             />
             <Text
               style={{
                 ...typography.caption,
-                color: colors.textFaint,
+                color: colors.teksSamar,
                 textTransform: 'uppercase',
                 marginTop: spacing.sm,
               }}
@@ -265,10 +265,10 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                   onPress={() => geserTanggal(-1)}
                 />
                 <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{ ...typography.body, color: colors.text }}>
+                  <Text style={{ ...typography.body, color: colors.teks }}>
                     {formatTanggalPanjang(tanggal)}
                   </Text>
-                  <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.xxs }}>
+                  <Text style={{ ...typography.caption, color: colors.teksSamar, marginTop: spacing.xxs }}>
                     {tanggal === hariIni ? 'hari ini' : 'tanggal pencatatan'}
                   </Text>
                 </View>
@@ -317,16 +317,16 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
               style={{
                 padding: spacing.md,
                 borderRadius: radius.md,
-                backgroundColor: colors.surfaceSunken,
+                backgroundColor: colors.permukaanCekung,
                 gap: spacing.xs,
               }}
             >
-              <Text style={{ ...typography.label, color: colors.text }}>
+              <Text style={{ ...typography.label, color: colors.teks }}>
                 {dasar === null
                   ? 'Pencatatan pertama'
                   : `${jumlahDiubah} dari ${FIELD.length} ukuran diubah`}
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 {dasar === null
                   ? 'Angka ini jadi titik nol Anda — pencatatan berikutnya dibandingkan dengannya.'
                   : mode === 'perbarui'
@@ -370,10 +370,10 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
 
             {/* Cara mengukur: konsistensi titik ukur lebih menentukan daripada akurasi. */}
             <View style={{ gap: spacing.xs }}>
-              <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
                 Supaya angkanya bisa dibandingkan
               </Text>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 Ukur pagi sebelum makan, otot rileks, meteran rata dan tidak menekan kulit.
                 Pinggang di ketinggian pusar, leher di bawah jakun, lengan di titik tertebal.
                 Yang paling menentukan bukan akurasinya, tapi memakai titik ukur yang SAMA tiap
@@ -393,10 +393,10 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                   gap: spacing.sm,
                   backgroundColor:
                     status === 'tersimpan'
-                      ? colors.jade
+                      ? colors.status.sukses.isian
                       : bisaSimpan
-                        ? colors.amber
-                        : colors.surfaceSunken,
+                        ? colors.aksen.isian
+                        : colors.permukaanCekung,
                   borderRadius: radius.lg,
                   minHeight: TAP_MIN,
                   paddingVertical: spacing.lg,
@@ -412,7 +412,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                 <Text
                   style={{
                     ...typography.bodyTebal,
-                    color: status === 'tersimpan' || bisaSimpan ? colors.diAtasIsian : colors.textFaint,
+                    color: status === 'tersimpan' || bisaSimpan ? colors.diAtasIsian : colors.teksSamar,
                   }}
                 >
                   {labelSimpan(status, perluKonfirmasi, mode)}
@@ -425,7 +425,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
                 onPress={() => (status === 'konfirmasi' ? setStatus('idle') : onTutup())}
                 style={{ minHeight: TAP_MIN, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Text style={{ ...typography.label, color: colors.textFaint }}>
+                <Text style={{ ...typography.label, color: colors.teksSamar }}>
                   {status === 'konfirmasi' ? 'Periksa lagi' : 'Batal'}
                 </Text>
               </Pressable>
@@ -469,8 +469,8 @@ function BarisInput({
       }}
     >
       <View style={{ flex: 1 }}>
-        <Text style={{ ...typography.body, color: colors.text }}>{label}</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint, marginTop: spacing.xxs }}>
+        <Text style={{ ...typography.body, color: colors.teks }}>{label}</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, marginTop: spacing.xxs }}>
           {/*
             Keterangan diturunkan dari SELISIH, bukan dari apakah field sudah
             disentuh: di mode perbarui angka yang belum disentuh pun sudah
@@ -507,8 +507,8 @@ function BarisInput({
           paddingHorizontal: spacing.md,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: valid ? colors.borderKuat : colors.coral,
-          backgroundColor: colors.surfaceSunken,
+          borderColor: valid ? colors.garisKontrol : colors.status.bahaya.isian,
+          backgroundColor: colors.permukaanCekung,
         }}
       >
         <TextInput
@@ -525,10 +525,10 @@ function BarisInput({
             width: 56,
             paddingVertical: spacing.md,
             textAlign: 'right',
-            color: valid ? colors.text : colors.aksenTeks.coral,
+            color: valid ? colors.teks : colors.status.bahaya.teks,
           }}
         />
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>cm</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>cm</Text>
       </View>
     </View>
   );
@@ -553,15 +553,15 @@ function TombolGeser({
         width: TAP_MIN,
         height: TAP_MIN,
         borderRadius: radius.pill,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
         borderWidth: 1,
-        borderColor: colors.borderKuat,
+        borderColor: colors.garisKontrol,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.title, color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.title, color: colors.teks }}>{label}</Text>
     </Pressable>
   );
 }
@@ -575,7 +575,7 @@ function Keterangan({
   children: React.ReactNode;
 }) {
   const warna =
-    nada === 'amber' ? colors.amber : nada === 'coral' ? colors.aksenTeks.coral : colors.textFaint;
+    nada === 'amber' ? colors.status.peringatan.teks : nada === 'coral' ? colors.status.bahaya.teks : colors.teksSamar;
   return (
     <Text style={{ ...typography.caption, color: warna }}>{children}</Text>
   );
@@ -591,8 +591,8 @@ function Kotak({
   judul: string;
   children: React.ReactNode;
 }) {
-  const dasar = nada === 'amber' ? colors.amber : colors.coral;
-  const teks = nada === 'amber' ? colors.amber : colors.aksenTeks.coral;
+  const dasar = nada === 'amber' ? colors.status.peringatan.isian : colors.status.bahaya.isian;
+  const teks = nada === 'amber' ? colors.status.peringatan.teks : colors.status.bahaya.teks;
   return (
     <View
       // Isian memakai surfaceSunken, bukan tint warnanya: tint 8% di atas
@@ -604,11 +604,11 @@ function Kotak({
         borderRadius: radius.md,
         borderWidth: 1,
         borderColor: dasar + '55',
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
       }}
     >
       <Text style={{ ...typography.label, color: teks }}>{judul}</Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         {children}
       </Text>
     </View>
@@ -633,8 +633,8 @@ function drafAwal(dasar: UkuranTubuh | null): Record<KunciUkuran, string> {
  * Yang diwarnai hanya lompatan tak wajar, karena itu soal salah ketik.
  */
 function warnaSelisih(selisih: number | null): string {
-  if (selisih === null) return colors.textFaint;
-  return Math.abs(selisih) > AMBANG_KONFIRMASI_CM ? colors.amber : colors.textMuted;
+  if (selisih === null) return colors.teksSamar;
+  return Math.abs(selisih) > AMBANG_KONFIRMASI_CM ? colors.status.peringatan.teks : colors.teksRedup;
 }
 
 function labelSimpan(

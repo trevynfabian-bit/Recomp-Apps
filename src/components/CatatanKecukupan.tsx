@@ -32,7 +32,7 @@ export function CatatanKecukupan({ kecukupan, untuk }: Props) {
         gap: spacing.sm,
         padding: spacing.md,
         borderRadius: radius.md,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.permukaanCekung,
       }}
     >
       <View
@@ -40,11 +40,11 @@ export function CatatanKecukupan({ kecukupan, untuk }: Props) {
           width: ukuran.titikKecil,
           height: ukuran.titikKecil,
           borderRadius: radius.pill,
-          backgroundColor: colors.textFaint,
+          backgroundColor: colors.teksSamar,
           marginTop: 5,
         }}
       />
-      <Text style={{ ...typography.caption, color: colors.textFaint, flex: 1 }}>
+      <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>
         {pesan}
       </Text>
     </View>

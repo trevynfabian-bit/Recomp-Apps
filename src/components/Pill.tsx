@@ -15,7 +15,7 @@ type Props = {
 };
 
 /** Badge kecil untuk fase program, tipe hari, atau penanda "estimasi". */
-export function Pill({ label, warna = colors.textMuted, diKartu = false }: Props) {
+export function Pill({ label, warna = colors.teksRedup, diKartu = false }: Props) {
   return (
     <View
       style={{

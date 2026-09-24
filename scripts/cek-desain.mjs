@@ -120,8 +120,15 @@ const berkasTs = (dir) =>
 const beku = [...berkasTs('app'), ...berkasTs('src')]
   .filter((p) => !p.startsWith(join('src', 'theme')))
   .flatMap(tangkapanModul);
+// Layar & komponen memakai lapis SEMANTIK (bab Desain 8.2); nama warna mentah
+// hanya boleh dibaca di src/theme.
+const NAMA_LAMA = /colors\.(bg|surface|surfaceSunken|border|borderKuat|text|textMuted|textFaint|amber|coral|jade|aksenTeks)\b/;
+const namaLama = [...berkasTs('app'), ...berkasTs('src')]
+  .filter((p) => !p.startsWith(join('src', 'theme')))
+  .flatMap((p) => cariBaris(p, NAMA_LAMA));
+cek('layar & komponen memakai nama warna semantik', namaLama.length === 0, namaLama.slice(0, 5).join(' | '));
 cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku.slice(0, 5).join(' | '));
-cek('latar tiap layar dari colors.bg', /contentStyle: \{ backgroundColor: colors\.bg \}/.test(tataLetak));
+cek('latar tiap layar dari colors.latar', /contentStyle: \{ backgroundColor: colors\.latar \}/.test(tataLetak));
 
 console.log('\nTipografi dari satu skala');
 // Ukuran huruf mentah yang sah, masing-masing dengan alasan.

@@ -160,7 +160,7 @@ export function GrafikTren({
   if (!punyaData) {
     return (
       <View style={{ height: TINGGI_PLOT, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ ...typography.body, color: colors.textFaint }}>
+        <Text style={{ ...typography.body, color: colors.teksSamar }}>
           Belum ada timbangan untuk digambar.
         </Text>
       </View>
@@ -173,17 +173,17 @@ export function GrafikTren({
       <View style={{ minHeight: 36, justifyContent: 'center' }}>
         {sorot ? (
           <View style={{ gap: spacing.xxs }}>
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
               {formatTanggalPanjang(sorot.tanggal)}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
-                <View style={{ width: 10, height: 2, backgroundColor: colors.amber }} />
-                <Text style={{ ...typography.label, color: colors.text }}>
+                <View style={{ width: 10, height: 2, backgroundColor: colors.aksen.isian }} />
+                <Text style={{ ...typography.label, color: colors.teks }}>
                   {sorot.rataRataKg !== null ? `${formatDesimal(sorot.rataRataKg)} kg` : '—'}
                 </Text>
               </View>
-              <Text style={{ ...typography.caption, color: colors.textFaint }}>
+              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                 harian{' '}
                 {sorot.beratHarianKg !== null
                   ? `${formatDesimal(sorot.beratHarianKg)} kg`
@@ -192,7 +192,7 @@ export function GrafikTren({
             </View>
           </View>
         ) : (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Sentuh dan geser grafik untuk melihat angka per hari.
           </Text>
         )}
@@ -211,17 +211,17 @@ export function GrafikTren({
             */}
             {jalurKoridor ? (
               <>
-                <Path d={jalurKoridor} fill={colors.jade} fillOpacity={0.14} />
+                <Path d={jalurKoridor} fill={colors.status.sukses.isian} fillOpacity={0.14} />
                 <Path
                   d={garisKoridorAtas}
-                  stroke={colors.aksenTeks.jade}
+                  stroke={colors.status.sukses.teks}
                   strokeWidth={1}
                   strokeOpacity={0.5}
                   fill="none"
                 />
                 <Path
                   d={garisKoridorBawah}
-                  stroke={colors.aksenTeks.jade}
+                  stroke={colors.status.sukses.teks}
                   strokeWidth={1}
                   strokeOpacity={0.5}
                   fill="none"
@@ -237,7 +237,7 @@ export function GrafikTren({
                 x2={lebar - PAD_KANAN}
                 y1={y(v)}
                 y2={y(v)}
-                stroke={colors.border}
+                stroke={colors.garis}
                 strokeWidth={1}
               />
             ))}
@@ -248,7 +248,7 @@ export function GrafikTren({
               menutupi pita koridor, padahal pita itu yang lebih bermakna.
             */}
             {jalurArea && !koridor ? (
-              <Path d={jalurArea} fill={colors.amber} fillOpacity={0.1} />
+              <Path d={jalurArea} fill={colors.aksen.isian} fillOpacity={0.1} />
             ) : null}
 
             {/*
@@ -265,9 +265,9 @@ export function GrafikTren({
                       cx={x(i)}
                       cy={y(t.beratHarianKg)}
                       r={3}
-                      fill={colors.textFaint}
+                      fill={colors.teksSamar}
                       fillOpacity={aktif === i ? 1 : 0.55}
-                      stroke={colors.surface}
+                      stroke={colors.permukaan}
                       strokeWidth={1.5}
                     />
                   ) : null,
@@ -277,7 +277,7 @@ export function GrafikTren({
             {/* Garis rata-rata: 2px, ujung & sambungan membulat */}
             <Path
               d={jalur}
-              stroke={colors.amber}
+              stroke={colors.aksen.isian}
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -290,8 +290,8 @@ export function GrafikTren({
                 cx={x(indeksTerakhir)}
                 cy={y(terakhirBerisi.rataRataKg)}
                 r={4}
-                fill={colors.amber}
-                stroke={colors.surface}
+                fill={colors.aksen.isian}
+                stroke={colors.permukaan}
                 strokeWidth={2}
               />
             ) : null}
@@ -304,7 +304,7 @@ export function GrafikTren({
                   x2={x(aktif)}
                   y1={PAD_ATAS}
                   y2={PAD_ATAS + TINGGI_PLOT}
-                  stroke={colors.textFaint}
+                  stroke={colors.teksSamar}
                   strokeWidth={1}
                 />
                 {titik[aktif].rataRataKg !== null ? (
@@ -312,8 +312,8 @@ export function GrafikTren({
                     cx={x(aktif)}
                     cy={y(titik[aktif].rataRataKg as number)}
                     r={4}
-                    fill={colors.amber}
-                    stroke={colors.surface}
+                    fill={colors.aksen.isian}
+                    stroke={colors.permukaan}
                     strokeWidth={2}
                   />
                 ) : null}
@@ -322,8 +322,8 @@ export function GrafikTren({
                     cx={x(aktif)}
                     cy={y(titik[aktif].beratHarianKg as number)}
                     r={4}
-                    fill={colors.text}
-                    stroke={colors.surface}
+                    fill={colors.teks}
+                    stroke={colors.permukaan}
                     strokeWidth={2}
                   />
                 ) : null}
@@ -348,7 +348,7 @@ export function GrafikTren({
                 key={`ty-${v}`}
                 style={{
                   ...typography.caption,
-                  color: colors.textFaint,
+                  color: colors.teksSamar,
                   position: 'absolute',
                   left: 0,
                   top: y(v) - 7,
@@ -366,10 +366,10 @@ export function GrafikTren({
       <View
         style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: spacing.xs }}
       >
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {tanggalSingkat(titik[0]?.tanggal)}
         </Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {tanggalSingkat(titik[titik.length - 1]?.tanggal)}
         </Text>
       </View>
@@ -386,9 +386,9 @@ export function GrafikTren({
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
           <View
-            style={{ width: 12, height: 2, backgroundColor: colors.amber, borderRadius: radius.pill }}
+            style={{ width: 12, height: 2, backgroundColor: colors.aksen.isian, borderRadius: radius.pill }}
           />
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>rata-rata 7 hari</Text>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>rata-rata 7 hari</Text>
         </View>
         {koridor ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
@@ -397,12 +397,12 @@ export function GrafikTren({
                 width: 12,
                 height: 8,
                 borderRadius: 2,
-                backgroundColor: colors.jade + '33',
+                backgroundColor: colors.status.sukses.isian + '33',
                 borderWidth: 1,
-                borderColor: colors.aksenTeks.jade + '88',
+                borderColor: colors.status.sukses.teks + '88',
               }}
             />
-            <Text style={{ ...typography.caption, color: colors.textFaint }}>koridor target</Text>
+            <Text style={{ ...typography.caption, color: colors.teksSamar }}>koridor target</Text>
           </View>
         ) : null}
 
@@ -429,15 +429,15 @@ export function GrafikTren({
               width: 7,
               height: 7,
               borderRadius: 4,
-              backgroundColor: tampilkanHarian ? colors.textFaint : 'transparent',
+              backgroundColor: tampilkanHarian ? colors.teksSamar : 'transparent',
               borderWidth: 1,
-              borderColor: colors.textFaint,
+              borderColor: colors.teksSamar,
             }}
           />
           <Text
             style={{
               ...typography.caption,
-              color: colors.textFaint,
+              color: colors.teksSamar,
               textDecorationLine: tampilkanHarian ? 'none' : 'line-through',
             }}
           >

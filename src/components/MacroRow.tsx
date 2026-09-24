@@ -19,21 +19,21 @@ type Props = {
 export function MacroRow({ macro, mode }: Props) {
   const { nilaiUtama, terlampaui, progres } = hitungMakro(macro, mode);
   const tanpaTarget = macro.target === null;
-  const warnaIsian = terlampaui ? colors.coral : colors.macro[macro.key];
-  const warnaTeks = terlampaui ? colors.aksenTeks.coral : colors.macroTeks[macro.key];
+  const warnaIsian = terlampaui ? colors.status.bahaya.isian : colors.macro[macro.key];
+  const warnaTeks = terlampaui ? colors.status.bahaya.teks : colors.macroTeks[macro.key];
 
   return (
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <Text style={{ ...typography.label, color: colors.textMuted }}>{macro.label}</Text>
+        <Text style={{ ...typography.label, color: colors.teksRedup }}>{macro.label}</Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
           {/* Sisa negatif diberi awalan "+" karena angkanya sudah dimutlakkan. */}
-          <Text style={{ ...typography.title, ...angkaTabular, color: terlampaui ? colors.aksenTeks.coral : colors.text }}>
+          <Text style={{ ...typography.title, ...angkaTabular, color: terlampaui ? colors.status.bahaya.teks : colors.teks }}>
             {mode === 'sisa' && terlampaui ? '+' : ''}
             {formatMakro(nilaiUtama)}
           </Text>
-          <Text style={{ ...typography.label, color: colors.textFaint }}>{macro.unit}</Text>
+          <Text style={{ ...typography.label, color: colors.teksSamar }}>{macro.unit}</Text>
         </View>
       </View>
 
@@ -41,7 +41,7 @@ export function MacroRow({ macro, mode }: Props) {
         style={{
           height: ukuran.track,
           borderRadius: radius.pill,
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.permukaanCekung,
           overflow: 'hidden',
         }}
       >
@@ -58,11 +58,11 @@ export function MacroRow({ macro, mode }: Props) {
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {keteranganMakro(macro, mode)}
         </Text>
         {!tanpaTarget ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {formatMakro(macro.terpakai)} / {formatMakro(macro.target as number)} {macro.unit}
           </Text>
         ) : null}

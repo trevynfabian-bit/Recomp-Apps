@@ -39,8 +39,8 @@ export function InputChat({ sibuk, onKirim }: Props) {
         paddingHorizontal: spacing.lg,
         paddingTop: spacing.md,
         borderTopWidth: 1,
-        borderTopColor: colors.border,
-        backgroundColor: colors.bg,
+        borderTopColor: colors.garis,
+        backgroundColor: colors.latar,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
@@ -49,8 +49,8 @@ export function InputChat({ sibuk, onKirim }: Props) {
             flex: 1,
             borderRadius: radius.lg,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
-            backgroundColor: colors.surfaceSunken,
+            borderColor: colors.garisKontrol,
+            backgroundColor: colors.permukaanCekung,
             paddingHorizontal: spacing.lg,
           }}
         >
@@ -58,12 +58,12 @@ export function InputChat({ sibuk, onKirim }: Props) {
             value={teks}
             onChangeText={(t) => setTeks(t.slice(0, MAKS_KARAKTER))}
             placeholder="Tanya apa saja tentang data Anda"
-            placeholderTextColor={colors.textFaint}
+            placeholderTextColor={colors.teksSamar}
             multiline
             accessibilityLabel="Pertanyaan untuk coach"
             style={{
               ...typography.body,
-              color: colors.text,
+              color: colors.teks,
               lineHeight: 22,
               paddingVertical: spacing.md,
               // Tumbuh sampai ~4 baris lalu berhenti; sisanya digulung sendiri.
@@ -85,16 +85,16 @@ export function InputChat({ sibuk, onKirim }: Props) {
             borderRadius: radius.pill,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: bisaKirim ? colors.amber : colors.surfaceSunken,
+            backgroundColor: bisaKirim ? colors.aksen.isian : colors.permukaanCekung,
             borderWidth: 1,
-            borderColor: bisaKirim ? colors.amber : colors.borderKuat,
+            borderColor: bisaKirim ? colors.aksen.isian : colors.garisKontrol,
             opacity: pressed ? 0.8 : 1,
           })}
         >
           <Text
             style={{
               ...typography.title,
-              color: bisaKirim ? colors.diAtasIsian : colors.textFaint,
+              color: bisaKirim ? colors.diAtasIsian : colors.teksSamar,
             }}
           >
             ↑
@@ -107,7 +107,7 @@ export function InputChat({ sibuk, onKirim }: Props) {
       <Text
         style={{
           ...typography.caption,
-          color: sisaKarakter < 0 ? colors.aksenTeks.coral : colors.textFaint,
+          color: sisaKarakter < 0 ? colors.status.bahaya.teks : colors.teksSamar,
           textAlign: 'right',
           minHeight: 14,
         }}

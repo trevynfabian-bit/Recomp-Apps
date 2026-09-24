@@ -87,29 +87,29 @@ export function KartuBodyFat({
   return (
     <Card style={{ gap: spacing.lg }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Body fat
         </Text>
-        <Pill diKartu label="ESTIMASI" warna={colors.amber} />
+        <Pill diKartu label="ESTIMASI" warna={colors.aksen.teks} />
       </View>
 
       {/* Angka, lalu rentangnya. Rentang tidak disembunyikan di balik info icon:
           ia bagian dari angkanya, bukan catatan kaki. */}
       <View style={{ gap: spacing.xs }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
-          <Text style={{ ...typography.display, color: colors.text }}>
+          <Text style={{ ...typography.display, color: colors.teks }}>
             {formatDesimal(hasil.persen)}
           </Text>
-          <Text style={{ ...typography.title, color: colors.textFaint, paddingBottom: 3 }}>%</Text>
+          <Text style={{ ...typography.title, color: colors.teksSamar, paddingBottom: 3 }}>%</Text>
         </View>
-        <Text style={{ ...typography.label, color: colors.textMuted }}>
+        <Text style={{ ...typography.label, color: colors.teksRedup }}>
           wajarnya di antara {formatDesimal(hasil.rentang!.bawah)}% dan{' '}
           {formatDesimal(hasil.rentang!.atas)}%
         </Text>
         {/* Perubahan dan periodenya satu kalimat: dipisah, "sejak 1 September"
             terbaca seolah menerangkan rentang di atasnya. */}
         {selisihPoin !== null && pertama ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             {selisihPoin === 0
               ? 'tidak berubah'
               : `${selisihPoin > 0 ? '+' : '−'}${formatDesimal(Math.abs(selisihPoin))} poin`}{' '}
@@ -124,7 +124,7 @@ export function KartuBodyFat({
           style={{
             flexDirection: 'row',
             borderRadius: radius.md,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.permukaanCekung,
             overflow: 'hidden',
           }}
         >
@@ -133,17 +133,17 @@ export function KartuBodyFat({
             nilai={komposisi.lemakKg}
             warna={colors.macroTeks.lemak}
           />
-          <View style={{ width: 1, backgroundColor: colors.border }} />
+          <View style={{ width: 1, backgroundColor: colors.garis }} />
           <BagianKomposisi
             label="Massa bebas lemak"
             nilai={komposisi.bebasLemakKg}
-            warna={colors.aksenTeks.jade}
+            warna={colors.status.sukses.teks}
           />
         </View>
       ) : null}
 
       {komposisi ? (
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Dihitung dari rata-rata berat 7 hari {formatDesimal(beratRataRataKg!)} kg, bukan timbangan
           satu pagi. Keduanya ikut menanggung ketidakpastian persennya: ±
           {formatDesimal(hasil.ketidakpastian, 0)} poin di sini berarti sekitar ±
@@ -153,7 +153,7 @@ export function KartuBodyFat({
 
       {/* Kenapa angka ini tidak boleh dibaca sebagai hasil pengukuran. */}
       <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Metode Navy menghitungnya dari lingkar pinggang dan leher plus tinggi badan — bukan dari
           lemak yang benar-benar diukur. Galat bakunya sekitar ±
           {formatDesimal(hasil.ketidakpastian, 0)} poin terhadap DXA, jadi ANGKANYA jangan dipakai
@@ -161,7 +161,7 @@ export function KartuBodyFat({
           sebagian besar saling meniadakan saat Anda membandingkannya dengan diri sendiri.
         </Text>
         {hasil.sensitivitasPinggang !== null ? (
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Pada ukuran Anda, meteran pinggang yang meleset 1 cm menggeser estimasi ini{' '}
             {formatDesimal(Math.abs(hasil.sensitivitasPinggang))} poin — itulah kenapa titik ukur
             yang konsisten lebih menentukan daripada ketelitian angkanya.
@@ -187,16 +187,16 @@ export function KartuBodyFat({
           paddingHorizontal: spacing.md,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: colors.borderKuat,
-          backgroundColor: colors.surfaceSunken,
+          borderColor: colors.garisKontrol,
+          backgroundColor: colors.permukaanCekung,
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           Dihitung untuk tinggi {formatDesimal(profil.tinggi_cm!, 0)} cm ·{' '}
           {profil.jenis_kelamin === 'pria' ? 'pria' : 'wanita'}
         </Text>
-        <Text style={{ ...typography.label, color: colors.amber }}>Ubah</Text>
+        <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah</Text>
       </Pressable>
     </Card>
   );
@@ -214,12 +214,12 @@ function BagianKomposisi({
 }) {
   return (
     <View style={{ flex: 1, padding: spacing.md, gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>{label}</Text>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
         {/* Tanda ± bukan hiasan: kedua angka ini turunan dari persen yang estimasi. */}
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>±</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>±</Text>
         <Text style={{ ...typography.title, color: warna }}>{formatDesimal(nilai)}</Text>
-        <Text style={{ ...typography.caption, color: colors.textFaint }}>kg</Text>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>kg</Text>
       </View>
     </View>
   );
@@ -255,13 +255,13 @@ function KartuKosong({
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={{ ...typography.caption, color: colors.textFaint, textTransform: 'uppercase' }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
           Body fat
         </Text>
-        <Pill diKartu label="ESTIMASI" warna={colors.textMuted} />
+        <Pill diKartu label="ESTIMASI" warna={colors.teksRedup} />
       </View>
-      <Text style={{ ...typography.body, color: colors.textMuted }}>Belum bisa dihitung</Text>
-      <Text style={{ ...typography.caption, color: colors.textFaint }}>
+      <Text style={{ ...typography.body, color: colors.teksRedup }}>Belum bisa dihitung</Text>
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
         {alasan ?? 'Data yang dibutuhkan rumus Navy belum lengkap.'}
       </Text>
 
@@ -280,7 +280,7 @@ function KartuKosong({
               justifyContent: 'center',
               paddingVertical: spacing.md,
               borderRadius: radius.lg,
-              backgroundColor: colors.amber,
+              backgroundColor: colors.aksen.isian,
               opacity: pressed ? 0.8 : 1,
             })}
           >
@@ -288,7 +288,7 @@ function KartuKosong({
               Lengkapi profil
             </Text>
           </Pressable>
-          <Text style={{ ...typography.caption, color: colors.textFaint }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
             Cukup sekali isi. Ukuran yang sudah Anda catat tetap tersimpan dan tidak perlu
             diulang — estimasinya langsung muncul begitu datanya lengkap.
           </Text>
@@ -307,12 +307,12 @@ function KartuKosong({
             justifyContent: 'center',
             borderRadius: radius.md,
             borderWidth: 1,
-            borderColor: colors.borderKuat,
-            backgroundColor: colors.surfaceSunken,
+            borderColor: colors.garisKontrol,
+            backgroundColor: colors.permukaanCekung,
             opacity: pressed ? 0.7 : 1,
           })}
         >
-          <Text style={{ ...typography.label, color: colors.amber }}>Ubah data profil</Text>
+          <Text style={{ ...typography.label, color: colors.aksen.teks }}>Ubah data profil</Text>
         </Pressable>
       ) : null}
     </Card>
