@@ -11,7 +11,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card, HeroNumber, KartuSesiLatihan, SectionHeader, TombolIkon } from '@/components';
+import { Card, HeroNumber, KartuSesiLatihan, KeadaanKosong, SectionHeader, TombolIkon } from '@/components';
 import { mockSesiLatihan } from '@/mocks/latihan';
 import { colors, spacing, typography } from '@/theme';
 
@@ -90,15 +90,11 @@ export default function LatihanScreen() {
       />
 
       {kelompok.length === 0 ? (
-        <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodySedang, color: colors.teks }}>
-            Belum ada latihan dari Hevy
-          </Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-            Latihan yang Anda catat di Hevy masuk otomatis setiap jam setelah Hevy dihubungkan di
-            Sumber data.
-          </Text>
-        </Card>
+        <KeadaanKosong
+          ikon="barbell-outline"
+          judul="Belum ada latihan dari Hevy"
+          keterangan="Latihan yang Anda catat di Hevy masuk otomatis setiap jam setelah Hevy dihubungkan di Sumber data."
+        />
       ) : (
         kelompok.map((k) => (
           <View key={k.tanggal}>

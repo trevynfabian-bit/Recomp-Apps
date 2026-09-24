@@ -14,6 +14,8 @@ import {
 import type { HasilLab } from '@recomp/logika';
 import {
   Card,
+  KeadaanGagal,
+  KeadaanKosong,
   KerangkaSheet,
   PenandaSumber,
   SectionHeader,
@@ -110,22 +112,15 @@ export default function HasilLabScreen() {
       </View>
 
       {statusMuat === 'gagal' ? (
-        <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>Hasil lab belum termuat</Text>
-          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-            {pesanGagal}
-          </Text>
-          <TombolBertepi label="Coba lagi" onPress={muatUlang} />
-        </Card>
+        <KeadaanGagal judul="Hasil lab belum termuat" keterangan={pesanGagal} aksi={{ label: 'Coba lagi', onPress: muatUlang }} />
       ) : null}
 
       {statusMuat === 'siap' && kelompok.length === 0 ? (
-        <Card style={{ gap: spacing.sm }}>
-          <Text style={{ ...typography.bodyTebal, color: colors.teks }}>Belum ada hasil lab</Text>
-          <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-            Hasil lab yang Anda tambahkan akan tampil di sini, dikelompokkan per tahun, dan dibaca coach sebagai konteks.
-          </Text>
-        </Card>
+        <KeadaanKosong
+          ikon="flask-outline"
+          judul="Belum ada hasil lab"
+          keterangan="Hasil lab yang Anda tambahkan akan tampil di sini, dikelompokkan per tahun, dan dibaca coach sebagai konteks."
+        />
       ) : null}
 
       {statusHapus === 'terhapus' ? (

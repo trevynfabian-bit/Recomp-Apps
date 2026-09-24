@@ -91,7 +91,14 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    `KeadaanKosong` (netral: apa yang akan tampil + cara mengisinya),
    `KeadaanGagal` (ikon + apa yang gagal + sebab + Coba lagi); masing-masing
    dalam tampilan `kartu`, `polos`, atau `layar`. `LayarMuatTarget` kini
-   tersusun dari keduanya.
+   tersusun dari keduanya. Diterapkan: `hasil-lab` (gagal + kosong),
+   `latihan` (kosong), `SheetCatatFoto` (menganalisis), `SheetHubungkanSumber`
+   (menunggu izin + gagal, `netral` saat dibatalkan pengguna). Ikut dibereskan:
+   tiga tombol lokal dan pengurai angka lokal di `SheetCatatFoto` diganti
+   `Tombol`/`uraiAngka`. Sengaja tetap khusus: aksi berpasangan di
+   `BannerBatasPinggang` (warna mengikuti status banner) dan −/+ jam di
+   `SheetJamTimbang` (tersembunyi dari pembaca layar karena pembungkusnya
+   `adjustable`).
 5. **Kartu angka hero**: varian sekunder untuk angka pendukung.
 
 Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).

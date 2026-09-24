@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, View } from 'react-native';
 import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { analisisFotoStub, type HasilAnalisisFoto } from '@/mocks/fotoAi';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 import type { FoodLog } from '@/types/domain';
 import { Isian } from './Isian';
+import { KeadaanMemuat } from './Keadaan';
+import { uraiAngka } from './Pemilih';
+import { Tombol } from './Tombol';
 
 /** Entri makanan baru yang siap disimpan (tanpa id & relasi, diisi pemanggil). */
 export type EntriMakananBaru = Omit<FoodLog, 'id' | 'daily_log_id'>;
@@ -61,7 +64,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
 
   const valid =
     nama.trim() !== '' &&
-    [kalori, protein, lemak, karbo, satFat].every((v) => urai(v) !== null);
+    [kalori, protein, lemak, karbo, satFat].every((v) => uraiAngka(v) !== null);
 
   function simpan() {
     if (!valid) return;
@@ -69,11 +72,11 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
     onSimpan({
       nama_makanan: nama.trim(),
       foto_url: null, // Fase 4 mengisi ini dengan objek di Supabase Storage.
-      kalori: Math.round(urai(kalori) ?? 0),
-      protein_g: urai(protein) ?? 0,
-      lemak_g: urai(lemak) ?? 0,
-      karbo_g: urai(karbo) ?? 0,
-      sat_fat_g: urai(satFat) ?? 0,
+      kalori: Math.round(uraiAngka(kalori) ?? 0),
+      protein_g: uraiAngka(protein) ?? 0,
+      lemak_g: uraiAngka(lemak) ?? 0,
+      karbo_g: uraiAngka(karbo) ?? 0,
+      sat_fat_g: uraiAngka(satFat) ?? 0,
       sumber: 'foto_ai',
     });
     onTutup();
@@ -118,7 +121,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
             {tahap === 'pilih' ? (
               <TahapPilih onMulai={jalankanAnalisis} />
             ) : tahap === 'menganalisis' ? (
-              <TahapMenganalisis />
+              <KeadaanMemuat label="Menganalisis foto…" keterangan="Hasilnya berupa estimasi dan masih bisa Anda koreksi." />
             ) : (
               <View style={{ gap: spacing.lg }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
@@ -156,13 +159,13 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
                 </Text>
 
                 <View style={{ gap: spacing.md }}>
-                  <TombolUtama label="Simpan" aktif={valid} onPress={simpan} />
-                  <TombolTeks label="Foto ulang" onPress={() => setTahap('pilih')} />
+                  <Tombol label="Simpan" nonaktif={!valid} onPress={simpan} />
+                  <Tombol label="Foto ulang" varian="teks" nada="netral" sejajar="tengah" onPress={() => setTahap('pilih')} />
                 </View>
               </View>
             )}
 
-            {tahap !== 'hasil' ? <TombolTeks label="Batal" onPress={onTutup} /> : null}
+            {tahap !== 'hasil' ? <Tombol label="Batal" varian="teks" nada="netral" sejajar="tengah" onPress={onTutup} /> : null}
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -193,100 +196,12 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
         </Text>
       </View>
 
-      <TombolUtama label="Ambil foto" aktif onPress={onMulai} />
-      <TombolSekunder label="Pilih dari galeri" onPress={onMulai} />
+      <Tombol label="Ambil foto" onPress={onMulai} />
+      <Tombol label="Pilih dari galeri" varian="bertepi" onPress={onMulai} />
 
       <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
         Fase 1 memakai hasil analisis tiruan — kamera & AI asli dipasang di Fase 4.
       </Text>
     </View>
   );
-}
-
-/** Tahap tunggu selama "analisis" berjalan. */
-function TahapMenganalisis() {
-  return (
-    <View style={{ height: 240, alignItems: 'center', justifyContent: 'center', gap: spacing.lg }}>
-      <ActivityIndicator size="large" color={colors.aksen.teks} />
-      <Text style={{ ...typography.body, color: colors.teksRedup }}>Menganalisis foto…</Text>
-      <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
-        Hasilnya berupa estimasi dan masih bisa Anda koreksi.
-      </Text>
-    </View>
-  );
-}
-
-function TombolUtama({
-  label,
-  aktif,
-  onPress,
-}: {
-  label: string;
-  aktif: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={!aktif}
-      onPress={onPress}
-      style={({ pressed }) => ({
-        backgroundColor: aktif ? colors.aksen.isian : colors.permukaanCekung,
-        borderRadius: radius.lg,
-        minHeight: TAP_MIN,
-        justifyContent: 'center',
-        paddingVertical: spacing.lg,
-        alignItems: 'center',
-        opacity: pressed ? 0.8 : 1,
-      })}
-    >
-      <Text
-        style={{ ...typography.bodyTebal, color: aktif ? colors.diAtasIsian : colors.teksSamar }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function TombolSekunder({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => ({
-        borderRadius: radius.lg,
-        borderWidth: 1,
-        borderColor: colors.garisKontrol,
-        backgroundColor: colors.permukaanCekung,
-        minHeight: TAP_MIN,
-        justifyContent: 'center',
-        paddingVertical: spacing.lg,
-        alignItems: 'center',
-        opacity: pressed ? 0.7 : 1,
-      })}
-    >
-      <Text style={{ ...typography.bodySedang, color: colors.teks }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-function TombolTeks({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={{ minHeight: TAP_MIN, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <Text style={{ ...typography.label, color: colors.teksSamar }}>{label}</Text>
-    </Pressable>
-  );
-}
-
-/** Urai input angka; menerima koma maupun titik sebagai pemisah desimal. */
-function urai(teks: string): number | null {
-  const bersih = teks.replace(',', '.').trim();
-  if (bersih === '') return null;
-  const n = Number(bersih);
-  return Number.isFinite(n) && n >= 0 ? n : null;
 }

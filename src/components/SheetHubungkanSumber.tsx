@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { pesanGagalHubungkan, PROFIL_SUMBER, samarkanKunci, validasiKunciHevy } from '@recomp/logika';
 import type { HasilHubungkan, SumberData } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
@@ -7,6 +7,7 @@ import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { colors, radius, spacing, typography } from '@/theme';
 import { Isian } from './Isian';
+import { KeadaanGagal, KeadaanMemuat } from './Keadaan';
 
 type Langkah =
   | { jenis: 'penjelasan' }
@@ -183,18 +184,16 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
       ) : null}
 
       {langkah.jenis === 'proses' ? (
-        <View style={{ alignItems: 'center', gap: spacing.lg, paddingVertical: spacing.xl }}>
-          <ActivityIndicator color={colors.aksen.teks} size="large" />
-          <Text
-            accessibilityLiveRegion="polite"
-            style={{ ...typography.body, color: colors.teks, textAlign: 'center' }}
-          >
-            {profil.otorisasi === 'healthkit'
-              ? 'Menunggu izin dari Apple Health…'
-              : profil.otorisasi === 'oauth'
-                ? `Menunggu persetujuan di ${profil.nama}…`
-                : 'Memeriksa kunci ke Hevy…'}
-          </Text>
+        <View style={{ gap: spacing.lg }}>
+          <KeadaanMemuat
+            label={
+              profil.otorisasi === 'healthkit'
+                ? 'Menunggu izin dari Apple Health…'
+                : profil.otorisasi === 'oauth'
+                  ? `Menunggu persetujuan di ${profil.nama}…`
+                  : 'Memeriksa kunci ke Hevy…'
+            }
+          />
           {/* Izin HealthKit dijawab dialog sistem, bukan halaman yang bisa
               ditinggal; hanya OAuth & kunci yang masuk akal dibatalkan. */}
           {profil.otorisasi !== 'healthkit' ? (
@@ -265,21 +264,14 @@ function GagalHubungkan({
   // Membatalkan sendiri bukan kegagalan: judulnya netral, tanpa warna peringatan.
   const netral = alasan === 'dibatalkan';
   return (
-    <>
-      <Text
-        accessibilityLiveRegion="polite"
-        style={{ ...typography.title, color: netral ? colors.teks : colors.status.bahaya.teks }}
-      >
-        {pesan.judul}
-      </Text>
-      <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-        {pesan.keterangan}
-      </Text>
-      <View style={{ gap: spacing.sm }}>
-        <TombolUtama label="Coba lagi" onPress={onCobaLagi} />
-        <TombolBertepi label="Tutup" onPress={onTutup} />
-      </View>
-    </>
+    <KeadaanGagal
+      tampilan="polos"
+      netral={netral}
+      judul={pesan.judul}
+      keterangan={pesan.keterangan}
+      aksi={{ label: 'Coba lagi', onPress: onCobaLagi }}
+      aksiKedua={{ label: 'Tutup', onPress: onTutup }}
+    />
   );
 }
 

@@ -18,7 +18,7 @@ type Aksi = { label: string; onPress: () => void };
 type Props = {
   judul: string;
   /** Satu-dua kalimat: apa yang terjadi dan apa yang bisa dilakukan. */
-  keterangan?: string;
+  keterangan?: string | null;
   /** Aksi utama (mis. "Tambah hasil lab", "Coba lagi"). */
   aksi?: Aksi;
   /** Aksi kedua yang lebih ringan (mis. "Keluar"). */
@@ -62,16 +62,37 @@ function DeretAksi({ aksi, aksiKedua, utamaBertepi }: { aksi?: Aksi; aksiKedua?:
  * Sedang memuat. Spinner + kalimat yang menyebut APA yang dimuat ("Memuat
  * target harian…"), bukan sekadar "Memuat…". Diumumkan ke pembaca layar.
  */
-export function KeadaanMemuat({ label, tampilan = 'polos' }: { label: string; tampilan?: TampilanKeadaan }) {
+export function KeadaanMemuat({
+  label,
+  keterangan,
+  tampilan = 'polos',
+}: {
+  label: string;
+  /** Baris kedua, mis. "Hasilnya berupa estimasi dan masih bisa Anda koreksi." */
+  keterangan?: string;
+  tampilan?: TampilanKeadaan;
+}) {
+  // Dengan keterangan, atau di layar penuh, susunannya bertumpuk dan lebih lega.
+  const tumpuk = tampilan === 'layar' || Boolean(keterangan);
   return (
     <Bingkai tampilan={tampilan}>
       <View
         accessibilityLiveRegion="polite"
-        accessibilityLabel={label}
-        style={{ flexDirection: tampilan === 'layar' ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.md }}
+        style={{
+          flexDirection: tumpuk ? 'column' : 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: tumpuk ? spacing.lg : spacing.md,
+          paddingVertical: tumpuk ? spacing.xl : 0,
+        }}
       >
-        <ActivityIndicator color={colors.aksen.isian} />
-        <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{label}</Text>
+        <ActivityIndicator size={tumpuk ? 'large' : 'small'} color={colors.aksen.isian} />
+        <Text style={{ ...(tumpuk ? typography.body : typography.labelBiasa), color: colors.teksRedup, textAlign: 'center' }}>
+          {label}
+        </Text>
+        {keterangan ? (
+          <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>{keterangan}</Text>
+        ) : null}
       </View>
     </Bingkai>
   );
@@ -108,12 +129,24 @@ export function KeadaanKosong({
  * yang layak tampil, dan jalan keluar (biasanya "Coba lagi"). Ikon + judul,
  * tidak pernah warna saja; diumumkan ke pembaca layar.
  */
-export function KeadaanGagal({ judul, keterangan, aksi, aksiKedua, tampilan = 'kartu' }: Props) {
+export function KeadaanGagal({
+  judul,
+  keterangan,
+  aksi,
+  aksiKedua,
+  tampilan = 'kartu',
+  netral = false,
+}: Props & {
+  /** Bukan kegagalan sungguhan (mis. pengguna membatalkan sendiri): tanpa ikon peringatan. */
+  netral?: boolean;
+}) {
   return (
     <Bingkai tampilan={tampilan}>
       <View accessibilityLiveRegion="polite" style={{ gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Ionicons name="alert-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
+          {netral ? null : (
+            <Ionicons name="alert-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
+          )}
           <Text
             accessibilityRole="header"
             style={{ ...(tampilan === 'layar' ? typography.title : typography.bodySedang), color: colors.teks, flex: 1 }}
@@ -127,9 +160,9 @@ export function KeadaanGagal({ judul, keterangan, aksi, aksiKedua, tampilan = 'k
           </Text>
         ) : null}
       </View>
-      {/* Di layar penuh "Coba lagi" adalah satu-satunya jalan, jadi utama;
-          di kartu ia aksi kedua di antara isi layar lain, jadi bertepi. */}
-      <DeretAksi aksi={aksi} aksiKedua={aksiKedua} utamaBertepi={tampilan !== 'layar'} />
+      {/* Di layar penuh atau di dalam sheet, "Coba lagi" adalah jalan utama; di
+          kartu ia aksi kedua di antara isi layar lain, jadi bertepi. */}
+      <DeretAksi aksi={aksi} aksiKedua={aksiKedua} utamaBertepi={tampilan === 'kartu'} />
     </Bingkai>
   );
 }
