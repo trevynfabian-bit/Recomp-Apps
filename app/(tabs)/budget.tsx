@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  bandingkanTargetTdee,
   budgetMingguan,
+  estimasiBodyFatNavy,
+  estimasiTdee,
+  faseSaat,
   formatAngka,
   formatTanggalPanjang,
   lajuBudget,
-  bandingkanTargetTdee,
-  estimasiTdee,
-  faseSaat,
   periksaProteksiProtein,
   redistribusiBasi,
   rincianKumulatif,
@@ -32,6 +33,7 @@ import {
 } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
+import { mockUkuran } from '@/mocks/ukuran';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
 import { colors, radius, spacing, tint, typography } from '@/theme';
@@ -105,14 +107,23 @@ export default function BudgetScreen() {
   const beratAwal = mockRiwayatBerat[0]?.berat_pagi_kg ?? null;
   const beratAkhir = mockRiwayatBerat[mockRiwayatBerat.length - 1]?.berat_pagi_kg ?? null;
 
+  const ukuranTerakhir = mockUkuran[mockUkuran.length - 1] ?? null;
   const tdee = estimasiTdee({
     beratKg: beratAkhir ?? 75,
     tinggiCm: profil.tinggi_cm,
     usiaTahun: usiaPada(profil.tanggal_lahir, hariIni),
     jenisKelamin: profil.jenis_kelamin,
-    // Body fat Navy butuh ukuran pinggang & leher — itu Fase 2, jadi metode
-    // Katch-McArdle sengaja dilewati sampai datanya ada.
-    persenLemak: null,
+    // Body fat Navy dari pencatatan lingkar terakhir (sama dengan kartu Body
+    // fat di Ukuran). Tanpa tinggi/jenis kelamin atau ukuran, `null`, dan
+    // Katch-McArdle dilewati, tidak ditebak.
+    persenLemak: ukuranTerakhir
+      ? estimasiBodyFatNavy({
+          jenisKelamin: profil.jenis_kelamin,
+          tinggiCm: profil.tinggi_cm,
+          pinggangCm: ukuranTerakhir.pinggang_cm,
+          leherCm: ukuranTerakhir.leher_cm,
+        }).persen
+      : null,
     tipeHariMinggu: budget.rincian.map((h) => h.namaTipeHari),
     hariData: mockRiwayatBerat.length,
     rataAsupanKalori:
