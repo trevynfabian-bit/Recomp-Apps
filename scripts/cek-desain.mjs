@@ -156,6 +156,36 @@ const heroBerwarna = layar.flatMap((p) => {
 });
 cek('angka hero: warna dari nada, pengganti lewat HeroPengganti', heroBerwarna.length === 0, heroBerwarna);
 
+bagian('Keadaan layar');
+/**
+ * Keadaan memuat/kosong (bab Desain 8.6): lewat KeadaanMemuat / KeadaanKosong,
+ * bukan teks "Belum ada …" atau spinner yang dirakit per layar. Spinner hanya
+ * boleh di komponen yang memang menggambar keadaan sibuk.
+ */
+const SPINNER_BOLEH = ['Keadaan.tsx', 'Tombol.tsx', 'IndikatorSinkron.tsx'];
+const keadaanRakitan = [...layar, ...berkasTsx('src/components')]
+  .filter((p) => !p.endsWith('Keadaan.tsx') && !p.endsWith('peraga.tsx'))
+  .flatMap((p) => {
+    const sf = ts.createSourceFile(p, readFileSync(p, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const hasil = [];
+    const baris = (n) => sf.getLineAndCharacterOfPosition(n.getStart()).line + 1;
+    (function kunjungi(n) {
+      if (ts.isJsxText(n) && /^\s*Belum ada\b/.test(n.getText(sf))) {
+        hasil.push(`${p}:${baris(n)}  "${n.getText(sf).trim().slice(0, 40)}" → KeadaanKosong`);
+      }
+      if (
+        (ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)) &&
+        n.tagName.getText(sf) === 'ActivityIndicator' &&
+        !SPINNER_BOLEH.some((b) => p.endsWith(b))
+      ) {
+        hasil.push(`${p}:${baris(n)}  <ActivityIndicator> → KeadaanMemuat atau Tombol memproses`);
+      }
+      ts.forEachChild(n, kunjungi);
+    })(sf);
+    return hasil;
+  });
+cek('keadaan memuat/kosong lewat komponen Keadaan*', keadaanRakitan.length === 0, keadaanRakitan);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];

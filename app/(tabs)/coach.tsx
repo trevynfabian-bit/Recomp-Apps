@@ -9,7 +9,16 @@ import {
   kelompokkanPerTanggal,
   tanggalHariIni,
 } from '@recomp/logika';
-import { GelembungMengetik, GelembungPesan, HeaderLayar, InputChat, PemisahTanggal, SheetRiwayatPercakapan, Tombol } from '@/components';
+import {
+  GelembungMengetik,
+  GelembungPesan,
+  HeaderLayar,
+  InputChat,
+  KeadaanKosong,
+  PemisahTanggal,
+  SheetRiwayatPercakapan,
+  Tombol,
+} from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { useProfil } from '@/state/profil';
 import { balasCoachStub, mockRiwayatPercakapan, SARAN_PERTANYAAN } from '@/mocks/coach';
@@ -209,21 +218,12 @@ export default function CoachScreen() {
         }}
       >
         {kosong ? (
-          <View style={{ alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg }}>
-            <Text style={{ ...typography.body, color: colors.teksRedup, textAlign: 'center' }}>
-              Belum ada percakapan
-            </Text>
-            <Text
-              style={{
-                ...typography.caption,
-                color: colors.teksSamar,
-                textAlign: 'center',
-              }}
-            >
-              Coach membaca log harian, tren berat, ukuran tubuh, dan budget mingguan Anda —
-              jadi pertanyaannya boleh langsung soal angka Anda sendiri.
-            </Text>
-          </View>
+          <KeadaanKosong
+            tampilan="polos"
+            ikon="chatbubbles-outline"
+            judul="Belum ada percakapan"
+            keterangan="Coach membaca log harian, tren berat, ukuran tubuh, dan budget mingguan Anda, jadi pertanyaannya boleh langsung soal angka Anda sendiri."
+          />
         ) : (
           pesan.map((m, i) => (
             <View key={m.id} style={{ gap: spacing.lg }}>

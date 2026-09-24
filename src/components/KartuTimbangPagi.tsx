@@ -8,6 +8,7 @@ import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
+import { KeadaanKosong } from './Keadaan';
 import { Tombol } from './Tombol';
 import { PemilihAngka, uraiAngka } from './Pemilih';
 import { formatSelisih } from '@/lib/formatTampilan';
@@ -306,9 +307,11 @@ export function KartuTimbangPagi({
                 ))}
               </View>
             ) : (
-              <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
-                Belum ada catatan berat sebelumnya
-              </Text>
+              <KeadaanKosong
+                tampilan="polos"
+                judul="Belum ada catatan berat sebelumnya"
+                keterangan="Timbangan yang Anda simpan tampil di sini sebagai pembanding."
+              />
             )}
 
             {/* Penjaga salah ketik: lompatan tak wajar diminta dikonfirmasi. */}

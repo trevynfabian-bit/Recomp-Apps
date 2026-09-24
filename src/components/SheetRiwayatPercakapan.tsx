@@ -3,6 +3,7 @@ import { formatJam, labelTanggalRelatif, tanggalDariWaktu, tanggalHariIni } from
 import { ketukRingan } from '@/lib/haptics';
 import type { Percakapan } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { KeadaanKosong } from './Keadaan';
 import { Tombol } from './Tombol';
 
 type Props = {
@@ -78,16 +79,13 @@ export function SheetRiwayatPercakapan({
             <Tombol label="Percakapan baru" aksesLabel="Mulai percakapan baru" onPress={onBaru} />
 
             {urut.length === 0 ? (
-              <Text
-                style={{
-                  ...typography.caption,
-                  color: colors.teksSamar,
-                  textAlign: 'center',
-                  paddingVertical: spacing.xl,
-                }}
-              >
-                Belum ada percakapan tersimpan.
-              </Text>
+              <View style={{ paddingVertical: spacing.lg }}>
+                <KeadaanKosong
+                  tampilan="polos"
+                  judul="Belum ada percakapan tersimpan"
+                  keterangan="Setiap percakapan dengan Coach tersimpan otomatis dan muncul di sini."
+                />
+              </View>
             ) : (
               urut.map((p) => {
                 const aktif = p.id === aktifId;

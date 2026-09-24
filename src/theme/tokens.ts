@@ -72,6 +72,8 @@ export const ukuran = {
   isianPanjang: 96,
   /** Kolom tempel teks mesin (CSV): cukup untuk ~8 baris, lalu menggulir. */
   isianTempel: { min: 140, maks: 220 },
+  /** Bingkai foto makanan sebelum difoto (SheetCatatFoto). */
+  bingkaiFoto: 160,
   /** Tinggi chip indikator kecil (status sinkron di header). */
   indikator: 24,
   /** Garis contoh di legenda grafik (garis rata-rata). */

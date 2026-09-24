@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, Text, View } from 'react-native';
 import { InputAngka } from './InputAngka';
 import { Pill } from './Pill';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { analisisFotoStub, type HasilAnalisisFoto } from '@/mocks/fotoAi';
-import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, typography, ukuran, ukuranIkon } from '@/theme';
 import type { FoodLog } from '@/types/domain';
 import { Isian } from './Isian';
 import { KeadaanMemuat } from './Keadaan';
@@ -179,7 +180,7 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
     <View style={{ gap: spacing.lg }}>
       <View
         style={{
-          height: 160,
+          height: ukuran.bingkaiFoto,
           borderRadius: radius.lg,
           borderWidth: 2,
           borderStyle: 'dashed',
@@ -190,9 +191,9 @@ function TahapPilih({ onMulai }: { onMulai: () => void }) {
           gap: spacing.sm,
         }}
       >
-        <Text style={{ ...typography.display, color: colors.teksSamar }}>📷</Text>
+        <Ionicons name="camera-outline" size={ukuranIkon.hasil} color={colors.teksSamar} accessibilityElementsHidden />
         <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-          Belum ada foto
+          Foto makanan tampil di sini
         </Text>
       </View>
 

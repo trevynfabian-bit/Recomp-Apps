@@ -17,6 +17,7 @@ import {
   HeaderLayar,
   KeadaanGagal,
   KeadaanKosong,
+  KeadaanMemuat,
   KerangkaSheet,
   PenandaSumber,
   SectionHeader,
@@ -96,6 +97,8 @@ export default function HasilLabScreen() {
           memeriksa; artinya dibicarakan dengan dokter.
         </Text>
       </View>
+
+      {statusMuat === 'memuat' ? <KeadaanMemuat tampilan="kartu" label="Memuat hasil lab…" /> : null}
 
       {statusMuat === 'gagal' ? (
         <KeadaanGagal judul="Hasil lab belum termuat" keterangan={pesanGagal} aksi={{ label: 'Coba lagi', onPress: muatUlang }} />
