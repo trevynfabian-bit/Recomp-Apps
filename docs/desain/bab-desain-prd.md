@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.0 (24 September 2026) |
+| **Versi** | 1.1 (24 September 2026) |
 | **Penjaga** | `npm run cek:desain`, `npm run cek:kontras` |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
@@ -36,6 +36,8 @@ berubah karena keputusan desain.
   dan varian teks kecil yang lebih terang. Di mode terang satu nilai aksen yang
   digelapkan melayani keduanya.
 - Label di atas isian memakai peran `teksDiAtasIsian`, bukan warna latar.
+- `info` hanya dipakai sebagai teks, bar, atau mark; tidak pernah sebagai isian
+  tombol/chip berlabel (label di atasnya 4,41:1 di mode gelap).
 - Pill di atas kartu/sheet tanpa isian (`diKartu`); pill bertint hanya di atas
   latar layar.
 
@@ -133,3 +135,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | Versi | Tanggal | Perubahan |
 |---|---|---|
 | 1.0 | 24 September 2026 | Bab pertama: palet semantik dua mode, tipografi dengan tinggi baris dan varian bernama, kepadatan & radius, komposisi layar, penjaga otomatis. |
+| 1.1 | 24 September 2026 | Lapis semantik diwujudkan di `src/theme/colors.ts` (`latar`, `permukaan`, `teks*`, `aksen`, `status.*`); `info` dibatasi ke teks/bar/mark. |

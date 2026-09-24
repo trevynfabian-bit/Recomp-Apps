@@ -8,7 +8,8 @@
  * `aksenTeks` dan `macroTeks` yang sedikit lebih terang dengan hue yang sama.
  * Aturannya: isian pakai warna dasar, teks kecil pakai varian teks.
  */
-const paletGelap = {
+/** Palet DASAR mode gelap: nilai heks, dinamai menurut warnanya. */
+const dasarGelap = {
   /** Latar utama aplikasi. */
   bg: '#14151A',
   /** Latar kartu / permukaan yang diangkat satu tingkat. */
@@ -74,22 +75,13 @@ const paletGelap = {
   },
 };
 
-/** Bentuk palet: setiap mode wajib punya kunci yang sama. */
-export type Palet = {
-  [K in keyof typeof paletGelap]: (typeof paletGelap)[K] extends string
-    ? string
-    : { [J in keyof (typeof paletGelap)[K]]: string };
-};
+/** Mengubah semua daun string menjadi `string` biasa (bukan literal). */
+type Heks<T> = { [K in keyof T]: T[K] extends string ? string : Heks<T[K]> };
 
-/**
- * Mode terang (docs/desain/arah-visual.md bab 1.6). Peran sama, nilai berbeda.
- *
- * Aksen di sini SATU nilai untuk isian dan teks: amber/coral/jade asli terlalu
- * terang untuk teks di atas putih (amber 2,1:1), jadi semuanya digelapkan
- * sampai lolos 4,5:1 sebagai teks — sekaligus cukup gelap untuk label putih
- * di atasnya (`diAtasIsian`) dan 3:1 terhadap track. Hue tetap sama.
- */
-const paletTerang: Palet = {
+/** Bentuk palet dasar: setiap mode wajib punya kunci yang sama. */
+type Dasar = Heks<typeof dasarGelap>;
+
+const dasarTerang: Dasar = {
   bg: '#F4F5F7',
   surface: '#FFFFFF',
   surfaceSunken: '#E9EBEF',
@@ -128,9 +120,64 @@ const paletTerang: Palet = {
   },
 };
 
+/** Isian (bar, tombol, pill, mark) dan teks kecil untuk satu peran warna. */
+type Peran = { isian: string; teks: string };
+
+/**
+ * Lapis SEMANTIK (bab Desain 8.2): nama menurut MAKNA, dibentuk dari palet
+ * dasar sehingga setiap heks tetap hanya ditulis sekali. Layar & komponen
+ * memakai lapis ini; nama warna mentah (`amber`, `surface`, …) adalah token
+ * lama yang dipensiunkan bertahap (task "Pembersihan Token Lama").
+ */
+function lengkapi(d: Dasar) {
+  return {
+    ...d,
+
+    /** Latar layar, splash, tab bar. */
+    latar: d.bg,
+    /** Kartu dan sheet. */
+    permukaan: d.surface,
+    /** Track progress, field isian, kontrol segmen. */
+    permukaanCekung: d.surfaceSunken,
+    /** Pemisah dekoratif (sengaja resesif, <2:1). */
+    garis: d.border,
+    /** Tepi kontrol (≥3:1). */
+    garisKontrol: d.borderKuat,
+
+    /** Teks utama. */
+    teks: d.text,
+    /** Teks pendukung dan keterangan. */
+    teksRedup: d.textMuted,
+    /** Label, unit, keterangan paling redup. */
+    teksSamar: d.textFaint,
+    // `diAtasIsian` sudah bernama semantik di palet dasar.
+
+    /** Suara merek: CTA, angka hero, tab aktif, pilihan terpilih. */
+    aksen: { isian: d.amber, teks: d.amber } satisfies Peran,
+
+    /** Warna status; SELALU disertai label atau ikon, tidak pernah warna saja. */
+    status: {
+      /** On-track, tersambung, tersimpan. */
+      sukses: { isian: d.jade, teks: d.aksenTeks.jade } satisfies Peran,
+      /** Mendekati batas, perlu perhatian. Satu hue dengan aksen. */
+      peringatan: { isian: d.amber, teks: d.amber } satisfies Peran,
+      /** Batas terlampaui, galat, tindakan merusak. */
+      bahaya: { isian: d.coral, teks: d.aksenTeks.coral } satisfies Peran,
+      /**
+       * Keterangan netral yang perlu dibedakan (estimasi, sumber). Isiannya
+       * hanya untuk bar & mark, bukan tombol berlabel (label di atasnya 4,41:1).
+       */
+      info: { isian: d.macro.karbo, teks: d.macroTeks.karbo } satisfies Peran,
+    },
+  };
+}
+
+/** Palet lengkap (dasar + semantik). Setiap mode punya bentuk yang sama. */
+export type Palet = Heks<ReturnType<typeof lengkapi>>;
+
 export type Skema = 'gelap' | 'terang';
 
-export const palet: Record<Skema, Palet> = { gelap: paletGelap, terang: paletTerang };
+export const palet: Record<Skema, Palet> = { gelap: lengkapi(dasarGelap), terang: lengkapi(dasarTerang) };
 
 /**
  * Palet yang BERLAKU. Satu objek yang isinya ditukar oleh `terapkanSkema`,
@@ -138,7 +185,7 @@ export const palet: Record<Skema, Palet> = { gelap: paletGelap, terang: paletTer
  * Konsekuensinya: jangan menyimpan `colors.x` di konstanta tingkat modul —
  * nilainya akan membeku di mode saat modul dimuat (dijaga `cek:desain`).
  */
-export const colors: Palet = salin(paletGelap);
+export const colors: Palet = salin(palet.gelap);
 
 let skemaAktif: Skema = 'gelap';
 
@@ -150,11 +197,14 @@ export function skemaBerlaku(): Skema {
 /** Menukar isi `colors` ke palet skema lain. Idempoten. */
 export function terapkanSkema(skema: Skema): void {
   skemaAktif = skema;
-  const sumber = palet[skema];
-  for (const k of Object.keys(sumber) as (keyof Palet)[]) {
-    const nilai = sumber[k];
-    if (typeof nilai === 'string') (colors as Record<string, unknown>)[k] = nilai;
-    else Object.assign(colors[k] as object, nilai);
+  timpa(colors, palet[skema]);
+}
+
+/** Salin daun demi daun, supaya objek bersarang di `colors` tetap objek yang sama. */
+function timpa(tujuan: Record<string, unknown>, sumber: Record<string, unknown>): void {
+  for (const [k, nilai] of Object.entries(sumber)) {
+    if (typeof nilai === 'string') tujuan[k] = nilai;
+    else timpa(tujuan[k] as Record<string, unknown>, nilai as Record<string, unknown>);
   }
 }
 
@@ -162,5 +212,4 @@ function salin(p: Palet): Palet {
   return JSON.parse(JSON.stringify(p)) as Palet;
 }
 
-
-export type MacroKey = keyof typeof paletGelap.macro;
+export type MacroKey = keyof typeof dasarGelap.macro;

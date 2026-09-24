@@ -79,6 +79,23 @@ label 16px tebal. Aturan resmi: label di atas isian apa pun memakai
 `teksDiAtasIsian` (`#14151A` di atas coral = **4,64:1**). Sudah diperbaiki di
 `src/components/Tombol.tsx` saat verifikasi (1.6).
 
+### 1.4a Nama di kode
+
+Lapis semantik ada di `src/theme/colors.ts` (fungsi `lengkapi`), dibentuk dari
+palet dasar sehingga setiap heks hanya ditulis sekali:
+
+| Peran | Kode |
+|---|---|
+| latar / permukaan / permukaanCekung | `colors.latar` / `colors.permukaan` / `colors.permukaanCekung` |
+| garis / garisKontrol | `colors.garis` / `colors.garisKontrol` |
+| teks / teksRedup / teksSamar | `colors.teks` / `colors.teksRedup` / `colors.teksSamar` |
+| teksDiAtasIsian | `colors.diAtasIsian` |
+| aksen | `colors.aksen.isian` / `colors.aksen.teks` |
+| sukses, peringatan, bahaya, info | `colors.status.<peran>.isian` / `.teks` |
+
+Nama lama (`bg`, `surface`, `amber`, `aksenTeks`, …) tetap ada selama masa
+peralihan dan dipensiunkan di task "Pembersihan Token Lama".
+
 ### 1.5 Verifikasi kontras (WCAG 2.1 AA)
 
 Dijalankan dengan `npm run cek:kontras`. Ambang: 4,5:1 teks kecil, 3:1 teks

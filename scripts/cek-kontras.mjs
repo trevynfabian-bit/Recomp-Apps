@@ -131,6 +131,18 @@ const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
   // akan langsung gagal.
   ['textMuted di pilihan terpilih', c.textMuted, PILIHAN_AMBER, false],
 
+  // Peran semantik (bab Desain 8.2): teks tiap peran di tiga permukaan, dan
+  // isiannya sebagai mark terhadap track.
+  ...[['aksen', c.aksen], ...Object.entries(c.status)].flatMap(([nama, p]) => [
+    [`peran ${nama}: teks di latar`, p.teks, c.latar, false],
+    [`peran ${nama}: teks di permukaan`, p.teks, c.permukaan, false],
+    [`peran ${nama}: teks di permukaanCekung`, p.teks, c.permukaanCekung, false],
+    [`peran ${nama}: isian vs track`, p.isian, c.permukaanCekung, true],
+    // `info` TIDAK pernah menjadi isian berlabel (tombol/chip): di mode gelap
+    // label di atas ungu karbo hanya 4,41:1. Isiannya hanya bar & mark.
+    ...(nama === 'info' ? [] : [[`peran ${nama}: diAtasIsian di isian`, c.diAtasIsian, p.isian, false]]),
+  ]),
+
   // Pill status, satu baris per peran di arah-visual bab 1.3. Di atas `bg`
   // pill bertint (warna + '1A'); di atas kartu/sheet pill memakai `diKartu`
   // (tanpa isian), sehingga teksnya berdiri langsung di atas `surface`.
