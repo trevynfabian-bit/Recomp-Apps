@@ -184,7 +184,16 @@ Keputusan penting:
 - **`teksDiAtasIsian` adalah peran sendiri** (`colors.diAtasIsian`). Dulu label
   di atas tombol memakai `colors.bg`; itu hanya benar di mode gelap. 24
   pemakaian sudah dipindahkan.
-- **Bayangan kartu** 35% di gelap, 8% di terang (`BAYANGAN_KARTU` membaca skema).
+- **Bayangan** (`bayangan.kartu` / `bayangan.melayang` di `tokens.ts`) membaca
+  skema: kartu 35% di gelap, 8% di terang; elemen melayang 40% / 14%.
+- **Selubung sheet** (`colors.selubung`): hitam 67% di gelap, `#14151A` 35% di
+  terang.
+- **Tint bernama.** Kepekatan tint tidak lagi ditempel sebagai alfa heks
+  (`warna + '14'`, 41 tempat saat audit); semuanya lewat
+  `tint(warna, tingkat)` dengan tingkat per tugas, disimpan per mode di
+  `colors.alfa`: `sorotSamar` 0F, `pilih` 14, `pill` 1A, `aktif` 22, `area` 33,
+  `tepi` 55, `tepiKuat` 66, `garisArea` 88. `cek:kontras` memakai tabel yang
+  sama untuk menghitung warna campuran, dan `cek:hardcode` menolak alfa mentah.
 
 Semua pasangan `cek:kontras` kini diperiksa **untuk kedua mode** dan lulus.
 

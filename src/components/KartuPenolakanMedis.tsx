@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import type { PenolakanMedis } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, tint, typography } from '@/theme';
 
 type Props = {
   penolakan: PenolakanMedis;
@@ -29,7 +29,7 @@ export function KartuPenolakanMedis({ penolakan }: Props) {
         borderRadius: radius.lg,
         backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.aksen.isian + '55',
+        borderColor: tint(colors.aksen.isian, 'tepi'),
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

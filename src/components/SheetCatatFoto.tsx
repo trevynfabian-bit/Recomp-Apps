@@ -92,7 +92,7 @@ export function SheetCatatFoto({ terbuka, onTutup, onSimpan }: Props) {
     <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: '#000000AA' }}
+        style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.selubung }}
       >
         <View
           style={{

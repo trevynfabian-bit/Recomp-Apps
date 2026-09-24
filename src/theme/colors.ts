@@ -51,6 +51,32 @@ const dasarGelap = {
    */
   diAtasIsian: '#14151A',
 
+  /** Selubung peredup di belakang sheet (mengaburkan layar di bawahnya). */
+  selubung: '#000000AA',
+
+  /**
+   * Kepekatan TINT (alfa heks) yang ditempel ke warna peran: `tint(warna, 'pill')`.
+   * Satu nama per tugas, supaya kepekatan tiap tugas bisa disetel per mode.
+   */
+  alfa: {
+    /** Sorot sangat halus: baris "hari ini" di daftar. */
+    sorotSamar: '0F',
+    /** Latar pilihan terpilih, banner, gelembung pengguna. */
+    pilih: '14',
+    /** Latar pill & chip. */
+    pill: '1A',
+    /** Latar kontrol yang sedang aktif/ditekan dan lebih perlu menonjol. */
+    aktif: '22',
+    /** Isian area grafik (koridor), tepi gelembung sorot. */
+    area: '33',
+    /** Tepi pill, chip, dan kartu bertanda. */
+    tepi: '55',
+    /** Tepi yang harus terlihat jelas (status sumber bermasalah). */
+    tepiKuat: '66',
+    /** Garis tepi area grafik. */
+    garisArea: '88',
+  },
+
   /** Teks paling menonjol. */
   text: '#F5F6F8',
   /** Teks pendukung. */
@@ -104,6 +130,20 @@ const dasarTerang: Dasar = {
 
   diAtasIsian: '#FFFFFF',
 
+  // Selubung terang: hitam penuh di atas latar putih terasa terlalu berat.
+  selubung: '#14151A59',
+
+  alfa: {
+    sorotSamar: '0F',
+    pilih: '14',
+    pill: '1A',
+    aktif: '22',
+    area: '33',
+    tepi: '55',
+    tepiKuat: '66',
+    garisArea: '88',
+  },
+
   text: '#14151A',
   textMuted: '#4A4F5C',
   textFaint: '#5C6170',
@@ -142,6 +182,10 @@ function lengkapi(d: Dasar) {
   return {
     /** Label & ikon di atas ISIAN aksen/status. Di gelap = latar, di terang putih. */
     diAtasIsian: d.diAtasIsian,
+    /** Selubung peredup di belakang sheet. */
+    selubung: d.selubung,
+    /** Kepekatan tint per tugas; pakai lewat `tint()`. */
+    alfa: d.alfa,
     /** Warna per makro untuk ISIAN bar (nama domain, bukan nama warna). */
     macro: d.macro,
     /** Warna per makro untuk TEKS KECIL. */
@@ -205,6 +249,14 @@ export const palet: Record<Skema, Palet> = { gelap: lengkapi(dasarGelap), terang
  * nilainya akan membeku di mode saat modul dimuat (dijaga `cek:desain`).
  */
 export const colors: Palet = salin(palet.gelap);
+
+/**
+ * Warna peran dengan kepekatan tint bernama, mis. `tint(colors.aksen.isian, 'pilih')`
+ * untuk latar pilihan terpilih. Dibaca saat render, jadi ikut skema.
+ */
+export function tint(warna: string, tingkat: keyof Palet['alfa']): string {
+  return warna + colors.alfa[tingkat];
+}
 
 let skemaAktif: Skema = 'gelap';
 

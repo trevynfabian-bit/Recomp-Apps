@@ -3,7 +3,7 @@ import { formatRentangTanggal } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import { ketukRingan } from '@/lib/haptics';
 import type { RingkasanMingguan } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
 
 type Props = {
   ringkasan: RingkasanMingguan;
@@ -32,7 +32,7 @@ export function KartuRingkasanMingguan({ ringkasan, onTanya }: Props) {
         borderRadius: radius.lg,
         backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: colors.aksen.isian + '55',
+        borderColor: tint(colors.aksen.isian, 'tepi'),
       }}
     >
       <View style={{ gap: spacing.xxs }}>

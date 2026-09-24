@@ -33,7 +33,7 @@ import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, tint, typography } from '@/theme';
 
 /**
  * Batas bawah kalori harian. Redistribusi tidak pernah menurunkan target di
@@ -340,7 +340,7 @@ function BarisHari({ hari, pertama }: { hari: BarisKumulatif; pertama: boolean }
         borderTopColor: colors.garis,
         // Hari yang belum berjalan diredupkan: angkanya proyeksi, bukan catatan.
         opacity: hari.proyeksi ? 0.55 : 1,
-        backgroundColor: iniHariIni ? colors.aksen.isian + '0F' : 'transparent',
+        backgroundColor: iniHariIni ? tint(colors.aksen.isian, 'sorotSamar') : 'transparent',
       }}
     >
       <View style={{ flex: 1, gap: spacing.xxs }}>

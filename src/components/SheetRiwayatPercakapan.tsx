@@ -2,7 +2,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { formatJam, labelTanggalRelatif, tanggalDariWaktu, tanggalHariIni } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import type { Percakapan } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -39,7 +39,7 @@ export function SheetRiwayatPercakapan({
 
   return (
     <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
         <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
 
         <View
@@ -131,7 +131,7 @@ export function SheetRiwayatPercakapan({
                       borderRadius: radius.md,
                       borderWidth: 1,
                       borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                      backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
+                      backgroundColor: aktif ? tint(colors.aksen.isian, 'pilih') : colors.permukaanCekung,
                       opacity: pressed ? 0.7 : 1,
                     })}
                   >

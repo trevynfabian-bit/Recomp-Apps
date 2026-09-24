@@ -4,7 +4,7 @@ import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/
 import { Card } from './Card';
 import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   koneksi: KoneksiSumber;
@@ -72,7 +72,7 @@ export function KartuSumberData({
         // Kartu yang butuh tindakan diberi tepi berwarna; sisanya tepi halus.
         borderColor:
           kesehatan.tingkat === 'bermasalah' || kesehatan.tingkat === 'terlambat'
-            ? warna + '66'
+            ? tint(warna, 'tepiKuat')
             : colors.garis,
       }}
     >

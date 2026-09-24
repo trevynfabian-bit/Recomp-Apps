@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { formatAngka, formatMakro } from '@recomp/logika';
 import type { ProteksiProtein } from '@recomp/logika';
 import { Card } from './Card';
-import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   proteksi: ProteksiProtein;
@@ -40,9 +40,9 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
               paddingHorizontal: spacing.md,
               paddingVertical: ukuran.chip.vertikal,
               borderRadius: radius.pill,
-              backgroundColor: warna + '1A',
+              backgroundColor: tint(warna, 'pill'),
               borderWidth: 1,
-              borderColor: warna + '55',
+              borderColor: tint(warna, 'tepi'),
             }}
           >
             {/* Identitas lewat simbol + teks, bukan warna saja. */}

@@ -25,7 +25,7 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
       animationType="slide"
       onRequestClose={() => onTutup?.()}
     >
-      <View style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
         <Pressable
           accessibilityLabel="Tutup"
           disabled={onTutup === null}

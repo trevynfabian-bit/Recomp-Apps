@@ -83,7 +83,6 @@ const BERKAS_BEBAS = [
   { berkas: 'src/components/PratinjauWidget.tsx', alasan: 'meniru layar kunci iOS; warna & huruf ditentukan sistem, bukan palet app' },
 ];
 const BARIS_BEBAS = [
-  { pola: /'#000000AA'/, alasan: 'selubung peredup di belakang sheet, bukan warna palet' },
   { pola: /shadowColor: '#000(000)?'/, alasan: 'warna bayangan iOS selalu hitam; kepekatannya yang ikut skema' },
   { pola: /'transparent'/, alasan: 'bukan warna' },
 ];
@@ -112,6 +111,11 @@ const ATURAN = [
       if (heks && WARNA.has(heks)) return `pakai ${WARNA.get(heks)}`;
       return 'pakai peran di colors (latar/permukaan/teks*/aksen/status.*); warna baru masuk palet + cek:kontras';
     },
+  },
+  {
+    nama: 'tint tertanam',
+    pola: /\+ '([0-9A-Fa-f]{2})'/g,
+    saran: () => "pakai tint(warna, 'pilih' | 'pill' | 'tepi' | …) dari src/theme",
   },
   {
     nama: 'jarak tertanam',

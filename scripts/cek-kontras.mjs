@@ -73,12 +73,12 @@ const kontras = (a, b) => {
 /** Semua pasangan untuk satu palet `c` (mode gelap atau terang). */
 function pasangan(c) {
 /** Latar bertint yang benar-benar dipakai di layar. */
-const BANNER_AMBER = campur(c.aksen.isian, '14', c.latar);
-const BANNER_CORAL = campur(c.status.bahaya.isian, '14', c.latar);
-const PILL_AMBER = campur(c.aksen.isian, '1A', c.permukaan);
-const PILIHAN_AMBER = campur(c.aksen.isian, '14', c.permukaan);
+const BANNER_AMBER = campur(c.aksen.isian, c.alfa.pilih, c.latar);
+const BANNER_CORAL = campur(c.status.bahaya.isian, c.alfa.pilih, c.latar);
+const PILL_AMBER = campur(c.aksen.isian, c.alfa.pill, c.permukaan);
+const PILIHAN_AMBER = campur(c.aksen.isian, c.alfa.pilih, c.permukaan);
 /** Gelembung pesan pengguna: amber 8% di atas latar layar. */
-const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, '14', c.latar);
+const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
 
 /**
  * Pasangan yang benar-benar ada di layar. `besar` berarti teksnya ≥24px atau
@@ -151,10 +151,10 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, '14', c.latar);
   // (tanpa isian), sehingga teksnya berdiri langsung di atas `surface`.
   // Pill bertint di atas surface SENGAJA tidak ada: jade/coral/karbo di sana
   // hanya ~3,9:1.
-  ['sukses: pill jade di latar', c.status.sukses.teks, campur(c.status.sukses.teks, '1A', c.latar), false],
-  ['bahaya: pill coral di latar', c.status.bahaya.teks, campur(c.status.bahaya.teks, '1A', c.latar), false],
-  ['info: pill karbo di latar', c.macroTeks.karbo, campur(c.macroTeks.karbo, '1A', c.latar), false],
-  ['peringatan: pill amber di latar', c.aksen.teks, campur(c.aksen.isian, '1A', c.latar), false],
+  ['sukses: pill jade di latar', c.status.sukses.teks, campur(c.status.sukses.teks, c.alfa.pill, c.latar), false],
+  ['bahaya: pill coral di latar', c.status.bahaya.teks, campur(c.status.bahaya.teks, c.alfa.pill, c.latar), false],
+  ['info: pill karbo di latar', c.macroTeks.karbo, campur(c.macroTeks.karbo, c.alfa.pill, c.latar), false],
+  ['peringatan: pill amber di latar', c.aksen.teks, campur(c.aksen.isian, c.alfa.pill, c.latar), false],
   ['pill teksRedup di kartu (tanpa isian)', c.teksRedup, c.permukaan, false],
 
   ['teks di gelembung pengguna', c.teks, GELEMBUNG_PENGGUNA, false],

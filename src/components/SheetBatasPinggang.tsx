@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Satu ketukan tombol −/+ (cm). */
 const LANGKAH_CM = 0.5;
@@ -94,7 +94,7 @@ export function SheetBatasPinggang({
 
   return (
     <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
         <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
 
         <View
@@ -196,7 +196,7 @@ export function SheetBatasPinggang({
                   // kehilangan kontras saat keadaannya berubah.
                   backgroundColor: colors.permukaanCekung,
                   borderWidth: 1,
-                  borderColor: sudahLewat ? colors.status.bahaya.isian + '55' : 'transparent',
+                  borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent',
                 }}
               >
                 <Text
@@ -270,7 +270,7 @@ export function SheetBatasPinggang({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.status.bahaya.isian + '55',
+                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
                   backgroundColor: colors.permukaanCekung,
                 }}
               >

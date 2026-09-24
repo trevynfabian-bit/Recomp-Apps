@@ -35,7 +35,7 @@ import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
 import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
-import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { DayType } from '@/types/domain';
 
 const FASE: Fase[] = ['Maintenance', 'Lean Gain', 'Cut'];
@@ -592,7 +592,7 @@ function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'
               borderRadius: radius.pill,
               borderWidth: 1,
               borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-              backgroundColor: aktif ? colors.aksen.isian + '1A' : 'transparent',
+              backgroundColor: aktif ? tint(colors.aksen.isian, 'pill') : 'transparent',
               opacity: pressed ? 0.7 : 1,
             })}
           >

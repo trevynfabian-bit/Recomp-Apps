@@ -1,5 +1,5 @@
 import { View, type StyleProp, type ViewStyle } from 'react-native';
-import { BAYANGAN_KARTU, colors, radius, spacing } from '@/theme';
+import { bayangan, colors, radius, spacing } from '@/theme';
 
 type Props = {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function Card({ children, style, flat = false }: Props) {
           borderWidth: 1,
           borderColor: colors.garis,
           padding: flat ? 0 : spacing.lg,
-          ...BAYANGAN_KARTU,
+          ...bayangan.kartu,
         },
         style,
       ]}

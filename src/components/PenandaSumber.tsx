@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { METADATA_SUMBER } from '@/lib/sumber';
-import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
 import type { JenisSumber } from '@/types/domain';
 
 type Props = {
@@ -33,8 +33,8 @@ export function PenandaSumber({ jenis, tampilan = 'inline', detail }: Props) {
               paddingVertical: spacing.xxs,
               borderRadius: radius.pill,
               borderWidth: 1,
-              borderColor: meta.warna + '55',
-              backgroundColor: meta.warna + '1A',
+              borderColor: tint(meta.warna, 'tepi'),
+              backgroundColor: tint(meta.warna, 'pill'),
             }
           : null),
       }}

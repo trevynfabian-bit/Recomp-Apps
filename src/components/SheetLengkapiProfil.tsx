@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View 
 import { formatMakro } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
 const TINGGI_MIN = 100;
@@ -68,7 +68,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
 
   return (
     <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
         <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
 
         <View
@@ -184,7 +184,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.status.bahaya.isian + '55',
+                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
                   // Tint di atas `surface` menjatuhkan kontras teks redup di
                   // dalamnya ke bawah AA; warnanya cukup dibawa tepi & judul.
                   backgroundColor: colors.permukaanCekung,
@@ -278,7 +278,7 @@ function PilihanKelamin({
         borderRadius: radius.md,
         borderWidth: 1,
         borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-        backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
+        backgroundColor: aktif ? tint(colors.aksen.isian, 'pilih') : colors.permukaanCekung,
         opacity: pressed ? 0.7 : 1,
       })}
     >

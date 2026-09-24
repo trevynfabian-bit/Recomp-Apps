@@ -3,7 +3,7 @@ import type { Fase } from '@recomp/logika';
 import { formatDesimal, LAJU_PER_MINGGU } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 const FASE: { nilai: Fase; ringkas: string }[] = [
   { nilai: 'Cut', ringkas: 'Turunkan lemak, jaga otot' },
@@ -54,7 +54,7 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                   borderRadius: radius.md,
                   borderWidth: 1,
                   borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                  backgroundColor: aktif ? colors.aksen.isian + '14' : colors.permukaanCekung,
+                  backgroundColor: aktif ? tint(colors.aksen.isian, 'pilih') : colors.permukaanCekung,
                   opacity: pressed ? 0.7 : 1,
                 })}
               >

@@ -1,4 +1,5 @@
 import type { TextStyle } from 'react-native';
+import { skemaBerlaku } from './colors';
 
 /**
  * Skala jarak (bab Desain 8.5): 4pt ditambah satu langkah 2pt.
@@ -116,3 +117,32 @@ export const bobot = { biasa: '500' } as const;
  * tipografinya: `{ ...typography.hero, ...angkaTabular }`.
  */
 export const angkaTabular: Pick<TextStyle, 'fontVariant'> = { fontVariant: ['tabular-nums'] };
+
+/**
+ * Bayangan (elevasi), dua mode. Di atas latar gelap bayangan harus pekat supaya
+ * terlihat; di atas latar terang kepekatan yang sama membuat kartu tampak
+ * kotor. Getter: dibaca saat render, jadi ikut skema. Disebar ke gaya:
+ * `{ ...bayangan.kartu }`.
+ */
+export const bayangan = {
+  /** Kartu di dalam layar. */
+  kartu: {
+    shadowColor: '#000000',
+    get shadowOpacity() {
+      return skemaBerlaku() === 'gelap' ? 0.35 : 0.08;
+    },
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  /** Elemen yang melayang di atas semua layar (banner Realtime, banner ekspor). */
+  melayang: {
+    shadowColor: '#000000',
+    get shadowOpacity() {
+      return skemaBerlaku() === 'gelap' ? 0.4 : 0.14;
+    },
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+};

@@ -1,5 +1,3 @@
-import { skemaBerlaku } from './colors';
-
 /**
  * Konstanta yang menjaga app tetap sejalan dengan Apple Human Interface
  * Guidelines. Dikumpulkan di satu tempat supaya tidak ditebak ulang per komponen.
@@ -56,34 +54,3 @@ export const PADANAN_IOS = {
  * tata letak satu-angka-per-layar tidak pecah pada ukuran aksesibilitas ekstrem.
  */
 export const MAKS_SKALA_HERO = 1.3;
-
-/**
- * Bayangan halus kartu — memberi kedalaman tanpa mengaburkan latar. Di atas
- * latar gelap bayangan harus pekat supaya terlihat; di atas latar terang
- * kepekatan yang sama membuat kartu tampak kotor, jadi diturunkan. Getter:
- * dibaca saat render, mengikuti skema yang berlaku.
- */
-export const BAYANGAN_KARTU = {
-  shadowColor: '#000000',
-  get shadowOpacity() {
-    return skemaBerlaku() === 'gelap' ? 0.35 : 0.08;
-  },
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 3,
-};
-
-/**
- * Bayangan elemen yang MELAYANG di atas semua layar (banner kiriman Realtime,
- * banner ekspor siap): lebih pekat dari kartu supaya terbaca terpisah dari isi
- * layar di bawahnya.
- */
-export const BAYANGAN_MELAYANG = {
-  shadowColor: '#000000',
-  get shadowOpacity() {
-    return skemaBerlaku() === 'gelap' ? 0.4 : 0.14;
-  },
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 6,
-};

@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { PenandaSumber } from './PenandaSumber';
 import { METADATA_SUMBER } from '@/lib/sumber';
 import type { RujukanData } from '@/types/domain';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, tint, typography } from '@/theme';
 
 type Props = {
   rujukan: RujukanData[];
@@ -37,7 +37,7 @@ export function DaftarRujukan({ rujukan }: Props) {
         borderWidth: 1,
         // Tepi amber saat ada estimasi di dalamnya: peringatan itu harus
         // terbaca sebelum daftarnya dibaca, bukan sesudah.
-        borderColor: adaEstimasi ? colors.aksen.isian + '55' : colors.garis,
+        borderColor: adaEstimasi ? tint(colors.aksen.isian, 'tepi') : colors.garis,
       }}
     >
       <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>

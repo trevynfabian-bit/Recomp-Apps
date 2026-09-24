@@ -10,7 +10,7 @@ import {
 } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Satu pencatatan baru; `id` diberikan oleh pemanggil (nanti oleh Postgres). */
 export type UkuranBaru = Omit<UkuranTubuh, 'id'>;
@@ -208,7 +208,7 @@ export function SheetCatatUkuran({ terbuka, onTutup, catatan, onSimpan }: Props)
 
   return (
     <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
         {/* Area gelap di atas sheet: ketuk untuk menutup. */}
         <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
 
@@ -603,7 +603,7 @@ function Kotak({
         padding: spacing.md,
         borderRadius: radius.md,
         borderWidth: 1,
-        borderColor: dasar + '55',
+        borderColor: tint(dasar, 'tepi'),
         backgroundColor: colors.permukaanCekung,
       }}
     >

@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { colors, radius, spacing, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
 
 type Props = {
   label: string;
@@ -24,8 +24,8 @@ export function Pill({ label, warna = colors.teksRedup, diKartu = false }: Props
         paddingVertical: ukuran.chip.vertikal,
         borderRadius: radius.pill,
         borderWidth: 1,
-        borderColor: warna + '55',
-        backgroundColor: diKartu ? 'transparent' : warna + '1A',
+        borderColor: tint(warna, 'tepi'),
+        backgroundColor: diKartu ? 'transparent' : tint(warna, 'pill'),
       }}
     >
       <Text style={{ ...typography.caption, color: warna }}>{label}</Text>

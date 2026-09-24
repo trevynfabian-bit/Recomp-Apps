@@ -6,7 +6,7 @@ import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 
 /** Langkah satu ketukan tombol −/+ (kg). */
@@ -199,7 +199,7 @@ export function KartuTimbangPagi({
                 width: 44,
                 height: 44,
                 borderRadius: radius.pill,
-                backgroundColor: colors.aksen.isian + '22',
+                backgroundColor: tint(colors.aksen.isian, 'aktif'),
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
@@ -221,7 +221,7 @@ export function KartuTimbangPagi({
         <Pressable
           accessibilityLabel="Tutup"
           onPress={() => setSheetTerbuka(false)}
-          style={{ flex: 1, backgroundColor: '#000000AA', justifyContent: 'flex-end' }}
+          style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}
         >
           {/* Hentikan propagasi agar ketukan di dalam sheet tidak menutupnya. */}
           <Pressable
@@ -362,7 +362,7 @@ export function KartuTimbangPagi({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.aksen.isian + '55',
+                  borderColor: tint(colors.aksen.isian, 'tepi'),
                   // Tint di atas `surface` membuat teks redup di dalamnya jatuh
                   // ke 3,9:1; warnanya cukup dibawa tepi dan judulnya.
                   backgroundColor: colors.permukaanCekung,
@@ -385,7 +385,7 @@ export function KartuTimbangPagi({
                   padding: spacing.md,
                   borderRadius: radius.md,
                   borderWidth: 1,
-                  borderColor: colors.status.bahaya.isian + '55',
+                  borderColor: tint(colors.status.bahaya.isian, 'tepi'),
                   backgroundColor: colors.permukaanCekung,
                 }}
               >

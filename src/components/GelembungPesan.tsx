@@ -7,7 +7,7 @@ import { KartuVerdictEvaluasi } from './KartuVerdictEvaluasi';
 import { KartuWidgetCoach } from './KartuWidgetCoach';
 import { ketukRingan } from '@/lib/haptics';
 import type { PesanCoach } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
 
 type Props = {
   pesan: PesanCoach;
@@ -102,12 +102,12 @@ export function GelembungPesan({
           // yang tetap terbaca tanpa warna.
           borderBottomRightRadius: dariPengguna ? radius.sm : radius.lg,
           borderBottomLeftRadius: dariPengguna ? radius.lg : radius.sm,
-          backgroundColor: dariPengguna ? colors.aksen.isian + '14' : colors.permukaan,
+          backgroundColor: dariPengguna ? tint(colors.aksen.isian, 'pilih') : colors.permukaan,
           borderWidth: 1,
           borderColor: gagal
-            ? colors.status.bahaya.isian + '55'
+            ? tint(colors.status.bahaya.isian, 'tepi')
             : dariPengguna
-              ? colors.aksen.isian + '33'
+              ? tint(colors.aksen.isian, 'area')
               : colors.garis,
           opacity: pesan.status === 'mengirim' ? 0.6 : 1,
         }}

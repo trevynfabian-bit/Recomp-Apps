@@ -3,7 +3,7 @@ import { PanResponder, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { KoridorTarget, TitikTren } from '@recomp/logika';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Tinggi area gambar, tidak termasuk label sumbu. */
 const TINGGI_PLOT = 180;
@@ -397,9 +397,9 @@ export function GrafikTren({
                 width: 12,
                 height: 8,
                 borderRadius: radius.xs,
-                backgroundColor: colors.status.sukses.isian + '33',
+                backgroundColor: tint(colors.status.sukses.isian, 'area'),
                 borderWidth: 1,
-                borderColor: colors.status.sukses.teks + '88',
+                borderColor: tint(colors.status.sukses.teks, 'garisArea'),
               }}
             />
             <Text style={{ ...typography.caption, color: colors.teksSamar }}>koridor target</Text>

@@ -4,7 +4,7 @@ import { ketukRingan } from '@/lib/haptics';
 import { formatAngka, formatMakro } from '@recomp/logika';
 import { alasanDeteksi, type HasilDeteksi } from '@recomp/logika';
 import { NAMA_SUMBER } from '@/mocks/workout';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
 import type { DayType, DayTypeTarget, Fase } from '@/types/domain';
 
 type Props = {
@@ -139,8 +139,8 @@ export function PemilihTipeHari({
                   paddingHorizontal: spacing.lg,
                   borderRadius: radius.pill,
                   borderWidth: 1,
-                  borderColor: colors.aksen.isian + '55',
-                  backgroundColor: colors.aksen.isian + '1A',
+                  borderColor: tint(colors.aksen.isian, 'tepi'),
+                  backgroundColor: tint(colors.aksen.isian, 'pill'),
                   opacity: pressed ? 0.7 : 1,
                 })}
               >

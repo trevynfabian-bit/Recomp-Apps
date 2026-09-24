@@ -21,7 +21,7 @@ import {
   mockJalankanImpor,
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
 export type SumberImpor = 'hevy_csv' | 'apple_health' | 'ukuran_lama';
@@ -211,7 +211,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                       borderRadius: radius.md,
                       borderWidth: 1,
                       borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                      backgroundColor: aktif ? colors.aksen.isian + '22' : 'transparent',
+                      backgroundColor: aktif ? tint(colors.aksen.isian, 'aktif') : 'transparent',
                     }}
                   >
                     <Text style={{ ...typography.label, color: aktif ? colors.aksen.teks : colors.teks }}>{r.label}</Text>

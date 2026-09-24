@@ -6,7 +6,7 @@ import { GrafikUkuran } from './GrafikUkuran';
 import { SectionHeader } from './SectionHeader';
 import { ketukRingan } from '@/lib/haptics';
 import type { BarisUkuran, UkuranTubuh } from '@/types/domain';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
 
 type KunciUkuran = BarisUkuran['kunci'];
 
@@ -74,7 +74,7 @@ export function RiwayatPerubahan({ catatan, bagian, awal = 'pinggang_cm' }: Prop
                 borderRadius: radius.pill,
                 borderWidth: 1,
                 borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                backgroundColor: aktif ? colors.aksen.isian + '1A' : colors.permukaanCekung,
+                backgroundColor: aktif ? tint(colors.aksen.isian, 'pill') : colors.permukaanCekung,
                 opacity: pressed ? 0.7 : 1,
               })}
             >

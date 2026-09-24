@@ -4,7 +4,7 @@ import { statusSinkronApp } from '@recomp/logika';
 import type { TingkatSinkronApp } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
 import { useSinkron } from '@/state/sinkron';
-import { colors, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 
 /** Warna titik status; SELALU disertai label, tidak pernah warna saja. */
 const WARNA: Record<TingkatSinkronApp, string> = {
@@ -61,7 +61,7 @@ export function IndikatorSinkron() {
         borderRadius: radius.pill,
         backgroundColor: colors.permukaan,
         borderWidth: 1,
-        borderColor: status.tingkat === 'langsung' ? colors.garis : warna + '66',
+        borderColor: status.tingkat === 'langsung' ? colors.garis : tint(warna, 'tepiKuat'),
         opacity: pressed ? 0.6 : 1,
       })}
     >

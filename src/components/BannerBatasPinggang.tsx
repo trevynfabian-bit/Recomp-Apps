@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { formatDesimal, formatMakro, type Fase, type StatusBatasPinggang } from '@recomp/logika';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography } from '@/theme';
 
 type Props = {
   status: StatusBatasPinggang;
@@ -57,8 +57,8 @@ export function BannerBatasPinggang({
         padding: spacing.lg,
         borderRadius: radius.lg,
         borderWidth: 1,
-        borderColor: dasar + '55',
-        backgroundColor: dasar + '14',
+        borderColor: tint(dasar, 'tepi'),
+        backgroundColor: tint(dasar, 'pilih'),
       }}
     >
       {/* Bentuk + teks, bukan warna saja: peringatan tidak boleh hanya terbaca
