@@ -244,6 +244,29 @@ const tanpaHeader = layar
   .filter((p) => (readFileSync(p, 'utf8').match(/<HeaderLayar\b/g) ?? []).length === 0);
 cek('setiap layar memakai HeaderLayar (kecuali layar masuk)', tanpaHeader.length === 0, tanpaHeader.join(', '));
 
+// Setiap Pressable harus terbukti mencapai 44 pt: token ukuran (TAP_MIN,
+// KONTROL_* + sisaSentuh, ukuran.tombolLangkah), hitSlop, padding ≥ md, flex
+// penuh, atau membungkus seluruh Card. Tombol bersama (Tombol, TombolIkon)
+// sudah memenuhinya di dalam komponennya.
+const CUKUP_SENTUH = /TAP_MIN|KONTROL_|tombolLangkah|hitSlop|padding: spacing\.(md|lg|xl)|paddingVertical: spacing\.(md|lg|xl)|flex: 1/;
+const sentuhKecil = semuaUi.flatMap((berkas) => {
+  const sf = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const hasil = [];
+  (function kunjungi(n) {
+    if (ts.isJsxElement(n) && n.openingElement.tagName.getText(sf) === 'Pressable') {
+      const buka = n.openingElement.getText(sf);
+      const anakPertama = n.children.find((c) => ts.isJsxElement(c) || ts.isJsxSelfClosingElement(c));
+      const tagAnak = anakPertama && (ts.isJsxElement(anakPertama) ? anakPertama.openingElement : anakPertama).tagName.getText(sf);
+      if (!CUKUP_SENTUH.test(buka) && tagAnak !== 'Card') {
+        hasil.push(`${berkas}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1}`);
+      }
+    }
+    ts.forEachChild(n, kunjungi);
+  })(sf);
+  return hasil;
+});
+cek('setiap Pressable terbukti ≥ 44 pt (token, hitSlop, padding, atau membungkus Card)', sentuhKecil.length === 0, sentuhKecil.join(' | '));
+
 console.log('\nAcuan resmi');
 let bab = '';
 try {
