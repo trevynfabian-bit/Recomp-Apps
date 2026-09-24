@@ -74,6 +74,20 @@ migrasi **dua kali** untuk membuktikan idempoten, lalu menjalankan uji RLS yang
 memeriksa dua pengguna tidak bisa saling melihat atau mengubah data. Keluar
 dengan kode bukan-nol bila ada yang gagal, jadi bisa dipakai di CI.
 
+## Rilis
+
+Build TestFlight hanya dari commit yang lulus gerbang rilis:
+
+```bash
+npm run cek:rilis   # tipe, desain, logika per fitur, lalu paritas menyeluruh (Postgres 16 & Deno)
+```
+
+`cek:rilis` menjalankan semua langkah walau satu gagal, menolak pohon kerja yang belum di-commit,
+dan tidak mengizinkan paritas tanpa Postgres. Hasilnya: `laporan/rilis.json` (per langkah) dan
+`laporan/paritas.json` (per penjaga paritas). Workflow `.github/workflows/cek-rilis.yml` menjalankan
+perintah yang sama di setiap pull request dan tag `v*`. Untuk memeriksa paritas saja:
+`npm run cek:paritas-semua` (`--cepat` melewatkan bagian yang butuh Postgres).
+
 ## Status
 
 **Fase 1 — frontend** sedang dikerjakan di atas **data tiruan** (`src/mocks/`).

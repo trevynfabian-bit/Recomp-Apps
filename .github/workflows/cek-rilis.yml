@@ -1,0 +1,45 @@
+# Gerbang rilis: `npm run cek:rilis` di setiap pull request, tag rilis (v*),
+# dan saat dijalankan manual. Build TestFlight hanya dari commit yang lulus.
+#
+# Skrip penjaga database menjalankan Postgres 16 lokal lewat `su postgres`
+# (butuh root) dan `cek:edge` memakai Deno, jadi keduanya disiapkan di sini.
+name: Gerbang rilis
+
+on:
+  pull_request:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  cek-rilis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Pasang dependensi
+        # --legacy-peer-deps: sama dengan pemasangan lokal (konflik peer Expo yang sudah ada).
+        run: npm ci --legacy-peer-deps
+
+      - name: Pastikan Postgres 16 tersedia
+        run: test -x /usr/lib/postgresql/16/bin/pg_ctl || (sudo apt-get update && sudo apt-get install -y postgresql-16)
+
+      - name: npm run cek:rilis
+        run: sudo -E env "PATH=$PATH" npm run cek:rilis
+
+      - name: Simpan laporan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laporan-rilis
+          path: laporan/

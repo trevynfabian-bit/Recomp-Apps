@@ -74,5 +74,19 @@ const halaman = readFileSync('app/paritas.tsx', 'utf8');
 cek('Laporan paritas memakai ringkasLaporanParitas & kalimatSelisihParitas',
   halaman.includes('ringkasLaporanParitas(') && halaman.includes('kalimatSelisihParitas('));
 
+console.log('\nParitas tersambung ke alur rilis');
+{
+  const rilis = readFileSync('scripts/cek-rilis.mjs', 'utf8');
+  const alur = readFileSync('.github/workflows/cek-rilis.yml', 'utf8');
+  const paket = JSON.parse(readFileSync('package.json', 'utf8'));
+  cek('cek:rilis menjalankan cek:paritas-semua (tanpa --cepat)',
+    /'cek:paritas-semua'/.test(rilis) && !/--cepat/.test(rilis.replace(/^\s*\*.*$/gm, '').replace(/\/\/.*$/gm, '')));
+  cek('cek:rilis menolak pohon kerja yang belum di-commit', /status', '--porcelain'/.test(rilis) && /pohon kerja bersih/.test(rilis));
+  cek('npm run cek:rilis terdaftar', paket.scripts['cek:rilis'] === 'node scripts/cek-rilis.mjs');
+  cek('workflow menjalankan cek:rilis di pull request & tag rilis, dengan Postgres 16 & Deno',
+    /pull_request:/.test(alur) && /tags: \['v\*'\]/.test(alur) && /npm run cek:rilis/.test(alur) &&
+    /postgresql-16/.test(alur) && /setup-deno/.test(alur));
+}
+
 console.log(gagal === 0 ? '\n✓ Laporan paritas terbaca dalam bahasa awam' : `\n✗ ${gagal} pemeriksaan gagal`);
 process.exit(gagal === 0 ? 0 : 1);
