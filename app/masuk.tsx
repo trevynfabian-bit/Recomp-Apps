@@ -41,6 +41,13 @@ export default function MasukScreen() {
   const refSandi = useRef<TextInput>(null);
 
   const isianLengkap = emailSah(email) && sandi.length > 0;
+  // Galat format email baru tampil setelah kolomnya ditinggalkan: tombol Masuk
+  // yang nonaktif tanpa alasan membuat orang menebak apa yang salah.
+  const [emailDitinggalkan, setEmailDitinggalkan] = useState(false);
+  const galatEmail =
+    emailDitinggalkan && email.trim().length > 0 && !emailSah(email)
+      ? 'Format email belum benar, mis. nama@contoh.id.'
+      : null;
 
   async function kirim() {
     if (!isianLengkap || memproses) return;
@@ -123,7 +130,11 @@ export default function MasukScreen() {
               setEmail(t);
               setGalat(null);
               setAturUlang('idle');
+              // Mengetik ulang menghapus galat format sampai kolomnya ditinggalkan lagi.
+              if (emailDitinggalkan && emailSah(t)) setEmailDitinggalkan(false);
             }}
+            onBlur={() => setEmailDitinggalkan(true)}
+            galat={galatEmail}
             nonaktif={memproses}
             autoCapitalize="none"
             autoCorrect={false}
