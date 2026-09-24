@@ -22,7 +22,7 @@ execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   { cwd: kerja, stdio: 'pipe' });
 const {
   emailSah, kodeGagalMasuk, PESAN_GAGAL_MASUK, buatSesiTersimpan, pulihkanSesi, pesanPemulihanSesi,
-  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN, putuskanSesi, pesanGagalAturUlang,
+  LAMA_SESI_HARI, VERSI_SESI_TERSIMPAN, putuskanSesi, pesanGagalAturUlang, labelStatusAkun,
 } = require(join(kerja, 'keluar', 'akun.js'));
 const { pelanggaranNada } = require(join(kerja, 'keluar', 'pengingat.js'));
 
@@ -130,6 +130,23 @@ cek('pertama kali: tanpa pesan', pesanPemulihanSesi('kosong') === null);
 cek('isi rusak: tanpa pesan (bukan urusan pengguna)', pesanPemulihanSesi('rusak') === null);
 const pesanBerakhir = pesanPemulihanSesi('berakhir');
 cek('berakhir: ada pesan, netral, tanpa angka', !!pesanBerakhir && pelanggaranNada(pesanBerakhir).length === 0 && !/\d/.test(pesanBerakhir));
+
+console.log('\nLabel status akun');
+{
+  const web = labelStatusAkun(true);
+  const contoh = labelStatusAkun(false);
+  cek('akun web: label & nada sukses', web.label === 'Akun web' && web.nada === 'sukses');
+  cek('akun contoh: menyebut data tidak dikirim ke server', contoh.nada === 'peringatan' && /tidak dikirim ke server/.test(contoh.keterangan));
+  for (const s of [web, contoh]) {
+    for (const t of [s.label, s.keterangan]) {
+      cek(`Bahasa Indonesia, tanpa istilah teknis: "${t}"`, !/\b(supabase|mock|demo|online|offline|synced|active|status)\b/i.test(t));
+      const p = pelanggaranNada(t);
+      cek(`netral: "${t}"`, p.length === 0, `melanggar: ${p.join(', ')}`);
+    }
+  }
+  const setelan = readFileSync('app/(tabs)/pengaturan.tsx', 'utf8');
+  cek('Setelan menampilkan label status akun', /labelStatusAkun\(supabaseSiap\)/.test(setelan));
+}
 
 console.log('\nTautan atur ulang kata sandi');
 cek('email tak dikenal dijawab seperti terkirim (tidak membocorkan akun)', pesanGagalAturUlang(kodeGagalMasuk({ code: 'user_not_found', status: 400 })) === null);

@@ -9,6 +9,7 @@ import {
   formatDesimal,
   formatTanggalPanjang,
   labelBerat,
+  labelStatusAkun,
   labelPanjang,
   periodeBerjalan,
   tampilkanBerat,
@@ -22,6 +23,7 @@ import {
   Card,
   DaftarBaris,
   HeaderLayar,
+  Pill,
   PilihanSegmen,
   SectionHeader,
   SheetBatasPinggang,
@@ -32,6 +34,7 @@ import {
   SheetLengkapiProfil,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
+import { supabaseSiap } from '@/lib/supabase';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockAkun } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
@@ -81,6 +84,7 @@ export default function PengaturanScreen() {
         ? `${formatAngka(kaloriFase[0])} kcal`
         : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))} kcal`;
   const email = pengguna?.email ?? mockAkun.email;
+  const statusAkun = labelStatusAkun(supabaseSiap);
   const [sheet, setSheet] = useState<Sheet>(null);
   const tampilan = usePilihanTampilan();
   const skema = useSkema();
@@ -112,7 +116,7 @@ export default function PengaturanScreen() {
       {/* --- Profil ----------------------------------------------------------- */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Profil ${profil.nama}, ${email}`}
+        accessibilityLabel={`Profil ${profil.nama}, ${email}, ${statusAkun.label}. ${statusAkun.keterangan}`}
         accessibilityHint="Membuka isian tinggi, jenis kelamin, dan tanggal lahir"
         onPress={() => {
           ketukRingan();
@@ -138,6 +142,11 @@ export default function PengaturanScreen() {
           <View style={{ flex: 1, gap: spacing.xxs }}>
             <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{profil.nama}</Text>
             <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{email}</Text>
+            <Pill label={statusAkun.label} warna={colors.status[statusAkun.nada].teks} diKartu />
+            {/* Akun web tidak perlu dijelaskan; mode contoh perlu, karena isiannya tidak ke mana-mana. */}
+            {statusAkun.nada === 'peringatan' ? (
+              <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{statusAkun.keterangan}</Text>
+            ) : null}
             {profilLengkap ? (
               <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
                 {[

@@ -173,6 +173,17 @@ export function pesanPemulihanSesi(alasan: 'kosong' | 'rusak' | 'berakhir'): str
   return null;
 }
 
+/**
+ * Label status akun di Setelan: akun web sungguhan atau akun contoh (app
+ * tanpa kredensial Supabase). Tanpa label ini, orang yang mencoba app dalam
+ * mode contoh tidak tahu bahwa isiannya tidak pernah sampai ke server.
+ */
+export function labelStatusAkun(tersambungServer: boolean): { label: string; keterangan: string; nada: 'sukses' | 'peringatan' } {
+  return tersambungServer
+    ? { label: 'Akun web', keterangan: 'Data tersimpan di akun yang sama dengan web.', nada: 'sukses' }
+    : { label: 'Akun contoh', keterangan: 'Mode contoh: isian hanya di perangkat ini, tidak dikirim ke server.', nada: 'peringatan' };
+}
+
 // ---------------------------------------------------------------------------
 // Sesi perangkat × sesi Supabase.
 //

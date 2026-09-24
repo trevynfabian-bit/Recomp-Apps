@@ -310,6 +310,7 @@ export {
   buatSesiTersimpan,
   emailSah,
   kodeGagalMasuk,
+  labelStatusAkun,
   LAMA_SESI_HARI,
   PESAN_GAGAL_MASUK,
   pesanGagalAturUlang,
