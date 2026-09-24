@@ -1174,6 +1174,30 @@ export type WorkoutRow = {
   created_at: string;
 };
 
+/** Satu gerakan dari `e1rm_per_gerakan`. */
+export type E1rmGerakanRow = {
+  latihan: string;
+  /** `null` bila gerakan baru punya satu titik e1RM dalam rentang ini. */
+  arah: 'naik' | 'turun' | 'datar' | null;
+  awal_kg: number;
+  akhir_kg: number;
+  selisih_kg: number | null;
+  terbaik_kg: number;
+  jumlah_sesi: number;
+  /** Satu titik per kemunculan di satu sesi, urut waktu. */
+  titik: { tanggal: string; e1rm_kg: number }[];
+};
+
+/** Hasil `e1rm_per_gerakan`: urut naik → turun → datar → satu titik, lalu nama. */
+export type E1rmPerGerakanRow = {
+  periode_dari: string;
+  periode_sampai: string;
+  gerakan: E1rmGerakanRow[];
+  naik: number;
+  turun: number;
+  datar: number;
+};
+
 /** Hasil `deteksi_tipe_hari`: tebakan tipe hari beserta dasarnya. */
 export type DeteksiTipeHariRow = {
   day_type_id: string;
@@ -1510,6 +1534,10 @@ export type Database = {
       riwayat_ukuran: {
         Args: { p_sampai: string | null; p_batas: number; p_maks_titik_laju: number };
         Returns: RiwayatUkuranRow;
+      };
+      e1rm_per_gerakan: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: E1rmPerGerakanRow;
       };
       evaluasi_4_mingguan: {
         Args: { p_sampai: string | null };

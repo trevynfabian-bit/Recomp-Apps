@@ -1981,7 +1981,17 @@ try {
         select public.arah_kekuatan_periode(date '2026-08-31', date '2026-09-13')::text;`).split('\n').pop());
       const a = arahKekuatan(tsSesi);
       const r = ringkasArahKekuatan(a);
-      const cocok = q.arah === r.arah && q.naik === a.naik && q.turun === a.turun && q.datar === a.datar && q.jumlah_gerakan === a.gerakan.length;
+      // Per gerakan dari endpoint e1rm_per_gerakan: ujung, selisih, arah, jumlah sesi.
+      const pg = JSON.parse(sql(`set request.jwt.claim.sub = '${UID_KUAT}';
+        select public.e1rm_per_gerakan(date '2026-08-31', date '2026-09-13')::text;`).split('\n').pop());
+      const sqlGerak = Object.fromEntries(pg.gerakan.filter((g) => g.arah !== null).map((g) => [g.latihan, g]));
+      const gerakCocok = a.gerakan.length === Object.keys(sqlGerak).length && a.gerakan.every((g) => {
+        const x = sqlGerak[g.latihan];
+        return x && x.arah === g.arah && Number(x.awal_kg) === g.awalKg && Number(x.akhir_kg) === g.akhirKg &&
+          Number(x.selisih_kg) === g.selisihKg && x.jumlah_sesi === g.jumlahSesi;
+      });
+      if (!gerakCocok) console.log(`  ✗ per gerakan berbeda: SQL ${JSON.stringify(sqlGerak)} · TS ${JSON.stringify(a.gerakan)}`);
+      const cocok = gerakCocok && q.arah === r.arah && q.naik === a.naik && q.turun === a.turun && q.datar === a.datar && q.jumlah_gerakan === a.gerakan.length;
       if (!cocok) gagalKuat += 1;
       console.log(`${cocok ? '✓' : '✗'} ${label.padEnd(26)} ${String(q.arah).padEnd(11)} ${r.arah.padEnd(11)} ${`${q.naik}/${q.turun}/${q.datar}`.padEnd(10)} ${a.naik}/${a.turun}/${a.datar}`);
     }
@@ -1990,7 +2000,7 @@ try {
       console.error(`✗ ${gagalKuat} kasus arah kekuatan: SQL dan TypeScript tidak sejalan.`);
       process.exit(1);
     }
-    console.log(`\n✓ ${SKENARIO.length} kasus cocok — arah kekuatan di SQL dan TypeScript sejalan.`);
+    console.log(`\n✓ ${SKENARIO.length} kasus cocok — arah kekuatan dan e1RM per gerakan di SQL dan TypeScript sejalan.`);
     console.log();
   }
 

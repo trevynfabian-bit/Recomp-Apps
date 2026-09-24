@@ -66,7 +66,8 @@ export async function evaluasiEmpatPekan(acuan: string | null = null): Promise<S
   // terang-terangan daripada menampilkan rekomendasi yang salah.
   if (hasil.kode !== j.kode || hasil.keyakinan !== j.keyakinan) {
     throw new KesalahanEvaluasi(
-      `Verdict server (${j.kode}) tidak cocok dengan aturan app (${hasil.kode}).`,
+      // Kode verdict sengaja tidak masuk kalimat: pengguna cukup tahu jalan keluarnya.
+      'Evaluasi belum bisa ditampilkan karena versi app dan server berbeda. Perbarui app, lalu coba lagi.',
       false,
     );
   }
@@ -123,7 +124,7 @@ export async function simpanEvaluasi(
     .single();
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanEvaluasi('Evaluasi tidak tersimpan.', true);
+  if (!data) throw new KesalahanEvaluasi('Evaluasi belum tersimpan. Coba lagi sebentar lagi.', true);
   return data;
 }
 
@@ -134,11 +135,11 @@ export async function simpanEvaluasi(
 function terjemahkan(error: { code?: string; message: string }): KesalahanEvaluasi {
   switch (error.code) {
     case '23514': // check_violation — periode tidak sah atau kode tak dikenal
-      return new KesalahanEvaluasi('Evaluasi ditolak database: periode atau kodenya tidak sah.', false);
+      return new KesalahanEvaluasi('Evaluasi ini belum bisa disimpan karena periodenya tidak lengkap. Muat ulang evaluasi, lalu coba lagi.', false);
     case '28000':
     case 'PGRST301':
       return new KesalahanEvaluasi('Sesi Anda berakhir. Masuk lagi untuk melihat evaluasi.', false);
     default:
-      return new KesalahanEvaluasi('Gagal memuat evaluasi. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanEvaluasi('Evaluasi belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
 }
