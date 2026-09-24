@@ -146,3 +146,18 @@ layar tanpa `HeaderLayar`.
   (N5): Ukuran → "Fase & budget" kini kembali ke tab yang sudah ada lalu pindah
   ke Budget, bukan menumpuk salinan tab di atas Ukuran. Diuji di web: berakhir
   di `/budget` tanpa tombol kembali.
+
+## 8. Pola transisi
+
+Satu tabel di `app/_layout.tsx` (`RUTE_TUMPUKAN` + `OPSI_TRANSISI`), dua pola:
+
+| Pola | Untuk | Animasi | Gestur | Tombol header |
+|---|---|---|---|---|
+| `dorong` | masuk lebih dalam ke satu topik (Ukuran, Sumber data, Hasil lab, …) | geser dari kanan | geser-kembali aktif (kecuali isian kotor, §7) | `‹` Kembali |
+| `modal` | membuat/mengubah satu hal lalu kembali (Tambah/Ubah hasil lab) | naik dari bawah, layar penuh | tidak ada | `✕` Tutup |
+| (akar) | masuk ↔ app | `fade` | — | — |
+
+Menyelesaikan N7: dulu `tambah-hasil-lab` naik dari bawah tetapi tetap
+memakai `‹` dan geser-kanan, jadi animasi, gestur, dan tombolnya tidak sepakat.
+`HeaderLayar jenisKembali="tutup"` memberi `✕`. `cek:desain` menolak rute
+tumpukan yang tidak ada di tabel.

@@ -14,6 +14,11 @@ type Props = {
    * Layar tab tidak punya tombol kembali.
    */
   kembali?: boolean | (() => void);
+  /**
+   * `kembali` (bawaan) untuk layar dorong: `‹`. `tutup` untuk layar modal
+   * (membuat/mengubah): `✕`, karena layarnya naik dari bawah, bukan dari kanan.
+   */
+  jenisKembali?: 'kembali' | 'tutup';
   /** Satu aksi di kanan: `Pill` fase, `Tombol ukuran="kecil"`, atau `TombolIkon`. */
   aksi?: React.ReactNode;
   /** Isi tambahan di bawah subjudul, mis. `IndikatorSinkron` di Hari Ini. */
@@ -28,14 +33,14 @@ type Props = {
  * membawa peran header aksesibilitas, jadi VoiceOver bisa melompat ke sana di
  * setiap layar. Jarak di bawahnya diatur kerangka layar (`gap: xl`), bukan di sini.
  */
-export function HeaderLayar({ judul, subjudul, kembali, aksi, bawah }: Props) {
+export function HeaderLayar({ judul, subjudul, kembali, jenisKembali = 'kembali', aksi, bawah }: Props) {
   const router = useRouter();
   return (
     <View style={{ flexDirection: 'row', alignItems: kembali ? 'center' : 'flex-start', gap: spacing.md }}>
       {kembali ? (
         <TombolIkon
-          ikon="chevron-back"
-          aksesLabel="Kembali"
+          ikon={jenisKembali === 'tutup' ? 'close' : 'chevron-back'}
+          aksesLabel={jenisKembali === 'tutup' ? 'Tutup' : 'Kembali'}
           onPress={typeof kembali === 'function' ? kembali : () => router.back()}
         />
       ) : null}

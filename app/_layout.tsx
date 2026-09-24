@@ -32,6 +32,33 @@ export default function RootLayout() {
 }
 
 /**
+ * Pola transisi (docs/desain/peta-navigasi.md §8), satu tabel untuk semua rute:
+ * - `dorong`: masuk lebih dalam ke satu topik; geser dari kanan, geser-kembali
+ *   aktif, tombol kembali `‹` di header.
+ * - `modal`: membuat/mengubah satu hal lalu kembali; naik dari bawah menutupi
+ *   layar penuh, ditutup dengan `✕` di header (tanpa gestur yang bisa
+ *   membuang isian tanpa sengaja).
+ */
+const OPSI_TRANSISI = {
+  dorong: { animation: 'slide_from_right', gestureEnabled: true },
+  modal: { animation: 'slide_from_bottom', presentation: 'fullScreenModal', gestureEnabled: false },
+} as const;
+
+const RUTE_TUMPUKAN: { nama: string; jenis: keyof typeof OPSI_TRANSISI }[] = [
+  { nama: 'ukuran', jenis: 'dorong' },
+  { nama: 'sumber-data', jenis: 'dorong' },
+  { nama: 'latihan', jenis: 'dorong' },
+  { nama: 'impor-riwayat', jenis: 'dorong' },
+  { nama: 'widget-pengingat', jenis: 'dorong' },
+  { nama: 'target-harian', jenis: 'dorong' },
+  { nama: 'privasi', jenis: 'dorong' },
+  { nama: 'hasil-lab', jenis: 'dorong' },
+  { nama: 'tambah-hasil-lab', jenis: 'modal' },
+  { nama: 'arah-visual', jenis: 'dorong' },
+  { nama: 'peraga', jenis: 'dorong' },
+];
+
+/**
  * Sesi memilih tumpukan: `Stack.Protected` membuat layar app TIDAK ADA bagi
  * yang keluar (tautan dalam ke /ukuran berakhir di layar masuk), dan layar
  * masuk tidak ada bagi yang sudah masuk. Keluar dari layar mana pun langsung
@@ -81,17 +108,9 @@ function TumpukanAkar() {
                 >
                   <Stack.Protected guard={sudahMasuk}>
                     <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="ukuran" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="sumber-data" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="latihan" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="impor-riwayat" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="widget-pengingat" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="target-harian" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="privasi" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="hasil-lab" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="tambah-hasil-lab" options={{ animation: 'slide_from_bottom' }} />
-                    <Stack.Screen name="arah-visual" options={{ animation: 'slide_from_right' }} />
-                    <Stack.Screen name="peraga" options={{ animation: 'slide_from_right' }} />
+                    {RUTE_TUMPUKAN.map((r) => (
+                      <Stack.Screen key={r.nama} name={r.nama} options={OPSI_TRANSISI[r.jenis]} />
+                    ))}
                   </Stack.Protected>
                   <Stack.Protected guard={!sudahMasuk}>
                     <Stack.Screen name="masuk" options={{ animation: 'fade' }} />

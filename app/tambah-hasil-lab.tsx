@@ -159,6 +159,7 @@ export default function TambahHasilLabScreen() {
       >
         <HeaderLayar
           kembali={() => kembali()}
+          jenisKembali="tutup"
           judul={asal ? 'Ubah hasil lab' : 'Tambah hasil lab'}
           subjudul="Salin dari kertas hasilnya"
         />

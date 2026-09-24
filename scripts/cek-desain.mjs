@@ -187,6 +187,12 @@ const tabBeda = tab.filter((t) => {
   return t.rute !== 'index' && !new RegExp(`(>\\s*|judul="|judul=\\{\`)${t.judul}\\b`).test(layarTab);
 });
 cek('judul layar diawali label tabnya', tabBeda.length === 0, tabBeda.map((t) => `${t.rute}: "${t.judul}"`).join(', '));
+const tabelRute = [...tataLetak.matchAll(/\{ nama: '([\w-]+)', jenis: '(dorong|modal)' \}/g)].map((m) => m[1]);
+const ruteTumpukan = readdirSync('app')
+  .filter((n) => n.endsWith('.tsx') && !['_layout.tsx', 'masuk.tsx'].includes(n))
+  .map((n) => n.replace('.tsx', ''));
+const tanpaTransisi = ruteTumpukan.filter((r) => !tabelRute.includes(r));
+cek('setiap rute tumpukan punya pola transisi (dorong/modal)', tanpaTransisi.length === 0, tanpaTransisi.join(', '));
 const tanpaHeader = layar
   .filter((p) => !/_layout\.tsx$|masuk\.tsx$/.test(p))
   .filter((p) => (readFileSync(p, 'utf8').match(/<HeaderLayar\b/g) ?? []).length === 0);
