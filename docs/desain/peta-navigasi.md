@@ -19,7 +19,7 @@ app/_layout.tsx                     Stack akar (headerShown: false), dijaga sesi
     ├── ukuran                      slide_from_right
     ├── sumber-data                 slide_from_right
     ├── latihan                     slide_from_right
-    ├── impor-riwayat               slide_from_right
+    ├── impor-riwayat (Impor & ekspor) slide_from_right
     ├── widget-pengingat            slide_from_right
     ├── target-harian               slide_from_right   param ?isi=<dayTypeId>
     ├── privasi                     slide_from_right
@@ -44,9 +44,9 @@ app/_layout.tsx                     Stack akar (headerShown: false), dijaga sesi
 | Hari Ini | Sumber data | ketuk `IndikatorSinkron` di kepala layar |
 | Tren | Ukuran | baris "Ukuran tubuh" |
 | Ukuran | **tab** Budget | "Fase & budget" di banner batas pinggang (`/(tabs)/budget`) |
-| Pengaturan | Target harian, Sumber data, Impor riwayat, Hasil lab, Widget & pengingat, Privasi | baris daftar |
+| Pengaturan | Target harian, Sumber data, Impor & ekspor, Hasil lab, Widget & pengingat, Privasi | baris daftar |
 | Pengaturan (dev) | Arah visual, Peraga | baris daftar, hanya `__DEV__` |
-| Sumber data | Latihan, Impor riwayat | tautan di kartu Hevy / kartu impor |
+| Sumber data | Latihan, Impor & ekspor | tautan di kartu Hevy / kartu impor |
 | Privasi | Sumber data, Widget & pengingat | baris daftar |
 | Hasil lab | Tambah hasil lab (baru / `?id=` ubah) | tombol utama, "Ubah" |
 | Semua layar tumpukan | layar sebelumnya | `TombolIkon` kembali → `router.back()` |
@@ -177,7 +177,7 @@ berganti). Dulu `router.back()` tanpa riwayat tidak melakukan apa-apa.
 | Ukuran | Tren |
 | Latihan | Sumber data |
 | Tambah/Ubah hasil lab | Hasil lab |
-| Sumber data, Impor riwayat, Widget & pengingat, Target harian, Privasi, Hasil lab, Arah visual, Peraga | Setelan |
+| Sumber data, Impor & ekspor, Widget & pengingat, Target harian, Privasi, Hasil lab, Arah visual, Peraga | Setelan |
 
 Dipakai `HeaderLayar` dan setiap aksi "selesai lalu kembali" (simpan, hapus,
 batal). Diuji di web: `/ukuran`, `/tambah-hasil-lab`, `/latihan` dibuka

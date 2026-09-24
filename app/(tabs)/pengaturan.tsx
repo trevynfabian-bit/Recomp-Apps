@@ -236,10 +236,10 @@ export default function PengaturanScreen() {
             onPress={() => router.push('/sumber-data')}
           />
           <BarisTautan
-            ikon="download-outline"
-            judul="Impor riwayat"
-            keterangan="Hevy, Apple Health, ukuran lama"
-            petunjuk="Membuka impor riwayat sekali"
+            ikon="swap-vertical-outline"
+            judul="Impor & ekspor"
+            keterangan="Riwayat Hevy, Apple Health, ukuran lama · CSV & JSON"
+            petunjuk="Membuka impor riwayat dan ekspor data"
             onPress={() => router.push('/impor-riwayat')}
           />
           <BarisTautan
@@ -256,13 +256,6 @@ export default function PengaturanScreen() {
             }
             petunjuk="Membuka riwayat hasil lab"
             onPress={() => router.push('/hasil-lab')}
-          />
-          <BarisTautan
-            ikon="share-outline"
-            judul="Ekspor data saya"
-            keterangan="CSV & JSON, kapan saja"
-            petunjuk="Membuka ekspor seluruh data"
-            onPress={() => setSheet('ekspor')}
           />
         </DaftarBaris>
       </View>
