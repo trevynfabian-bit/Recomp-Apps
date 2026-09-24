@@ -104,6 +104,10 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    `AngkaStat`/`DeretStat` (angka sekunder; menggantikan 3 salinan `StatKecil`
    di tugas berikutnya), `formatSelisih()` di `src/lib/formatTampilan.ts`
    (tanda "+" / minus U+2212, nol sesuai presisi atau kalimat) menggantikan 8
-   pola selisih tulisan tangan.
+   pola selisih tulisan tangan. Diterapkan: ketujuh layar data (Hari Ini, Tren, Budget,
+   Ukuran, Target harian, Sumber data, Latihan) memakai `KartuHero`; tiga
+   `StatKecil` lokal diganti `stat`; Hari Ini dan Target harian memakai
+   `pengganti` saat target belum diisi; Sumber data dan Latihan kini ikut
+   berbingkai kartu seperti layar lain.
 
 Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).

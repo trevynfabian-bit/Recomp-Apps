@@ -13,8 +13,8 @@ import {
 import {
   BannerBatasPinggang,
   Card,
-  HeroNumber,
   KartuBodyFat,
+  KartuHero,
   RiwayatPerubahan,
   SectionHeader,
   SheetBatasPinggang,
@@ -130,19 +130,17 @@ export default function UkuranScreen() {
       {/* Pinggang jadi angka utama: ia penanda lemak perut yang paling responsif.
           Memakai HeroNumber, bukan hero rakitan sendiri, supaya batas Dynamic
           Type (MAKS_SKALA_HERO) ikut berlaku seperti di layar lain. */}
-      <Card style={{ paddingVertical: spacing.xl }}>
-        <HeroNumber
-          label="Pinggang"
-          nilai={formatDesimal(terbaru.pinggang_cm)}
-          unit="cm"
-          keterangan={
-            pertama
-              ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
-              : undefined
-          }
-          warna={colors.teks}
-        />
-
+      <KartuHero
+        label="Pinggang"
+        nilai={formatDesimal(terbaru.pinggang_cm)}
+        unit="cm"
+        keterangan={
+          pertama
+            ? `${selisihTeks(terbaru.pinggang_cm - pertama.pinggang_cm)} sejak ${formatTanggalPanjang(pertama.tanggal)}`
+            : undefined
+        }
+        warna={colors.teks}
+      >
         <View style={{ alignItems: 'center', marginTop: spacing.md }}>
           {/* Batas pinggang diatur dari sini, bukan dari Setelan: angkanya baru
               punya arti saat dilihat berdampingan dengan pinggang hari ini. */}
@@ -181,7 +179,7 @@ export default function UkuranScreen() {
             </Text>
           </Pressable>
         </View>
-      </Card>
+      </KartuHero>
 
       {/* Peringatan batas — hanya muncul saat ada yang perlu diputuskan */}
       <BannerBatasPinggang

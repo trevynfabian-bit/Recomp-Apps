@@ -6,7 +6,7 @@ import { kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logi
 import type { KoneksiSumber, SumberData } from '@recomp/logika';
 import {
   Card,
-  HeroNumber,
+  KartuHero,
   KartuSumberData,
   SectionHeader,
   SheetHubungkanSumber,
@@ -115,7 +115,7 @@ export default function SumberDataScreen() {
         </View>
       </View>
 
-      <HeroNumber
+      <KartuHero
         label="Sumber aktif"
         nilai={String(ringkasan.aktif)}
         unit={`dari ${ringkasan.total}`}

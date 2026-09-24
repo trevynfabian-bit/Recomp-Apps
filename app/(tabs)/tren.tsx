@@ -19,21 +19,12 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { Fase, StatusKoridor } from '@recomp/logika';
-import {
-  Card,
-  CatatanKecukupan,
-  GrafikTren,
-  HeroNumber,
-  LabelSinyalArah,
-  Pemisah,
-  PenandaSumber,
-  Pill,
-  SectionHeader,
-} from '@/components';
+import { Card, CatatanKecukupan, GrafikTren, KartuHero, LabelSinyalArah, PenandaSumber, Pill, SectionHeader } from '@/components';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
 import { sumberBerat } from '@/lib/sumber';
 import { colors, radius, spacing, typography } from '@/theme';
+import { formatSelisih } from '@/lib/formatTampilan';
 
 /**
  * Layar Tren.
@@ -109,58 +100,37 @@ export default function TrenScreen() {
       </View>
 
       {/* Angka utama: rata-rata 7 hari, bukan berat hari ini */}
-      <Card style={{ paddingVertical: spacing.xl }}>
-        <HeroNumber
-          label={`Rata-rata ${JENDELA_HARI} hari`}
-          nilai={rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'}
-          unit="kg"
-          keterangan={
-            rata.rataRataKg !== null
-              ? `dari ${rata.jumlahTimbangan} timbangan dalam ${JENDELA_HARI} hari terakhir`
-              : 'belum ada timbangan dalam sepekan terakhir'
-          }
-          warna={colors.teks}
-        />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: spacing.xl,
-            paddingTop: spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: colors.garis,
-          }}
-        >
-          <StatKecil
-            label="Arah sepekan"
-            nilai={
-              sinyal.perubahanKg !== null
-                ? `${sinyal.perubahanKg > 0 ? '+' : sinyal.perubahanKg < 0 ? '−' : ''}${formatDesimal(Math.abs(sinyal.perubahanKg))}`
-                : '—'
-            }
-            unit={sinyal.perubahanKg !== null ? 'kg' : ''}
-            warna={warnaArah}
-          />
-          <Pemisah arah="vertikal" />
-          <StatKecil
-            label="Sepekan lalu"
-            nilai={sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—'}
-            unit="kg"
-            warna={colors.teksRedup}
-          />
-          <Pemisah arah="vertikal" />
-          <StatKecil
-            label="Terakhir"
-            nilai={terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—'}
-            unit="kg"
-            warna={colors.teksRedup}
-          />
-        </View>
-
-        <View style={{ marginTop: spacing.lg }}>
-          <CatatanKecukupan kecukupan={kecukupan} untuk="rataRata" />
-        </View>
-      </Card>
+      <KartuHero
+        label={`Rata-rata ${JENDELA_HARI} hari`}
+        nilai={rata.rataRataKg !== null ? formatDesimal(rata.rataRataKg) : '—'}
+        unit="kg"
+        keterangan={
+          rata.rataRataKg !== null
+            ? `dari ${rata.jumlahTimbangan} timbangan dalam ${JENDELA_HARI} hari terakhir`
+            : 'belum ada timbangan dalam sepekan terakhir'
+        }
+        warna={colors.teks}
+        stat={[
+          {
+            label: 'Arah sepekan',
+            nilai: sinyal.perubahanKg !== null ? formatSelisih(sinyal.perubahanKg) : '—',
+            unit: sinyal.perubahanKg !== null ? 'kg' : undefined,
+            warna: warnaArah,
+          },
+          {
+            label: 'Sepekan lalu',
+            nilai: sepekanLalu.rataRataKg !== null ? formatDesimal(sepekanLalu.rataRataKg) : '—',
+            unit: 'kg',
+            warna: colors.teksRedup,
+          },
+          {
+            label: 'Terakhir',
+            nilai: terakhir?.berat_pagi_kg !== undefined ? formatDesimal(terakhir.berat_pagi_kg) : '—',
+            unit: 'kg',
+            warna: colors.teksRedup,
+          },
+        ]}
+      />
 
       {/* Grafik: rata-rata 7 hari sebagai garis, timbangan harian sebagai titik */}
       <View>
@@ -329,29 +299,3 @@ function asalHari(tanggal: string) {
   return jenis ? <PenandaSumber jenis={jenis} /> : null;
 }
 
-function StatKecil({
-  label,
-  nilai,
-  unit,
-  warna,
-}: {
-  label: string;
-  nilai: string;
-  unit: string;
-  warna: string;
-}) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs }}>
-      <Text
-        style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
-        <Text style={{ ...typography.title, color: warna }}>{nilai}</Text>
-        {unit ? <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text> : null}
-      </View>
-    </View>
-  );
-}

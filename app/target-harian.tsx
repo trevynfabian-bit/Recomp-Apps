@@ -18,8 +18,8 @@ import {
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import {
   Card,
-  HeroNumber,
   InputTarget,
+  KartuHero,
   KerangkaSheet,
   MatriksTarget,
   PemilihTipeHari,
@@ -238,17 +238,15 @@ export default function TargetHarianScreen() {
             <SectionHeader judul="Berlaku hari ini" aksi={override ? 'tipe hari diubah manual' : 'tipe hari otomatis'} />
             <View style={{ gap: spacing.md }}>
               {/* Satu angka utama di layar ini: target kalori yang berlaku hari ini. */}
-              <Card style={{ paddingVertical: spacing.xl }}>
-                {targetHariIni ? (
-                  <HeroNumber
-                    label="Target kalori hari ini"
-                    nilai={formatAngka(targetHariIni.target_kalori)}
-                    unit="kcal"
-                    keterangan={`${namaTipeHariIni} · ${profil.fase_aktif} · protein ${formatMakro(targetHariIni.target_protein_g)} g · lemak ${formatMakro(targetHariIni.target_lemak_g)} g · sat fat ≤${formatMakro(targetHariIni.batas_sat_fat_g)} g`}
-                  />
-                ) : (
+              <KartuHero
+                label="Target kalori hari ini"
+                nilai={targetHariIni ? formatAngka(targetHariIni.target_kalori) : '—'}
+                unit="kcal"
+                keterangan={targetHariIni ? `${namaTipeHariIni} · ${profil.fase_aktif} · protein ${formatMakro(targetHariIni.target_protein_g)} g · lemak ${formatMakro(targetHariIni.target_lemak_g)} g · sat fat ≤${formatMakro(targetHariIni.batas_sat_fat_g)} g` : undefined}
+                pengganti={
+                  targetHariIni ? undefined : (
                   <View style={{ gap: spacing.md }}>
-                    <Text style={{ ...typography.caption, color: colors.teksRedup }}>TARGET KALORI HARI INI</Text>
+                    <Text style={{ ...typography.caption, color: colors.teksRedup, textTransform: 'uppercase' }}>Target kalori hari ini</Text>
                     <Text style={{ ...typography.title, color: colors.teks }}>
                       {namaTipeHariIni} · {profil.fase_aktif} belum diisi
                     </Text>
@@ -258,8 +256,9 @@ export default function TargetHarianScreen() {
                       onPress={() => setSuntingSatu({ dayTypeId: tipeHariIni, fase: profil.fase_aktif })}
                     />
                   </View>
-                )}
-              </Card>
+                  )
+                }
+              />
               <PemilihTipeHari
                 tampilkanTarget={false}
                 daftar={tipeHari}

@@ -2,24 +2,7 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Card,
-  HeroNumber,
-  IndikatorSinkron,
-  KartuCatatan,
-  KartuTimbangPagi,
-  LegendaSumber,
-  PanelRingkasanMakro,
-  PemilihTipeHari,
-  Pemisah,
-  PenandaSumber,
-  Pill,
-  SectionHeader,
-  SheetCatatFoto,
-  Tombol,
-  TombolUtama,
-  type EntriMakananBaru,
-} from '@/components';
+import { Card, IndikatorSinkron, KartuCatatan, KartuHero, KartuTimbangPagi, LegendaSumber, PanelRingkasanMakro, PemilihTipeHari, PenandaSumber, Pill, SectionHeader, SheetCatatFoto, Tombol, TombolUtama, type EntriMakananBaru } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHariBerlaku } from '@recomp/logika';
 import { batalkanPengingatTimbangHariIni } from '@/lib/notifikasi';
 import { supabaseSiap } from '@/lib/supabase';
@@ -150,49 +133,39 @@ export default function LogHarianScreen() {
       </View>
 
       {/* Angka utama: sisa kalori hari ini */}
-      <Card style={{ paddingVertical: spacing.xl }}>
-        {target && sisaKalori !== null ? (
-          <HeroNumber
-            label="Sisa kalori hari ini"
-            nilai={formatAngka(sisaKalori)}
-            unit="kcal"
-            keterangan={`${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal`}
-            warna={sisaKalori >= 0 ? colors.aksen.besar : colors.status.bahaya.isian}
-          />
-        ) : (
-          <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>
-            <Text style={{ ...typography.caption, color: colors.teksRedup }}>SISA KALORI HARI INI</Text>
-            <Text style={{ ...typography.title, color: colors.teks }}>
-              Target {dayType.nama} · {fase} belum diisi
-            </Text>
-            <Text style={{ ...typography.body, color: colors.teksRedup }}>
-              Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
-              tetap tersimpan seperti biasa.
-            </Text>
-            <TombolUtama
-              label="Isi target"
-              aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`}
-              onPress={() => router.push({ pathname: '/target-harian', params: { isi: dayTypeId } })}
-            />
-          </View>
-        )}
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: spacing.xl,
-            paddingTop: spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: colors.garis,
-          }}
-        >
-          <StatKecil label="Sisa protein" nilai={sisaProtein !== null ? formatMakro(sisaProtein) : '–'} unit={sisaProtein !== null ? 'g' : ''} warna={colors.status.sukses.teks} />
-          <Pemisah arah="vertikal" />
-          <StatKecil label="Sisa lemak" nilai={sisaLemak !== null ? formatMakro(sisaLemak) : '–'} unit={sisaLemak !== null ? 'g' : ''} warna={colors.teks} />
-          <Pemisah arah="vertikal" />
-          <StatKecil label="Tipe hari" nilai={dayType.nama} unit="" warna={colors.teks} kecil />
-        </View>
-      </Card>
+      <KartuHero
+        label="Sisa kalori hari ini"
+        nilai={sisaKalori !== null ? formatAngka(sisaKalori) : '—'}
+        unit="kcal"
+        keterangan={target ? `${formatAngka(log.kalori)} dari target ${formatAngka(target.target_kalori)} kcal` : undefined}
+        warna={sisaKalori !== null && sisaKalori < 0 ? colors.status.bahaya.isian : colors.aksen.besar}
+        pengganti={
+          target && sisaKalori !== null ? undefined : (
+            <View accessibilityLiveRegion="polite" style={{ gap: spacing.md }}>
+              <Text style={{ ...typography.caption, color: colors.teksRedup, textTransform: 'uppercase' }}>
+                Sisa kalori hari ini
+              </Text>
+              <Text style={{ ...typography.title, color: colors.teks }}>
+                Target {dayType.nama} · {fase} belum diisi
+              </Text>
+              <Text style={{ ...typography.body, color: colors.teksRedup }}>
+                Tanpa target, sisanya belum bisa dihitung. Tercatat {formatAngka(log.kalori)} kcal; makanan dan timbangan
+                tetap tersimpan seperti biasa.
+              </Text>
+              <TombolUtama
+                label="Isi target"
+                aksesLabel={`Isi target ${dayType.nama} untuk fase ${fase}`}
+                onPress={() => router.push({ pathname: '/target-harian', params: { isi: dayTypeId } })}
+              />
+            </View>
+          )
+        }
+        stat={[
+          { label: 'Sisa protein', nilai: sisaProtein !== null ? formatMakro(sisaProtein) : '–', unit: sisaProtein !== null ? 'g' : undefined, warna: colors.status.sukses.teks },
+          { label: 'Sisa lemak', nilai: sisaLemak !== null ? formatMakro(sisaLemak) : '–', unit: sisaLemak !== null ? 'g' : undefined },
+          { label: 'Tipe hari', nilai: dayType.nama, kata: true },
+        ]}
+      />
 
       {/* Timbang pagi — jalur tercepat: ketuk kartu, lalu Simpan (dua tap) */}
       <KartuTimbangPagi
@@ -320,32 +293,5 @@ export default function LogHarianScreen() {
         </View>
       </View>
     </ScrollView>
-  );
-}
-
-/** Tiga statistik pendukung di bawah angka utama; lebarnya dibagi rata. */
-function StatKecil({
-  label,
-  nilai,
-  unit,
-  warna,
-  kecil = false,
-}: {
-  label: string;
-  nilai: string;
-  unit: string;
-  warna: string;
-  kecil?: boolean;
-}) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs }}>
-      <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-        {label}
-      </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xxs }}>
-        <Text style={{ ...(kecil ? typography.body : typography.title), color: warna }}>{nilai}</Text>
-        {unit ? <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text> : null}
-      </View>
-    </View>
   );
 }

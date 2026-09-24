@@ -16,20 +16,7 @@ import {
   usiaPada,
 } from '@recomp/logika';
 import type { BarisKumulatif, Fase, HasilRedistribusi } from '@recomp/logika';
-import {
-  Card,
-  HeroNumber,
-  IndikatorProteinTerlindungi,
-  KartuTdee,
-  MeterBudget,
-  PanelRedistribusi,
-  PemilihFase,
-  Pemisah,
-  Pill,
-  SectionHeader,
-  SheetGantiFase,
-  StatusRedistribusi,
-} from '@/components';
+import { Card, IndikatorProteinTerlindungi, KartuHero, KartuTdee, MeterBudget, PanelRedistribusi, PemilihFase, Pill, SectionHeader, SheetGantiFase, StatusRedistribusi } from '@/components';
 import { mockHariBudget } from '@/mocks/budget';
 import { mockDailyLogHariIni, mockRiwayatBerat } from '@/mocks/dailyLog';
 import { useProfil } from '@/state/profil';
@@ -151,49 +138,36 @@ export default function BudgetScreen() {
       </View>
 
       {/* Angka utama: sisa jatah minggu ini */}
-      <Card style={{ paddingVertical: spacing.xl }}>
-        <HeroNumber
-          label={lewat ? 'Melewati jatah minggu ini' : 'Sisa jatah minggu ini'}
-          nilai={formatAngka(Math.abs(budget.sisa))}
-          unit="kcal"
-          keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
-          warna={lewat ? colors.status.bahaya.isian : colors.aksen.besar}
-        />
-
+      <KartuHero
+        label={lewat ? 'Melewati jatah minggu ini' : 'Sisa jatah minggu ini'}
+        nilai={formatAngka(Math.abs(budget.sisa))}
+        unit="kcal"
+        keterangan={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal`}
+        warna={lewat ? colors.status.bahaya.isian : colors.aksen.besar}
+        stat={[
+          { label: 'Hari tersisa', nilai: String(budget.hariTersisa), unit: 'hari', unitDiBawah: true },
+          {
+            label: 'Dibagi rata',
+            nilai: budget.sisaPerHari !== null ? formatAngka(budget.sisaPerHari) : '—',
+            unit: 'kcal/hari',
+            unitDiBawah: true,
+            warna: budget.sisaPerHari !== null && budget.sisaPerHari < 0 ? colors.status.bahaya.teks : colors.teks,
+          },
+          // Pembanding: berapa jatah per hari kalau minggu ini berjalan sesuai rencana.
+          {
+            label: 'Rencana',
+            nilai: budget.rencanaPerHari !== null ? formatAngka(budget.rencanaPerHari) : '—',
+            unit: 'kcal/hari',
+            unitDiBawah: true,
+            warna: colors.teksRedup,
+          },
+        ]}
+      >
         {/* Meter laju: sisa saja tidak menjawab "apakah lajunya wajar". */}
-        <View style={{ marginTop: spacing.xl }}>
+        <View>
           <MeterBudget budget={budget} laju={laju} />
         </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            marginTop: spacing.xl,
-            paddingTop: spacing.lg,
-            borderTopWidth: 1,
-            borderTopColor: colors.garis,
-          }}
-        >
-          <StatKecil label="Hari tersisa" nilai={String(budget.hariTersisa)} unit="hari" warna={colors.teks} />
-          <Pemisah arah="vertikal" />
-          <StatKecil
-            label="Dibagi rata"
-            nilai={budget.sisaPerHari !== null ? formatAngka(budget.sisaPerHari) : '—'}
-            unit="kcal/hari"
-            warna={
-              budget.sisaPerHari !== null && budget.sisaPerHari < 0 ? colors.status.bahaya.teks : colors.teks
-            }
-          />
-          <Pemisah arah="vertikal" />
-          {/* Pembanding: berapa jatah per hari kalau minggu ini berjalan sesuai rencana. */}
-          <StatKecil
-            label="Rencana"
-            nilai={budget.rencanaPerHari !== null ? formatAngka(budget.rencanaPerHari) : '—'}
-            unit="kcal/hari"
-            warna={colors.teksRedup}
-          />
-        </View>
-      </Card>
+      </KartuHero>
 
       {/* Fase program — mengubahnya mengubah target, koridor, dan budget */}
       <View>
@@ -391,31 +365,4 @@ function namaHariSingkat(tanggal: string): string {
   const [y, m, d] = tanggal.split('-').map(Number);
   const t = new Date(Date.UTC(y, m - 1, d));
   return `${NAMA_HARI[t.getUTCDay()]} ${d}`;
-}
-
-function StatKecil({
-  label,
-  nilai,
-  unit,
-  warna,
-}: {
-  label: string;
-  nilai: string;
-  unit: string;
-  warna: string;
-}) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xxs }}>
-      <Text
-        style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-      <View style={{ alignItems: 'center' }}>
-        <Text style={{ ...typography.title, color: warna }}>{nilai}</Text>
-        <Text style={{ ...typography.caption, color: colors.teksSamar }}>{unit}</Text>
-      </View>
-    </View>
-  );
 }

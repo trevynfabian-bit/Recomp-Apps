@@ -11,7 +11,7 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card, HeroNumber, KartuSesiLatihan, KeadaanKosong, SectionHeader, TombolIkon } from '@/components';
+import { Card, KartuHero, KartuSesiLatihan, KeadaanKosong, SectionHeader, TombolIkon } from '@/components';
 import { mockSesiLatihan } from '@/mocks/latihan';
 import { colors, spacing, typography } from '@/theme';
 
@@ -82,7 +82,7 @@ export default function LatihanScreen() {
         </View>
       </View>
 
-      <HeroNumber
+      <KartuHero
         label="Pekan ini"
         nilai={String(pekan.jumlahSesi)}
         unit="sesi"

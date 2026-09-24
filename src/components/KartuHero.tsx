@@ -62,6 +62,11 @@ type PropsKartuHero = React.ComponentProps<typeof HeroNumber> & {
   stat?: PropsStat[];
   /** Isi tambahan di bawah angka hero (mis. meter budget), sebelum deret stat. */
   children?: React.ReactNode;
+  /**
+   * Pengganti angka hero saat angkanya belum bisa dihitung (mis. target belum
+   * diisi): kalimat + aksi di tempat yang sama, bukan angka palsu.
+   */
+  pengganti?: React.ReactNode;
 };
 
 /**
@@ -69,10 +74,10 @@ type PropsKartuHero = React.ComponentProps<typeof HeroNumber> & {
  * isi pendukung dan deret angka sekunder di bawah garis. Sama seperti
  * `HeroNumber`, paling banyak satu per layar (dijaga `cek:desain`).
  */
-export function KartuHero({ stat, children, ...hero }: PropsKartuHero) {
+export function KartuHero({ stat, children, pengganti, ...hero }: PropsKartuHero) {
   return (
     <Card style={{ paddingVertical: spacing.xl, gap: spacing.xl }}>
-      <HeroNumber {...hero} />
+      {pengganti ?? <HeroNumber {...hero} />}
       {children}
       {stat && stat.length > 0 ? (
         <View style={{ gap: spacing.lg }}>
