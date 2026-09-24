@@ -1,5 +1,5 @@
 import { Text, TextInput, View } from 'react-native';
-import { colors, radius, spacing, typography } from '@/theme';
+import { angkaTabular, colors, radius, spacing, typography } from '@/theme';
 
 type Props = {
   label: string;
@@ -37,6 +37,7 @@ export function InputAngka({ label, nilai, unit, onUbah, warna = colors.textMute
           // Lebar diserahkan ke flex; tanpa ini input memakai lebar bawaannya.
           style={{
             ...typography.body,
+            ...angkaTabular,
             flex: 1,
             minWidth: 0,
             color: colors.text,

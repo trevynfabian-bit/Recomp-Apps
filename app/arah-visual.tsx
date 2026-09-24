@@ -16,17 +16,17 @@ import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
  * dibuka dari Pengaturan pada build pengembangan. Data dari `src/mocks`.
  */
 
-// Varian tipografi bab 2.3. Dipindahkan ke `src/theme/tokens.ts` di Fase 2;
-// di sini dulu supaya layar contoh bisa menilainya sebelum tokennya resmi.
+// Tinggi baris gaya dasar (bab 2.2) masuk ke `src/theme/tokens.ts` di Fase 2;
+// sampai saat itu layar contoh menambahkannya di sini. Varian bernama
+// (`bodySedang`, `bodyTebal`, `labelBiasa`) sudah resmi.
 const usulanTipografi = {
-  hero: { ...typography.hero, lineHeight: 68 },
   display: { ...typography.display, lineHeight: 40 },
   title: { ...typography.title, lineHeight: 26 },
   body: { ...typography.body, lineHeight: 24 },
-  bodySedang: { ...typography.body, fontWeight: '600', lineHeight: 24 },
-  bodyTebal: { ...typography.body, fontWeight: '700', lineHeight: 24 },
+  bodySedang: typography.bodySedang,
+  bodyTebal: typography.bodyTebal,
   label: { ...typography.label, lineHeight: 19 },
-  labelBiasa: { ...typography.label, fontWeight: '500', lineHeight: 19 },
+  labelBiasa: typography.labelBiasa,
   caption: { ...typography.caption, lineHeight: 16 },
 } as const;
 

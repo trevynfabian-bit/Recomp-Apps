@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { colors, MAKS_SKALA_HERO, spacing, typography } from '@/theme';
+import { angkaTabular, colors, MAKS_SKALA_HERO, spacing, typography } from '@/theme';
 
 type Props = {
   /** Angka utama, sudah diformat sebagai string. */
@@ -25,7 +25,7 @@ export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.ambe
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
         <Text
           maxFontSizeMultiplier={MAKS_SKALA_HERO}
-          style={{ ...typography.hero, color: warna }}
+          style={{ ...typography.hero, ...angkaTabular, color: warna }}
         >
           {nilai}
         </Text>
@@ -34,7 +34,7 @@ export function HeroNumber({ nilai, unit, label, keterangan, warna = colors.ambe
         </Text>
       </View>
       {keterangan ? (
-        <Text style={{ ...typography.label, color: colors.textMuted }}>{keterangan}</Text>
+        <Text style={{ ...typography.labelBiasa, color: colors.textMuted, textAlign: 'center' }}>{keterangan}</Text>
       ) : null}
     </View>
   );

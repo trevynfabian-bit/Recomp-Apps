@@ -201,6 +201,25 @@ layar kunci iOS dan memang dikecualikan dari palet.
 - Dynamic Type: teks isi menskala penuh; hanya `hero` yang dibatasi
   `MAKS_SKALA_HERO` (1,3).
 
+### 2.5 Hierarki teks di komponen
+
+Empat tingkat, dari yang paling menonjol. Satu kartu memakai paling banyak tiga.
+
+| Tingkat | Gaya | Warna | Contoh |
+|---|---|---|---|
+| 1. Angka | `hero` (sekali per layar) atau `title` + `angkaTabular` | `aksen` / `teks` | `HeroNumber`, nilai di `MacroRow` |
+| 2. Judul | `title` (layar/sheet), `bodySedang` (kartu/baris) | `teks` | judul layar, nama baris pengaturan |
+| 3. Keterangan | `labelBiasa` | `teksRedup` | kalimat di bawah judul kartu, keterangan hero |
+| 4. Label grup & unit | `caption` (kapital untuk grup) atau `label` | `teksSamar` | `SectionHeader`, unit "kcal", label di atas input |
+
+Label tombol: `bodyTebal` untuk tombol utama, `bodySedang` untuk tombol bertepi.
+
+Sudah diterapkan pada komponen inti: `HeroNumber` (keterangan `labelBiasa`,
+angka tabular), `MacroRow` (angka tabular), `InputAngka` (angka tabular),
+`TombolUtama`/`TombolBertepi` (varian bernama), `LayarMuatTarget` (keterangan
+`labelBiasa`, tinggi baris `body` 24). `SectionHeader`, `Pill`, `Card`, dan
+`KerangkaSheet` sudah sesuai hierarki tanpa perubahan.
+
 ---
 
 ## 3. Kepadatan tata letak

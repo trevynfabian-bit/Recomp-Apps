@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { colors, radius, spacing, typography } from '@/theme';
+import { angkaTabular, colors, radius, spacing, typography } from '@/theme';
 import { formatMakro } from '@recomp/logika';
 import { hitungMakro, keteranganMakro } from '@recomp/logika';
 import type { MacroProgress, ModeMakro } from '@/types/domain';
@@ -29,7 +29,7 @@ export function MacroRow({ macro, mode }: Props) {
 
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.xs }}>
           {/* Sisa negatif diberi awalan "+" karena angkanya sudah dimutlakkan. */}
-          <Text style={{ ...typography.title, color: terlampaui ? colors.aksenTeks.coral : colors.text }}>
+          <Text style={{ ...typography.title, ...angkaTabular, color: terlampaui ? colors.aksenTeks.coral : colors.text }}>
             {mode === 'sisa' && terlampaui ? '+' : ''}
             {formatMakro(nilaiUtama)}
           </Text>

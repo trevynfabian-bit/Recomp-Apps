@@ -50,7 +50,7 @@ export function TombolUtama({
       ) : (
         // Label di atas isian selalu warna latar: teks terang di atas coral hanya
         // 3,64:1, di bawah ambang AA untuk label 16px (lihat docs/desain/arah-visual.md).
-        <Text style={{ ...typography.body, fontWeight: '700', color: colors.bg }}>
+        <Text style={{ ...typography.bodyTebal, color: colors.bg }}>
           {label}
         </Text>
       )}
@@ -80,7 +80,7 @@ export function TombolBertepi({ label, onPress, aksesLabel, nonaktif = false }: 
         opacity: nonaktif ? 0.45 : pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.body, fontWeight: '600', color: colors.text }}>{label}</Text>
+      <Text style={{ ...typography.bodySedang, color: colors.text }}>{label}</Text>
     </Pressable>
   );
 }

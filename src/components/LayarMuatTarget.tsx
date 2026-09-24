@@ -34,7 +34,7 @@ export function LayarMuatTarget({ pesanGagal, onCobaLagi, onKeluar }: Props) {
       {pesanGagal === null ? (
         <View accessibilityLiveRegion="polite" style={{ alignItems: 'center', gap: spacing.md }}>
           <ActivityIndicator color={colors.amber} />
-          <Text style={{ ...typography.label, fontWeight: '500', color: colors.textMuted }}>Memuat target harian…</Text>
+          <Text style={{ ...typography.labelBiasa, color: colors.textMuted }}>Memuat target harian…</Text>
         </View>
       ) : (
         <>
@@ -42,7 +42,7 @@ export function LayarMuatTarget({ pesanGagal, onCobaLagi, onKeluar }: Props) {
             <Text accessibilityRole="header" style={{ ...typography.title, color: colors.text }}>
               Target harian belum termuat
             </Text>
-            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 23 }}>{pesanGagal}</Text>
+            <Text style={{ ...typography.body, color: colors.textMuted, lineHeight: 24 }}>{pesanGagal}</Text>
           </View>
           <View style={{ gap: spacing.sm }}>
             <TombolUtama label="Coba lagi" onPress={onCobaLagi} />

@@ -1,3 +1,5 @@
+import type { TextStyle } from 'react-native';
+
 /** Skala spasi 4pt — dipakai untuk padding, gap, dan margin. */
 export const spacing = {
   xs: 4,
@@ -28,4 +30,20 @@ export const typography = {
   body: { fontSize: 16, fontWeight: '500' },
   label: { fontSize: 13, fontWeight: '600' },
   caption: { fontSize: 11, fontWeight: '600', letterSpacing: 0.6 },
+
+  // Varian bernama (docs/desain/arah-visual.md bab 2.3). Menggantikan penimpaan
+  // `fontWeight`/`lineHeight` manual setelah `...typography.x`.
+  /** Judul kartu / nama baris yang bisa diketuk. */
+  bodySedang: { fontSize: 16, fontWeight: '600', lineHeight: 24 },
+  /** Label tombol utama dan nilai yang ditekankan di dalam kalimat. */
+  bodyTebal: { fontSize: 16, fontWeight: '700', lineHeight: 24 },
+  /** Teks keterangan: satu kalimat atau lebih di bawah judul kartu. */
+  labelBiasa: { fontSize: 13, fontWeight: '500', lineHeight: 19 },
 } as const;
+
+/**
+ * Digit selebar sama untuk angka yang berubah di tempat (hero, nilai makro,
+ * stepper): angka tidak "menari" saat nilainya berganti. Disebar setelah gaya
+ * tipografinya: `{ ...typography.hero, ...angkaTabular }`.
+ */
+export const angkaTabular: Pick<TextStyle, 'fontVariant'> = { fontVariant: ['tabular-nums'] };
