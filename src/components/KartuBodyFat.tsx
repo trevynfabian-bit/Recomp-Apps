@@ -4,6 +4,8 @@ import {
   formatDesimal,
   formatTanggalPanjang,
   komposisiTubuh,
+  selisihHari,
+  tanggalHariIni,
   type HasilBodyFat,
 } from '@recomp/logika';
 import { Card, Pemisah } from './Card';
@@ -12,6 +14,9 @@ import type { Profile, UkuranTubuh } from '@/types/domain';
 import { colors, radius, spacing, typography } from '@/theme';
 import { Tombol } from './Tombol';
 import { formatSelisih } from '@/lib/formatTampilan';
+
+/** Ukur pekanan: lebih dari 10 hari berarti satu pengukuran terlewat. */
+const UMUR_UKUR_BASI_HARI = 10;
 
 type Props = {
   profil: Profile;
@@ -83,6 +88,8 @@ export function KartuBodyFat({
   const selisihPoin =
     awal?.persen != null ? Math.round((hasil.persen - awal.persen) * 10) / 10 : null;
 
+  const umurHari = selisihHari(terbaru.tanggal, tanggalHariIni());
+  const basi = umurHari > UMUR_UKUR_BASI_HARI;
   const komposisi = beratRataRataKg !== null ? komposisiTubuh(hasil.persen, beratRataRataKg) : null;
 
   return (
@@ -106,6 +113,12 @@ export function KartuBodyFat({
         <Text style={{ ...typography.label, color: colors.teksRedup }}>
           wajarnya di antara {formatDesimal(hasil.rentang!.bawah)}% dan{' '}
           {formatDesimal(hasil.rentang!.atas)}%
+        </Text>
+        {/* Tanggal ukur yang dipakai: estimasi selalu milik satu pencatatan
+            lingkar, bukan "hari ini". Lebih dari 10 hari berarti sudah basi. */}
+        <Text style={{ ...typography.caption, color: basi ? colors.status.peringatan.teks : colors.teksSamar }}>
+          Dari ukuran {formatTanggalPanjang(terbaru.tanggal)}
+          {basi ? ` · ${umurHari} hari lalu, ukur ulang untuk angka terkini` : ''}
         </Text>
         {/* Perubahan dan periodenya satu kalimat: dipisah, "sejak 1 September"
             terbaca seolah menerangkan rentang di atasnya. */}
@@ -174,8 +187,7 @@ export function KartuBodyFat({
       <Tombol
         varian="bertepi"
         ukuran="kecil"
-        label="Ubah"
-        aksesLabel="Ubah tinggi badan dan jenis kelamin"
+        label="Ubah tinggi & jenis kelamin"
         sejajar="tengah"
         onPress={() => onLengkapiProfil()}
       />
