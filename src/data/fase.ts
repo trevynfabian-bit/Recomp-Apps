@@ -38,8 +38,8 @@ export async function gantiFase(fase: Fase, tanggal: string | null = null): Prom
     p_tanggal: tanggal,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanFase('Server tidak mengembalikan periode fase.', true);
+  if (error) throw terjemahkan(error, 'simpan');
+  if (!data) throw new KesalahanFase('Fase belum tersimpan. Coba lagi sebentar lagi.', true);
   return data;
 }
 
@@ -47,8 +47,8 @@ export async function gantiFase(fase: Fase, tanggal: string | null = null): Prom
 export async function fasePadaTanggal(tanggal: string): Promise<Fase> {
   const { data, error } = await supabase.rpc('fase_pada_tanggal', { p_tanggal: tanggal });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanFase('Server tidak mengembalikan fase.', true);
+  if (error) throw terjemahkan(error, 'muat');
+  if (!data) throw new KesalahanFase('Fase belum bisa dimuat. Coba lagi sebentar lagi.', true);
   return data;
 }
 
@@ -60,7 +60,7 @@ export async function riwayatFase(batas = 12): Promise<FasePeriodeRow[]> {
     .order('mulai_tanggal', { ascending: false })
     .limit(batas);
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
@@ -72,7 +72,7 @@ export async function periodeBerjalan(): Promise<FasePeriodeRow | null> {
     .is('selesai_tanggal', null)
     .maybeSingle();
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? null;
 }
 
@@ -89,15 +89,26 @@ export async function targetSemuaFase(): Promise<DayTypeTargetRow[]> {
     .select('*')
     .order('fase', { ascending: true });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
 /**
  * Ubah kesalahan Postgres/PostgREST menjadi pesan berbahasa Indonesia.
  * Kode SQLSTATE-nya sengaja dicocokkan dengan yang di-`raise` oleh RPC.
+ * `untuk` membedakan memuat dari mengganti fase: "belum bisa dimuat" untuk
+ * ganti fase yang gagal membuat orang mengira datanya yang hilang.
+ * Setiap kalimat diperiksa `cek:target` (nada, tanpa istilah teknis).
  */
-function terjemahkan(error: { code?: string; message: string }): KesalahanFase {
+function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 'simpan'): KesalahanFase {
+  if (/fetch|network|jaringan/i.test(error.message)) {
+    return new KesalahanFase(
+      untuk === 'muat'
+        ? 'Fase belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+        : 'Fase belum diganti. Periksa koneksi, lalu coba lagi.',
+      true,
+    );
+  }
   switch (error.code) {
     case '22007': // invalid_datetime_format — tanggal menabrak periode tertutup
       return new KesalahanFase(
@@ -105,7 +116,7 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanFase {
         false,
       );
     case '23502': // not_null_violation — profil belum punya fase
-      return new KesalahanFase('Profil belum punya fase aktif.', false);
+      return new KesalahanFase('Profil belum punya fase program. Pilih fase dulu di Setelan.', false);
     case '23505': // unique_violation — dua periode berjalan sekaligus
       return new KesalahanFase(
         'Sudah ada periode fase yang berjalan. Muat ulang lalu coba lagi.',
@@ -116,12 +127,18 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanFase {
         'Tanggal itu bertumpuk dengan periode fase lain. Muat ulang riwayat fase lalu coba lagi.',
         true,
       );
-    case '23514': // check_violation
-      return new KesalahanFase('Nilai target ditolak database.', false);
+    case '23514': // check_violation — fase_periode_urutan_masuk_akal
+      return new KesalahanFase('Tanggal selesai periode fase tidak boleh sebelum tanggal mulainya.', false);
     case '28000':
     case 'PGRST301':
-      return new KesalahanFase('Sesi Anda berakhir. Masuk lagi untuk mengubah fase.', false);
+      return new KesalahanFase(
+        untuk === 'muat' ? 'Sesi Anda berakhir. Masuk lagi untuk melihat fase.' : 'Sesi Anda berakhir. Masuk lagi untuk mengganti fase.',
+        false,
+      );
     default:
-      return new KesalahanFase('Gagal memuat fase. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanFase(
+        untuk === 'muat' ? 'Fase belum bisa dimuat. Coba lagi sebentar lagi.' : 'Fase belum diganti. Coba lagi sebentar lagi.',
+        true,
+      );
   }
 }

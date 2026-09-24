@@ -26,7 +26,7 @@ export async function daftarTipeHari(): Promise<TipeHariAktifRow[]> {
     .select('*')
     .order('urutan', { ascending: true });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   return data ?? [];
 }
 
@@ -45,8 +45,8 @@ export async function setelTipeHari(
     p_override: override,
   });
 
-  if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanTipeHari('Server tidak mengembalikan data', true);
+  if (error) throw terjemahkan(error, 'simpan');
+  if (!data) throw new KesalahanTipeHari('Tipe hari belum tersimpan. Coba lagi sebentar lagi.', true);
   return data;
 }
 
@@ -57,21 +57,35 @@ export async function setelTipeHari(
 export async function ambilTargetHarian(tanggal: string): Promise<TargetHarianRow | null> {
   const { data, error } = await supabase.rpc('ambil_target_harian', { p_tanggal: tanggal });
 
-  if (error) throw terjemahkan(error);
+  if (error) throw terjemahkan(error, 'muat');
   // Fungsi mengembalikan SETOF dengan LIMIT 1, jadi hasilnya array 0 atau 1 baris.
   return data?.[0] ?? null;
 }
 
-function terjemahkan(error: { code?: string; message: string }): KesalahanTipeHari {
+function terjemahkan(error: { code?: string; message: string }, untuk: 'muat' | 'simpan'): KesalahanTipeHari {
+  if (/fetch|network|jaringan/i.test(error.message)) {
+    return new KesalahanTipeHari(
+      untuk === 'muat'
+        ? 'Tipe hari belum bisa dimuat. Periksa koneksi, lalu coba lagi.'
+        : 'Tipe hari belum tersimpan. Periksa koneksi, lalu coba lagi.',
+      true,
+    );
+  }
   switch (error.code) {
     case '28000':
     case 'PGRST301':
-      return new KesalahanTipeHari('Sesi Anda berakhir. Masuk lagi untuk menyimpan.', false);
+      return new KesalahanTipeHari(
+        untuk === 'muat' ? 'Sesi Anda berakhir. Masuk lagi untuk melihat target.' : 'Sesi Anda berakhir. Masuk lagi untuk menyimpan.',
+        false,
+      );
     case '23503': // foreign_key_violation — tipe hari tidak ditemukan / bukan milik Anda
-      return new KesalahanTipeHari('Tipe hari itu tidak ada di akun Anda.', false);
+      return new KesalahanTipeHari('Tipe hari itu tidak ada di akun Anda. Muat ulang lalu pilih lagi.', false);
     case '23502': // not_null_violation — profil belum punya fase aktif
-      return new KesalahanTipeHari('Profil belum punya fase program. Atur dulu di Setelan.', false);
+      return new KesalahanTipeHari('Profil belum punya fase program. Pilih fase dulu di Setelan.', false);
     default:
-      return new KesalahanTipeHari('Gagal menyimpan tipe hari. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanTipeHari(
+        untuk === 'muat' ? 'Tipe hari belum bisa dimuat. Coba lagi sebentar lagi.' : 'Tipe hari belum tersimpan. Coba lagi sebentar lagi.',
+        true,
+      );
   }
 }
