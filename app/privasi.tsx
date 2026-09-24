@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DATA_TERSIMPAN, PROFIL_SUMBER, susunStatusPrivasi } from '@recomp/logika';
@@ -15,13 +15,13 @@ import {
   SheetHapusAkun,
 } from '@/components';
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
-import { ketukRingan } from '@/lib/haptics';
+
 import { supabaseSiap } from '@/lib/supabase';
 import { mockFotoMakananDisimpan } from '@/mocks/privasi';
 import { mockPengaturanPengingat } from '@/mocks/widget';
 import { useSesi } from '@/state/sesi';
 import { useSinkron } from '@/state/sinkron';
-import { colors, ukuranIkon, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
 const IKON: Record<ButirStatusPrivasi['nada'], React.ComponentProps<typeof Ionicons>['name']> = {
   terjaga: 'lock-closed-outline',
@@ -113,33 +113,29 @@ export default function PrivasiScreen() {
 
       <View>
         <SectionHeader judul="Keadaan sekarang" />
-        <Card flat>
-          <View accessibilityRole="list">
-            {status.map((b, i) => (
-              <View
-                key={b.kunci}
-                accessible
-                accessibilityLabel={`${b.judul}: ${b.status}. ${b.penjelasan}`}
-                style={{
-                  flexDirection: 'row',
-                  gap: spacing.md,
-                  padding: spacing.lg,
-                  borderTopWidth: i === 0 ? 0 : 1,
-                  borderTopColor: colors.garis,
-                }}
-              >
-                <Ionicons name={IKON[b.nada]} size={ukuranIkon.baris} color={WARNA_STATUS[b.nada]} />
-                <View style={{ flex: 1, gap: spacing.xs }}>
-                  <Text style={{ ...typography.bodySedang, color: colors.teks }}>{b.judul}</Text>
-                  <Text style={{ ...typography.label, color: WARNA_STATUS[b.nada] }}>{b.status}</Text>
-                  <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
-                    {b.penjelasan}
-                  </Text>
-                </View>
+        <DaftarBaris daftar>
+          {status.map((b) => (
+            <View
+              key={b.kunci}
+              accessible
+              accessibilityLabel={`${b.judul}: ${b.status}. ${b.penjelasan}`}
+              style={{
+                flexDirection: 'row',
+                gap: spacing.md,
+                padding: spacing.lg,
+              }}
+            >
+              <Ionicons name={IKON[b.nada]} size={ukuranIkon.baris} color={WARNA_STATUS[b.nada]} />
+              <View style={{ flex: 1, gap: spacing.xs }}>
+                <Text style={{ ...typography.bodySedang, color: colors.teks }}>{b.judul}</Text>
+                <Text style={{ ...typography.label, color: WARNA_STATUS[b.nada] }}>{b.status}</Text>
+                <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+                  {b.penjelasan}
+                </Text>
               </View>
-            ))}
-          </View>
-        </Card>
+            </View>
+          ))}
+        </DaftarBaris>
       </View>
 
       <View>
@@ -163,7 +159,7 @@ export default function PrivasiScreen() {
         <SectionHeader judul="Kendali Anda" />
         <DaftarBaris>
           <BarisTautan
-            ikon="download-outline"
+            ikon="share-outline"
             judul="Ekspor data saya"
             keterangan="CSV & JSON, kapan saja"
             onPress={() => setSheet('ekspor')}
@@ -183,6 +179,7 @@ export default function PrivasiScreen() {
           <BarisTautan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
+            nada="bahaya"
             keterangan="Tidak bisa dibatalkan"
             onPress={() => setSheet('hapus')}
           />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { formatMakro } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';

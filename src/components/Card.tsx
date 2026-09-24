@@ -69,16 +69,27 @@ export function Pemisah({ arah = 'horizontal' }: { arah?: 'horizontal' | 'penuh'
  * kartu tanpa padding, `Pemisah` otomatis di antara setiap anak. Anak yang
  * `null`/`false` dilewati, jadi baris bersyarat tidak meninggalkan garis ganda.
  */
-export function DaftarBaris({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+export function DaftarBaris({
+  children,
+  style,
+  daftar = false,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** Baca sebagai daftar oleh pembaca layar (baris informasi, bukan tombol). */
+  daftar?: boolean;
+}) {
   const baris = Children.toArray(children).filter(isValidElement);
   return (
     <Card flat style={style}>
-      {baris.map((anak, i) => (
-        <Fragment key={anak.key ?? i}>
-          {i > 0 ? <Pemisah /> : null}
-          {anak}
-        </Fragment>
-      ))}
+      <View accessibilityRole={daftar ? 'list' : undefined}>
+        {baris.map((anak, i) => (
+          <Fragment key={anak.key ?? i}>
+            {i > 0 ? <Pemisah /> : null}
+            {anak}
+          </Fragment>
+        ))}
+      </View>
     </Card>
   );
 }

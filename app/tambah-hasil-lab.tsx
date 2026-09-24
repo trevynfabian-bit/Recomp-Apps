@@ -17,6 +17,7 @@ import {
   Card,
   HeaderLayar,
   Isian,
+  JudulSheet,
   KeadaanGagal,
   KeadaanMemuat,
   KerangkaSheet,
@@ -277,7 +278,7 @@ export default function TambahHasilLabScreen() {
       </ScrollView>
 
       <KerangkaSheet terbuka={konfirmasiBatal} onTutup={() => setKonfirmasiBatal(false)} label="Isian belum disimpan">
-        <Text style={{ ...typography.title, color: colors.teks }}>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</Text>
+        <JudulSheet>{asal ? 'Buang perubahan?' : 'Buang isian ini?'}</JudulSheet>
         <Text style={{ ...typography.body, color: colors.teksRedup }}>
           {asal
             ? 'Perubahan belum disimpan. Entri yang tersimpan tetap seperti sebelumnya.'

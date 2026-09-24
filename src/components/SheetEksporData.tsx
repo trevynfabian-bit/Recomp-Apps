@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { formatAngka, formatUkuranBerkas } from '@recomp/logika';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
@@ -57,7 +57,7 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
 
   return (
     <KerangkaSheet terbuka onTutup={menyerahkan ? null : onTutup} label="Ekspor data">
-      <Text style={{ ...typography.title, color: colors.teks }}>Ekspor data saya</Text>
+      <JudulSheet>Ekspor data saya</JudulSheet>
       <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Satu berkas ZIP berisi CSV per jenis data dan satu JSON lengkap — terbaca di spreadsheet mana pun, tanpa
         app ini.

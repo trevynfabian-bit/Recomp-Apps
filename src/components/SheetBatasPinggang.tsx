@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
@@ -72,7 +72,6 @@ export function SheetBatasPinggang({
       ? [{ label: `pinggang awal (${formatDesimal(pinggangAwalCm)})`, nilai: bulat(pinggangAwalCm) }]
       : []),
   ];
-
 
   async function simpan() {
     if (!valid || angka === null) return;

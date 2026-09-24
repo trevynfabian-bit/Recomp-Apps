@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { AccessibilityInfo, Platform, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NOTIF_EKSPOR_SIAP } from '@recomp/logika';
-import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { ketukBerhasil } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
-import { bayangan, colors, radius, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
+import { bayangan, colors, radius, spacing, typography, ukuran, ukuranIkon } from '@/theme';
+import { Tombol, TombolIkon } from './Tombol';
 
 /**
  * Pemberitahuan "ekspor data siap" di dalam app, untuk berkas yang selesai
@@ -35,7 +36,7 @@ export function BannerEksporSiap() {
   return (
     <View
       pointerEvents="box-none"
-      style={{ position: 'absolute', bottom: insets.bottom + 72, left: spacing.lg, right: spacing.lg }}
+      style={{ position: 'absolute', bottom: insets.bottom + ukuran.bilahTab + spacing.xl, left: spacing.lg, right: spacing.lg }}
     >
       <View
         accessibilityRole="alert"
@@ -60,13 +61,13 @@ export function BannerEksporSiap() {
             {gagal ? `Belum bisa ${web ? 'diunduh' : 'dibagikan'}; coba lagi.` : 'Berisi data kesehatan Anda.'}
           </Text>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={web ? 'Unduh berkas ekspor' : 'Bagikan berkas ekspor'}
-          accessibilityState={{ busy: memproses, disabled: memproses }}
-          disabled={memproses}
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          label={web ? 'Unduh' : 'Bagikan'}
+          aksesLabel={web ? 'Unduh berkas ekspor' : 'Bagikan berkas ekspor'}
+          memproses={memproses}
           onPress={async () => {
-            ketukRingan();
             setMemproses(true);
             try {
               await serahkan();
@@ -77,32 +78,8 @@ export function BannerEksporSiap() {
               setMemproses(false);
             }
           }}
-          style={({ pressed }) => ({
-            minHeight: TAP_MIN,
-            paddingHorizontal: spacing.md,
-            justifyContent: 'center',
-            opacity: pressed || memproses ? 0.6 : 1,
-          })}
-        >
-          <Text style={{ ...typography.label, color: colors.aksen.teks }}>{web ? 'Unduh' : 'Bagikan'}</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Tutup pemberitahuan ekspor"
-          onPress={() => {
-            ketukRingan();
-            tutupPemberitahuan();
-          }}
-          style={({ pressed }) => ({
-            width: TAP_MIN,
-            height: TAP_MIN,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <Ionicons name="close" size={ukuranIkon.sedang} color={colors.teksRedup} />
-        </Pressable>
+        />
+        <TombolIkon bentuk="polos" ikon="close" aksesLabel="Tutup pemberitahuan ekspor" onPress={tutupPemberitahuan} />
       </View>
     </View>
   );

@@ -59,3 +59,16 @@ export function KerangkaSheet({ terbuka, onTutup, label, children }: Props) {
     </Modal>
   );
 }
+
+/**
+ * Judul sheet: `title`, diumumkan sebagai header. Satu tempat untuk gaya ini
+ * supaya setiap sheet dibuka dengan judul yang sama (dan pembaca layar bisa
+ * melompat ke sana).
+ */
+export function JudulSheet({ children }: { children: React.ReactNode }) {
+  return (
+    <Text accessibilityRole="header" style={{ ...typography.title, color: colors.teks }}>
+      {children}
+    </Text>
+  );
+}

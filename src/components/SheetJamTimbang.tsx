@@ -9,7 +9,7 @@ import {
   saranJamTimbang,
 } from '@recomp/logika';
 import type { JamPengingat } from '@recomp/logika';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -54,7 +54,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
 
   return (
     <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Pengingat timbang">
-      <Text style={{ ...typography.title, color: colors.teks }}>Jam pengingat</Text>
+      <JudulSheet>Jam pengingat</JudulSheet>
       <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
         Pengingat hanya muncul di pagi yang belum ada timbangannya. Pilih jam sedikit sesudah Anda
         biasanya timbang.

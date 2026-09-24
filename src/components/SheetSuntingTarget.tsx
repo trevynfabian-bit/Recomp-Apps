@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { formatAngka, ISIAN_KOSONG, isianBerubah, isianDariTarget, periksaTarget, rincianKaloriMakro } from '@recomp/logika';
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import { InputTarget } from './InputTarget';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { KesalahanTarget } from '@/data/target';
 import { ketukBerhasil } from '@/lib/haptics';
@@ -85,9 +85,9 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
 
   return (
     <KerangkaSheet terbuka onTutup={menyimpan ? null : onTutup} label={`Target ${namaTipeHari}`}>
-      <Text style={{ ...typography.title, color: colors.teks }}>
+      <JudulSheet>
         {namaTipeHari} · {fase}
-      </Text>
+      </JudulSheet>
       <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
         {tersimpan
           ? `Tersimpan: ${formatAngka(tersimpan.target_kalori)} kcal. Perubahan berlaku mulai hari ini.`

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { colors, spacing, typography } from '@/theme';
 import { Isian } from './Isian';
@@ -50,7 +50,7 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
 
   return (
     <KerangkaSheet terbuka onTutup={status === 'memproses' ? null : onTutup} label="Hapus akun">
-      <Text style={{ ...typography.title, color: colors.teks }}>Hapus akun & semua data?</Text>
+      <JudulSheet>Hapus akun & semua data?</JudulSheet>
       <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Profil, catatan harian, makanan, ukuran, latihan, data dari perangkat, percakapan coach, dan hasil lab
         dihapus dari server. Tidak bisa dibatalkan.

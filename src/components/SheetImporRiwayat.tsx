@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import {
   formatAngka,
   formatRentangTanggal,
@@ -10,11 +10,11 @@ import {
 } from '@recomp/logika';
 import type { BarisDilewati } from '@recomp/logika';
 import { Isian } from './Isian';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { PilihanSegmen } from './PilihanSegmen';
 import { Tombol } from './Tombol';
 import { jalankanImporRiwayat, KesalahanImpor, type IsiImpor } from '@/data/imporRiwayat';
-import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
+import { ketukBerhasil } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
 import {
   CONTOH_CSV_HEVY,
@@ -23,7 +23,7 @@ import {
   mockJalankanImpor,
   RENTANG_APPLE_HEALTH,
 } from '@/mocks/impor';
-import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 import { Panel } from './Card';
 
 /** Sumber impor; sama dengan `import_jobs.sumber` di PRD. */
@@ -181,7 +181,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
       onTutup={langkah.jenis === 'proses' ? null : onTutup}
       label="Impor riwayat"
     >
-      <Text style={{ ...typography.title, color: colors.teks }}>{JUDUL[sumber]}</Text>
+      <JudulSheet>{JUDUL[sumber]}</JudulSheet>
 
       {langkah.jenis === 'masukan' ? (
         sumber === 'apple_health' ? (

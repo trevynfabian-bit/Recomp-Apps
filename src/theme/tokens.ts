@@ -72,6 +72,8 @@ export const ukuran = {
   isianPanjang: 96,
   /** Kolom tempel teks mesin (CSV): cukup untuk ~8 baris, lalu menggulir. */
   isianTempel: { min: 140, maks: 220 },
+  /** Tinggi bilah tab iOS (tanpa inset bawah); pemberitahuan melayang di atasnya. */
+  bilahTab: 49,
   /** Lingkaran inisial profil di Setelan. */
   avatar: 52,
   /** Bingkai foto makanan sebelum difoto (SheetCatatFoto). */

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Switch, Text, View } from 'react-native';
 import { PROFIL_SUMBER } from '@recomp/logika';
 import type { SumberData } from '@recomp/logika';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { colors, spacing, typography } from '@/theme';
 
@@ -64,7 +64,7 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
       onTutup={status === 'memproses' ? null : onTutup}
       label="Sumber data"
     >
-      <Text style={{ ...typography.title, color: colors.teks }}>Putuskan {profil.nama}?</Text>
+      <JudulSheet>Putuskan {profil.nama}?</JudulSheet>
 
       <Text style={{ ...typography.body, color: colors.teksRedup }}>
         {kapital(gabung(profil.membawa))} yang baru dari {profil.nama} berhenti masuk. Yang sudah

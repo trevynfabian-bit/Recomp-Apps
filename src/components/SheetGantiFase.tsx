@@ -11,7 +11,7 @@ import {
   tampilkanBerat,
 } from '@recomp/logika';
 import type { Fase } from '@recomp/logika';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { PemilihFase } from './PemilihFase';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
@@ -63,7 +63,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
     const terbaru = [...riwayatFase].reverse().slice(0, 3);
     return (
       <KerangkaSheet terbuka onTutup={onTutup} label="Fase">
-        <Text style={{ ...typography.title, color: colors.teks }}>Fase program</Text>
+        <JudulSheet>Fase program</JudulSheet>
         <PemilihFase terpilih={profil.fase_aktif} onPilih={setCalon} />
         <View style={{ gap: spacing.xs }}>
           <Text style={{ ...typography.caption, color: colors.teksRedup }}>RIWAYAT</Text>
@@ -107,7 +107,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
 
   return (
     <KerangkaSheet terbuka onTutup={onTutup} label="Ganti fase">
-      <Text style={{ ...typography.title, color: colors.teks }}>Ganti ke {calon}?</Text>
+      <JudulSheet>Ganti ke {calon}?</JudulSheet>
       <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Mulai hari ini, {tanggalRingkas(tanggal)}. Hari yang sudah lewat tetap memakai target {profil.fase_aktif}.
       </Text>

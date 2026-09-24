@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { emailSah } from '@recomp/logika';
 import { Isian, TombolIkon, Tombol } from '@/components';
-import { ketukRingan } from '@/lib/haptics';
+
 import { KesalahanAturUlang, KesalahanMasuk, useSesi } from '@/state/sesi';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, ukuranIkon, radius, spacing, typography } from '@/theme';
 
 /**
  * Layar masuk.
@@ -167,7 +167,7 @@ export default function MasukScreen() {
               accessibilityLiveRegion="polite"
               style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}
             >
-              <Ionicons name="information-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
+              <Ionicons name="alert-circle-outline" size={ukuranIkon.kecil} color={colors.status.bahaya.teks} />
               <Text style={{ flex: 1, ...typography.labelBiasa, color: colors.status.bahaya.teks }}>
                 {galat}
               </Text>
@@ -176,25 +176,15 @@ export default function MasukScreen() {
 
           <Tombol label="Masuk" nonaktif={!isianLengkap} memproses={memproses} onPress={() => void kirim()} />
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityHint="Mengirim tautan atur ulang kata sandi ke email di atas"
-            disabled={aturUlang === 'mengirim' || memproses}
-            onPress={() => {
-              ketukRingan();
-              void lupaSandi();
-            }}
-            style={({ pressed }) => ({
-              minHeight: TAP_MIN,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed || aturUlang === 'mengirim' ? 0.6 : 1,
-            })}
-          >
-            <Text style={{ ...typography.bodySedang, color: colors.aksen.teks }}>
-              {aturUlang === 'mengirim' ? 'Mengirim tautan…' : 'Lupa kata sandi?'}
-            </Text>
-          </Pressable>
+          <Tombol
+            varian="teks"
+            sejajar="tengah"
+            label={aturUlang === 'mengirim' ? 'Mengirim tautan…' : 'Lupa kata sandi?'}
+            aksesPetunjuk="Mengirim tautan atur ulang kata sandi ke email di atas"
+            memproses={aturUlang === 'mengirim'}
+            nonaktif={memproses}
+            onPress={() => void lupaSandi()}
+          />
 
           {aturUlang === 'terkirim' || aturUlang === 'gagal' ? (
             <Text

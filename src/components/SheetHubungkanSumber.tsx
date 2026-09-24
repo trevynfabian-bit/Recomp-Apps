@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { pesanGagalHubungkan, PROFIL_SUMBER, samarkanKunci, validasiKunciHevy } from '@recomp/logika';
 import type { HasilHubungkan, SumberData } from '@recomp/logika';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { colors, radius, spacing, typography, ukuranIkon } from '@/theme';
@@ -115,7 +115,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
     >
       {langkah.jenis === 'penjelasan' ? (
         <>
-          <Text style={{ ...typography.title, color: colors.teks }}>Hubungkan {profil.nama}</Text>
+          <JudulSheet>Hubungkan {profil.nama}</JudulSheet>
 
           <View style={{ gap: spacing.sm }}>
             <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>

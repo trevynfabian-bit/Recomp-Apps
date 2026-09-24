@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
-import { KerangkaSheet } from './KerangkaSheet';
+import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
@@ -34,7 +34,7 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
 
   return (
     <KerangkaSheet terbuka onTutup={memproses ? null : onTutup} label="Keluar dari akun">
-      <Text style={{ ...typography.title, color: colors.teks }}>Keluar dari akun?</Text>
+      <JudulSheet>Keluar dari akun?</JudulSheet>
       <Text style={{ ...typography.body, color: colors.teksRedup }}>
         Semua data tetap tersimpan di akun Anda dan kembali utuh saat masuk lagi.
       </Text>

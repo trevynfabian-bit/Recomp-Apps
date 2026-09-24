@@ -15,6 +15,7 @@ import type { HasilLab } from '@recomp/logika';
 import {
   Card,
   HeaderLayar,
+  JudulSheet,
   KeadaanGagal,
   KeadaanKosong,
   KeadaanMemuat,
@@ -146,7 +147,7 @@ export default function HasilLabScreen() {
       >
         {akanDihapus ? (
           <>
-            <Text style={{ ...typography.title, color: colors.teks }}>Hapus hasil lab ini?</Text>
+            <JudulSheet>Hapus hasil lab ini?</JudulSheet>
             <Text style={{ ...typography.body, color: colors.teksRedup }}>
               {akanDihapus.nama}, {formatTanggalPanjang(akanDihapus.tanggal).split(', ')[1]} {akanDihapus.tanggal.slice(0, 4)} ·{' '}
               {akanDihapus.penanda.length} penanda. Coach tidak lagi membacanya sebagai konteks, dan penghapusan ini tidak
