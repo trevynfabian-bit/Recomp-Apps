@@ -61,4 +61,4 @@ export { SheetPutuskanSumber } from './SheetPutuskanSumber';
 export { SheetRiwayatPercakapan } from './SheetRiwayatPercakapan';
 export { SheetSuntingTarget } from './SheetSuntingTarget';
 export { StatusRedistribusi } from './StatusRedistribusi';
-export { Tombol, TombolBertepi, TombolIkon, TombolUtama, type UkuranTombol, type VarianTombol } from './Tombol';
+export { Tombol, TombolIkon, type UkuranTombol, type VarianTombol } from './Tombol';

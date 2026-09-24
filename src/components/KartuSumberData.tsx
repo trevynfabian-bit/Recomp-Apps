@@ -2,7 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import { formatAngka, PROFIL_SUMBER } from '@recomp/logika';
 import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/logika';
 import { Card } from './Card';
-import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
 import { colors, radius, sisaSentuh, spacing, tint, typography, ukuran } from '@/theme';
 
@@ -105,18 +105,7 @@ export function KartuSumberData({
       </View>
 
       {tautan && koneksi.status === 'terhubung' ? (
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={tautan.label}
-          onPress={() => {
-            ketukRingan();
-            tautan.onPress();
-          }}
-          hitSlop={{ top: sisaSentuh(typography.label.lineHeight), bottom: sisaSentuh(typography.label.lineHeight), left: spacing.sm, right: spacing.lg }}
-          style={({ pressed }) => ({ alignSelf: 'flex-start', opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ ...typography.label, color: colors.aksen.teks }}>{tautan.label} ›</Text>
-        </Pressable>
+        <Tombol varian="teks" ukuran="kecil" sejajar="awal" label={tautan.label} onPress={tautan.onPress} />
       ) : null}
 
       <AksiKartu
@@ -148,11 +137,11 @@ function AksiKartu({
 }) {
   if (tingkat === 'belum' || tingkat === 'bermasalah') {
     const label = tingkat === 'belum' ? `Hubungkan ${nama}` : 'Sambungkan ulang';
-    return <TombolUtama label={label} onPress={onHubungkan} />;
+    return <Tombol label={label} onPress={onHubungkan} />;
   }
 
   if (tingkat === 'terlambat' && bisaSinkronManual) {
-    return <TombolBertepi label="Sinkron sekarang" onPress={onSinkronSekarang} />;
+    return <Tombol varian="bertepi" label="Sinkron sekarang" onPress={onSinkronSekarang} />;
   }
 
   // Sehat, menunggu, atau terlambat lewat webhook: tidak ada yang perlu

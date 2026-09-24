@@ -2,7 +2,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatAngka } from '@recomp/logika';
-import { Card, HeaderLayar, KartuHero, MacroRow, Pill, SectionHeader, TombolBertepi, TombolUtama } from '@/components';
+import { Card, HeaderLayar, KartuHero, MacroRow, Pill, SectionHeader, Tombol } from '@/components';
 import { cariTarget, mockDailyLogHariIni, susunMacros } from '@/mocks/dailyLog';
 import { colors, radius, spacing, typography } from '@/theme';
 
@@ -172,9 +172,9 @@ export default function ArahVisualScreen() {
       <View>
         <SectionHeader judul="Aksi" />
         <Card style={{ gap: spacing.md }}>
-          <TombolUtama label="Simpan" onPress={() => undefined} />
-          <TombolBertepi label="Batal" onPress={() => undefined} />
-          <TombolUtama label="Hapus data" merusak onPress={() => undefined} />
+          <Tombol label="Simpan" onPress={() => undefined} />
+          <Tombol varian="bertepi" label="Batal" onPress={() => undefined} />
+          <Tombol label="Hapus data" varian="merusak" onPress={() => undefined} />
         </Card>
       </View>
     </ScrollView>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { colors, spacing, typography } from '@/theme';
 import { Isian } from './Isian';
 
@@ -59,7 +59,7 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
         Izin Apple Health di iPhone dan kunci API di Hevy tetap ada di tempatnya sampai Anda mencabutnya di sana.
       </Text>
 
-      <TombolBertepi label="Ekspor data dulu" onPress={onEksporDulu} nonaktif={status === 'memproses'} />
+      <Tombol varian="bertepi" label="Ekspor data dulu" onPress={onEksporDulu} nonaktif={status === 'memproses'} />
 
       <Isian
         label={`Ketik “${KATA_KONFIRMASI_HAPUS}” untuk melanjutkan`}
@@ -78,14 +78,14 @@ export function SheetHapusAkun({ terbuka, onTutup, onEksporDulu, hapus }: Props)
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <TombolUtama
-          merusak
+        <Tombol
+          varian="merusak"
           label="Hapus akun"
           nonaktif={!cocok}
           memproses={status === 'memproses'}
           onPress={jalankan}
         />
-        <TombolBertepi label="Batal" onPress={onTutup} nonaktif={status === 'memproses'} />
+        <Tombol varian="bertepi" label="Batal" onPress={onTutup} nonaktif={status === 'memproses'} />
       </View>
     </KerangkaSheet>
   );

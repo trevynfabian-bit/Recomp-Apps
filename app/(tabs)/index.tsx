@@ -18,7 +18,6 @@ import {
   SectionHeader,
   SheetCatatFoto,
   Tombol,
-  TombolUtama,
   type EntriMakananBaru,
 } from '@/components';
 import { formatAngka, formatMakro, formatTanggalPanjang, tanggalHariIni, tipeHariBerlaku } from '@recomp/logika';

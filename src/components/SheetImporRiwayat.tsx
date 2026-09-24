@@ -9,8 +9,10 @@ import {
   uraiCsvUkuran,
 } from '@recomp/logika';
 import type { BarisDilewati } from '@recomp/logika';
+import { Isian } from './Isian';
 import { KerangkaSheet } from './KerangkaSheet';
-import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
+import { PilihanSegmen } from './PilihanSegmen';
+import { Tombol } from './Tombol';
 import { jalankanImporRiwayat, KesalahanImpor, type IsiImpor } from '@/data/imporRiwayat';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -188,41 +190,14 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               Berat pagi, langkah, energi aktif, dan tidur dari rentang yang dipilih. Cukup sekali; setelah
               itu data baru masuk sendiri.
             </Teks>
-            <View
-              accessibilityRole="radiogroup"
-              style={{ flexDirection: 'row', gap: spacing.sm }}
-            >
-              {RENTANG_APPLE_HEALTH.map((r) => {
-                const aktif = r.kunci === rentang;
-                return (
-                  <Pressable
-                    key={r.kunci}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: aktif }}
-                    accessibilityLabel={r.label}
-                    onPress={() => {
-                      ketukRingan();
-                      setRentang(r.kunci);
-                    }}
-                    style={{
-                      flex: 1,
-                      minHeight: TAP_MIN,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: radius.md,
-                      borderWidth: 1,
-                      borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
-                      backgroundColor: aktif ? tint(colors.aksen.isian, 'aktif') : 'transparent',
-                    }}
-                  >
-                    <Text style={{ ...typography.label, color: aktif ? colors.aksen.teks : colors.teks }}>{r.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <PilihanSegmen
+              opsi={RENTANG_APPLE_HEALTH.map((r) => ({ nilai: r.kunci, label: r.label }))}
+              terpilih={rentang}
+              onPilih={setRentang}
+            />
             <View style={{ gap: spacing.sm }}>
-              <TombolUtama label="Lihat pratinjau" onPress={periksa} />
-              <TombolBertepi label="Nanti saja" onPress={onTutup} />
+              <Tombol label="Lihat pratinjau" onPress={periksa} />
+              <Tombol varian="bertepi" label="Nanti saja" onPress={onTutup} />
             </View>
           </>
         ) : (
@@ -232,38 +207,17 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
                 ? 'Di Hevy: Profil › Settings › Export & Import Data › Export Workouts. Tempel isi berkas CSV-nya di sini.'
                 : 'Tempel tabel ukuran lama: satu baris per tanggal, kolom Tanggal lalu Pinggang, Dada, Leher, Lengan kiri/kanan, Paha kiri/kanan (cm). Boleh dari Excel.'}
             </Teks>
-            <TextInput
+            <Isian
+              mono
+              label="Isi berkas CSV"
               value={teks}
               onChangeText={(t) => {
                 setTeks(t);
                 if (galat) setGalat(null);
               }}
-              multiline
               placeholder="Tempel isi CSV di sini"
-              placeholderTextColor={colors.teksSamar}
-              accessibilityLabel="Isi berkas CSV"
-              autoCapitalize="none"
-              autoCorrect={false}
-              spellCheck={false}
-              style={{
-                minHeight: 140,
-                maxHeight: 220,
-                padding: spacing.md,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: galat ? colors.status.bahaya.isian : colors.garisKontrol,
-                backgroundColor: colors.permukaanCekung,
-                color: colors.teks,
-                fontFamily: 'Menlo',
-                fontSize: 12,
-                textAlignVertical: 'top',
-              }}
+              galat={galat}
             />
-            {galat ? (
-              <Text accessibilityLiveRegion="polite" style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-                {galat}
-              </Text>
-            ) : null}
             <Tombol
               varian="teks"
               ukuran="kecil"
@@ -274,8 +228,8 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
               }}
             />
             <View style={{ gap: spacing.sm }}>
-              <TombolUtama label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
-              <TombolBertepi label="Nanti saja" onPress={onTutup} />
+              <Tombol label="Lihat pratinjau" nonaktif={teks.trim().length === 0} onPress={periksa} />
+              <Tombol varian="bertepi" label="Nanti saja" onPress={onTutup} />
             </View>
           </>
         )
@@ -300,14 +254,14 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
             </Text>
           ) : null}
           <View style={{ gap: spacing.sm }}>
-            <TombolUtama
+            <Tombol
               label={`Impor ${formatAngka(langkah.p.jumlah)} ${langkah.p.satuan}`}
               onPress={() => impor(langkah.p)}
             />
             {/* Bukan "Kembali": label itu sudah dipakai tombol kembali layar di
                 belakang sheet, dan dua tombol berlabel sama membingungkan
                 pembaca layar. Labelnya menyebut apa yang akan diubah. */}
-            <TombolBertepi
+            <Tombol varian="bertepi"
               label={sumber === 'apple_health' ? 'Ganti rentang' : 'Ganti berkas'}
               onPress={() => {
                 setGalat(null);
@@ -351,7 +305,7 @@ export function SheetImporRiwayat({ sumber, onTutup, onSelesai }: Props) {
           {langkah.p.dilewati.length > 0 ? (
             <Teks redup>{`${langkah.p.dilewati.length} baris dilewati, seperti di pratinjau.`}</Teks>
           ) : null}
-          <TombolUtama label="Selesai" onPress={onTutup} />
+          <Tombol label="Selesai" onPress={onTutup} />
         </>
       ) : null}
     </KerangkaSheet>

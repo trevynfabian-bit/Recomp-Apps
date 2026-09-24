@@ -4,7 +4,7 @@ import { formatAngka, ISIAN_KOSONG, isianBerubah, isianDariTarget, periksaTarget
 import type { Fase, IsianTarget, KolomTarget, NilaiTarget } from '@recomp/logika';
 import { InputTarget } from './InputTarget';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { KesalahanTarget } from '@/data/target';
 import { ketukBerhasil } from '@/lib/haptics';
 import { colors, radius, spacing, typography } from '@/theme';
@@ -136,8 +136,8 @@ export function SheetSuntingTarget({ terbuka, onTutup, namaTipeHari, fase, tersi
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <TombolUtama label="Simpan" nonaktif={!berubah} memproses={menyimpan} onPress={() => void jalankan()} />
-        <TombolBertepi label="Batal" onPress={onTutup} nonaktif={menyimpan} />
+        <Tombol label="Simpan" nonaktif={!berubah} memproses={menyimpan} onPress={() => void jalankan()} />
+        <Tombol varian="bertepi" label="Batal" onPress={onTutup} nonaktif={menyimpan} />
       </View>
     </KerangkaSheet>
   );

@@ -70,6 +70,10 @@ export const ukuran = {
   kolomAngka: 140,
   /** Tinggi minimum kolom isian multibaris (catatan harian). */
   isianPanjang: 96,
+  /** Kolom tempel teks mesin (CSV): cukup untuk ~8 baris, lalu menggulir. */
+  isianTempel: { min: 140, maks: 220 },
+  /** Tinggi chip indikator kecil (status sinkron di header). */
+  indikator: 24,
   /** Garis contoh di legenda grafik (garis rata-rata). */
   garisLegenda: { lebar: 12, tebal: 2 },
   /** Baris pemeriksa di atas grafik: tingginya tetap saat isinya berganti. */
@@ -92,6 +96,8 @@ export const ukuranIkon = {
   baris: 22,
   /** Ikon di tombol −/+ pemilih angka. */
   besar: 28,
+  /** Ikon hasil di tengah sheet (mis. centang "terhubung"). */
+  hasil: 40,
 } as const;
 
 /**

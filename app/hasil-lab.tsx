@@ -12,7 +12,16 @@ import {
   ringkasHasilLab,
 } from '@recomp/logika';
 import type { HasilLab } from '@recomp/logika';
-import { Card, HeaderLayar, KeadaanGagal, KeadaanKosong, KerangkaSheet, PenandaSumber, SectionHeader, Tombol, TombolBertepi, TombolUtama } from '@/components';
+import {
+  Card,
+  HeaderLayar,
+  KeadaanGagal,
+  KeadaanKosong,
+  KerangkaSheet,
+  PenandaSumber,
+  SectionHeader,
+  Tombol,
+} from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
@@ -106,7 +115,7 @@ export default function HasilLabScreen() {
         </Text>
       ) : null}
 
-      <TombolUtama label="Tambah hasil lab" nonaktif={statusMuat !== 'siap'} onPress={() => router.push('/tambah-hasil-lab')} />
+      <Tombol label="Tambah hasil lab" nonaktif={statusMuat !== 'siap'} onPress={() => router.push('/tambah-hasil-lab')} />
 
       {kelompok.map((k) => (
         <View key={k.tahun}>
@@ -146,8 +155,8 @@ export default function HasilLabScreen() {
               </Text>
             ) : null}
             <View style={{ gap: spacing.sm }}>
-              <TombolUtama merusak label="Hapus hasil lab" memproses={statusHapus === 'menghapus'} onPress={() => void jalankanHapus()} />
-              <TombolBertepi label="Batal" onPress={() => setAkanDihapus(null)} nonaktif={statusHapus === 'menghapus'} />
+              <Tombol varian="merusak" label="Hapus hasil lab" memproses={statusHapus === 'menghapus'} onPress={() => void jalankanHapus()} />
+              <Tombol varian="bertepi" label="Batal" onPress={() => setAkanDihapus(null)} nonaktif={statusHapus === 'menghapus'} />
             </View>
           </>
         ) : null}

@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { emailSah } from '@recomp/logika';
-import { Isian, TombolIkon, TombolUtama } from '@/components';
+import { Isian, TombolIkon, Tombol } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { KesalahanAturUlang, KesalahanMasuk, useSesi } from '@/state/sesi';
 import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
@@ -174,7 +174,7 @@ export default function MasukScreen() {
             </View>
           ) : null}
 
-          <TombolUtama label="Masuk" nonaktif={!isianLengkap} memproses={memproses} onPress={() => void kirim()} />
+          <Tombol label="Masuk" nonaktif={!isianLengkap} memproses={memproses} onPress={() => void kirim()} />
 
           <Pressable
             accessibilityRole="button"

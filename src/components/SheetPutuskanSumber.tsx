@@ -3,7 +3,7 @@ import { Switch, Text, View } from 'react-native';
 import { PROFIL_SUMBER } from '@recomp/logika';
 import type { SumberData } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { colors, spacing, typography } from '@/theme';
 
 type Props = {
@@ -115,13 +115,13 @@ export function SheetPutuskanSumber({ sumber, onTutup, putuskan }: Props) {
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <TombolUtama
-          merusak
+        <Tombol
+          varian="merusak"
           label={hapusData ? `Putuskan & hapus data` : `Putuskan ${profil.nama}`}
           memproses={status === 'memproses'}
           onPress={jalankan}
         />
-        <TombolBertepi label="Batal" onPress={onTutup} nonaktif={status === 'memproses'} />
+        <Tombol varian="bertepi" label="Batal" onPress={onTutup} nonaktif={status === 'memproses'} />
       </View>
     </KerangkaSheet>
   );

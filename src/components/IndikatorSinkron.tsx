@@ -50,13 +50,13 @@ export function IndikatorSinkron() {
         ketukRingan();
         router.push('/sumber-data');
       }}
-      hitSlop={{ top: sisaSentuh(24), bottom: sisaSentuh(24) }}
+      hitSlop={{ top: sisaSentuh(ukuran.indikator), bottom: sisaSentuh(ukuran.indikator) }}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'flex-start',
         gap: ukuran.celahTitik,
-        minHeight: 24,
+        minHeight: ukuran.indikator,
         paddingHorizontal: ukuran.chip.horizontal,
         borderRadius: radius.pill,
         backgroundColor: colors.permukaan,
@@ -66,9 +66,9 @@ export function IndikatorSinkron() {
       })}
     >
       {sibuk ? (
-        <ActivityIndicator size="small" color={warna} style={{ transform: [{ scale: 0.6 }], width: 8, height: 8 }} />
+        <ActivityIndicator size="small" color={warna} style={{ transform: [{ scale: 0.6 }], width: ukuran.titik, height: ukuran.titik }} />
       ) : (
-        <View style={{ width: 7, height: 7, borderRadius: radius.pill, backgroundColor: warna }} />
+        <View style={{ width: ukuran.titik, height: ukuran.titik, borderRadius: radius.pill, backgroundColor: warna }} />
       )}
       <Text style={{ ...typography.caption, color: status.tingkat === 'langsung' ? colors.teksRedup : warna }}>
         {status.label}

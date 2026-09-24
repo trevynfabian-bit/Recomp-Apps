@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { formatAngka, formatUkuranBerkas } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
 import { colors, spacing, typography } from '@/theme';
@@ -120,17 +120,17 @@ export function SheetEksporData({ terbuka, onTutup }: Props) {
       <View style={{ gap: spacing.sm }}>
         {status.jenis === 'siap' ? (
           <>
-            <TombolUtama label={web ? 'Unduh berkas' : 'Bagikan berkas'} memproses={menyerahkan} onPress={() => void jalankanSerah()} />
-            <TombolBertepi label="Buang berkas" onPress={buang} nonaktif={menyerahkan} />
+            <Tombol label={web ? 'Unduh berkas' : 'Bagikan berkas'} memproses={menyerahkan} onPress={() => void jalankanSerah()} />
+            <Tombol varian="bertepi" label="Buang berkas" onPress={buang} nonaktif={menyerahkan} />
           </>
         ) : (
-          <TombolUtama
+          <Tombol
             label={status.jenis === 'diserahkan' ? 'Siapkan lagi' : status.jenis === 'gagal' ? 'Coba lagi' : 'Siapkan berkas'}
             memproses={status.jenis === 'memproses'}
             onPress={() => void mulai()}
           />
         )}
-        <TombolBertepi label="Tutup" onPress={onTutup} nonaktif={menyerahkan} />
+        <Tombol varian="bertepi" label="Tutup" onPress={onTutup} nonaktif={menyerahkan} />
       </View>
     </KerangkaSheet>
   );

@@ -10,7 +10,7 @@ import {
 } from '@recomp/logika';
 import type { JamPengingat } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 import { Panel } from './Card';
@@ -114,7 +114,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
       <Text style={{ ...typography.label, color: colors.teksSamar }}>{ringkasJadwal(draf)}</Text>
 
       <View style={{ gap: spacing.sm }}>
-        <TombolUtama
+        <Tombol
           label="Simpan"
           onPress={() => {
             ketukBerhasil();
@@ -122,7 +122,7 @@ export function SheetJamTimbang({ terbuka, onTutup, jam, waktuTimbang, onSimpan 
             onTutup();
           }}
         />
-        <TombolBertepi label="Batal" onPress={onTutup} />
+        <Tombol varian="bertepi" label="Batal" onPress={onTutup} />
       </View>
     </KerangkaSheet>
   );

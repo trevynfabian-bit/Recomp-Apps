@@ -88,8 +88,6 @@ const BARIS_BEBAS = [
 ];
 const UKURAN_HURUF_BEBAS = [
   { berkas: 'src/components/Pemilih.tsx', alasan: 'angka PemilihAngka 52 pt: input yang bisa diketik, bukan HeroNumber; satu-satunya tempat' },
-  { berkas: 'src/components/SheetHubungkanSumber.tsx', alasan: 'glyph centang dekoratif, disembunyikan dari pembaca layar' },
-  { berkas: 'src/components/SheetImporRiwayat.tsx', alasan: 'pratinjau CSV mentah dalam Menlo (teks mesin, bukan UI)' },
 ];
 const TINGGI_BARIS_BEBAS = [
   { berkas: 'src/components/Pemilih.tsx', alasan: 'tinggi baris angka 52 pt PemilihAngka (pasangan ukuran huruf di atas)' },

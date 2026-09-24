@@ -22,8 +22,6 @@ import {
   KerangkaSheet,
   PenandaSumber,
   Tombol,
-  TombolBertepi,
-  TombolUtama,
 } from '@/components';
 import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
@@ -259,7 +257,7 @@ export default function TambahHasilLabScreen() {
               nonaktif={menyimpan}
             />
           ))}
-          <TombolBertepi
+          <Tombol varian="bertepi"
             label="Tambah penanda"
             onPress={() => ubah({ penanda: [...isian.penanda, { ...PENANDA_KOSONG }] })}
             nonaktif={menyimpan}
@@ -269,7 +267,7 @@ export default function TambahHasilLabScreen() {
         <View style={{ gap: spacing.sm }}>
           {tampil && !hasil.sah ? <TeksGalat teks="Ada isian yang perlu diperbaiki sebelum disimpan." /> : null}
           {status === 'gagal' ? <TeksGalat teks={pesanGagal} /> : null}
-          <TombolUtama
+          <Tombol
             label={asal ? 'Simpan perubahan' : 'Simpan hasil lab'}
             nonaktif={tanpaPerubahan}
             memproses={menyimpan}
@@ -286,8 +284,8 @@ export default function TambahHasilLabScreen() {
             : 'Hasil lab ini belum disimpan. Riwayat yang sudah ada tidak berubah.'}
         </Text>
         <View style={{ gap: spacing.sm }}>
-          <TombolUtama label="Lanjut mengisi" onPress={() => setKonfirmasiBatal(false)} />
-          <TombolBertepi
+          <Tombol label="Lanjut mengisi" onPress={() => setKonfirmasiBatal(false)} />
+          <Tombol varian="bertepi"
             label="Buang & kembali"
             onPress={() => {
               setKonfirmasiBatal(false);

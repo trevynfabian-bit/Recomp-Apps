@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatWaktuRelatif } from '@recomp/logika';
-import { Card, HeaderLayar, SheetImporRiwayat, TombolBertepi, TombolUtama, type SumberImpor } from '@/components';
+import { Card, HeaderLayar, SheetImporRiwayat, Tombol, type SumberImpor } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 
 type StatusImpor = { selesaiPada: string; ringkas: string } | null;
@@ -86,9 +86,9 @@ export default function ImporRiwayatScreen() {
                 </View>
               ) : null}
               {s ? (
-                <TombolBertepi label="Impor lagi" onPress={() => setTerbuka(k.sumber)} />
+                <Tombol varian="bertepi" label="Impor lagi" onPress={() => setTerbuka(k.sumber)} />
               ) : (
-                <TombolUtama label="Mulai impor" aksesLabel={`Mulai impor ${k.judul}`} onPress={() => setTerbuka(k.sumber)} />
+                <Tombol label="Mulai impor" aksesLabel={`Mulai impor ${k.judul}`} onPress={() => setTerbuka(k.sumber)} />
               )}
             </Card>
           );

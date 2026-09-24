@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Platform, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { angkaTabular, colors, radius, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
 
 type Props = Omit<TextInputProps, 'style' | 'editable' | 'placeholderTextColor'> & {
@@ -29,7 +29,19 @@ type Props = Omit<TextInputProps, 'style' | 'editable' | 'placeholderTextColor'>
   ekor?: React.ReactNode;
   /** Kolom angka: digit tabular supaya lebar angka tidak berubah saat diketik. */
   angka?: boolean;
+  /**
+   * Kolom tempel teks mesin (CSV): huruf monospace kecil, multibaris, tinggi
+   * `ukuran.isianTempel`, tanpa koreksi otomatis. Bukan untuk teks yang ditulis orang.
+   */
+  mono?: boolean;
   ref?: React.Ref<TextInput>;
+};
+
+/** Teks mesin: monospace sistem, ukuran `caption` supaya satu baris CSV muat. */
+const MONO = {
+  fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+  fontSize: typography.caption.fontSize,
+  lineHeight: typography.caption.lineHeight,
 };
 
 /**
@@ -50,6 +62,7 @@ export function Isian({
   warnaLabel,
   ekor,
   angka = false,
+  mono = false,
   ref,
   onFocus,
   onBlur,
@@ -66,7 +79,7 @@ export function Isian({
       <View
         style={{
           flexDirection: 'row',
-          alignItems: inputProps.multiline ? 'flex-start' : 'center',
+          alignItems: mono || inputProps.multiline ? 'flex-start' : 'center',
           gap: spacing.xs,
           backgroundColor: colors.permukaanCekung,
           borderRadius: radius.md,
@@ -83,6 +96,7 @@ export function Isian({
           accessibilityLabel={aksesLabel ?? label}
           accessibilityHint={galat ?? accessibilityHint ?? keterangan}
           accessibilityState={{ disabled: nonaktif }}
+          {...(mono ? { multiline: true, autoCapitalize: 'none' as const, autoCorrect: false, spellCheck: false } : null)}
           onFocus={(e) => {
             setFokus(true);
             onFocus?.(e);
@@ -94,10 +108,12 @@ export function Isian({
           style={{
             ...typography.body,
             ...(angka ? angkaTabular : null),
+            ...(mono ? MONO : null),
             flex: 1,
             minWidth: 0,
-            minHeight: inputProps.multiline ? ukuran.isianPanjang : TAP_MIN,
-            textAlignVertical: inputProps.multiline ? 'top' : 'center',
+            minHeight: mono ? ukuran.isianTempel.min : inputProps.multiline ? ukuran.isianPanjang : TAP_MIN,
+            maxHeight: mono ? ukuran.isianTempel.maks : undefined,
+            textAlignVertical: mono || inputProps.multiline ? 'top' : 'center',
             color: colors.teks,
             paddingVertical: spacing.sm,
             // Fokus sudah ditandai tepi aksen kolom; garis fokus bawaan browser

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { KerangkaSheet } from './KerangkaSheet';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { colors, ukuranIkon, spacing, typography } from '@/theme';
 
 type Props = {
@@ -47,7 +47,7 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
       </View>
 
       <View style={{ gap: spacing.sm }}>
-        <TombolUtama
+        <Tombol
           label="Keluar"
           memproses={memproses}
           onPress={() => {
@@ -56,7 +56,7 @@ export function SheetKeluarAkun({ terbuka, onTutup, email, keluar }: Props) {
             void keluar();
           }}
         />
-        <TombolBertepi label="Batal" onPress={onTutup} nonaktif={memproses} />
+        <Tombol varian="bertepi" label="Batal" onPress={onTutup} nonaktif={memproses} />
       </View>
     </KerangkaSheet>
   );

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { pesanGagalHubungkan, PROFIL_SUMBER, samarkanKunci, validasiKunciHevy } from '@recomp/logika';
 import type { HasilHubungkan, SumberData } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
-import { Tombol, TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuranIkon } from '@/theme';
 import { Isian } from './Isian';
 import { KeadaanGagal, KeadaanMemuat } from './Keadaan';
 
@@ -167,7 +168,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
           </Text>
 
           <View style={{ gap: spacing.sm }}>
-            <TombolUtama
+            <Tombol
               label={
                 profil.otorisasi === 'healthkit'
                   ? 'Lanjut ke izin Apple Health'
@@ -178,7 +179,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
               nonaktif={profil.otorisasi === 'kunci_api' && kunci.trim().length === 0}
               onPress={mulai}
             />
-            <TombolBertepi label="Nanti saja" onPress={onTutup} />
+            <Tombol varian="bertepi" label="Nanti saja" onPress={onTutup} />
           </View>
         </>
       ) : null}
@@ -198,7 +199,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
               ditinggal; hanya OAuth & kunci yang masuk akal dibatalkan. */}
           {profil.otorisasi !== 'healthkit' ? (
             <View style={{ alignSelf: 'stretch' }}>
-              <TombolBertepi label="Batal" onPress={batal} />
+              <Tombol varian="bertepi" label="Batal" onPress={batal} />
             </View>
           ) : null}
         </View>
@@ -207,9 +208,12 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
       {langkah.jenis === 'berhasil' ? (
         <>
           <View style={{ alignItems: 'center', gap: spacing.sm, paddingTop: spacing.md }}>
-            <Text style={{ fontSize: 40, color: colors.status.sukses.teks }} accessibilityElementsHidden>
-              ✓
-            </Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={ukuranIkon.hasil}
+              color={colors.status.sukses.teks}
+              accessibilityElementsHidden
+            />
             <Text
               accessibilityLiveRegion="polite"
               style={{ ...typography.title, color: colors.teks, textAlign: 'center' }}
@@ -233,7 +237,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
               Kunci tersimpan: {langkah.kunciSamar}
             </Text>
           ) : null}
-          <TombolUtama label="Selesai" onPress={onTutup} />
+          <Tombol label="Selesai" onPress={onTutup} />
         </>
       ) : null}
 

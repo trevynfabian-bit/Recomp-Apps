@@ -13,7 +13,7 @@ import {
 import type { Fase } from '@recomp/logika';
 import { KerangkaSheet } from './KerangkaSheet';
 import { PemilihFase } from './PemilihFase';
-import { TombolBertepi, TombolUtama } from './Tombol';
+import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
 import { useProfil } from '@/state/profil';
 import { useTarget } from '@/state/target';
@@ -80,7 +80,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
             ))}
           </View>
         </View>
-        <TombolBertepi label="Tutup" onPress={onTutup} />
+        <Tombol varian="bertepi" label="Tutup" onPress={onTutup} />
       </KerangkaSheet>
     );
   }
@@ -151,7 +151,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
 
       <View style={{ gap: spacing.sm }}>
         {bisaGanti ? (
-          <TombolUtama
+          <Tombol
             label={`Ganti ke ${calon}`}
             onPress={() => {
               gantiFase(calon);
@@ -160,7 +160,7 @@ export function SheetGantiFase({ terbuka, onTutup, calon: calonAwal = null }: Pr
             }}
           />
         ) : null}
-        <TombolBertepi label="Batal" onPress={kembaliKePilih} />
+        <Tombol varian="bertepi" label="Batal" onPress={kembaliKePilih} />
       </View>
     </KerangkaSheet>
   );

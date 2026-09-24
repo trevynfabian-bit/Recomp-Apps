@@ -188,18 +188,3 @@ export function TombolIkon({ ikon, aksesLabel, onPress, bentuk = 'bulat', nonakt
     </Pressable>
   );
 }
-
-// --- Nama lama, tetap didukung: pembungkus tipis di atas `Tombol`. ----------
-
-type PropsLama = Pick<Props, 'label' | 'onPress' | 'aksesLabel' | 'nonaktif' | 'memproses'>;
-
-/** Tombol isian utama. `merusak` memakai varian bahaya. Sama dengan `<Tombol varian="utama" />`. */
-export function TombolUtama({ merusak = false, ...props }: PropsLama & { merusak?: boolean }) {
-  return <Tombol {...props} varian={merusak ? 'merusak' : 'utama'} />;
-}
-
-/** Tombol bertepi untuk aksi kedua. Sama dengan `<Tombol varian="bertepi" />`. */
-export function TombolBertepi({ memproses: _abaikan, ...props }: PropsLama) {
-  return <Tombol {...props} varian="bertepi" />;
-}
-

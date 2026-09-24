@@ -23,9 +23,7 @@ import {
   Pill,
   SectionHeader,
   Tombol,
-  TombolBertepi,
   TombolIkon,
-  TombolUtama,
   uraiAngka,
 } from '@/components';
 import { tanggalHariIni } from '@recomp/logika';
@@ -269,13 +267,13 @@ export default function PeragaScreen() {
       </Bagian>
 
       <Bagian judul="Sheet">
-        <TombolBertepi label="Buka KerangkaSheet" onPress={() => setSheetTerbuka(true)} />
+        <Tombol varian="bertepi" label="Buka KerangkaSheet" onPress={() => setSheetTerbuka(true)} />
         <KerangkaSheet terbuka={sheetTerbuka} onTutup={() => setSheetTerbuka(false)} label="Peraga">
           <Text style={{ ...typography.title, color: colors.teks }}>Kerangka sheet</Text>
           <Text style={{ ...typography.body, color: colors.teksRedup }}>
             Selubung, pegangan, label, dan isi yang bisa digulir.
           </Text>
-          <TombolUtama label="Tutup" onPress={() => setSheetTerbuka(false)} />
+          <Tombol label="Tutup" onPress={() => setSheetTerbuka(false)} />
         </KerangkaSheet>
       </Bagian>
     </ScrollView>
