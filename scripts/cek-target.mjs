@@ -332,14 +332,38 @@ console.log('\nPeringatan protein sebelum simpan');
   cek('tepat 1,6 g/kg tidak dianggap rendah', peringatanProtein(120, null, 75) === null);
 }
 
-console.log('\nPesan galat lapisan data (target, tipe hari, fase, berat, ukuran, tren)');
+console.log('\nTarget kalori vs perkiraan TDEE');
+{
+  const kerjaTdee = mkdtempSync(join(tmpdir(), 'tdee-'));
+  for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/logika/src', b), join(kerjaTdee, b));
+  execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
+    ['tdee.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerjaTdee, 'keluar'), '--skipLibCheck'],
+    { cwd: kerjaTdee, stdio: 'pipe' });
+  const { bandingkanTargetTdee: banding } = require(join(kerjaTdee, 'keluar', 'tdee.js'));
+  cek('tanpa TDEE: tanpa kalimat', banding(2680, null, 'Cut') === null);
+  cek('Lean Gain di atas TDEE: sejalan', /20 kcal di atas.*sejalan/.test(banding(2700, 2680, 'Lean Gain')));
+  cek('Lean Gain di bawah TDEE: berlawanan', /30 kcal di bawah.*berlawanan/.test(banding(2650, 2680, 'Lean Gain')));
+  cek('Cut di bawah TDEE: sejalan', /400 kcal di bawah.*sejalan/.test(banding(2280, 2680, 'Cut')));
+  for (const f of ['Lean Gain', 'Cut', 'Maintenance']) {
+    const sama = banding(2680, 2680, f);
+    cek(`${f}, target = TDEE: "sama dengan", tanpa arah`, /sama dengan perkiraan TDEE/.test(sama) && !/0 kcal|sejalan|berlawanan/.test(sama), sama);
+  }
+  const hampir = banding(2680, 2680.4, 'Cut');
+  cek('selisih < 0,5 kcal dibaca sama, bukan "0 kcal di bawah"', /sama dengan/.test(hampir), hampir);
+  for (const [t, d, f] of [[2700, 2680, 'Lean Gain'], [2650, 2680, 'Cut'], [2680, 2680, 'Cut'], [2600, 2680, 'Maintenance']]) {
+    const k = banding(t, d, f);
+    cek(`nada netral: "${k}"`, pelanggaranNada(k).length === 0, pelanggaranNada(k).join(', '));
+  }
+}
+
+console.log('\nPesan galat lapisan data (target, tipe hari, fase, berat, ukuran, tren, TDEE)');
 {
   // Setiap kalimat yang dilempar lapisan data ke layar: literal string di
   // dalam `new Kesalahan*(...)`, dibaca lewat parser TypeScript. Kalimat itu
   // tampil apa adanya, jadi harus netral, tanpa istilah teknis, dan lengkap.
   const TEKNIS = /\b(database|server tidak mengembalikan|rpc|sql|postgres|null|undefined|error|gagal memuat)\b/i;
   const kalimat = [];
-  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts', 'src/data/beratPagi.ts', 'src/data/ukuran.ts', 'src/data/tren.ts']) {
+  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts', 'src/data/beratPagi.ts', 'src/data/ukuran.ts', 'src/data/tren.ts', 'src/data/tdee.ts']) {
     const sumber = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true);
     (function jelajah(n, dalam) {
       const baru = dalam || (ts.isNewExpression(n) && /^Kesalahan/.test(n.expression.getText(sumber)));

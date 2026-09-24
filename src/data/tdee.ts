@@ -66,7 +66,7 @@ export async function snapshotTdee(
   });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanTdee('Server tidak mengembalikan estimasi TDEE.', true);
+  if (!data) throw new KesalahanTdee('Perkiraan TDEE belum bisa dihitung. Coba lagi sebentar lagi.', true);
 
   const j = data as EstimasiTdeeRow;
   const angka = (n: number | null) => (n === null ? null : Number(n));
@@ -137,6 +137,6 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanTdee {
     case 'PGRST301':
       return new KesalahanTdee('Sesi Anda berakhir. Masuk lagi untuk melihat TDEE.', false);
     default:
-      return new KesalahanTdee('Gagal memuat estimasi TDEE. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanTdee('Perkiraan TDEE belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
 }

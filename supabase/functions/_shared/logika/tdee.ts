@@ -158,10 +158,17 @@ export function bandingkanTargetTdee(
   fase: Fase,
 ): string | null {
   if (tdeeTengah === null) return null;
-  const selisih = targetHarian - tdeeTengah;
-  const arah = selisih > 0 ? 'di atas' : 'di bawah';
+  // Dibulatkan DULU, seperti yang tampil: selisih 0,4 kcal bukan "0 kcal di
+  // bawah", dan target yang sama persis dengan TDEE tidak punya arah.
+  const selisih = Math.round(targetHarian - tdeeTengah);
   const diharapkan =
     fase === 'Lean Gain' ? 'di atas' : fase === 'Cut' ? 'di bawah' : 'sekitar';
+  if (selisih === 0) {
+    return fase === 'Maintenance'
+      ? 'Target hari ini sama dengan perkiraan TDEE, sesuai fase Maintenance.'
+      : `Target hari ini sama dengan perkiraan TDEE; fase ${fase} biasanya menargetkan ${diharapkan} angka itu.`;
+  }
+  const arah = selisih > 0 ? 'di atas' : 'di bawah';
 
   if (fase === 'Maintenance') {
     return `Target hari ini ${formatAngka(Math.abs(selisih))} kcal ${arah} perkiraan TDEE — fase Maintenance memang menargetkan sekitar angka itu.`;
