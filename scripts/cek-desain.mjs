@@ -75,7 +75,8 @@ cek(
   'status bar mengikuti skema (terang di atas gelap, gelap di atas terang)',
   /<StatusBar style=\{skema === 'gelap' \? 'light' : 'dark'\} \/>/.test(tataLetak),
 );
-cek('akar dibungkus PenyediaSkema', /<PenyediaSkema>/.test(tataLetak));
+cek('akar dibungkus PenyediaSkema (paling luar)', /return \(\s*<PenyediaSkema>/.test(tataLetak));
+cek('PenyediaSkema mewarnai latar akar', /backgroundColor: colors\.latar/.test(readFileSync('src/theme/skema.tsx', 'utf8')));
 cek('navigator dipasang ulang saat skema berganti', /key=\{skema\}/.test(tataLetak));
 
 // `colors.x` di luar fungsi dibaca SEKALI saat modul dimuat, lalu membeku di

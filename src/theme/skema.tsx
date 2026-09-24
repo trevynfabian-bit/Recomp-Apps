@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
-import { useColorScheme, type ColorSchemeName } from 'react-native';
-import { terapkanSkema, type Skema } from './colors';
+import { useColorScheme, View, type ColorSchemeName } from 'react-native';
+import { colors, terapkanSkema, type Skema } from './colors';
 
 const KonteksSkema = createContext<Skema>('gelap');
 
@@ -31,7 +31,13 @@ export function PenyediaSkema({ children }: { children: React.ReactNode }) {
   // Sengaja di dalam render, bukan efek: anak-anak di bawah harus sudah
   // membaca palet baru pada render yang sama. Idempoten.
   terapkanSkema(skema);
-  return <KonteksSkema.Provider value={skema}>{children}</KonteksSkema.Provider>;
+  return (
+    <KonteksSkema.Provider value={skema}>
+      {/* Latar akar: terlihat sekejap saat navigator dipasang ulang dan di balik
+          layar yang belum selesai digambar, jadi ikut skema juga. */}
+      <View style={{ flex: 1, backgroundColor: colors.latar }}>{children}</View>
+    </KonteksSkema.Provider>
+  );
 }
 
 /** Skema yang berlaku: 'gelap' atau 'terang'. */
