@@ -262,6 +262,21 @@ const tanggalMentah = [...layar, ...berkasTsx('src/components')].flatMap((p) =>
 );
 cek('label aksesibilitas tidak memuat tanggal ISO mentah', tanggalMentah.length === 0, tanggalMentah);
 
+// Format kg (bab Desain 8.6): berat badan, rata-rata, lingkar, dan massa
+// SELALU satu desimal (formatDesimal) — "74,0 kg", bukan "74 kg" — supaya
+// kolom sejajar dan perubahan 0,x terlihat. Beban latihan lewat formatBeban,
+// volume dan kalori bilangan bulat (formatAngka).
+const kgBulat = [...layar, ...berkasTsx('src/components')].flatMap((p) =>
+  readFileSync(p, 'utf8')
+    .split('\n')
+    .flatMap((b, i) =>
+      /formatAngka\([^)]*(berat|Berat|rataRata|pinggang|lingkar|massa|lemakKg|bebasLemak)[^)]*\)/.test(b)
+        ? [`${p}:${i + 1}  formatAngka pada berat/ukuran → formatDesimal`]
+        : [],
+    ),
+);
+cek('berat & ukuran tubuh satu desimal, bukan bilangan bulat', kgBulat.length === 0, kgBulat);
+
 bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];

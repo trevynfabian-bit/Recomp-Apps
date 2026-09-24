@@ -75,6 +75,8 @@ console.log('\nRangkuman latihan');
   cek(`berat badan: "${dip.set}", tanpa e1RM & volume`, dip.set === 'BB × 12, BB × 10' && dip.e1rmKg === null && dip.volumeKg === 0);
   cek('format beban: bulat tanpa ",0", pecahan satu desimal, ribuan bertitik',
     formatBeban(80) === '80 kg' && formatBeban(82.5) === '82,5 kg' && formatBeban(1200) === '1.200 kg');
+  cek('formatBeban membulatkan setengah ke atas & membuang ",0" hasil pembulatan',
+    formatBeban(82.25) === '82,3 kg' && formatBeban(82.04) === '82 kg' && formatBeban(null) === 'BB', `${formatBeban(82.25)} | ${formatBeban(82.04)}`);
 }
 
 console.log('\nRingkasan sesi & pekan');

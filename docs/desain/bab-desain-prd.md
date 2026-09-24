@@ -135,6 +135,11 @@ berubah karena keputusan desain.
   `AngkaStat` (label kapital kecil, `title` tabular, satuan). Selisih selalu
   bertanda: "+" untuk naik, minus sejati "−" (U+2212) untuk turun
   (`formatSelisih`), supaya arah terbaca tanpa warna dan kolom tidak bergeser.
+- Format kg: berat badan, rata-rata, lingkar, dan massa lemak/bebas lemak selalu
+  satu desimal (`formatDesimal`: "74,0 kg"); beban latihan tanpa ",0" dan
+  dibulatkan setengah ke atas seperti SQL (`formatBeban`: "60 kg", "82,5 kg");
+  volume latihan dan kalori bilangan bulat berpemisah ribuan (`formatAngka`).
+  Dijaga `cek:desain` dan `cek:latihan`.
 - Kontainer: `Card` (kartu standar; `nada` memberi tepi bertint untuk kartu yang
   perlu dilihat lebih dulu), `DaftarBaris` (baris-baris dalam satu kartu dengan
   pemisah otomatis), `Panel` (area cekung di dalam kartu), `Pemisah` (garis
