@@ -54,3 +54,18 @@ export const BAYANGAN_KARTU = {
   shadowOffset: { width: 0, height: 4 },
   elevation: 3,
 };
+
+/**
+ * Bayangan elemen yang MELAYANG di atas semua layar (banner kiriman Realtime,
+ * banner ekspor siap): lebih pekat dari kartu supaya terbaca terpisah dari isi
+ * layar di bawahnya.
+ */
+export const BAYANGAN_MELAYANG = {
+  shadowColor: '#000000',
+  get shadowOpacity() {
+    return skemaBerlaku() === 'gelap' ? 0.4 : 0.14;
+  },
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 6,
+};

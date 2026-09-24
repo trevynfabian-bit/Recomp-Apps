@@ -26,7 +26,9 @@ export const spacing = {
  * kecil dari radius kartunya (`md` di dalam `lg`) supaya sudutnya sejajar.
  */
 export const radius = {
-  /** Sel matriks target, "ekor" gelembung chat, swatch legenda. */
+  /** Swatch legenda grafik (kotak kecil 12×8). */
+  xs: 2,
+  /** Sel matriks target, "ekor" gelembung chat. */
   sm: 8,
   /** Tombol, field isian, chip pilihan. */
   md: 12,
@@ -57,6 +59,10 @@ export const ukuran = {
   chip: { vertikal: 5, horizontal: 10 },
   /** Jarak titik/ikon kecil ↔ labelnya di legenda dan penanda. */
   celahTitik: 5,
+  /** Lingkaran tombol radio (pilihan fase, jenis kelamin, opsi redistribusi). */
+  radio: 18,
+  /** Sisipan di dalam kontrol segmen, antara track dan segmen terpilih. */
+  sisipanSegmen: 3,
 } as const;
 
 /**

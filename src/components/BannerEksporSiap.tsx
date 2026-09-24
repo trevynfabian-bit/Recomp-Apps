@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NOTIF_EKSPOR_SIAP } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { useEkspor } from '@/state/ekspor';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { BAYANGAN_MELAYANG, colors, radius, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
 
 /**
  * Pemberitahuan "ekspor data siap" di dalam app, untuk berkas yang selesai
@@ -50,11 +50,7 @@ export function BannerEksporSiap() {
           backgroundColor: colors.permukaan,
           borderWidth: 1,
           borderColor: colors.garisKontrol,
-          shadowColor: '#000',
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
+          ...BAYANGAN_MELAYANG,
         }}
       >
         <Ionicons name="document-attach-outline" size={ukuranIkon.baris} color={colors.teksRedup} />

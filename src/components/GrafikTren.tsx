@@ -396,7 +396,7 @@ export function GrafikTren({
               style={{
                 width: 12,
                 height: 8,
-                borderRadius: 2,
+                borderRadius: radius.xs,
                 backgroundColor: colors.status.sukses.isian + '33',
                 borderWidth: 1,
                 borderColor: colors.status.sukses.teks + '88',
@@ -428,7 +428,7 @@ export function GrafikTren({
             style={{
               width: 7,
               height: 7,
-              borderRadius: 4,
+              borderRadius: radius.pill,
               backgroundColor: tampilkanHarian ? colors.teksSamar : 'transparent',
               borderWidth: 1,
               borderColor: colors.teksSamar,

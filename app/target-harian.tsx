@@ -617,7 +617,7 @@ function PilihFase({
   return (
     <View
       accessibilityRole="tablist"
-      style={{ flexDirection: 'row', padding: 3, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung }}
+      style={{ flexDirection: 'row', padding: ukuran.sisipanSegmen, borderRadius: radius.pill, backgroundColor: colors.permukaanCekung }}
     >
       {FASE.map((f) => {
         const dipilih = f === terpilih;

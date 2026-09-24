@@ -35,7 +35,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -380,7 +380,7 @@ function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Sat
       accessibilityRole="radiogroup"
       style={{
         flexDirection: 'row',
-        padding: 3,
+        padding: ukuran.sisipanSegmen,
         borderRadius: radius.pill,
         backgroundColor: colors.permukaanCekung,
       }}

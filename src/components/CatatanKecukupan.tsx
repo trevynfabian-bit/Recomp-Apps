@@ -41,7 +41,8 @@ export function CatatanKecukupan({ kecukupan, untuk }: Props) {
           height: ukuran.titikKecil,
           borderRadius: radius.pill,
           backgroundColor: colors.teksSamar,
-          marginTop: 5,
+          // Titik di tengah baris caption pertama.
+          marginTop: (typography.caption.lineHeight - ukuran.titikKecil) / 2,
         }}
       />
       <Text style={{ ...typography.caption, color: colors.teksSamar, flex: 1 }}>

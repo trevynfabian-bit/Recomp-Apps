@@ -100,7 +100,7 @@ export function KartuBodyFat({
           <Text style={{ ...typography.display, color: colors.teks }}>
             {formatDesimal(hasil.persen)}
           </Text>
-          <Text style={{ ...typography.title, color: colors.teksSamar, paddingBottom: 3 }}>%</Text>
+          <Text style={{ ...typography.title, color: colors.teksSamar, paddingBottom: spacing.xxs }}>%</Text>
         </View>
         <Text style={{ ...typography.label, color: colors.teksRedup }}>
           wajarnya di antara {formatDesimal(hasil.rentang!.bawah)}% dan{' '}

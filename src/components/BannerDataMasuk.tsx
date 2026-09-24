@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatAngka, PROFIL_SUMBER } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import { useSinkron } from '@/state/sinkron';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { BAYANGAN_MELAYANG, colors, radius, spacing, TAP_MIN, typography } from '@/theme';
 
 /** Berapa lama banner tampil sebelum menutup sendiri. */
 const LAMA_TAMPIL_MS = 6000;
@@ -60,11 +60,7 @@ export function BannerDataMasuk() {
           borderWidth: 1,
           borderColor: colors.garisKontrol,
           opacity: pressed ? 0.8 : 1,
-          shadowColor: '#000',
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 6,
+          ...BAYANGAN_MELAYANG,
         })}
       >
         <PenandaSumber jenis="sinkron" detail={nama} />

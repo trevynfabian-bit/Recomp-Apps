@@ -110,7 +110,7 @@ export default function UkuranScreen() {
       style={{ flex: 1, backgroundColor: colors.latar }}
       contentContainerStyle={{
         paddingTop: insets.top + spacing.lg,
-        paddingBottom: spacing.xxl,
+        paddingBottom: insets.bottom + spacing.xxl,
         paddingHorizontal: spacing.lg,
         gap: spacing.xl,
       }}

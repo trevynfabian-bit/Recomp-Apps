@@ -122,7 +122,7 @@ export default function TambahHasilLabScreen() {
 
   if (id && !asal && statusMuat === 'memuat') {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg }}>
+      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg }}>
         <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
           Memuat hasil lab…
         </Text>
@@ -132,7 +132,7 @@ export default function TambahHasilLabScreen() {
 
   if (id && !asal) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
+      <View style={{ flex: 1, backgroundColor: colors.latar, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg, gap: spacing.lg }}>
         <Text style={{ ...typography.title, color: colors.teks }}>Hasil lab ini tidak ditemukan</Text>
         <Text style={{ ...typography.body, color: colors.teksRedup }}>
           Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.

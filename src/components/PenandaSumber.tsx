@@ -30,7 +30,7 @@ export function PenandaSumber({ jenis, tampilan = 'inline', detail }: Props) {
         ...(tampilan === 'pill'
           ? {
               paddingHorizontal: ukuran.chip.horizontal,
-              paddingVertical: 3,
+              paddingVertical: spacing.xxs,
               borderRadius: radius.pill,
               borderWidth: 1,
               borderColor: meta.warna + '55',
@@ -53,7 +53,8 @@ export function LegendaSumber() {
     <View style={{ gap: spacing.md }}>
       {urutan.map((jenis) => (
         <View key={jenis} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-          <View style={{ paddingTop: 5 }}>
+          {/* Titik di tengah baris caption pertama. */}
+          <View style={{ paddingTop: (typography.caption.lineHeight - ukuran.titikKecil) / 2 }}>
             <View
               style={{
                 width: ukuran.titikKecil,

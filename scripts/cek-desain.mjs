@@ -178,9 +178,12 @@ const dasar = ['hero', 'display', 'title', 'body', 'label', 'caption'];
 cek('setiap gaya dasar punya padanan iOS di hig.ts', dasar.every((d) => new RegExp(`\\b${d}: '`).test(higTeks)));
 
 console.log('\nJarak dari satu skala (plafon, hanya boleh turun)');
-const PLAFON = { lineHeight: 3, jarak: 9 };
+const PLAFON = { lineHeight: 3, jarak: 0 };
 const tinggiBaris = semuaUi.flatMap((p) => cariBaris(p, /lineHeight: \d/));
-const jarakMentah = semuaUi.flatMap((p) => cariBaris(p, /\b(gap|rowGap|columnGap|margin\w*|padding\w*): \d/));
+// Nol bukan pelanggaran skala (reset padding bawaan input).
+const jarakMentah = semuaUi.flatMap((p) => cariBaris(p, /\b(gap|rowGap|columnGap|margin\w*|padding\w*): -?[1-9]/));
+const radiusMentah = semuaUi.flatMap((p) => cariBaris(p, /(borderRadius|Radius): \d/));
+cek('radius hanya dari token radius', radiusMentah.length === 0, radiusMentah.slice(0, 5).join(' | '));
 cek(
   `lineHeight mentah ${tinggiBaris.length} ≤ ${PLAFON.lineHeight}`,
   tinggiBaris.length <= PLAFON.lineHeight,

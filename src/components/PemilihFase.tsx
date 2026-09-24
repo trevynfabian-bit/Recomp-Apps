@@ -61,9 +61,9 @@ export function PemilihFase({ terpilih, onPilih }: Props) {
                 {/* Penanda terpilih berupa BENTUK, bukan warna saja. */}
                 <View
                   style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: 9,
+                    width: ukuran.radio,
+                    height: ukuran.radio,
+                    borderRadius: radius.pill,
                     borderWidth: 2,
                     borderColor: aktif ? colors.aksen.isian : colors.garisKontrol,
                     alignItems: 'center',

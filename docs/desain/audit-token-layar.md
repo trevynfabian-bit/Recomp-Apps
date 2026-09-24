@@ -111,3 +111,17 @@ Diukur ulang setelah task "Terapkan arah visual ke seluruh layar":
 | T2 `lineHeight` mentah | 139 | 88 | Semua yang ikut varian bernama hilang; `body` 23 → 24. Sisanya (`caption` 16, `body` 24) hilang saat gaya dasar membawa `lineHeight` (Fase 2). |
 | T3 jarak mentah | 67 | 11 | `spacing.xxs` (2) ditambahkan; `gap`/`marginTop` 2–3 memakai token. Sisa: inset kontrol segmen (`padding: 3`), offset optis garis dasar (3, 5), dan `padding: 0` pada input. |
 | L3 judul tab | `display` di Pengaturan | `title` di semua tab | Pengaturan kini juga membawa `accessibilityRole="header"`. |
+
+## 6. Setelah skala jarak & radius diterapkan (Fase 2)
+
+| Temuan | Sesudah Fase 1 | Sesudah Fase 2 | Keterangan |
+|---|---|---|---|
+| T2 `lineHeight` mentah | 88 | 3 | Gaya dasar membawa tinggi baris. Sisa: glyph −/+ stepper (2) dan field chat (1). |
+| T3 jarak mentah | 9 | 0 | `ukuran.sisipanSegmen`, `spacing.xxs`, offset titik dihitung dari token (`(caption.lineHeight − titikKecil) / 2`). `padding: 0` (reset input) bukan pelanggaran. |
+| T5 dimensi mentah | pegangan ×7, titik ×10, radio ×3 | 0 untuk yang berulang | `ukuran.pegangan`, `titik`, `titikKecil`, `track`, `trackTebal`, `radio`. |
+| T6 ukuran ikon | 19 angka | 0 | `ukuranIkon.mini/kecil/sedang/baris`. |
+| Radius mentah | 7 | 0 | `radius.xs` (2) ditambahkan untuk swatch legenda; lingkaran memakai `radius.pill`. |
+| Bayangan mentah | 2 banner | 0 | `BAYANGAN_MELAYANG` di `hig.ts`, ikut skema. |
+| L4 padding bawah | `ukuran` tanpa inset | semua layar tumpukan `inset + xxl` | Layar tab tetap `xxl` karena tab bar sudah memegang inset bawah. `tambah-hasil-lab` keadaan kosong/galat kini `inset + lg` seperti layar lain. |
+
+Semua dijaga `cek:desain` dengan plafon nol.
