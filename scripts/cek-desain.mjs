@@ -25,15 +25,36 @@ import { join } from 'node:path';
 import ts from 'typescript';
 
 let gagal = 0;
+const daftarGagal = [];
+/** Paling banyak sekian pelanggaran dicetak per pemeriksaan; sisanya dihitung. */
+const MAKS_RINCIAN = 20;
+
+/**
+ * Cetak hasil satu pemeriksaan. Saat gagal, setiap pelanggaran dicetak di
+ * barisnya sendiri (`berkas:baris  nilai → saran`), supaya bisa langsung
+ * dibuka dari terminal; `rincian` boleh daftar atau teks berpemisah ` | `.
+ */
 function cek(nama, lulus, rincian = '') {
-  console.log(`${lulus ? '✓' : '✗'} ${nama}${!lulus && rincian ? ` — ${rincian}` : ''}`);
-  if (!lulus) gagal += 1;
+  if (lulus) {
+    console.log(`✓ ${nama}`);
+    return;
+  }
+  gagal += 1;
+  daftarGagal.push(nama);
+  const butir = (Array.isArray(rincian) ? rincian : String(rincian).split(' | ')).filter(Boolean);
+  console.log(`✗ ${nama}${butir.length > 1 ? ` (${butir.length})` : ''}`);
+  for (const b of butir.slice(0, MAKS_RINCIAN)) console.log(`    · ${b}`);
+  if (butir.length > MAKS_RINCIAN) console.log(`    … dan ${butir.length - MAKS_RINCIAN} lagi`);
 }
 /** Baris `berkas:n` yang cocok dengan pola. */
 function cariBaris(berkas, pola) {
   return readFileSync(berkas, 'utf8')
     .split('\n')
-    .flatMap((baris, i) => (pola.test(baris) ? [`${berkas}:${i + 1}`] : []));
+    .flatMap((baris, i) => {
+      const m = baris.match(pola);
+      // `berkas:baris  cuplikan` — cuplikan adalah nilai yang melanggar.
+      return m ? [`${berkas}:${i + 1}  ${m[0].trim()}`] : [];
+    });
 }
 function berkasTsx(dir) {
   return readdirSync(dir).flatMap((n) => {
@@ -156,14 +177,15 @@ const NAMA_LAMA = USANG.size ? new RegExp(`colors\\.(${[...USANG.keys()].join('|
 const namaLama = [...berkasTs('app'), ...berkasTs('src')]
   .filter((p) => !p.startsWith(join('src', 'theme')))
   .flatMap((p) =>
-    cariBaris(p, NAMA_LAMA).map((lokasi) => {
+    cariBaris(p, NAMA_LAMA).map((temuan) => {
+      const lokasi = temuan.split('  ')[0];
       const [berkas, baris] = [lokasi.slice(0, lokasi.lastIndexOf(':')), Number(lokasi.slice(lokasi.lastIndexOf(':') + 1))];
       const token = NAMA_LAMA.exec(readFileSync(berkas, 'utf8').split('\n')[baris - 1])[1];
       return `${lokasi} colors.${token} → ${USANG.get(token)}`;
     }),
   );
-cek('layar & komponen tidak memakai token usang', namaLama.length === 0, namaLama.slice(0, 5).join(' | '));
-cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku.slice(0, 5).join(' | '));
+cek('layar & komponen tidak memakai token usang', namaLama.length === 0, namaLama);
+cek('colors tidak dibekukan di tingkat modul (pakai getter/fungsi)', beku.length === 0, beku);
 cek('latar tiap layar dari colors.latar', /contentStyle: \{ backgroundColor: colors\.latar \}/.test(tataLetak));
 
 // Berkas UI: layar + komponen, kecuali PratinjauWidget yang meniru layar kunci iOS.
@@ -180,11 +202,11 @@ const timpaBobot = semuaUi.flatMap((p) => {
   }
   return hasil;
 });
-cek('ketebalan tidak ditimpa setelah typography (pakai varian bernama)', timpaBobot.length === 0, timpaBobot.slice(0, 5).join(' | '));
+cek('ketebalan tidak ditimpa setelah typography (pakai varian bernama)', timpaBobot.length === 0, timpaBobot);
 const bobotMentah = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '\d+'/));
-cek('ketebalan span dari token bobot', bobotMentah.length === 0, bobotMentah.slice(0, 5).join(' | '));
+cek('ketebalan span dari token bobot', bobotMentah.length === 0, bobotMentah);
 const bobotTerlarang = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '(100|200|300|400|900)'/));
-cek('ketebalan hanya 500, 600, 700, 800', bobotTerlarang.length === 0, bobotTerlarang.slice(0, 5).join(' | '));
+cek('ketebalan hanya 500, 600, 700, 800', bobotTerlarang.length === 0, bobotTerlarang);
 
 // Tangga tipografi sendiri: setiap gaya membawa tinggi baris, tidak ada yang
 // di bawah batas HIG, dan setiap gaya punya padanan iOS yang tercatat.
@@ -296,5 +318,11 @@ try {
 cek('bab Desain PRD ada dan berstatus resmi', /\*\*Status\*\* \| \*\*Resmi/.test(bab));
 cek('bab Desain punya riwayat versi', /## Riwayat & perubahan/.test(bab));
 
-console.log(gagal ? `\n${gagal} pemeriksaan gagal` : '\nSemua pemeriksaan desain lulus');
+if (gagal) {
+  console.log(`\n${gagal} pemeriksaan gagal:`);
+  for (const n of daftarGagal) console.log(`  ✗ ${n}`);
+  console.log('Aturan & alasannya: docs/desain/bab-desain-prd.md (ringkas) dan docs/desain/arah-visual.md (rinci).');
+} else {
+  console.log('\nSemua pemeriksaan desain lulus');
+}
 process.exit(gagal ? 1 : 0);
