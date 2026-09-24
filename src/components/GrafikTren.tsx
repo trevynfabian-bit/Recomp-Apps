@@ -155,6 +155,12 @@ export function GrafikTren({
   }
 
   const terakhirBerisi = [...titik].reverse().find((t) => t.rataRataKg !== null);
+  const pertamaBerisi = titik.find((t) => t.rataRataKg !== null);
+  // Pembaca layar tidak melihat garisnya: ringkas isinya dengan kalimat.
+  const ringkasanAkses =
+    pertamaBerisi && terakhirBerisi && pertamaBerisi.rataRataKg !== null && terakhirBerisi.rataRataKg !== null
+      ? `Grafik rata-rata berat 7 hari: ${formatDesimal(pertamaBerisi.rataRataKg)} kg pada ${formatTanggalPanjang(pertamaBerisi.tanggal)}, ${formatDesimal(terakhirBerisi.rataRataKg)} kg pada ${formatTanggalPanjang(terakhirBerisi.tanggal)}${koridor ? '; koridor target fase ikut digambar' : ''}. Sentuh dan geser untuk angka per hari.`
+      : 'Grafik rata-rata berat 7 hari';
   const indeksTerakhir = terakhirBerisi ? titik.indexOf(terakhirBerisi) : -1;
   const sorot = aktif !== null ? titik[aktif] : null;
 
@@ -205,7 +211,8 @@ export function GrafikTren({
       <View
         onLayout={(e) => setLebar(e.nativeEvent.layout.width)}
         {...panResponder.panHandlers}
-        accessibilityLabel="Grafik rata-rata berat 7 hari"
+        accessibilityRole="image"
+        accessibilityLabel={ringkasanAkses}
       >
         {lebar > 0 ? (
           <Svg width={lebar} height={TINGGI_PLOT + PAD_ATAS + PAD_BAWAH}>
@@ -412,9 +419,8 @@ export function GrafikTren({
         <Pressable
           accessibilityRole="switch"
           aria-checked={tampilkanHarian}
-          accessibilityLabel={
-            tampilkanHarian ? 'Sembunyikan timbangan harian' : 'Tampilkan timbangan harian'
-          }
+          // Label tetap; keadaan hidup/mati diumumkan lewat aria-checked.
+          accessibilityLabel="Tampilkan timbangan harian"
           disabled={!onUbahTampilkanHarian}
           onPress={() => onUbahTampilkanHarian?.(!tampilkanHarian)}
           style={({ pressed }) => ({
