@@ -74,7 +74,7 @@ export async function snapshotBudget(
   });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanBudget('Server tidak mengembalikan budget.', true);
+  if (!data) throw new KesalahanBudget('Budget belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const j = data as BudgetMingguanRow;
   const budget = keBudgetTs(j);
@@ -176,7 +176,7 @@ export async function snapshotLayarBudget(
   });
 
   if (error) throw terjemahkan(error);
-  if (!data) throw new KesalahanBudget('Server tidak mengembalikan data budget.', true);
+  if (!data) throw new KesalahanBudget('Budget belum bisa dimuat. Coba lagi sebentar lagi.', true);
 
   const j = data as EndpointBudgetRow;
   const budget = keBudgetTs(j.budget);
@@ -231,6 +231,6 @@ function terjemahkan(error: { code?: string; message: string }): KesalahanBudget
     case 'PGRST301':
       return new KesalahanBudget('Sesi Anda berakhir. Masuk lagi untuk melihat budget.', false);
     default:
-      return new KesalahanBudget('Gagal memuat budget. Periksa koneksi lalu coba lagi.', true);
+      return new KesalahanBudget('Budget belum bisa dimuat. Periksa koneksi, lalu coba lagi.', true);
   }
 }

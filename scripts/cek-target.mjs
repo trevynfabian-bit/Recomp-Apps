@@ -356,14 +356,14 @@ console.log('\nTarget kalori vs perkiraan TDEE');
   }
 }
 
-console.log('\nPesan galat lapisan data (target, tipe hari, fase, berat, ukuran, tren, TDEE)');
+console.log('\nPesan galat lapisan data (target, tipe hari, fase, berat, ukuran, tren, TDEE, budget)');
 {
   // Setiap kalimat yang dilempar lapisan data ke layar: literal string di
   // dalam `new Kesalahan*(...)`, dibaca lewat parser TypeScript. Kalimat itu
   // tampil apa adanya, jadi harus netral, tanpa istilah teknis, dan lengkap.
   const TEKNIS = /\b(database|server tidak mengembalikan|rpc|sql|postgres|null|undefined|error|gagal memuat)\b/i;
   const kalimat = [];
-  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts', 'src/data/beratPagi.ts', 'src/data/ukuran.ts', 'src/data/tren.ts', 'src/data/tdee.ts']) {
+  for (const berkas of ['src/data/target.ts', 'src/data/tipeHari.ts', 'src/data/fase.ts', 'src/data/beratPagi.ts', 'src/data/ukuran.ts', 'src/data/tren.ts', 'src/data/tdee.ts', 'src/data/budget.ts']) {
     const sumber = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true);
     (function jelajah(n, dalam) {
       const baru = dalam || (ts.isNewExpression(n) && /^Kesalahan/.test(n.expression.getText(sumber)));
