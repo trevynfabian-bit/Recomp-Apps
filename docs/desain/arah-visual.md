@@ -128,3 +128,75 @@ dihitung rasionya:
 Catatan untuk Fase 3: amber isian `#F0A202` hanya 1,8:1 terhadap track terang,
 sehingga bar kalori di mode terang butuh varian isian yang lebih gelap; `garisKontrol`
 terang harus di bawah `#8A909E` agar lolos 3:1 di atas `permukaanCekung`.
+
+---
+
+## 2. Tipografi & skala teks
+
+### 2.1 Rupa huruf
+
+**Huruf sistem** (SF Pro di iOS, Roboto di Android, font sistem di web). Tidak
+ada font kustom: Dynamic Type, angka tabular, dan rendering tajam didapat
+gratis, dan tidak ada berkas font yang perlu dimuat sebelum layar pertama.
+`expo-font` tetap terpasang hanya untuk ikon. Satu pengecualian yang sah:
+`Menlo` untuk pratinjau isi CSV di `SheetImporRiwayat` (teks mesin, bukan UI).
+
+**Angka:** angka yang berubah di tempat (hero, stepper, tabel makro) memakai
+`fontVariant: ['tabular-nums']` supaya lebar digit tetap dan angka tidak
+"menari" saat nilainya berganti. Diwujudkan sebagai token di Fase 2.
+
+### 2.2 Tangga ukuran
+
+Enam ukuran, tidak ditambah. Setiap gaya **membawa `lineHeight` sendiri**
+sehingga layar tidak perlu lagi menulis 16/19/20/23/24 secara manual (139
+kejadian di audit).
+
+| Gaya | Ukuran | Tinggi baris | Ketebalan | Tracking | Pemakaian |
+|---|---|---|---|---|---|
+| `hero` | 64 | 68 | 800 | −2 | **Satu** angka utama per layar (`HeroNumber`) |
+| `display` | 34 | 40 | 700 | −0,8 | Judul layar publik (masuk) dan angka sekunder besar |
+| `title` | 20 | 26 | 700 | −0,3 | Judul layar (tab & tumpukan), judul sheet |
+| `body` | 16 | 24 | 500 | 0 | Teks isi dan nilai di baris |
+| `label` | 13 | 19 | 600 | 0 | Label kontrol, nama baris, judul kecil di kartu |
+| `caption` | 11 | 16 | 600 | +0,6 | Label huruf kapital di atas grup, unit kecil, keterangan grafik |
+
+Tinggi baris dipilih dari nilai yang **sudah paling sering** ditulis manual
+(`label` 19 ×47, `caption` 16 ×46, `body` 24 ×15) supaya penerapannya tidak
+menggeser tata letak. `body` 23 (×12) dibulatkan ke 24.
+
+### 2.3 Aturan ketebalan
+
+Hanya empat ketebalan yang boleh ada: **500, 600, 700, 800**.
+
+| Ketebalan | Nama | Boleh untuk |
+|---|---|---|
+| 500 | biasa | Teks isi (`body`) dan teks keterangan (`labelBiasa`) |
+| 600 | sedang | `label`, `caption`, judul kartu (`bodySedang`), label tombol bertepi |
+| 700 | tebal | `title`, `display`, label tombol utama & nilai yang ditekankan (`bodyTebal`) |
+| 800 | hero | Hanya `hero` |
+
+Varian bernama menggantikan penimpaan manual `fontWeight` (152 kejadian di
+audit):
+
+| Varian | Dasar | Menggantikan | Kejadian |
+|---|---|---|---|
+| `labelBiasa` | `label` + 500 | `label, fontWeight: '500'` (± `lineHeight`) | 92 |
+| `bodyTebal` | `body` + 700 | `body, fontWeight: '700'` | 30 |
+| `bodySedang` | `body` + 600 | `body, fontWeight: '600'` | 12 |
+
+Kombinasi lain (`label` 700, `caption` 500/700: 6 kejadian) dilebur ke varian
+terdekat saat layarnya diseragamkan di Fase 5. Ketebalan 300 dilarang di UI
+aplikasi; satu-satunya pemakaiannya ada di `PratinjauWidget`, yang meniru jam
+layar kunci iOS dan memang dikecualikan dari palet.
+
+### 2.4 Aturan pakai
+
+- Tidak ada `fontSize` mentah di layar atau komponen (pengecualian:
+  `PratinjauWidget`). Ukuran di luar tangga berarti tangganya perlu dibahas,
+  bukan ditambal di tempat.
+- Tidak menimpa `fontWeight` atau `lineHeight` setelah `...typography.x`; pakai
+  varian bernama.
+- Huruf kapital hanya untuk `caption` (label grup), selalu lewat
+  `textTransform: 'uppercase'`, bukan huruf kapital yang diketik.
+- Dynamic Type: teks isi menskala penuh; hanya `hero` yang dibatasi
+  `MAKS_SKALA_HERO` (1,3).
