@@ -23,9 +23,16 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import ts from 'typescript';
+import { buatRingkasan } from './lib/ringkasan-cek.mjs';
 
-let gagal = 0;
-const daftarGagal = [];
+const ringkasan = buatRingkasan('cek:desain');
+let adaBagian = false;
+/** Judul bagian: dicetak dan menjadi baris di ringkasan akhir. */
+function bagian(judul) {
+  console.log(`${adaBagian ? '\n' : ''}${judul}`);
+  adaBagian = true;
+  ringkasan.bagian(judul);
+}
 /** Paling banyak sekian pelanggaran dicetak per pemeriksaan; sisanya dihitung. */
 const MAKS_RINCIAN = 20;
 
@@ -35,13 +42,12 @@ const MAKS_RINCIAN = 20;
  * dibuka dari terminal; `rincian` boleh daftar atau teks berpemisah ` | `.
  */
 function cek(nama, lulus, rincian = '') {
+  const butir = (Array.isArray(rincian) ? rincian : String(rincian).split(' | ')).filter(Boolean);
+  ringkasan.catat(nama, lulus, butir.length);
   if (lulus) {
     console.log(`✓ ${nama}`);
     return;
   }
-  gagal += 1;
-  daftarGagal.push(nama);
-  const butir = (Array.isArray(rincian) ? rincian : String(rincian).split(' | ')).filter(Boolean);
   console.log(`✗ ${nama}${butir.length > 1 ? ` (${butir.length})` : ''}`);
   for (const b of butir.slice(0, MAKS_RINCIAN)) console.log(`    · ${b}`);
   if (butir.length > MAKS_RINCIAN) console.log(`    … dan ${butir.length - MAKS_RINCIAN} lagi`);
@@ -63,7 +69,7 @@ function berkasTsx(dir) {
   });
 }
 
-console.log('Satu angka utama per layar');
+bagian('Satu angka utama per layar');
 const layar = berkasTsx('app');
 
 /**
@@ -126,7 +132,7 @@ const heroRakitan = [...layar, ...berkasTsx('src/components')]
   .flatMap((p) => cariBaris(p, /typography\.hero\b/));
 cek('tidak ada angka hero rakitan sendiri (typography.hero)', heroRakitan.length === 0, heroRakitan.join(' | '));
 
-console.log('\nDua mode dari satu palet');
+bagian('Dua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
 cek('app.json: userInterfaceStyle mengikuti sistem', app.userInterfaceStyle === 'automatic');
@@ -191,7 +197,7 @@ cek('latar tiap layar dari colors.latar', /contentStyle: \{ backgroundColor: col
 // Berkas UI: layar + komponen, kecuali PratinjauWidget yang meniru layar kunci iOS.
 const semuaUi = [...layar, ...berkasTsx('src/components')].filter((p) => !p.endsWith('PratinjauWidget.tsx'));
 
-console.log('\nTipografi dari satu skala');
+bagian('Tipografi dari satu skala');
 // Ketebalan yang ditimpa tepat setelah gaya tipografi (satu baris maupun banyak baris).
 const timpaBobot = semuaUi.flatMap((p) => {
   const isi = readFileSync(p, 'utf8');
@@ -242,7 +248,7 @@ const skalaMati = [...layar, ...berkasTsx('src/components')].flatMap((p) => cari
 cek('tidak ada teks yang mematikan Dynamic Type', skalaMati.length === 0, skalaMati.join(' | '));
 cek('angka hero dibatasi MAKS_SKALA_HERO', /maxFontSizeMultiplier=\{MAKS_SKALA_HERO\}/.test(readFileSync('src/components/HeroNumber.tsx', 'utf8')));
 
-console.log('\nArea sentuh (HIG 44×44 pt)');
+bagian('Area sentuh (HIG 44×44 pt)');
 // Kontrol yang tampil lebih kecil dari 44 pt memakai KONTROL_RAPAT/SEGMEN dan
 // menggenapkan area sentuhnya dengan sisaSentuh(); mengurangi TAP_MIN berarti
 // area sentuhnya ikut mengecil.
@@ -256,7 +262,7 @@ const kontrolRapat = semuaUi.flatMap((p) => {
 });
 cek('setiap kontrol rapat menggenapkan area sentuh', kontrolRapat.length === 0, kontrolRapat.join(' | '));
 
-console.log('\nNavigasi (docs/desain/peta-navigasi.md)');
+bagian('Navigasi (docs/desain/peta-navigasi.md)');
 const tabTeks = readFileSync(join('app', '(tabs)', '_layout.tsx'), 'utf8');
 const tab = [...tabTeks.matchAll(/\{ rute: '(\w+)', judul: '([^']+)'/g)].map((m) => ({ rute: m[1], judul: m[2] }));
 cek(`jumlah tab ${tab.length} (1–5, batas HIG iPhone)`, tab.length >= 1 && tab.length <= 5);
@@ -308,7 +314,7 @@ const sentuhKecil = semuaUi.flatMap((berkas) => {
 });
 cek('setiap Pressable terbukti ≥ 44 pt (token, hitSlop, padding, atau membungkus Card)', sentuhKecil.length === 0, sentuhKecil.join(' | '));
 
-console.log('\nAcuan resmi');
+bagian('Acuan resmi');
 let bab = '';
 try {
   bab = readFileSync('docs/desain/bab-desain-prd.md', 'utf8');
@@ -318,11 +324,8 @@ try {
 cek('bab Desain PRD ada dan berstatus resmi', /\*\*Status\*\* \| \*\*Resmi/.test(bab));
 cek('bab Desain punya riwayat versi', /## Riwayat & perubahan/.test(bab));
 
-if (gagal) {
-  console.log(`\n${gagal} pemeriksaan gagal:`);
-  for (const n of daftarGagal) console.log(`  ✗ ${n}`);
-  console.log('Aturan & alasannya: docs/desain/bab-desain-prd.md (ringkas) dan docs/desain/arah-visual.md (rinci).');
-} else {
-  console.log('\nSemua pemeriksaan desain lulus');
-}
-process.exit(gagal ? 1 : 0);
+process.exit(
+  ringkasan.cetak({
+    saran: 'Aturan & alasannya: docs/desain/bab-desain-prd.md (ringkas) dan docs/desain/arah-visual.md (rinci).',
+  }),
+);

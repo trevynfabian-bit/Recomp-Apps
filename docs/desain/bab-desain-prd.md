@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Status** | **Resmi: acuan yang mengikat** untuk `app/`, `src/theme/`, `src/components/` |
-| **Versi** | 1.4 (24 September 2026) |
-| **Penjaga** | `npm run cek:desain`, `npm run cek:kontras` |
+| **Versi** | 1.5 (24 September 2026) |
+| **Penjaga** | `npm run cek:desain-semua` (`cek:desain`, `cek:hardcode`, `cek:kontras`) |
 | **Rincian & alasan** | [`arah-visual.md`](./arah-visual.md), titik awal di [`audit-token-layar.md`](./audit-token-layar.md) |
 
 > Bab ini adalah bab 8 PRD plan **Rombak Sistem Desain App**, setelah
@@ -151,6 +151,12 @@ berubah karena keputusan desain.
 - `npm run cek:hardcode`: tidak ada warna, jarak, radius, ukuran huruf, tinggi
   baris, atau ukuran ikon yang ditulis langsung di layar; setiap temuan disertai
   saran token terdekat.
+- `npm run cek:desain-semua`: ketiganya sekaligus, ditutup satu ringkasan
+  gabungan.
+- Setiap penjaga berakhir dengan blok **Ringkasan** yang sama bentuknya:
+  lulus/total per bagian, total keseluruhan, dan satu baris `HASIL: LULUS`
+  atau `HASIL: GAGAL` beserta daftar yang harus diperbaiki. Pelanggaran
+  sendiri dicetak per baris `berkas:baris  nilai → saran`.
 - Pengecualian dicatat di dalam skrip beserta alasannya.
 
 ### 8.9 Di luar lingkup desain
@@ -164,7 +170,7 @@ formula, atau perilaku data yang berubah.
 
 Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 `src/theme`, dan penjaganya sekaligus, lalu menambah baris di tabel ini.
-`cek:desain` dan `cek:kontras` harus lulus.
+`npm run cek:desain-semua` harus berakhir `HASIL: LULUS`.
 
 | Versi | Tanggal | Perubahan |
 |---|---|---|
@@ -173,3 +179,4 @@ Bab ini berubah hanya lewat satu PR yang memperbarui bab ini, token di
 | 1.2 | 24 September 2026 | Token Fase 2 terpusat: lapis semantik satu-satunya nama warna di luar `src/theme` (nama lama dihapus); tipografi membawa tinggi baris; token `ukuran`, `ukuranIkon`, `bobot`, `radius.xs`; kontrol rapat 36/40 pt dengan area sentuh 44 pt. |
 | 1.3 | 24 September 2026 | Mode terang: pilihan manual di Pengaturan, angka hero `aksen.besar`, tint & bayangan per mode. Varian teks kecil mode gelap dinaikkan agar lolos AA di dalam pill bertint (≥4,6:1). |
 | 1.4 | 24 September 2026 | Navigasi: tab final "Setelan", ikon terisi + garis penanda untuk tab terpilih, `HeaderLayar` di semua layar, pola transisi dorong/modal, kembali satu langkah. Aturan angka hero dipertegas: hanya layar data, selalu `KartuHero`. |
+| 1.5 | 24 September 2026 | Penjaga desain diperbarui: `cek:hardcode` baru (nilai tertanam + saran token), pelanggaran per baris dengan nilainya, ringkasan lulus/gagal seragam di akhir setiap penjaga, dan `cek:desain-semua` untuk ketiganya. |

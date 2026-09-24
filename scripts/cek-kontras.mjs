@@ -19,6 +19,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { buatRingkasan } from './lib/ringkasan-cek.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -236,12 +237,13 @@ const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, c.alfa.pilih, c.latar);
 ];
 }
 
-let gagal = 0;
+const hasil = buatRingkasan('cek:kontras');
 
 // --- Paritas bentuk: kedua mode wajib punya kunci yang sama dan nilai sah.
 // Kunci yang hanya ada di satu mode berarti layar yang memakainya mendapat
 // `undefined` di mode lain — warna hilang tanpa galat.
 console.log('Paritas palet gelap ↔ terang');
+hasil.bagian('Paritas palet gelap ↔ terang');
 const daun = (objek, jalur = '') =>
   Object.entries(objek).flatMap(([k, v]) =>
     typeof v === 'string' ? [[`${jalur}${k}`, v]] : daun(v, `${jalur}${k}.`),
@@ -259,7 +261,7 @@ for (const [nama, daftar] of [
   ['nilai bukan heks sah', tidakSah],
 ]) {
   console.log(`${daftar.length === 0 ? '  ok  ' : ' GAGAL'} ${nama}${daftar.length ? `: ${daftar.join(', ')}` : ''}`);
-  gagal += daftar.length;
+  hasil.catat(nama, daftar.length === 0, daftar.length);
 }
 
 // --- Kontras per mode.
@@ -268,6 +270,7 @@ const MARGIN_TIPIS = 0.1;
 const ringkasan = [];
 for (const [skema, c] of Object.entries(PALET)) {
   console.log(`\nKontras teks (WCAG 2.1 AA) — mode ${skema}`);
+  hasil.bagian(`Kontras AA mode ${skema}`);
   let lulusMode = 0;
   let gagalMode = 0;
   let lulusAAA = 0;
@@ -281,13 +284,13 @@ for (const [skema, c] of Object.entries(PALET)) {
     console.log(
       `${lulus ? (margin < MARGIN_TIPIS ? ' tipis' : '  ok  ') : ' GAGAL'} ${label.padEnd(46)} ${rasio.toFixed(2)}:1 (min ${ambang})`,
     );
+    hasil.catat(label, lulus);
     if (lulus) lulusMode += 1;
     else gagalMode += 1;
     if (rasio >= (besar ? AAA_BESAR : AAA_KECIL)) lulusAAA += 1;
     if (lulus && margin < MARGIN_TIPIS) tipis.push(label);
     if (!terlemah || margin < terlemah.margin) terlemah = { label, rasio, ambang, margin };
   }
-  gagal += gagalMode;
   ringkasan.push({ skema, lulusMode, gagalMode, lulusAAA, terlemah, tipis });
 }
 
@@ -300,15 +303,16 @@ for (const [skema, c] of Object.entries(PALET)) {
  * terlalu menonjol.
  */
 console.log('\nGaris pemisah dekoratif harus tetap resesif');
+hasil.bagian('Garis pemisah tetap resesif');
 for (const [skema, c] of Object.entries(PALET)) {
   const rasioGaris = kontras(c.garis, c.permukaan);
   console.log(
     `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} [${skema}] garis vs permukaan ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
   );
-  if (rasioGaris >= 2) gagal += 1;
+  hasil.catat(`[${skema}] garis vs permukaan`, rasioGaris < 2);
 }
 
-console.log('\nRingkasan');
+console.log('\nRincian per mode');
 for (const r of ringkasan) {
   console.log(
     `  ${r.skema.padEnd(7)} AA: ${r.lulusMode} lulus, ${r.gagalMode} gagal · terlemah: ${r.terlemah.label} ${r.terlemah.rasio.toFixed(2)}:1 (min ${r.terlemah.ambang}) · AAA (info): ${r.lulusAAA}/${r.lulusMode + r.gagalMode}`,
@@ -316,5 +320,6 @@ for (const r of ringkasan) {
   if (r.tipis.length) console.log(`          margin < ${MARGIN_TIPIS} (lulus, tapi rawan): ${r.tipis.join('; ')}`);
 }
 
-console.log(gagal === 0 ? '\n✓ Semua pasangan lolos AA di kedua mode' : `\n✗ ${gagal} pemeriksaan gagal`);
-process.exit(gagal === 0 ? 0 : 1);
+process.exit(
+  hasil.cetak({ saran: 'Cara menyesuaikan warna: docs/desain/panduan-token.md ("Contoh: mengganti warna aksen").' }),
+);

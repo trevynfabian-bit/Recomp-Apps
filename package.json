@@ -33,6 +33,7 @@
     "cek:ekspor": "node scripts/cek-ekspor.mjs",
     "cek:desain": "node scripts/cek-desain.mjs",
     "cek:hardcode": "node scripts/cek-hardcode.mjs",
+    "cek:desain-semua": "node scripts/cek-desain-semua.mjs",
     "cek:lab": "node scripts/cek-lab.mjs",
     "cek:db": "npm run db:cek && npm run cek:paritas",
     "cek:edge": "bash scripts/cek-edge.sh",

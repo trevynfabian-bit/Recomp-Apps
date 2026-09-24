@@ -18,6 +18,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { buatRingkasan } from './lib/ringkasan-cek.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -179,12 +180,18 @@ for (const p of berkas) {
     });
 }
 
-let gagal = 0;
+const ringkasan = buatRingkasan('cek:hardcode');
+ringkasan.bagian('Nilai tertanam');
 console.log(`Nilai tertanam di ${berkas.length} berkas layar & komponen\n`);
+let jumlahNilai = 0;
 for (const [nama, daftar] of temuan) {
   console.log(`${daftar.length === 0 ? '✓' : '✗'} ${nama}${daftar.length ? ` (${daftar.length})` : ''}`);
   for (const t of daftar) console.log(`    ${t}`);
-  gagal += daftar.length;
+  ringkasan.catat(nama, daftar.length === 0, daftar.length);
+  jumlahNilai += daftar.length;
 }
-console.log(gagal ? `\n${gagal} nilai tertanam — ganti dengan token dari src/theme` : '\nTidak ada nilai tertanam');
-process.exit(gagal ? 1 : 0);
+process.exit(
+  ringkasan.cetak({
+    saran: `${jumlahNilai} nilai tertanam: ganti dengan token dari src/theme (lihat docs/desain/panduan-token.md).`,
+  }),
+);

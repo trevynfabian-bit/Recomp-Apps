@@ -92,6 +92,8 @@ Jalankan di terminal, dari folder proyek:
 npm run cek:kontras   # apakah tulisan tetap terbaca di mode gelap & terang
 npm run cek:desain    # apakah prinsip desain tetap terjaga
 npm run cek:hardcode  # apakah ada layar yang menulis warna/ukuran sendiri
+
+npm run cek:desain-semua  # ketiganya sekaligus, dengan satu ringkasan gabungan
 ```
 
 Hasilnya berupa daftar centang (✓) atau silang (✗). Setiap silang menyebut
@@ -100,6 +102,20 @@ Hasilnya berupa daftar centang (✓) atau silang (✗). Setiap silang menyebut
 ```
 ✗ jarak tertanam (1)
     src/components/Pill.tsx:31  marginTop: 10  → pakai spacing.sm (8)
+```
+
+Di akhir setiap pemeriksaan selalu ada blok **Ringkasan**: berapa yang lulus
+per bagian, totalnya, dan satu baris **HASIL: LULUS** atau **HASIL: GAGAL**
+beserta daftar yang perlu diperbaiki. Cukup lihat blok terakhir itu, tidak
+perlu menggulir seluruh daftar.
+
+```
+Ringkasan cek:hardcode
+  ✗ Nilai tertanam  7/8 lulus
+  Total: 7 lulus, 1 gagal dari 8 pemeriksaan
+
+HASIL: GAGAL (1 pemeriksaan perlu diperbaiki)
+  ✗ Nilai tertanam › jarak tertanam
 ```
 
 ## Yang sebaiknya TIDAK dilakukan
