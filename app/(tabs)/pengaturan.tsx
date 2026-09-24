@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -10,6 +10,7 @@ import {
   formatTanggalPanjang,
   labelBerat,
   labelStatusAkun,
+  tanggalDariWaktu,
   labelPanjang,
   periodeBerjalan,
   tampilkanBerat,
@@ -35,6 +36,7 @@ import {
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
+import { statusAkun } from '@/data/akun';
 import { mockRiwayatBerat } from '@/mocks/dailyLog';
 import { mockAkun } from '@/mocks/pengaturan';
 import { mockUkuran } from '@/mocks/ukuran';
@@ -84,7 +86,21 @@ export default function PengaturanScreen() {
         ? `${formatAngka(kaloriFase[0])} kcal`
         : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))} kcal`;
   const email = pengguna?.email ?? mockAkun.email;
-  const statusAkun = labelStatusAkun(supabaseSiap);
+  const labelAkun = labelStatusAkun(supabaseSiap);
+  // Tanggal bergabung: dari Supabase Auth untuk akun sungguhan, tiruan untuk mode contoh.
+  const [bergabung, setBergabung] = useState(mockAkun.bergabung);
+  useEffect(() => {
+    if (!supabaseSiap) return;
+    let batal = false;
+    statusAkun()
+      .then((s) => {
+        if (!batal) setBergabung(tanggalDariWaktu(s.bergabung_pada));
+      })
+      .catch(() => undefined);
+    return () => {
+      batal = true;
+    };
+  }, []);
   const [sheet, setSheet] = useState<Sheet>(null);
   const tampilan = usePilihanTampilan();
   const skema = useSkema();
@@ -116,7 +132,7 @@ export default function PengaturanScreen() {
       {/* --- Profil ----------------------------------------------------------- */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Profil ${profil.nama}, ${email}, ${statusAkun.label}. ${statusAkun.keterangan}`}
+        accessibilityLabel={`Profil ${profil.nama}, ${email}, ${labelAkun.label}. ${labelAkun.keterangan}`}
         accessibilityHint="Membuka isian tinggi, jenis kelamin, dan tanggal lahir"
         onPress={() => {
           ketukRingan();
@@ -142,10 +158,10 @@ export default function PengaturanScreen() {
           <View style={{ flex: 1, gap: spacing.xxs }}>
             <Text style={{ ...typography.bodyTebal, color: colors.teks }}>{profil.nama}</Text>
             <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{email}</Text>
-            <Pill label={statusAkun.label} warna={colors.status[statusAkun.nada].teks} diKartu />
+            <Pill label={labelAkun.label} warna={colors.status[labelAkun.nada].teks} diKartu />
             {/* Akun web tidak perlu dijelaskan; mode contoh perlu, karena isiannya tidak ke mana-mana. */}
-            {statusAkun.nada === 'peringatan' ? (
-              <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{statusAkun.keterangan}</Text>
+            {labelAkun.nada === 'peringatan' ? (
+              <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>{labelAkun.keterangan}</Text>
             ) : null}
             {profilLengkap ? (
               <Text style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
@@ -362,7 +378,7 @@ export default function PengaturanScreen() {
       ) : null}
 
       <Text style={{ ...typography.caption, color: colors.teksSamar, textAlign: 'center' }}>
-        Recomp Coach {Constants.expoConfig?.version ?? ''} · bergabung {formatTanggalPanjang(mockAkun.bergabung).split(', ')[1]}
+        Recomp Coach {Constants.expoConfig?.version ?? ''} · bergabung {formatTanggalPanjang(bergabung).split(', ')[1]}
       </Text>
 
       {/* --- Sheet ----------------------------------------------------------- */}

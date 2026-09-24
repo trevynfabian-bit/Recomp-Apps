@@ -146,6 +146,7 @@ console.log('\nLabel status akun');
   }
   const setelan = readFileSync('app/(tabs)/pengaturan.tsx', 'utf8');
   cek('Setelan menampilkan label status akun', /labelStatusAkun\(supabaseSiap\)/.test(setelan));
+  cek('Setelan memakai tanggal bergabung dari status_akun_saya untuk akun sungguhan', /statusAkun\(\)/.test(setelan) && /formatTanggalPanjang\(bergabung\)/.test(setelan));
 }
 
 console.log('\nTautan atur ulang kata sandi');

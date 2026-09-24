@@ -1243,6 +1243,17 @@ export type PesanPercakapanRow = {
   lebih_lama: number | null;
 };
 
+/** Hasil `status_akun_saya`. */
+export type StatusAkunRow = {
+  email: string;
+  email_terkonfirmasi: boolean;
+  bergabung_pada: string;
+  masuk_terakhir: string | null;
+  profil: { ada: boolean; nama: string | null; fase_aktif: string | null; lengkap: boolean };
+  data_awal_siap: boolean;
+  sumber_terhubung: HealthConnectionRow['sumber'][];
+};
+
 /** Hasil `putuskan_sumber`: status baru dan berapa yang ikut dihapus. */
 export type PutuskanSumberRow = {
   sumber: HealthConnectionRow['sumber'];
@@ -1624,6 +1635,10 @@ export type Database = {
       pesan_percakapan: {
         Args: { p_percakapan: string; p_sebelum_urutan?: number | null; p_batas?: number };
         Returns: PesanPercakapanRow;
+      };
+      status_akun_saya: {
+        Args: Record<string, never>;
+        Returns: StatusAkunRow;
       };
       putuskan_sumber: {
         Args: { p_sumber: string; p_hapus_data?: boolean };

@@ -8,7 +8,11 @@ create schema if not exists auth;
 
 create table if not exists auth.users (
   id uuid primary key default gen_random_uuid(),
-  email text unique
+  email text unique,
+  -- Kolom Supabase Auth yang dibaca fungsi app (mis. status_akun_saya).
+  created_at timestamptz not null default now(),
+  email_confirmed_at timestamptz,
+  last_sign_in_at timestamptz
 );
 
 -- Tiruan auth.uid(): membaca klaim `sub` dari setelan sesi, sama seperti

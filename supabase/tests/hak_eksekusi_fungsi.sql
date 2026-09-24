@@ -51,7 +51,11 @@ as $$
        -- Menurunkan pengguna dari auth.uid(); argumennya hanya nama sumber &
        -- pilihan hapus data. DEFINER karena baris koneksi ber-token hanya boleh
        -- diubah server, dan rahasianya ikut terhapus lewat pemicu.
-       'public.putuskan_sumber(text, boolean)'::regprocedure
+       'public.putuskan_sumber(text, boolean)'::regprocedure,
+       -- Menurunkan pengguna dari auth.uid(), tanpa argumen. DEFINER karena
+       -- auth.users (tanggal bergabung, konfirmasi email) tidak terbaca klien;
+       -- hanya baris milik pemanggil yang dibaca.
+       'public.status_akun_saya()'::regprocedure
      )
 $$;
 
