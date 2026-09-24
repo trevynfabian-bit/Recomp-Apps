@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  arahKekuatan,
   formatAngka,
+  formatBeban,
   labelTanggalRelatif,
   MAKS_REPS_E1RM,
   ringkasPekan,
@@ -11,9 +14,9 @@ import {
   tanggalHariIni,
 } from '@recomp/logika';
 import type { SesiLatihan } from '@recomp/logika';
-import { Card, HeaderLayar, KartuHero, KartuSesiLatihan, KeadaanKosong, SectionHeader } from '@/components';
+import { Card, HeaderLayar, KartuHero, KartuSesiLatihan, KeadaanKosong, SectionHeader, Sisipan } from '@/components';
 import { mockSesiLatihan } from '@/mocks/latihan';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuranIkon } from '@/theme';
 
 /**
  * Layar Latihan: sesi yang masuk dari Hevy.
@@ -31,6 +34,7 @@ export default function LatihanScreen() {
   const router = useRouter();
 
   const [sesi] = useState<SesiLatihan[]>(() => mockSesiLatihan());
+  const arah = useMemo(() => arahKekuatan(sesi), [sesi]);
   const hariIni = tanggalHariIni();
 
   // Sesi terbaru dibuka lebih dulu: itu yang hampir selalu dicari.
@@ -85,6 +89,44 @@ export default function LatihanScreen() {
         keterangan={pekan.jumlahSesi > 0 ? `Volume ${formatAngka(pekan.volumeKg)} kg` : 'Belum ada sesi pekan ini'}
         nada="netral"
       />
+
+      {/* Arah kekuatan dengan kalimat awam: gerakan yang diulang, sesi terakhir
+          dibanding sesi pertamanya. Angkanya estimasi e1RM, jadi ditandai. */}
+      {arah.gerakan.length > 0 ? (
+        <View>
+          <SectionHeader
+            judul="Arah kekuatan"
+            aksi={arah.gerakan.length === 1 ? '1 gerakan diulang' : `${arah.gerakan.length} gerakan diulang`}
+          />
+          <Card style={{ gap: spacing.md }}>
+            <Text style={{ ...typography.body, color: colors.teks }}>{arah.kalimat}</Text>
+            <View accessibilityRole="list" style={{ gap: spacing.sm }}>
+              {arah.gerakan.map((g) => (
+                <View
+                  key={g.latihan}
+                  accessible
+                  accessibilityLabel={`${g.latihan} ${g.arah}: e1RM estimasi ${formatBeban(g.awalKg)} menjadi ${formatBeban(g.akhirKg)}, ${g.jumlahSesi} sesi`}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                >
+                  <Ionicons
+                    name={g.arah === 'naik' ? 'arrow-up' : g.arah === 'turun' ? 'arrow-down' : 'arrow-forward'}
+                    size={ukuranIkon.kecil}
+                    color={g.arah === 'turun' ? colors.status.peringatan.teks : colors.teksRedup}
+                  />
+                  <View style={{ flex: 1, gap: spacing.xxs }}>
+                    <Text style={{ ...typography.label, color: colors.teks }}>
+                      {g.latihan} <Sisipan>{g.arah}</Sisipan>
+                    </Text>
+                    <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+                      e1RM ≈ {formatBeban(g.awalKg)} → {formatBeban(g.akhirKg)} · {g.jumlahSesi} sesi
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </Card>
+        </View>
+      ) : null}
 
       {kelompok.length === 0 ? (
         <KeadaanKosong

@@ -174,3 +174,78 @@ function tambahHari(tanggal: string, n: number): string {
   d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
+
+// --- Arah kekuatan (keterangan awam) ---------------------------------------
+
+/**
+ * Perubahan di bawah ambang ini dibaca DATAR: e1RM dari satu set berayun
+ * beberapa persen antar sesi (tidur, pemanasan, urutan latihan) tanpa kekuatan
+ * yang sungguh berubah.
+ */
+export const AMBANG_ARAH_KEKUATAN = 0.02;
+
+export type ArahGerakan = {
+  latihan: string;
+  awalKg: number;
+  akhirKg: number;
+  /** Selisih e1RM akhir − awal, satu desimal. */
+  selisihKg: number;
+  arah: 'naik' | 'turun' | 'datar';
+  /** Jumlah sesi dengan e1RM untuk gerakan ini. */
+  jumlahSesi: number;
+};
+
+export type ArahKekuatan = {
+  gerakan: ArahGerakan[];
+  naik: number;
+  turun: number;
+  datar: number;
+  /** Satu-dua kalimat awam; `null` bila belum ada gerakan yang diulang. */
+  kalimat: string | null;
+};
+
+/**
+ * Arah kekuatan per gerakan dari sesi-sesi yang ada: e1RM sesi TERAKHIR
+ * dibanding sesi PERTAMA gerakan itu. Hanya gerakan yang muncul di minimal dua
+ * sesi dengan e1RM (satu titik tidak punya arah). Diurutkan: naik, turun, datar,
+ * lalu nama.
+ */
+export function arahKekuatan(sesi: SesiLatihan[]): ArahKekuatan {
+  const urut = [...sesi].sort((a, b) => a.mulai.localeCompare(b.mulai));
+  const titik = new Map<string, number[]>();
+  for (const s of urut) {
+    for (const l of s.latihan) {
+      const e = ringkasLatihan(l).e1rmKg;
+      if (e === null) continue;
+      titik.set(l.latihan, [...(titik.get(l.latihan) ?? []), e]);
+    }
+  }
+  const URUT_ARAH = { naik: 0, turun: 1, datar: 2 } as const;
+  const gerakan: ArahGerakan[] = [...titik.entries()]
+    .filter(([, t]) => t.length >= 2)
+    .map(([latihan, t]) => {
+      const awalKg = t[0];
+      const akhirKg = t[t.length - 1];
+      const selisihKg = bulat1(akhirKg - awalKg);
+      const relatif = awalKg > 0 ? (akhirKg - awalKg) / awalKg : 0;
+      const arah = Math.abs(relatif) < AMBANG_ARAH_KEKUATAN ? 'datar' : relatif > 0 ? 'naik' : 'turun';
+      return { latihan, awalKg, akhirKg, selisihKg, arah, jumlahSesi: t.length } as ArahGerakan;
+    })
+    .sort((a, b) => URUT_ARAH[a.arah] - URUT_ARAH[b.arah] || a.latihan.localeCompare(b.latihan));
+
+  const naik = gerakan.filter((g) => g.arah === 'naik').length;
+  const turun = gerakan.filter((g) => g.arah === 'turun').length;
+  const datar = gerakan.length - naik - turun;
+
+  let kalimat: string | null = null;
+  if (gerakan.length > 0) {
+    const dari = `${naik} dari ${gerakan.length} gerakan yang diulang`;
+    kalimat =
+      naik > turun
+        ? `${dari} makin kuat: otot sedang bertambah atau setidaknya terjaga, arah yang dicari saat rekomposisi.`
+        : turun > naik
+          ? `${turun} dari ${gerakan.length} gerakan yang diulang melemah. Sekali-dua kali wajar (tidur, kelelahan); bila berlanjut dua pekan, periksa asupan protein dan kalori.`
+          : `Kekuatan cenderung stabil (${dari} naik). Stabil saat defisit sudah bagus; saat Lean Gain, beban perlu mulai naik.`;
+  }
+  return { gerakan, naik, turun, datar, kalimat };
+}

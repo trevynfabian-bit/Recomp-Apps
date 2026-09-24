@@ -197,16 +197,11 @@ export {
   selisihMasuk,
 } from './sumberData';
 
-export type {
-  JenisSet,
-  LatihanDalamSesi,
-  RingkasanLatihan,
-  RingkasanSesi,
-  SesiLatihan,
-  SetLatihan,
-} from './latihan';
+export type { ArahGerakan, ArahKekuatan, JenisSet, LatihanDalamSesi, RingkasanLatihan, RingkasanSesi, SesiLatihan, SetLatihan } from './latihan';
 
 export {
+  AMBANG_ARAH_KEKUATAN,
+  arahKekuatan,
   e1rmEpley,
   formatBeban,
   MAKS_REPS_E1RM,

@@ -199,16 +199,11 @@ export {
   selisihMasuk,
 } from './sumberData.ts';
 
-export type {
-  JenisSet,
-  LatihanDalamSesi,
-  RingkasanLatihan,
-  RingkasanSesi,
-  SesiLatihan,
-  SetLatihan,
-} from './latihan.ts';
+export type { ArahGerakan, ArahKekuatan, JenisSet, LatihanDalamSesi, RingkasanLatihan, RingkasanSesi, SesiLatihan, SetLatihan } from './latihan.ts';
 
 export {
+  AMBANG_ARAH_KEKUATAN,
+  arahKekuatan,
   e1rmEpley,
   formatBeban,
   MAKS_REPS_E1RM,

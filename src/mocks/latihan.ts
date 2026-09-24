@@ -69,6 +69,8 @@ export function mockSesiLatihan(sekarang: Date = new Date()): SesiLatihan[] {
         { latihan: 'Bench Press (Dumbbell)', sets: sama(3, 32, 10) },
         { latihan: 'Lateral Raise (Cable)', sets: sama(3, 7.5, 15) },
         { latihan: 'Skull Crusher (Barbell)', sets: sama(3, 30, 10) },
+        // Diulang di Push Day A dengan beban lebih berat: bahan "arah kekuatan".
+        { latihan: 'Triceps Pushdown (Cable)', sets: sama(3, 30, 10) },
       ],
     },
     {

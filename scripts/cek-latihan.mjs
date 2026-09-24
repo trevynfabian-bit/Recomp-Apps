@@ -19,7 +19,7 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['latihan.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { e1rmEpley, formatBeban, MAKS_REPS_E1RM, ringkasLatihan, ringkasPekan, ringkasSesi } =
+const { arahKekuatan, e1rmEpley, formatBeban, MAKS_REPS_E1RM, ringkasLatihan, ringkasPekan, ringkasSesi } =
   require(join(kerja, 'keluar', 'latihan.js'));
 
 let gagal = 0;
@@ -103,6 +103,27 @@ console.log('\nRingkasan sesi & pekan');
   cek(`pekan menurut kalender Jakarta: ${p.jumlahSesi} sesi`, p.jumlahSesi === 3);
   cek(`volume pekan = 3 × volume sesi (${p.volumeKg})`, p.volumeKg === 3 * 2312.5);
   cek('pekan kosong → 0 sesi, 0 kg', JSON.stringify(ringkasPekan([], '2026-09-23')) === '{"jumlahSesi":0,"volumeKg":0}');
+}
+
+console.log('\nArah kekuatan (keterangan awam)');
+{
+  const set = (beban, reps) => ({ set_ke: 1, beban_kg: beban, reps, jarak_km: null, durasi_detik: null, tipe: 'normal' });
+  const sesi = (id, mulai, latihan) => ({ id, mulai, nama: id, durasi_menit: 60, latihan: latihan.map(([n, b, r]) => ({ latihan: n, sets: [set(b, r)] })) });
+  const data = [
+    sesi('b', '2026-09-15T07:00:00+07:00', [['Bench', 80, 8], ['Squat', 100, 5], ['OHP', 50, 8], ['Dip', null, 10]]),
+    sesi('a', '2026-09-08T07:00:00+07:00', [['Bench', 77.5, 8], ['Squat', 105, 5], ['OHP', 50, 8], ['Curl', 20, 10]]),
+  ];
+  const h = arahKekuatan(data);
+  const per = Object.fromEntries(h.gerakan.map((g) => [g.latihan, g]));
+  cek('urutan waktu dipakai, bukan urutan larik (Bench 77,5 → 80 naik)', per.Bench?.arah === 'naik' && per.Bench.awalKg < per.Bench.akhirKg);
+  cek('turun terbaca (Squat 105 → 100)', per.Squat?.arah === 'turun' && per.Squat.selisihKg === -5.8, JSON.stringify(per.Squat));
+  cek('sama persis → datar', per.OHP?.arah === 'datar');
+  cek('gerakan satu sesi (Curl) & tanpa e1RM (Dip) tidak ikut', !per.Curl && !per.Dip && h.gerakan.length === 3);
+  cek('urutan: naik, turun, datar', h.gerakan.map((g) => g.arah).join(',') === 'naik,turun,datar');
+  const kecil = arahKekuatan([sesi('x', '2026-09-01T07:00:00+07:00', [['Row', 100, 5]]), sesi('y', '2026-09-08T07:00:00+07:00', [['Row', 101.5, 5]])]);
+  cek('di bawah ambang 2% → datar', kecil.gerakan[0]?.arah === 'datar');
+  cek('seri naik = turun → kalimat stabil', h.kalimat?.startsWith('Kekuatan cenderung stabil'), h.kalimat);
+  cek('tanpa gerakan berulang → kalimat null', arahKekuatan([data[0]]).kalimat === null);
 }
 
 console.log(gagal === 0 ? '\n✓ Latihan: e1RM hanya ≤ 12 repetisi & dibulatkan seperti SQL, pekan menurut Jakarta' : `\n✗ ${gagal} pemeriksaan gagal`);
