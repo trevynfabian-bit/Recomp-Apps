@@ -1,10 +1,12 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import { formatRentangTanggal, PEKAN_EVALUASI, type ArahMetrik } from '@recomp/logika';
 import { PenandaSumber } from './PenandaSumber';
 import { Pill } from './Pill';
 import type { EvaluasiEmpatPekan } from '@/types/domain';
-import { colors, spacing, typography, ukuran } from '@/theme';
+import { colors, spacing, typography, ukuranIkon } from '@/theme';
 import { Card, Panel } from './Card';
+import { METADATA_SUMBER } from '@/lib/sumber';
 
 type Props = {
   evaluasi: EvaluasiEmpatPekan;
@@ -42,13 +44,14 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
         {evaluasi.sumbu.map((s) => (
           <View
             key={s.label}
+            // Satu kalimat per sumbu untuk pembaca layar; panahnya dekoratif.
+            accessible
+            accessibilityLabel={`${s.label} ${kataArah(s.arah)}, ${s.nilai}, sumber ${METADATA_SUMBER[s.sumber].label}`}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
           >
             {/* Panah SELALU berpasangan dengan katanya — bentuk saja tidak
                 cukup, dan warna saja apalagi. */}
-            <Text style={{ ...typography.title, color: colors.teksRedup, width: ukuran.kolomPanah }}>
-              {panah(s.arah)}
-            </Text>
+            <Ionicons name={panah(s.arah)} size={ukuranIkon.sedang} color={colors.teksRedup} accessibilityElementsHidden />
             <View style={{ flex: 1, gap: spacing.xxs }}>
               <Text style={{ ...typography.label, color: colors.teks }}>
                 {s.label} {kataArah(s.arah)}
@@ -88,11 +91,11 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
   );
 }
 
-function panah(arah: ArahMetrik): string {
-  if (arah === 'naik') return '↑';
-  if (arah === 'turun') return '↓';
-  if (arah === 'datar') return '→';
-  return '?';
+function panah(arah: ArahMetrik): React.ComponentProps<typeof Ionicons>['name'] {
+  if (arah === 'naik') return 'arrow-up';
+  if (arah === 'turun') return 'arrow-down';
+  if (arah === 'datar') return 'arrow-forward';
+  return 'help';
 }
 
 function kataArah(arah: ArahMetrik): string {

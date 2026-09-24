@@ -90,8 +90,6 @@ export const ukuran = {
   kolomAngkaBaris: 56,
   /** Kolom jam di pemilih jam (cukup untuk "06.30"). */
   kolomJam: 72,
-  /** Kolom panah arah di kartu evaluasi. */
-  kolomPanah: 20,
   /** Lebar minimum kolom target di form (dua kolom per baris). */
   isianTarget: 130,
   /** Tinggi maksimum kolom pesan Coach sebelum menggulir. */
