@@ -6,7 +6,7 @@ import type { HasilHubungkan, SumberData } from '@recomp/logika';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { ketukBerhasil } from '@/lib/haptics';
-import { colors, radius, spacing, typography, ukuranIkon } from '@/theme';
+import { colors, radius, spacing, typography, ukuran, ukuranIkon } from '@/theme';
 import { Isian } from './Isian';
 import { KeadaanGagal, KeadaanMemuat } from './Keadaan';
 
@@ -123,7 +123,7 @@ export function SheetHubungkanSumber({ sumber, onTutup, hubungkan, onTerhubung }
             </Text>
             {profil.membawa.map((m) => (
               <View key={m} style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-                <View style={{ width: 5, height: 5, borderRadius: radius.pill, backgroundColor: colors.teksRedup }} />
+                <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: colors.teksRedup }} />
                 <Text style={{ ...typography.body, color: colors.teks }}>{kapital(m)}</Text>
               </View>
             ))}

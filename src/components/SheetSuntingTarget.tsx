@@ -7,7 +7,7 @@ import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { KesalahanTarget } from '@/data/target';
 import { ketukBerhasil } from '@/lib/haptics';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   terbuka: boolean;
@@ -157,7 +157,7 @@ function RincianKalori({ rincian }: { rincian: ReturnType<typeof rincianKaloriMa
       style={{ gap: spacing.sm }}
     >
       <Text style={{ ...typography.caption, color: colors.teksRedup }}>PEMBAGIAN KALORI</Text>
-      <View style={{ flexDirection: 'row', height: 10, borderRadius: radius.pill, overflow: 'hidden', gap: spacing.xxs, backgroundColor: colors.permukaanCekung }}>
+      <View style={{ flexDirection: 'row', height: ukuran.trackTebal, borderRadius: radius.pill, overflow: 'hidden', gap: spacing.xxs, backgroundColor: colors.permukaanCekung }}>
         {bagian.filter((b) => b.persen > 0).map((b) => (
           <View key={b.kunci} style={{ flex: b.persen, backgroundColor: b.warna }} />
         ))}

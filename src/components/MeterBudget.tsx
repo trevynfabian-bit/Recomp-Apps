@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { formatAngka } from '@recomp/logika';
 import type { BudgetMingguan, LajuBudget } from '@recomp/logika';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing, typography, ukuran } from '@/theme';
 
 type Props = {
   budget: BudgetMingguan;
@@ -35,8 +35,17 @@ export function MeterBudget({ budget, laju }: Props) {
   return (
     <View style={{ gap: spacing.sm }}>
       <View
+        // Dibacakan sebagai progres: berapa terpakai dari jatah, dan lajunya.
+        accessibilityRole="progressbar"
+        accessibilityLabel="Pemakaian jatah minggu ini"
+        aria-valuemin={0}
+        aria-valuemax={budget.budgetTotal}
+        aria-valuenow={Math.min(budget.terpakai, budget.budgetTotal)}
+        aria-valuetext={`${formatAngka(budget.terpakai)} dari ${formatAngka(budget.budgetTotal)} kcal terpakai${
+          laju.status !== 'belum mulai' ? `, laju semestinya ${formatAngka(laju.seharusnya)}` : ''
+        }`}
         style={{
-          height: 12,
+          height: ukuran.meter.tinggi,
           borderRadius: radius.pill,
           backgroundColor: colors.permukaanCekung,
           overflow: 'hidden',
@@ -56,9 +65,9 @@ export function MeterBudget({ budget, laju }: Props) {
             style={{
               position: 'absolute',
               left: `${persenSeharusnya * 100}%`,
-              top: -2,
-              width: 2,
-              height: 16,
+              top: -(ukuran.meter.penandaTinggi - ukuran.meter.tinggi) / 2,
+              width: ukuran.meter.penandaLebar,
+              height: ukuran.meter.penandaTinggi,
               backgroundColor: colors.teks,
             }}
           />
@@ -70,9 +79,13 @@ export function MeterBudget({ budget, laju }: Props) {
           terpakai {formatAngka(budget.terpakai)}
         </Text>
         {laju.status !== 'belum mulai' ? (
-          <Text style={{ ...typography.caption, color: colors.teksRedup }}>
-            │ laju semestinya {formatAngka(laju.seharusnya)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
+            {/* Contoh penanda laju: bentuk yang sama dengan garis tegak di meter. */}
+            <View style={{ width: ukuran.meter.penandaLebar, height: ukuran.meter.tinggi, backgroundColor: colors.teks }} />
+            <Text style={{ ...typography.caption, color: colors.teksRedup }}>
+              laju semestinya {formatAngka(laju.seharusnya)}
+            </Text>
+          </View>
         ) : null}
         <Text style={{ ...typography.caption, color: colors.teksSamar }}>
           {formatAngka(budget.budgetTotal)}

@@ -3,7 +3,7 @@ import { formatRentangTanggal, PEKAN_EVALUASI, type ArahMetrik } from '@recomp/l
 import { PenandaSumber } from './PenandaSumber';
 import { Pill } from './Pill';
 import type { EvaluasiEmpatPekan } from '@/types/domain';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuran } from '@/theme';
 import { Card, Panel } from './Card';
 
 type Props = {
@@ -46,7 +46,7 @@ export function KartuVerdictEvaluasi({ evaluasi }: Props) {
           >
             {/* Panah SELALU berpasangan dengan katanya — bentuk saja tidak
                 cukup, dan warna saja apalagi. */}
-            <Text style={{ ...typography.title, color: colors.teksRedup, width: 20 }}>
+            <Text style={{ ...typography.title, color: colors.teksRedup, width: ukuran.kolomPanah }}>
               {panah(s.arah)}
             </Text>
             <View style={{ flex: 1, gap: spacing.xxs }}>

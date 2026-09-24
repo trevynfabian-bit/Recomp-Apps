@@ -84,6 +84,20 @@ export const ukuran = {
   kolomSelisih: 62,
   /** Tinggi chip indikator kecil (status sinkron di header). */
   indikator: 24,
+  /** Kolom angka rata kanan di tabel ringkas (proteksi protein): lebar & sempit. */
+  kolomTabel: { lebar: 86, sempit: 54 },
+  /** Kolom angka di baris riwayat berat (KartuTimbangPagi). */
+  kolomAngkaBaris: 56,
+  /** Kolom jam di pemilih jam (cukup untuk "06.30"). */
+  kolomJam: 72,
+  /** Kolom panah arah di kartu evaluasi. */
+  kolomPanah: 20,
+  /** Lebar minimum kolom target di form (dua kolom per baris). */
+  isianTarget: 130,
+  /** Tinggi maksimum kolom pesan Coach sebelum menggulir. */
+  isianChatMaks: 120,
+  /** Meter budget mingguan: track dan penanda laju yang menembus track. */
+  meter: { tinggi: 12, penandaLebar: 2, penandaTinggi: 16 },
   /** Garis contoh di legenda grafik (garis rata-rata). */
   garisLegenda: { lebar: 12, tebal: 2 },
   /** Baris pemeriksa di atas grafik: tingginya tetap saat isinya berganti. */

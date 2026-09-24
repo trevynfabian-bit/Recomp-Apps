@@ -12,7 +12,7 @@ import type { JamPengingat } from '@recomp/logika';
 import { JudulSheet, KerangkaSheet } from './KerangkaSheet';
 import { Tombol, TombolIkon } from './Tombol';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
-import { colors, spacing, typography } from '@/theme';
+import { colors, spacing, typography, ukuran } from '@/theme';
 import { Panel } from './Card';
 
 /** Jam akhir pekan yang ditawarkan saat sakelarnya pertama dinyalakan. */
@@ -138,7 +138,7 @@ function PengaturJam({ label, menit, onUbah }: { label: string; menit: number; o
       <Text style={{ ...typography.label, color: colors.teksRedup }}>{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
         <TombolGeser label="−" nonaktif={menit <= RENTANG_JAM_TIMBANG.min} onPress={() => geser(-1)} />
-        <Text style={{ ...typography.title, color: colors.teks, minWidth: 72, textAlign: 'center' }}>{jam}</Text>
+        <Text style={{ ...typography.title, color: colors.teks, minWidth: ukuran.kolomJam, textAlign: 'center' }}>{jam}</Text>
         <TombolGeser label="+" nonaktif={menit >= RENTANG_JAM_TIMBANG.maks} onPress={() => geser(1)} />
       </View>
     </View>

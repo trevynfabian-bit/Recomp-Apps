@@ -6,7 +6,7 @@ import { sumberBerat } from '@/lib/sumber';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { EntriBerat } from '@/mocks/dailyLog';
-import { colors, radius, spacing, tint, typography, ukuran } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { SumberBerat } from '@/types/domain';
 import { KeadaanKosong } from './Keadaan';
 import { Tombol } from './Tombol';
@@ -192,8 +192,8 @@ export function KartuTimbangPagi({
 
             <View
               style={{
-                width: 44,
-                height: 44,
+                width: TAP_MIN,
+                height: TAP_MIN,
                 borderRadius: radius.pill,
                 backgroundColor: tint(colors.aksen.isian, 'aktif'),
                 alignItems: 'center',
@@ -261,7 +261,7 @@ export function KartuTimbangPagi({
                   {formatTanggalPanjang(r.tanggal)}
                 </Text>
                 <PenandaSumber jenis={sumberBerat(r.sumber_berat) ?? 'manual'} />
-                <Text style={{ ...typography.label, color: colors.teks, width: 56, textAlign: 'right' }}>
+                <Text style={{ ...typography.label, color: colors.teks, width: ukuran.kolomAngkaBaris, textAlign: 'right' }}>
                   {formatDesimal(r.berat_pagi_kg)}
                 </Text>
               </View>

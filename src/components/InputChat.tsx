@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import { TombolIkon } from './Tombol';
 
 /** Batas panjang pertanyaan; penjaga tempel-seluruh-dokumen, bukan sensor. */
@@ -69,7 +69,7 @@ export function InputChat({ sibuk, onKirim }: Props) {
               paddingVertical: spacing.md,
               // Tumbuh sampai ~4 baris lalu berhenti; sisanya digulung sendiri.
               minHeight: TAP_MIN,
-              maxHeight: 120,
+              maxHeight: ukuran.isianChatMaks,
             }}
           />
         </View>
@@ -84,7 +84,8 @@ export function InputChat({ sibuk, onKirim }: Props) {
           ...typography.caption,
           color: sisaKarakter < 0 ? colors.status.bahaya.teks : colors.teksSamar,
           textAlign: 'right',
-          minHeight: 14,
+          // Tempat penghitung dicadangkan supaya kolom tidak melompat saat ia muncul.
+          minHeight: typography.caption.lineHeight,
         }}
       >
         {sisaKarakter <= 100 ? `sisa ${sisaKarakter} karakter` : ''}

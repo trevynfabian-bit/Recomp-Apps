@@ -76,7 +76,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                   ...typography.caption,
                   color: colors.teksSamar,
                   textTransform: 'uppercase',
-                  width: 86,
+                  width: ukuran.kolomTabel.lebar,
                   textAlign: 'right',
                 }}
               >
@@ -87,7 +87,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                   ...typography.caption,
                   color: colors.teksSamar,
                   textTransform: 'uppercase',
-                  width: 54,
+                  width: ukuran.kolomTabel.sempit,
                   textAlign: 'right',
                 }}
               >
@@ -112,7 +112,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                     style={{
                       ...typography.caption,
                       color: kaloriBerubah ? colors.aksen.teks : colors.teksSamar,
-                      width: 86,
+                      width: ukuran.kolomTabel.lebar,
                       textAlign: 'right',
                     }}
                   >
@@ -124,7 +124,7 @@ export function IndikatorProteinTerlindungi({ proteksi, sudahRedistribusi }: Pro
                     style={{
                       ...typography.caption,
                       color: proteinBerubah ? colors.status.bahaya.teks : colors.status.sukses.teks,
-                      width: 54,
+                      width: ukuran.kolomTabel.sempit,
                       textAlign: 'right',
                     }}
                   >

@@ -403,8 +403,8 @@ export function GrafikTren({
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
             <View
               style={{
-                width: 12,
-                height: 8,
+                width: ukuran.garisLegenda.lebar,
+                height: ukuran.titik,
                 borderRadius: radius.xs,
                 backgroundColor: tint(colors.status.sukses.isian, 'area'),
                 borderWidth: 1,
@@ -434,8 +434,8 @@ export function GrafikTren({
         >
           <View
             style={{
-              width: 7,
-              height: 7,
+              width: ukuran.titik,
+              height: ukuran.titik,
               borderRadius: radius.pill,
               backgroundColor: tampilkanHarian ? colors.teksSamar : 'transparent',
               borderWidth: 1,

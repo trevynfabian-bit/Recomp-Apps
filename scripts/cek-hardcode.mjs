@@ -89,6 +89,9 @@ const BARIS_BEBAS = [
 const UKURAN_HURUF_BEBAS = [
   { berkas: 'src/components/Pemilih.tsx', alasan: 'angka PemilihAngka 52 pt: input yang bisa diketik, bukan HeroNumber; satu-satunya tempat' },
 ];
+const UKURAN_BEBAS = [
+  { berkas: 'app/arah-visual.tsx', alasan: 'layar acuan pengembang: contoh swatch & baris ukuran, bukan UI pengguna' },
+];
 const TINGGI_BARIS_BEBAS = [
   { berkas: 'src/components/Pemilih.tsx', alasan: 'tinggi baris angka 52 pt PemilihAngka (pasangan ukuran huruf di atas)' },
   { berkas: 'src/components/InputChat.tsx', alasan: 'field chat multiline menghitung tingginya sendiri per baris' },
@@ -122,6 +125,14 @@ const ATURAN = [
     nama: 'jarak tertanam',
     pola: /\b(gap|rowGap|columnGap|margin\w*|padding\w*): (-?[1-9]\d*)\b/g,
     saran: (m) => `pakai ${terdekat(SPACING, 'spacing', Math.abs(Number(m[2])))} atau token ukuran`,
+  },
+  {
+    // Lebar/tinggi/posisi tetap. 0 dan 1 (garis rambut) boleh; sisanya punya
+    // nama di `ukuran` (src/theme/tokens.ts) supaya bisa ditelusuri & diubah.
+    nama: 'ukuran tertanam',
+    pola: /\b(width|height|minWidth|minHeight|maxWidth|maxHeight|top|left|right|bottom): (-?(?:[2-9]|[1-9]\d+))\b/g,
+    bebas: UKURAN_BEBAS,
+    saran: (m) => `beri nama di token ukuran (src/theme/tokens.ts) untuk ${m[1]}: ${m[2]}`,
   },
   {
     nama: 'radius tertanam',

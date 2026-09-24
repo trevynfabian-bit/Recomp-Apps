@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { Isian } from './Isian';
+import { ukuran } from '@/theme';
 
 /**
  * Satu kolom angka pada form target (kalori, protein, lemak, batas sat fat).
@@ -31,7 +32,7 @@ export function InputTarget({
 }) {
   return (
     // Dua kolom per baris; lebar minimum menjaga label panjang tidak terpotong.
-    <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: 130 }}>
+    <View style={{ flexBasis: '46%', flexGrow: 1, minWidth: ukuran.isianTarget }}>
       <Isian
         label={label}
         unit={unit}
