@@ -59,6 +59,14 @@ const kasus = [
   ['-5 kg', "'-5 kg"],
   ['@SUM(A1)', "'@SUM(A1)"],
   ['\t=1', "'\t=1"],
+  // Spasi di depan formula: sebagian pengimpor memangkasnya sebelum menilai sel.
+  ['  =HYPERLINK("http://x")', `"'  =HYPERLINK(""http://x"")"`],
+  ['\u00A0+62812', "'\u00A0+62812"],
+  // Bentuk lebar penuh.
+  ['＝1+1', "'＝1+1"],
+  ['＠SUM(A1)', "'＠SUM(A1)"],
+  // Teks biasa berspasi awal tanpa formula tetap tanpa apostrof.
+  ['  catatan', '"  catatan"'],
 ];
 for (const [masuk, harap] of kasus) cek(`${JSON.stringify(masuk)} → ${JSON.stringify(harap)}`, selCsv(masuk) === harap, `dapat ${JSON.stringify(selCsv(masuk))}`);
 

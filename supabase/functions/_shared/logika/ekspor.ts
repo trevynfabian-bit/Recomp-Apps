@@ -38,8 +38,13 @@ export const VERSI_FORMAT_EKSPOR = 1;
 
 const BOM = '\uFEFF';
 
-/** Awalan yang membuat spreadsheet membaca teks sebagai formula. */
-const AWALAN_FORMULA = /^[=+\-@\t\r]/;
+/**
+ * Awalan yang membuat spreadsheet membaca teks sebagai formula (OWASP: `=`,
+ * `+`, `-`, `@`, tab, CR), juga bila didahului spasi (sebagian pengimpor
+ * memangkas spasi awal sebelum menilai sel) dan dalam bentuk lebar penuh
+ * (＝＋－＠, yang diubah sebagian spreadsheet menjadi tanda biasa).
+ */
+const AWALAN_FORMULA = /^[ \u00A0\u3000]*[=+\-@\uFF1D\uFF0B\uFF0D\uFF20]|^[\t\r]/;
 
 export function selCsv(nilai: NilaiSel): string {
   if (nilai === null) return '';
@@ -89,7 +94,7 @@ export function susunBerkasEkspor(
     '- Satuan disebut di nama kolom: kg, cm, kcal, g. Data selalu disimpan metrik.',
     '- Angka memakai titik desimal. Tanggal berformat YYYY-MM-DD, waktu ISO 8601.',
     '- Kolom "sumber" membedakan catatan manual, data sinkron dari perangkat, dan estimasi (foto AI, rumus).',
-    "- Teks yang diawali =, +, -, atau @ diberi awalan ' supaya spreadsheet tidak menjalankannya sebagai formula.",
+    "- Teks yang diawali =, +, -, atau @ (juga setelah spasi, atau dalam bentuk lebar penuh) diberi awalan ' supaya spreadsheet tidak menjalankannya sebagai formula.",
     '',
     'Berkas ini berisi data kesehatan Anda. Setelah dibagikan, penjagaannya mengikuti tempat tujuannya.',
     '',
