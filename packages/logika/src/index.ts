@@ -205,6 +205,7 @@ export {
   e1rmEpley,
   formatBeban,
   MAKS_REPS_E1RM,
+  ringkasArahKekuatan,
   ringkasLatihan,
   ringkasPekan,
   ringkasSesi,

@@ -249,3 +249,17 @@ export function arahKekuatan(sesi: SesiLatihan[]): ArahKekuatan {
   }
   return { gerakan, naik, turun, datar, kalimat };
 }
+
+/**
+ * Sumbu kekuatan dalam satu frasa + arahnya, dari `arahKekuatan`. Dipakai
+ * kartu Arah kekuatan, sumbu Kekuatan evaluasi 4 pekan, dan jawaban Coach,
+ * supaya "x dari y gerakan naik" sama di mana pun ia tampil.
+ */
+export function ringkasArahKekuatan(a: ArahKekuatan): {
+  arah: 'naik' | 'turun' | 'datar' | 'belum jelas';
+  teks: string;
+} {
+  if (a.gerakan.length === 0) return { arah: 'belum jelas', teks: 'belum ada gerakan yang diulang' };
+  const arah = a.naik > a.turun ? 'naik' : a.turun > a.naik ? 'turun' : 'datar';
+  return { arah, teks: `${a.naik} dari ${a.gerakan.length} gerakan naik` };
+}

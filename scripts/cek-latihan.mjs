@@ -19,7 +19,7 @@ for (const b of readdirSync('packages/logika/src')) copyFileSync(join('packages/
 execFileSync(join(process.cwd(), 'node_modules', '.bin', 'tsc'),
   ['latihan.ts', '--module', 'commonjs', '--target', 'es2022', '--outDir', join(kerja, 'keluar'), '--skipLibCheck'],
   { cwd: kerja, stdio: 'pipe' });
-const { arahKekuatan, e1rmEpley, formatBeban, MAKS_REPS_E1RM, ringkasLatihan, ringkasPekan, ringkasSesi } =
+const { arahKekuatan, ringkasArahKekuatan, e1rmEpley, formatBeban, MAKS_REPS_E1RM, ringkasLatihan, ringkasPekan, ringkasSesi } =
   require(join(kerja, 'keluar', 'latihan.js'));
 
 let gagal = 0;
@@ -124,6 +124,9 @@ console.log('\nArah kekuatan (keterangan awam)');
   cek('di bawah ambang 2% → datar', kecil.gerakan[0]?.arah === 'datar');
   cek('seri naik = turun → kalimat stabil', h.kalimat?.startsWith('Kekuatan cenderung stabil'), h.kalimat);
   cek('tanpa gerakan berulang → kalimat null', arahKekuatan([data[0]]).kalimat === null);
+  const r = ringkasArahKekuatan(h);
+  cek('ringkasan sumbu: "1 dari 3 gerakan naik", seri → datar', r.teks === '1 dari 3 gerakan naik' && r.arah === 'datar', JSON.stringify(r));
+  cek('ringkasan tanpa gerakan berulang → belum jelas', ringkasArahKekuatan(arahKekuatan([data[0]])).arah === 'belum jelas');
 }
 
 console.log(gagal === 0 ? '\n✓ Latihan: e1RM hanya ≤ 12 repetisi & dibulatkan seperti SQL, pekan menurut Jakarta' : `\n✗ ${gagal} pemeriksaan gagal`);

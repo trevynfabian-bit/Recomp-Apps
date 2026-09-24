@@ -1,4 +1,12 @@
-import { evaluasi4Mingguan, judulPercakapan, periksaBatasMedis } from '@recomp/logika';
+import { arahKekuatan, evaluasi4Mingguan, judulPercakapan, periksaBatasMedis, ringkasArahKekuatan } from '@recomp/logika';
+import { mockSesiLatihan } from './latihan';
+
+/**
+ * Sumbu kekuatan diturunkan dari sesi tiruan yang SAMA dengan layar Latihan,
+ * bukan ditulis tangan: angka "x dari y gerakan naik" di evaluasi dan jawaban
+ * Coach harus sama dengan kartu Arah kekuatan.
+ */
+const KEKUATAN = ringkasArahKekuatan(arahKekuatan(mockSesiLatihan()));
 import type { PenolakanMedis } from '@recomp/logika';
 import type {
   Percakapan,
@@ -77,13 +85,13 @@ export const mockPercakapan: PesanCoach[] = [
       sumbu: [
         { label: 'Berat', nilai: '+1,1 kg rata-rata 7 hari', arah: 'naik', sumber: 'manual' },
         { label: 'Pinggang', nilai: '+0,9 cm', arah: 'naik', sumber: 'manual' },
-        { label: 'Kekuatan', nilai: '3 dari 4 gerakan naik', arah: 'naik', sumber: 'sinkron' },
+        { label: 'Kekuatan', nilai: KEKUATAN.teks, arah: KEKUATAN.arah, sumber: 'sinkron' },
       ],
       hasil: evaluasi4Mingguan({
         fase: 'Lean Gain',
         arahBerat: 'naik',
         arahPinggang: 'naik',
-        arahKekuatan: 'naik',
+        arahKekuatan: KEKUATAN.arah,
         pekanData: 4,
       }),
     },
@@ -367,10 +375,9 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
 
   if (t.includes('evaluasi') || t.includes('4 minggu') || t.includes('empat')) {
     return teksDanRujukan(
-      'Empat pekan terakhir: berat rata-rata +1,1 kg, pinggang +0,9 cm, dan kekuatan naik di ' +
-      'tiga dari empat gerakan utama.\n\nArah berat dan kekuatan sesuai Lean Gain, tapi pinggang ' +
-      'ikut naik lebih cepat dari yang biasanya diinginkan. Evaluasi lengkapnya ada di layar ' +
-      'Evaluasi 4 mingguan.',
+      `Empat pekan terakhir: berat rata-rata +1,1 kg, pinggang +0,9 cm, dan kekuatan: ${KEKUATAN.teks}.` +
+      '\n\nArah berat dan kekuatan sesuai Lean Gain, tapi pinggang ikut naik lebih cepat dari yang ' +
+      'biasanya diinginkan. Kartu evaluasi lengkapnya terkirim di percakapan ini pada 22 September.',
       [
         {
           label: 'Perubahan rata-rata berat',
@@ -386,7 +393,7 @@ function susunBalasan(pertanyaan: string): BalasanCoach {
         },
         {
           label: 'Kekuatan',
-          nilai: '3 dari 4 naik',
+          nilai: KEKUATAN.teks,
           jenis: 'sinkron',
           dasar: 'ditarik dari Hevy',
         },
