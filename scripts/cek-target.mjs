@@ -294,7 +294,9 @@ console.log('\nAPI target (muat_target / simpan_target)');
   cek('layar muat: kalimat netral', kalimatMuat.length >= 2 && kalimatMuat.every((t) => pelanggaranNada(t).length === 0), kalimatMuat.join(' | '));
   cek('penyedia memuat dari server hanya saat masuk & kredensial ada', /const pakaiServer = supabaseSiap && pengguna !== null;/.test(penyedia));
   cek('penyedia memakai baris dari server setelah simpan (bukan isian)', /hasil\.target/.test(penyedia));
-  cek('layar muat punya Coba lagi & Keluar', /label="Coba lagi"/.test(layarMuat) && /label="Keluar"/.test(layarMuat));
+  // Tombol bisa ditulis sebagai prop (`label="…"`) atau sebagai aksi KeadaanGagal (`label: '…'`).
+  const adaAksi = (teks) => new RegExp(`label(="|: ')${teks}["']`).test(layarMuat);
+  cek('layar muat punya Coba lagi & Keluar', adaAksi('Coba lagi') && adaAksi('Keluar'));
   cek('muat berbatas waktu (tidak menunggu klien Supabase ±30 detik)', /dalamBatasWaktu\(muatTarget\(\), BATAS_MUAT_MS\)/.test(penyedia));
   cek('hasil muat yang berangkat sebelum simpanan dibuang', /if \(versi\.current !== versiAwal\) return;/.test(penyedia) && /versi\.current \+= 1;/.test(penyedia));
   cek('salinan di perangkat diperiksa bentuknya sebelum dipakai', /const adaSalinan = dataTargetSah\(salinan\);/.test(penyedia));

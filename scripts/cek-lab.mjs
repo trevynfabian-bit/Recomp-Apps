@@ -168,7 +168,9 @@ console.log('\nService hasil lab (Supabase)');
   cek('ubah membawa waktu muat; konflik/terhapus memuat ulang', /diperbaruiPada: waktu\.current\[id\]/.test(penyedia) && /e\.kode === 'konflik' \|\| e\.kode === 'tidak-ada'/.test(penyedia));
   const layar = readFileSync('app/hasil-lab.tsx', 'utf8');
   cek('layar riwayat: memuat & gagal (dengan Coba lagi) tidak terbaca "belum ada"',
-    /statusMuat === 'siap' && kelompok\.length === 0/.test(layar) && /label="Coba lagi" onPress=\{muatUlang\}/.test(layar));
+    /statusMuat === 'siap' && kelompok\.length === 0/.test(layar) &&
+      // Prop tombol (`label="Coba lagi" onPress={muatUlang}`) atau aksi KeadaanGagal.
+      /label(="Coba lagi"|: 'Coba lagi',) onPress(=\{|: )muatUlang/.test(layar));
 }
 
 console.log('\nLabel data mentah');

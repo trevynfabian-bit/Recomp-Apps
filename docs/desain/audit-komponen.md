@@ -111,3 +111,28 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
    berbingkai kartu seperti layar lain.
 
 Halaman peraga: **Pengaturan → Peraga komponen** (build pengembangan).
+
+## 7. Konsistensi akhir Fase 3
+
+Diukur ulang setelah seluruh task Komponen Inti Terpadu:
+
+| Ukuran | Saat audit | Sekarang | Keterangan |
+|---|---|---|---|
+| `Pressable` di layar & komponen | 101 | 60 | Sisanya baris/kartu yang bisa diketuk, chip pilihan, dan kontrol khusus (grafik, segmen), bukan tombol. |
+| `TextInput` langsung | 14 | 5 | 3 khusus yang disengaja (`InputChat`, `SheetImporRiwayat`, baris ukuran di `SheetCatatUkuran`); 2 sisanya hanya tipe `useRef<TextInput>`. |
+| `ActivityIndicator` lepas | 9 | 1 | Satu di `IndikatorSinkron` (titik status 8 pt yang berputar, bukan keadaan memuat). |
+| Tombol kembali glyph `‹` | 10 layar | 0 | Semua `TombolIkon`. |
+| Sheet dengan `Modal` sendiri | 6 | 6 | Belum disentuh: isinya tidak bergulir / tingginya tetap. Dicatat untuk Fase 5. |
+
+Verifikasi:
+
+- Seluruh pemeriksaan proyek yang tidak butuh Postgres lulus: `typecheck`,
+  `cek:kontras`, `cek:desain`, `cek:hardcode`, dan 20 `cek:*` domain.
+  `cek:target` dan `cek:lab` sempat gagal karena mencari sintaks tombol lama
+  (`label="Coba lagi"`); polanya diperluas untuk juga menerima aksi
+  `KeadaanGagal` (`label: 'Coba lagi'`) dan diuji negatif: menghapus aksi
+  Keluar/Coba lagi tetap membuat keduanya gagal.
+- `cek:edge` dan `db:cek` butuh Deno/Postgres dan tidak dijalankan di sini;
+  tidak ada berkas di cakupan keduanya yang berubah.
+- 16 rute dirender dalam mode gelap (dan terang, lihat §7 audit token) dari
+  bundel bersih tanpa galat runtime.
