@@ -4,7 +4,7 @@ import { formatAngka, formatMakro, urutanFaseJanggal } from '@recomp/logika';
 import type { BarisMatriks, Fase } from '@recomp/logika';
 import { Card } from './Card';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { angkaTabular, colors, radius, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
 
 type Props = {
   baris: BarisMatriks[];
@@ -58,11 +58,11 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
               {/* Huruf biasa tanpa renggang: "Maintenance" dalam huruf kapital terpotong di lebar ponsel. */}
               <Text
                 numberOfLines={1}
-                style={{ ...typography.caption, letterSpacing: 0, fontWeight: '700', color: f === faseAktif ? colors.teks : colors.teksRedup }}
+                style={{ ...typography.caption, letterSpacing: 0, color: f === faseAktif ? colors.teks : colors.teksRedup }}
               >
                 {f}
               </Text>
-              <Text style={{ ...typography.caption, fontWeight: '500', color: colors.aksen.teks, minHeight: 14 }}>
+              <Text style={{ ...typography.caption, color: colors.aksen.teks, minHeight: typography.caption.lineHeight }}>
                 {f === faseAktif ? 'aktif' : ''}
               </Text>
             </Pressable>
@@ -86,7 +86,7 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
             >
               <View style={{ width: LEBAR_NAMA, gap: spacing.xxs }}>
                 <Text style={{ ...typography.label, color: colors.teks }}>{b.nama}</Text>
-                {hariIni ? <Text style={{ ...typography.caption, fontWeight: '500', color: colors.aksen.teks }}>hari ini</Text> : null}
+                {hariIni ? <Text style={{ ...typography.caption, color: colors.aksen.teks }}>hari ini</Text> : null}
               </View>
               {b.sel.map((s) => {
                 const aktif = s.fase === faseAktif;
@@ -118,10 +118,10 @@ export function MatriksTarget({ baris, faseAktif, tipeHariIniId, onPilihFase, on
                   >
                     {s.target ? (
                       <>
-                        <Text style={{ ...typography.label, fontWeight: '700', color: colors.teks }}>
+                        <Text style={{ ...typography.label, ...angkaTabular, color: colors.teks }}>
                           {formatAngka(s.target.target_kalori)}
                         </Text>
-                        <Text style={{ ...typography.caption, fontWeight: '500', color: colors.teksSamar }}>
+                        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
                           P {formatMakro(s.target.target_protein_g)}
                         </Text>
                       </>

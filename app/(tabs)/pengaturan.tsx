@@ -35,7 +35,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
+import { colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -390,6 +390,7 @@ function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Sat
         return (
           <Pressable
             key={s.nilai}
+            hitSlop={{ top: sisaSentuh(KONTROL_SEGMEN), bottom: sisaSentuh(KONTROL_SEGMEN) }}
             accessibilityRole="radio"
             accessibilityState={{ selected: aktif }}
             accessibilityLabel={`Satuan ${s.label}`}
@@ -400,7 +401,7 @@ function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Sat
             }}
             style={{
               flex: 1,
-              minHeight: TAP_MIN - 4,
+              minHeight: KONTROL_SEGMEN,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: radius.pill,

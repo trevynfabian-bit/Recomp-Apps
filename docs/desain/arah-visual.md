@@ -340,6 +340,9 @@ Aturan: radius elemen di dalam kartu harus **lebih kecil** dari radius kartunya
   `caption` 16, `title` 26, `display` 40. Tidak ada `lineHeight` mentah.
 - **Tinggi baris daftar** (baris pengaturan, baris riwayat) minimal `TAP_MIN`
   (44) bila bisa diketuk, dengan padding vertikal `md`.
+- **Kontrol rapat**: chip, tautan kecil, dan segmen boleh tampil 36 pt
+  (`KONTROL_RAPAT`) atau 40 pt (`KONTROL_SEGMEN`) asalkan area sentuhnya
+  digenapkan ke 44 pt dengan `hitSlop={sisaSentuh(...)}`. `TAP_MIN - n` dilarang.
 - **Tinggi kontrol**: tombol, field isian, chip, dan stepper minimal 44×44 pt
   (`TAP_MIN`, 71 pemakaian). Tinggi mentah lain yang ditemukan (14, 24, 36, 72,
   96, 140) adalah area grafik/pratinjau, bukan kontrol, dan dijadikan token

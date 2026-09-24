@@ -12,6 +12,24 @@ import { skemaBerlaku } from './colors';
 export const TAP_MIN = 44;
 
 /**
+ * Tinggi VISUAL kontrol rapat (chip templat, chip tampilan, tautan "Hari ini",
+ * tombol tutup kecil). Area sentuhnya tetap digenapkan ke `TAP_MIN` lewat
+ * `hitSlop={sisaSentuh(KONTROL_RAPAT)}`: kecil di mata, 44 pt di jari.
+ */
+export const KONTROL_RAPAT = 36;
+
+/** Tinggi visual segmen di dalam kontrol segmen (di dalam `ukuran.sisipanSegmen`). */
+export const KONTROL_SEGMEN = 40;
+
+/**
+ * `hitSlop` yang menggenapkan kontrol setinggi `visual` menjadi `TAP_MIN`.
+ * Dipakai untuk setiap kontrol yang sengaja tampil lebih kecil dari 44 pt.
+ */
+export function sisaSentuh(visual: number): number {
+  return Math.max(0, Math.ceil((TAP_MIN - visual) / 2));
+}
+
+/**
  * Ukuran teks terkecil yang boleh ada di UI (HIG: Typography, "minimum 11 pt").
  * `typography.caption` tepat di batas ini; tidak ada gaya yang lebih kecil.
  */

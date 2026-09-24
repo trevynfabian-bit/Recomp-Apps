@@ -4,7 +4,7 @@ import type { KesehatanKoneksi, KoneksiSumber, TingkatKesehatan } from '@recomp/
 import { Card } from './Card';
 import { TombolBertepi, TombolUtama } from './Tombol';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { colors, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 
 type Props = {
   koneksi: KoneksiSumber;
@@ -20,8 +20,6 @@ type Props = {
   tautan?: { label: string; onPress: () => void };
 };
 
-/** Tinggi teks label ±18 pt; hitSlop ini menggenapkannya jadi 44 pt (TAP_MIN). */
-const HIT_SLOP_TAUTAN = Math.ceil((TAP_MIN - 18) / 2);
 
 /**
  * Warna status. Teks kecil memakai varian `aksenTeks` supaya lolos kontras AA,
@@ -114,7 +112,7 @@ export function KartuSumberData({
             ketukRingan();
             tautan.onPress();
           }}
-          hitSlop={{ top: HIT_SLOP_TAUTAN, bottom: HIT_SLOP_TAUTAN, left: spacing.sm, right: spacing.lg }}
+          hitSlop={{ top: sisaSentuh(typography.label.lineHeight), bottom: sisaSentuh(typography.label.lineHeight), left: spacing.sm, right: spacing.lg }}
           style={({ pressed }) => ({ alignSelf: 'flex-start', opacity: pressed ? 0.6 : 1 })}
         >
           <Text style={{ ...typography.label, color: colors.aksen.teks }}>{tautan.label} ›</Text>
@@ -170,7 +168,7 @@ function AksiKartu({
       }}
       // Target sentuh 44 pt dicapai lewat hitSlop, bukan tinggi baris: tautan
       // redup ini tidak boleh memakan ruang sebesar tombol utama.
-      hitSlop={{ top: HIT_SLOP_TAUTAN, bottom: HIT_SLOP_TAUTAN, left: spacing.sm, right: spacing.lg }}
+      hitSlop={{ top: sisaSentuh(typography.label.lineHeight), bottom: sisaSentuh(typography.label.lineHeight), left: spacing.sm, right: spacing.lg }}
       style={({ pressed }) => ({
         alignSelf: 'flex-start',
         opacity: pressed ? 0.6 : 1,

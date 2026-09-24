@@ -35,7 +35,7 @@ import { useHariIni } from '@/state/hariIni';
 import { useProfil } from '@/state/profil';
 import { KesalahanTarget } from '@/data/target';
 import { useTarget, type PerubahanTarget } from '@/state/target';
-import { colors, radius, spacing, TAP_MIN, typography, ukuran } from '@/theme';
+import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran } from '@/theme';
 import type { DayType } from '@/types/domain';
 
 const FASE: Fase[] = ['Maintenance', 'Lean Gain', 'Cut'];
@@ -497,7 +497,7 @@ function KartuTargetBaca({
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
           <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
             {dayType.nama}
-            {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · bawaan</Text> : null}
+            {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: bobot.biasa }}> · bawaan</Text> : null}
           </Text>
           {hariIni ? <Pill label="Hari ini" warna={colors.aksen.teks} /> : null}
         </View>
@@ -578,6 +578,7 @@ function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'
         return (
           <Pressable
             key={t.nilai}
+            hitSlop={sisaSentuh(KONTROL_RAPAT)}
             accessibilityRole="radio"
             accessibilityState={{ selected: aktif }}
             accessibilityLabel={`Tampilan ${t.label}`}
@@ -585,7 +586,7 @@ function PilihTampilan({ terpilih, onPilih }: { terpilih: 'per-fase' | 'matriks'
               if (!aktif) onPilih(t.nilai);
             }}
             style={({ pressed }) => ({
-              minHeight: TAP_MIN - 8,
+              minHeight: KONTROL_RAPAT,
               paddingHorizontal: spacing.lg,
               justifyContent: 'center',
               borderRadius: radius.pill,
@@ -624,6 +625,7 @@ function PilihFase({
         return (
           <Pressable
             key={f}
+            hitSlop={{ top: sisaSentuh(KONTROL_SEGMEN), bottom: sisaSentuh(KONTROL_SEGMEN) }}
             accessibilityRole="tab"
             accessibilityState={{ selected: dipilih }}
             accessibilityLabel={`${f}${f === aktif ? ', fase aktif' : ''}${diubah.has(f) ? ', ada perubahan belum disimpan' : ''}`}
@@ -634,7 +636,7 @@ function PilihFase({
             }}
             style={{
               flex: 1,
-              minHeight: TAP_MIN - 4,
+              minHeight: KONTROL_SEGMEN,
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'row',
@@ -647,7 +649,7 @@ function PilihFase({
           >
             <Text style={{ ...typography.label, color: dipilih ? colors.teks : colors.teksRedup }}>
               {f}
-              {f === aktif ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · aktif</Text> : null}
+              {f === aktif ? <Text style={{ color: colors.teksSamar, fontWeight: bobot.biasa }}> · aktif</Text> : null}
             </Text>
             {/* Titik = belum disimpan; label aksesibilitas menyebutnya dengan kata. */}
             {diubah.has(f) ? <View style={{ width: ukuran.titikKecil, height: ukuran.titikKecil, borderRadius: radius.pill, backgroundColor: colors.aksen.isian }} /> : null}
@@ -691,7 +693,7 @@ function BarisTarget({
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
         <Text style={{ ...typography.bodyTebal, color: colors.teks }}>
           {dayType.nama}
-          {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: '500' }}> · bawaan</Text> : null}
+          {dayType.is_default ? <Text style={{ color: colors.teksSamar, fontWeight: bobot.biasa }}> · bawaan</Text> : null}
         </Text>
         {diubah ? (
           <Pressable

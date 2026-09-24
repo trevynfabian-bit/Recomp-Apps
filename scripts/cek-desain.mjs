@@ -152,13 +152,13 @@ const timpaBobot = semuaUi.flatMap((p) => {
   const hasil = [];
   const pola = /\.\.\.typography\.(\w+),\s*(?:[a-zA-Z]+: [^,{}]+,\s*)*?fontWeight: '(\d+)'/g;
   for (const m of isi.matchAll(pola)) {
-    // Sel padat MatriksTarget menunggu Fase 5 (docs/desain/audit-token-layar.md §5).
-    if (p.endsWith('MatriksTarget.tsx')) continue;
     hasil.push(`${p}:${isi.slice(0, m.index).split('\n').length} ${m[1]}+${m[2]}`);
   }
   return hasil;
 });
 cek('ketebalan tidak ditimpa setelah typography (pakai varian bernama)', timpaBobot.length === 0, timpaBobot.slice(0, 5).join(' | '));
+const bobotMentah = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '\d+'/));
+cek('ketebalan span dari token bobot', bobotMentah.length === 0, bobotMentah.slice(0, 5).join(' | '));
 const bobotTerlarang = semuaUi.flatMap((p) => cariBaris(p, /fontWeight: '(100|200|300|400|900)'/));
 cek('ketebalan hanya 500, 600, 700, 800', bobotTerlarang.length === 0, bobotTerlarang.slice(0, 5).join(' | '));
 
@@ -201,6 +201,20 @@ cek('tidak ada aritmetika spacing (pakai token ukuran)', aritmetika.length === 0
 if (tinggiBaris.length < PLAFON.lineHeight || jarakMentah.length < PLAFON.jarak) {
   console.log('  (plafon bisa diturunkan: ubah PLAFON di scripts/cek-desain.mjs)');
 }
+
+console.log('\nArea sentuh (HIG 44×44 pt)');
+// Kontrol yang tampil lebih kecil dari 44 pt memakai KONTROL_RAPAT/SEGMEN dan
+// menggenapkan area sentuhnya dengan sisaSentuh(); mengurangi TAP_MIN berarti
+// area sentuhnya ikut mengecil.
+const tapDikurangi = semuaUi.flatMap((p) => cariBaris(p, /TAP_MIN\s*-\s*\d/));
+cek('TAP_MIN tidak dikurangi (pakai KONTROL_RAPAT + sisaSentuh)', tapDikurangi.length === 0, tapDikurangi.join(' | '));
+const kontrolRapat = semuaUi.flatMap((p) => {
+  const isi = readFileSync(p, 'utf8');
+  const nKontrol = (isi.match(/: KONTROL_(RAPAT|SEGMEN)\b/g) ?? []).length;
+  const nSlop = (isi.match(/sisaSentuh\(KONTROL_(RAPAT|SEGMEN)\)/g) ?? []).length;
+  return nKontrol > 0 && nSlop === 0 ? [p] : [];
+});
+cek('setiap kontrol rapat menggenapkan area sentuh', kontrolRapat.length === 0, kontrolRapat.join(' | '));
 
 console.log('\nAcuan resmi');
 let bab = '';

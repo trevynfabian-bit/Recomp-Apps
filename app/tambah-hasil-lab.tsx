@@ -18,7 +18,7 @@ import { KesalahanHasilLab } from '@/data/hasilLab';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
-import { colors, ukuranIkon, radius, spacing, TAP_MIN, typography } from '@/theme';
+import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuranIkon } from '@/theme';
 
 type GalatLab = Extract<HasilPeriksaLab, { sah: false }>['galat'];
 
@@ -205,6 +205,7 @@ export default function TambahHasilLabScreen() {
             {TEMPLAT_PANEL_LAB.map((t) => (
               <Pressable
                 key={t.nama}
+                hitSlop={sisaSentuh(KONTROL_RAPAT)}
                 accessibilityRole="button"
                 accessibilityLabel={`Templat ${t.nama}: isi nama & satuan ${t.penanda.length} penanda`}
                 disabled={menyimpan}
@@ -213,7 +214,7 @@ export default function TambahHasilLabScreen() {
                   pakaiTemplat(t.nama);
                 }}
                 style={({ pressed }) => ({
-                  minHeight: TAP_MIN - 8,
+                  minHeight: KONTROL_RAPAT,
                   paddingHorizontal: spacing.md,
                   justifyContent: 'center',
                   borderRadius: radius.pill,
@@ -237,10 +238,11 @@ export default function TambahHasilLabScreen() {
               nonaktif={menyimpan}
             />
             <Pressable
+              hitSlop={sisaSentuh(KONTROL_RAPAT)}
               accessibilityRole="button"
               accessibilityLabel="Isi tanggal hari ini"
               onPress={() => ubah({ tanggal: hariIniTertulis() })}
-              style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: TAP_MIN - 8, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+              style={({ pressed }) => ({ alignSelf: 'flex-start', minHeight: KONTROL_RAPAT, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
             >
               <Text style={{ ...typography.label, color: colors.aksen.teks }}>Hari ini</Text>
             </Pressable>
@@ -339,8 +341,8 @@ function KartuPenanda({
               ketukRingan();
               onHapus();
             }}
-            hitSlop={8}
-            style={({ pressed }) => ({ width: TAP_MIN - 8, height: TAP_MIN - 8, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
+            hitSlop={sisaSentuh(KONTROL_RAPAT)}
+            style={({ pressed }) => ({ width: KONTROL_RAPAT, height: KONTROL_RAPAT, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
           >
             <Ionicons name="close" size={ukuranIkon.sedang} color={colors.teksRedup} />
           </Pressable>
