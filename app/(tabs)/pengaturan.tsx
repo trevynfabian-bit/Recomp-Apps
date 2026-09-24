@@ -35,7 +35,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon } from '@/theme';
+import { colors, KONTROL_RAPAT, KONTROL_SEGMEN, type PilihanTampilan, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon, usePilihanTampilan, useSkema } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -78,6 +78,8 @@ export default function PengaturanScreen() {
         : `${formatAngka(Math.min(...kaloriFase))}–${formatAngka(Math.max(...kaloriFase))} kcal`;
   const email = pengguna?.email ?? mockAkun.email;
   const [sheet, setSheet] = useState<Sheet>(null);
+  const tampilan = usePilihanTampilan();
+  const skema = useSkema();
   const [pesanTiruan, setPesanTiruan] = useState<string | null>(null);
   const tutup = () => setSheet(null);
 
@@ -197,10 +199,27 @@ export default function PengaturanScreen() {
               </Text>
             </View>
           </View>
-          <PilihSatuan terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
+          <PilihSegmen opsi={SATUAN} aksesAwalan="Satuan" terpilih={profil.satuan} onPilih={(satuan) => void perbaruiProfil({ satuan })} />
           <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
             Contoh: berat {formatDesimal(tampilkanBerat(contohBeratKg, profil.satuan), 1)} {labelBerat(profil.satuan)}
             {profil.tinggi_cm !== null ? ` · tinggi ${panjang(profil.tinggi_cm)}` : ''}
+          </Text>
+        </Card>
+        <Card style={{ gap: spacing.md, marginTop: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <Ionicons name="contrast-outline" size={ukuranIkon.baris} color={colors.teksRedup} />
+            <View style={{ flex: 1, gap: spacing.xxs }}>
+              <Text style={{ ...typography.bodySedang, color: colors.teks }}>Tampilan</Text>
+              <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
+                Hanya di perangkat ini; tidak mengubah data apa pun.
+              </Text>
+            </View>
+          </View>
+          <PilihSegmen opsi={TAMPILAN} aksesAwalan="Tampilan" terpilih={tampilan.pilihan} onPilih={tampilan.pilih} />
+          <Text accessibilityLiveRegion="polite" style={{ ...typography.labelBiasa, color: colors.teksRedup }}>
+            {tampilan.pilihan === 'sistem'
+              ? `Mengikuti setelan HP: sekarang ${skema === 'gelap' ? 'gelap' : 'terang'}.`
+              : `Selalu ${tampilan.pilihan}, apa pun setelan HP.`}
           </Text>
         </Card>
       </View>
@@ -374,7 +393,25 @@ const SATUAN: { nilai: Satuan; label: string }[] = [
   { nilai: 'imperial', label: 'lb · in' },
 ];
 
-function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Satuan) => void }) {
+const TAMPILAN: { nilai: PilihanTampilan; label: string }[] = [
+  { nilai: 'sistem', label: 'Ikuti sistem' },
+  { nilai: 'terang', label: 'Terang' },
+  { nilai: 'gelap', label: 'Gelap' },
+];
+
+/** Kontrol segmen: satu pilihan dari beberapa, dibaca pembaca layar sebagai grup radio. */
+function PilihSegmen<T extends string>({
+  opsi,
+  terpilih,
+  onPilih,
+  aksesAwalan,
+}: {
+  opsi: { nilai: T; label: string }[];
+  terpilih: T;
+  onPilih: (nilai: T) => void;
+  /** Awalan label aksesibilitas, mis. "Satuan" → "Satuan kg · cm". */
+  aksesAwalan: string;
+}) {
   return (
     <View
       accessibilityRole="radiogroup"
@@ -385,7 +422,7 @@ function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Sat
         backgroundColor: colors.permukaanCekung,
       }}
     >
-      {SATUAN.map((s) => {
+      {opsi.map((s) => {
         const aktif = s.nilai === terpilih;
         return (
           <Pressable
@@ -393,7 +430,7 @@ function PilihSatuan({ terpilih, onPilih }: { terpilih: Satuan; onPilih: (s: Sat
             hitSlop={{ top: sisaSentuh(KONTROL_SEGMEN), bottom: sisaSentuh(KONTROL_SEGMEN) }}
             accessibilityRole="radio"
             accessibilityState={{ selected: aktif }}
-            accessibilityLabel={`Satuan ${s.label}`}
+            accessibilityLabel={`${aksesAwalan} ${s.label}`}
             onPress={() => {
               if (aktif) return;
               ketukRingan();

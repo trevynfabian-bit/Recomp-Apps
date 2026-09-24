@@ -213,6 +213,11 @@ diubah: mereka tetap membaca `colors.x` saat render. Konsekuensinya:
   dipilih dibanding mengubah puluhan layar menjadi pembaca konteks.
 - Deteksi sistem ada di satu fungsi murni, `skemaDariSistem()`: hanya `light`
   yang memilih terang; `null`/`unspecified` jatuh ke gelap.
+- **Pilihan manual** (Pengaturan → Preferensi → Tampilan): *Ikuti sistem*
+  (bawaan), *Terang*, atau *Gelap*. Disimpan di perangkat (`recomp:tampilan`,
+  di luar cadangan per akun, jadi tidak hilang saat keluar) lewat
+  `usePilihanTampilan()`. Skema yang berlaku = `skemaBerlakuDari(pilihan,
+  sistem)`. Kontrol segmennya sama dengan pemilih satuan (`PilihSegmen`).
 
 **Angka hero di mode terang (Fase 3).** Amber teks kecil `#8A5A00` terlihat
 cokelat pada ukuran 64 px. Karena hero adalah teks besar (ambang 3:1), peran
