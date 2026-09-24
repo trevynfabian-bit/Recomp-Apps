@@ -125,3 +125,15 @@ Diukur ulang setelah task "Terapkan arah visual ke seluruh layar":
 | L4 padding bawah | `ukuran` tanpa inset | semua layar tumpukan `inset + xxl` | Layar tab tetap `xxl` karena tab bar sudah memegang inset bawah. `tambah-hasil-lab` keadaan kosong/galat kini `inset + lg` seperti layar lain. |
 
 Semua dijaga `cek:desain` dengan plafon nol.
+
+## 7. Verifikasi dua mode (Fase 3)
+
+Seluruh rute (15 layar app + layar contoh `arah-visual`) dirender di web
+(Chromium 390 px) dalam mode gelap dan terang dari bundel bersih
+(`expo start --clear`), tanpa galat runtime. Semua layar membaca token saat
+render, jadi tidak ada layar yang perlu diubah khusus untuk mode terang.
+
+Catatan cara memverifikasi: pengawas berkas Metro di lingkungan kontainer bisa
+tidak menangkap perubahan, sehingga tangkapan layar memakai bundel lama. Selalu
+jalankan ulang dengan `--clear` sebelum menilai tampilan, dan periksa bahwa
+bundel memuat nilai token terbaru.
