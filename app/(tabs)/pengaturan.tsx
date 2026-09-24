@@ -18,6 +18,7 @@ import {
 } from '@recomp/logika';
 import type { Satuan } from '@recomp/logika';
 import {
+  BarisTautan,
   Card,
   DaftarBaris,
   HeaderLayar,
@@ -161,24 +162,24 @@ export default function PengaturanScreen() {
       <View>
         <SectionHeader judul="Program" />
         <DaftarBaris>
-          <BarisPengaturan
+          <BarisTautan
             ikon="flag-outline"
             judul="Fase"
-            nilai={faseMulai ? `${profil.fase_aktif} · sejak ${formatTanggalPanjang(faseMulai).split(', ')[1]}` : profil.fase_aktif}
+            keterangan={faseMulai ? `${profil.fase_aktif} · sejak ${formatTanggalPanjang(faseMulai).split(', ')[1]}` : profil.fase_aktif}
             petunjuk="Membuka pilihan fase program"
             onPress={() => setSheet('fase')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="restaurant-outline"
             judul="Target per tipe hari"
-            nilai={`${rentangKalori} · ${tipeHari.length} tipe hari · ${profil.fase_aktif}${belumDiisi > 0 ? ` · ${belumDiisi} belum diisi` : ''}`}
+            keterangan={`${rentangKalori} · ${tipeHari.length} tipe hari · ${profil.fase_aktif}${belumDiisi > 0 ? ` · ${belumDiisi} belum diisi` : ''}`}
             petunjuk="Membuka form target kalori dan makro tiap tipe hari"
             onPress={() => router.push('/target-harian')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="resize-outline"
             judul="Batas pinggang"
-            nilai={profil.batas_pinggang_cm !== null ? panjang(profil.batas_pinggang_cm) : 'Belum diatur'}
+            keterangan={profil.batas_pinggang_cm !== null ? panjang(profil.batas_pinggang_cm) : 'Belum diatur'}
             petunjuk="Membuka pengaturan batas pinggang"
             onPress={() => setSheet('pinggang')}
           />
@@ -227,24 +228,24 @@ export default function PengaturanScreen() {
       <View>
         <SectionHeader judul="Data" />
         <DaftarBaris>
-          <BarisPengaturan
+          <BarisTautan
             ikon="sync-outline"
             judul="Sumber data"
-            nilai="Apple Health, WHOOP, Strava, Hevy"
+            keterangan="Apple Health, WHOOP, Strava, Hevy"
             petunjuk="Membuka status sinkron tiap sumber"
             onPress={() => router.push('/sumber-data')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="download-outline"
             judul="Impor riwayat"
-            nilai="Hevy, Apple Health, ukuran lama"
+            keterangan="Hevy, Apple Health, ukuran lama"
             petunjuk="Membuka impor riwayat sekali"
             onPress={() => router.push('/impor-riwayat')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="flask-outline"
             judul="Hasil lab"
-            nilai={
+            keterangan={
               statusLab === 'memuat'
                 ? 'Memuat…'
                 : statusLab === 'gagal'
@@ -256,10 +257,10 @@ export default function PengaturanScreen() {
             petunjuk="Membuka riwayat hasil lab"
             onPress={() => router.push('/hasil-lab')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="share-outline"
             judul="Ekspor data saya"
-            nilai="CSV & JSON, kapan saja"
+            keterangan="CSV & JSON, kapan saja"
             petunjuk="Membuka ekspor seluruh data"
             onPress={() => setSheet('ekspor')}
           />
@@ -270,10 +271,10 @@ export default function PengaturanScreen() {
       <View>
         <SectionHeader judul="Notifikasi" />
         <Card flat>
-          <BarisPengaturan
+          <BarisTautan
             ikon="notifications-outline"
             judul="Widget & pengingat"
-            nilai="Notifikasi per jenis, widget layar kunci"
+            keterangan="Notifikasi per jenis, widget layar kunci"
             petunjuk="Membuka pengaturan pengingat dan widget"
             onPress={() => router.push('/widget-pengingat')}
           />
@@ -298,24 +299,24 @@ export default function PengaturanScreen() {
           </View>
         </Card>
         <DaftarBaris style={{ marginTop: spacing.md }}>
-          <BarisPengaturan
+          <BarisTautan
             ikon="shield-checkmark-outline"
             judul="Privasi"
-            nilai="Apa yang disimpan & siapa yang membaca"
+            keterangan="Apa yang disimpan & siapa yang membaca"
             petunjuk="Membuka penjelasan privasi dalam bahasa sehari-hari beserta keadaannya"
             onPress={() => router.push('/privasi')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="log-out-outline"
             judul="Keluar"
-            nilai={email}
+            keterangan={email}
             petunjuk="Membuka konfirmasi keluar dari akun di perangkat ini"
             onPress={() => setSheet('keluar')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
-            nilai="Tidak bisa dibatalkan"
+            keterangan="Tidak bisa dibatalkan"
             petunjuk="Membuka konfirmasi penghapusan akun"
             onPress={() => setSheet('hapus')}
           />
@@ -333,17 +334,17 @@ export default function PengaturanScreen() {
       {/* Layar acuan desain: hanya di build pengembangan, tidak pernah sampai ke pengguna. */}
       {__DEV__ ? (
         <DaftarBaris>
-          <BarisPengaturan
+          <BarisTautan
             ikon="color-palette-outline"
             judul="Arah visual"
-            nilai="Layar acuan palet, tipografi, dan jarak"
+            keterangan="Layar acuan palet, tipografi, dan jarak"
             petunjuk="Membuka layar contoh arah visual"
             onPress={() => router.push('/arah-visual')}
           />
-          <BarisPengaturan
+          <BarisTautan
             ikon="shapes-outline"
             judul="Peraga komponen"
-            nilai="Komponen inti dalam semua keadaannya"
+            keterangan="Komponen inti dalam semua keadaannya"
             petunjuk="Membuka halaman peraga komponen"
             onPress={() => router.push('/peraga')}
           />
@@ -399,46 +400,3 @@ const TAMPILAN: { nilai: PilihanTampilan; label: string }[] = [
   { nilai: 'terang', label: 'Terang' },
   { nilai: 'gelap', label: 'Gelap' },
 ];
-
-
-function BarisPengaturan({
-  ikon,
-  judul,
-  nilai,
-  petunjuk,
-  onPress,
-}: {
-  ikon: React.ComponentProps<typeof Ionicons>['name'];
-  judul: string;
-  /** Nilai yang BERLAKU sekarang, atau keterangan singkat. */
-  nilai: string;
-  petunjuk: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${judul}: ${nilai}`}
-      accessibilityHint={petunjuk}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-        minHeight: TAP_MIN,
-        padding: spacing.lg,
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.teksRedup} />
-      <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text style={{ ...typography.bodySedang, color: colors.teks }}>{judul}</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{nilai}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />
-    </Pressable>
-  );
-}

@@ -20,8 +20,10 @@ import {
 } from '@recomp/logika';
 import type { Fase, StatusKoridor } from '@recomp/logika';
 import {
+  BarisTautan,
   Card,
   CatatanKecukupan,
+  DaftarBaris,
   GrafikTren,
   HeaderLayar,
   KartuHero,
@@ -156,11 +158,9 @@ export default function TrenScreen() {
         <SectionHeader judul="Koridor target" aksi={`fase ${profil.fase_aktif}`} />
         <Card>
           <View style={{ gap: spacing.md }}>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
-              <Text style={{ ...typography.title, color: warnaKoridor(posisi.posisi) }}>
-                {posisi.posisi === 'di dalam koridor' ? 'Di dalam koridor' : ubahHuruf(posisi.posisi)}
-              </Text>
-            </View>
+            <Text accessibilityRole="header" style={{ ...typography.title, color: warnaKoridor(posisi.posisi) }}>
+              {posisi.posisi === 'di dalam koridor' ? 'Di dalam koridor' : ubahHuruf(posisi.posisi)}
+            </Text>
             {posisi.bawahKg !== null && posisi.atasKg !== null && kecukupan.cukupRataRata ? (
               <Text style={{ ...typography.body, color: colors.teksRedup }}>
                 Rentang hari ini {formatDesimal(posisi.bawahKg)}–{formatDesimal(posisi.atasKg)} kg;
@@ -202,30 +202,20 @@ export default function TrenScreen() {
       </View>
 
       {/* Jalan masuk ke ukuran tubuh — pelengkap berat, bukan penggantinya */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Buka ukuran tubuh"
-        onPress={() => router.push('/ukuran')}
-        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-      >
-        <Card>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <View style={{ gap: spacing.xxs, flex: 1 }}>
-              <Text style={{ ...typography.label, color: colors.teks }}>Ukuran tubuh</Text>
-              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                Pinggang, dada, lengan, paha, leher — yang tidak terlihat dari timbangan
-              </Text>
-            </View>
-            <Text style={{ ...typography.title, color: colors.aksen.teks }}>›</Text>
-          </View>
-        </Card>
-      </Pressable>
+      <Card flat>
+        <BarisTautan
+          judul="Ukuran tubuh"
+          keterangan="Pinggang, dada, lengan, paha, leher — yang tidak terlihat dari timbangan"
+          aksesLabel="Buka ukuran tubuh"
+          onPress={() => router.push('/ukuran')}
+        />
+      </Card>
 
       {/* Daftar timbangan terakhir, dengan asal tiap angkanya */}
       <View>
         <SectionHeader judul="Timbangan terakhir" aksi={`${deret.length} hari`} />
-        <Card flat>
-          {[...deret].reverse().map((t, i) => (
+        <DaftarBaris>
+          {[...deret].reverse().map((t) => (
             <View
               key={t.tanggal}
               style={{
@@ -234,8 +224,6 @@ export default function TrenScreen() {
                 justifyContent: 'space-between',
                 paddingVertical: spacing.md,
                 paddingHorizontal: spacing.lg,
-                borderTopWidth: i === 0 ? 0 : 1,
-                borderTopColor: colors.garis,
               }}
             >
               <View style={{ flex: 1, gap: spacing.xxs }}>
@@ -259,22 +247,11 @@ export default function TrenScreen() {
               </Text>
             </View>
           ))}
-        </Card>
+        </DaftarBaris>
       </View>
 
       <View style={{ alignItems: 'center' }}>
-        <View
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.sm,
-            borderRadius: radius.pill,
-            backgroundColor: colors.permukaanCekung,
-          }}
-        >
-          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-            Data tiruan · grafik & koridor menyusul
-          </Text>
-        </View>
+        <Pill label="Data tiruan · grafik & koridor menyusul" />
       </View>
     </ScrollView>
   );

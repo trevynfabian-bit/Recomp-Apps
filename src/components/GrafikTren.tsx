@@ -4,6 +4,7 @@ import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { formatDesimal, formatTanggalPanjang } from '@recomp/logika';
 import type { KoridorTarget, TitikTren } from '@recomp/logika';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { KeadaanKosong } from './Keadaan';
 
 /** Tinggi area gambar, tidak termasuk label sumbu. */
 const TINGGI_PLOT = 180;
@@ -159,10 +160,13 @@ export function GrafikTren({
 
   if (!punyaData) {
     return (
-      <View style={{ height: TINGGI_PLOT, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ ...typography.body, color: colors.teksSamar }}>
-          Belum ada timbangan untuk digambar.
-        </Text>
+      <View style={{ minHeight: TINGGI_PLOT, justifyContent: 'center' }}>
+        <KeadaanKosong
+          tampilan="polos"
+          ikon="analytics-outline"
+          judul="Belum ada timbangan"
+          keterangan="Garis rata-rata 7 hari tergambar di sini setelah timbangan pagi pertama Anda."
+        />
       </View>
     );
   }
@@ -170,7 +174,7 @@ export function GrafikTren({
   return (
     <View style={{ gap: spacing.sm }}>
       {/* Baris pemeriksa: isinya berubah saat grafik disentuh */}
-      <View style={{ minHeight: 36, justifyContent: 'center' }}>
+      <View style={{ minHeight: ukuran.barisPemeriksa, justifyContent: 'center' }}>
         {sorot ? (
           <View style={{ gap: spacing.xxs }}>
             <Text style={{ ...typography.caption, color: colors.teksSamar }}>
@@ -178,7 +182,7 @@ export function GrafikTren({
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.md }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
-                <View style={{ width: 10, height: 2, backgroundColor: colors.aksen.isian }} />
+                <GarisLegenda />
                 <Text style={{ ...typography.label, color: colors.teks }}>
                   {sorot.rataRataKg !== null ? `${formatDesimal(sorot.rataRataKg)} kg` : '—'}
                 </Text>
@@ -385,9 +389,7 @@ export function GrafikTren({
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: ukuran.celahTitik }}>
-          <View
-            style={{ width: 12, height: 2, backgroundColor: colors.aksen.isian, borderRadius: radius.pill }}
-          />
+          <GarisLegenda />
           <Text style={{ ...typography.caption, color: colors.teksSamar }}>rata-rata 7 hari</Text>
         </View>
         {koridor ? (
@@ -455,4 +457,18 @@ function tanggalSingkat(tanggal?: string): string {
   const [, sisa] = formatTanggalPanjang(tanggal).split(', ');
   const [hari, bulan] = (sisa ?? '').split(' ');
   return `${hari} ${bulan?.slice(0, 3) ?? ''}`;
+}
+
+/** Contoh garis rata-rata di legenda dan baris pemeriksa. */
+function GarisLegenda() {
+  return (
+    <View
+      style={{
+        width: ukuran.garisLegenda.lebar,
+        height: ukuran.garisLegenda.tebal,
+        borderRadius: radius.pill,
+        backgroundColor: colors.aksen.isian,
+      }}
+    />
+  );
 }

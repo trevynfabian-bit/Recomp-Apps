@@ -38,6 +38,7 @@ export { PemilihFase } from './PemilihFase';
 export { PemilihTipeHari } from './PemilihTipeHari';
 export { PemilihAngka, PemilihTanggal, uraiAngka } from './Pemilih';
 export { PenandaSumber, LegendaSumber } from './PenandaSumber';
+export { BarisTautan } from './BarisTautan';
 export { Pill } from './Pill';
 export { PilihanSegmen, type OpsiSegmen } from './PilihanSegmen';
 export { Sisipan } from './Sisipan';

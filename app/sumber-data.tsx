@@ -4,7 +4,16 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { kesehatanKoneksi, ringkasanKoneksi, urutkanKoneksi } from '@recomp/logika';
 import type { KoneksiSumber, SumberData } from '@recomp/logika';
-import { Card, HeaderLayar, KartuHero, KartuSumberData, SectionHeader, SheetHubungkanSumber, SheetPutuskanSumber } from '@/components';
+import {
+  BarisTautan,
+  Card,
+  HeaderLayar,
+  KartuHero,
+  KartuSumberData,
+  SectionHeader,
+  SheetHubungkanSumber,
+  SheetPutuskanSumber,
+} from '@/components';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { mockHubungkan, mockPutuskan } from '@/mocks/sumberData';
 import { useSinkron } from '@/state/sinkron';
@@ -131,30 +140,12 @@ export default function SumberDataScreen() {
 
       {/* Riwayat lama: pintu satu kali, di bawah sumber yang mengalir. */}
       <Card flat>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Impor riwayat lama: Hevy, Apple Health, ukuran tubuh"
-          onPress={() => {
-            ketukRingan();
-            router.push('/impor-riwayat');
-          }}
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.md,
-            minHeight: TAP_MIN,
-            padding: spacing.lg,
-            opacity: pressed ? 0.6 : 1,
-          })}
-        >
-          <View style={{ flex: 1, gap: spacing.xxs }}>
-            <Text style={{ ...typography.bodySedang, color: colors.teks }}>Impor riwayat lama</Text>
-            <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>
-              Sekali saja: Hevy CSV, Apple Health, ukuran tubuh
-            </Text>
-          </View>
-          <Text style={{ ...typography.title, color: colors.teksSamar }}>›</Text>
-        </Pressable>
+        <BarisTautan
+          judul="Impor riwayat lama"
+          keterangan="Sekali saja: Hevy CSV, Apple Health, ukuran tubuh"
+          aksesLabel="Impor riwayat lama: Hevy, Apple Health, ukuran tubuh"
+          onPress={() => router.push('/impor-riwayat')}
+        />
       </Card>
 
       {/* Anti-dobel dijelaskan di sini, di tempat orang menghubungkan perangkat

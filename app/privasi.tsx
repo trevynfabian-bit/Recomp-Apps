@@ -5,7 +5,15 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DATA_TERSIMPAN, PROFIL_SUMBER, susunStatusPrivasi } from '@recomp/logika';
 import type { ButirStatusPrivasi } from '@recomp/logika';
-import { Card, DaftarBaris, HeaderLayar, SectionHeader, SheetEksporData, SheetHapusAkun } from '@/components';
+import {
+  BarisTautan,
+  Card,
+  DaftarBaris,
+  HeaderLayar,
+  SectionHeader,
+  SheetEksporData,
+  SheetHapusAkun,
+} from '@/components';
 import { ambilPengaturanPengingat } from '@/data/pengaturanNotifikasi';
 import { ketukRingan } from '@/lib/haptics';
 import { supabaseSiap } from '@/lib/supabase';
@@ -154,25 +162,25 @@ export default function PrivasiScreen() {
       <View>
         <SectionHeader judul="Kendali Anda" />
         <DaftarBaris>
-          <BarisKendali
+          <BarisTautan
             ikon="download-outline"
             judul="Ekspor data saya"
             keterangan="CSV & JSON, kapan saja"
             onPress={() => setSheet('ekspor')}
           />
-          <BarisKendali
+          <BarisTautan
             ikon="sync-outline"
             judul="Sumber data"
             keterangan="Sambungkan atau putuskan"
             onPress={() => router.push('/sumber-data')}
           />
-          <BarisKendali
+          <BarisTautan
             ikon="phone-portrait-outline"
             judul="Widget & pengingat"
             keterangan="Angka di layar kunci"
             onPress={() => router.push('/widget-pengingat')}
           />
-          <BarisKendali
+          <BarisTautan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
             keterangan="Tidak bisa dibatalkan"
@@ -204,43 +212,5 @@ export default function PrivasiScreen() {
         }
       />
     </ScrollView>
-  );
-}
-
-function BarisKendali({
-  ikon,
-  judul,
-  keterangan,
-  onPress,
-}: {
-  ikon: React.ComponentProps<typeof Ionicons>['name'];
-  judul: string;
-  keterangan: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${judul}: ${keterangan}`}
-      onPress={() => {
-        ketukRingan();
-        onPress();
-      }}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-        minHeight: TAP_MIN,
-        padding: spacing.lg,
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.teksRedup} />
-      <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text style={{ ...typography.bodySedang, color: colors.teks }}>{judul}</Text>
-        <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{keterangan}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />
-    </Pressable>
   );
 }

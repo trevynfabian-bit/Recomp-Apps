@@ -70,6 +70,10 @@ export const ukuran = {
   kolomAngka: 140,
   /** Tinggi minimum kolom isian multibaris (catatan harian). */
   isianPanjang: 96,
+  /** Garis contoh di legenda grafik (garis rata-rata). */
+  garisLegenda: { lebar: 12, tebal: 2 },
+  /** Baris pemeriksa di atas grafik: tingginya tetap saat isinya berganti. */
+  barisPemeriksa: 36,
   /** Garis penanda di atas ikon tab terpilih. */
   penandaTab: { lebar: 20, tinggi: 3, jarakAtas: 6 },
 } as const;
