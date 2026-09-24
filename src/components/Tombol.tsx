@@ -1,86 +1,191 @@
+import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { ketukRingan } from '@/lib/haptics';
-import { colors, radius, TAP_MIN, typography } from '@/theme';
+import {
+  colors,
+  KONTROL_RAPAT,
+  radius,
+  sisaSentuh,
+  spacing,
+  TAP_MIN,
+  typography,
+  ukuranIkon,
+} from '@/theme';
+
+/**
+ * Varian tombol (bab Desain 8.6):
+ * - `utama`: isian aksen, satu per kartu/sheet — aksi yang paling mungkin dipilih.
+ * - `bertepi`: aksi kedua (batal, coba lagi) yang tidak boleh bersaing dengan utama.
+ * - `merusak`: isian bahaya untuk menghapus/memutuskan; labelnya selalu menyebut
+ *   tindakannya, tidak pernah warna saja.
+ * - `teks`: tautan aksi di dalam kartu ("Ubah", "Lihat 4 nilai"), tanpa isian.
+ */
+export type VarianTombol = 'utama' | 'bertepi' | 'merusak' | 'teks';
+
+/**
+ * `normal` setinggi `TAP_MIN` (44 pt) dan melebar penuh; `kecil` tampil
+ * `KONTROL_RAPAT` (36 pt) selebar isinya, dengan area sentuh tetap 44 pt.
+ */
+export type UkuranTombol = 'normal' | 'kecil';
 
 type Props = {
   label: string;
   onPress: () => void;
+  varian?: VarianTombol;
+  ukuran?: UkuranTombol;
   /** Label untuk pembaca layar bila berbeda dari teks tombolnya. */
   aksesLabel?: string;
+  /** Petunjuk pembaca layar: apa yang terjadi setelah ditekan. */
+  aksesPetunjuk?: string;
   nonaktif?: boolean;
-  /** Menampilkan indikator proses menggantikan label, dan menonaktifkan tombol. */
+  /** Indikator proses menggantikan label; tombol nonaktif selama itu. */
   memproses?: boolean;
+  /**
+   * Aksi baru saja berhasil (mis. "Tersimpan"): isian sukses + centang.
+   * Tombol tetap bisa ditekan lagi; pemanggil yang memutuskan kapan kembali.
+   */
+  berhasil?: boolean;
+  /** Ikon di depan label. */
+  ikon?: React.ComponentProps<typeof Ionicons>['name'];
 };
 
-/**
- * Tombol isian: aksi utama sebuah kartu atau sheet. `merusak` memakai coral
- * untuk tindakan yang menghapus atau memutuskan sesuatu — warnanya disertai
- * label yang menyebut tindakannya, tidak pernah warna saja.
- */
-export function TombolUtama({
+/** Warna isian, tepi, dan label per varian & keadaan. Dibaca saat render (ikut skema). */
+function gaya(varian: VarianTombol, berhasil: boolean) {
+  if (berhasil) return { isian: colors.status.sukses.isian, tepi: 'transparent', label: colors.diAtasIsian };
+  switch (varian) {
+    case 'utama':
+      return { isian: colors.aksen.isian, tepi: 'transparent', label: colors.diAtasIsian };
+    case 'merusak':
+      return { isian: colors.status.bahaya.isian, tepi: 'transparent', label: colors.diAtasIsian };
+    case 'bertepi':
+      return { isian: 'transparent', tepi: colors.garisKontrol, label: colors.teks };
+    case 'teks':
+      return { isian: 'transparent', tepi: 'transparent', label: colors.aksen.teks };
+  }
+}
+
+/** Tombol seragam untuk seluruh app. Lihat `VarianTombol` dan `UkuranTombol`. */
+export function Tombol({
   label,
   onPress,
+  varian = 'utama',
+  ukuran = 'normal',
   aksesLabel,
+  aksesPetunjuk,
   nonaktif = false,
   memproses = false,
-  merusak = false,
-}: Props & { merusak?: boolean }) {
+  berhasil = false,
+  ikon,
+}: Props) {
   const mati = nonaktif || memproses;
+  const kecil = ukuran === 'kecil';
+  const g = gaya(varian, berhasil);
+  const teksGaya = kecil
+    ? typography.label
+    : varian === 'utama' || varian === 'merusak' || berhasil
+      ? typography.bodyTebal
+      : typography.bodySedang;
+  const tinggi = kecil ? KONTROL_RAPAT : TAP_MIN;
+  const ikonTampil = berhasil ? 'checkmark' : ikon;
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={aksesLabel ?? label}
+      accessibilityHint={aksesPetunjuk}
       accessibilityState={{ disabled: mati, busy: memproses }}
       disabled={mati}
+      hitSlop={kecil || varian === 'teks' ? sisaSentuh(tinggi) : undefined}
       onPress={() => {
         ketukRingan();
         onPress();
       }}
       style={({ pressed }) => ({
-        minHeight: TAP_MIN,
+        minHeight: tinggi,
+        alignSelf: kecil || varian === 'teks' ? 'flex-start' : 'stretch',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: radius.md,
-        backgroundColor: merusak ? colors.status.bahaya.isian : colors.aksen.isian,
-        opacity: nonaktif ? 0.45 : pressed ? 0.8 : 1,
+        gap: spacing.xs,
+        paddingHorizontal: varian === 'teks' ? 0 : kecil ? spacing.md : spacing.lg,
+        borderRadius: kecil ? radius.pill : radius.md,
+        backgroundColor: g.isian,
+        borderWidth: g.tepi === 'transparent' ? 0 : 1,
+        borderColor: g.tepi,
+        opacity: nonaktif ? 0.45 : pressed ? (g.isian === 'transparent' ? 0.6 : 0.8) : 1,
       })}
     >
       {memproses ? (
-        <ActivityIndicator color={colors.diAtasIsian} />
+        <ActivityIndicator size="small" color={g.label} />
       ) : (
-        // Label di atas isian selalu warna latar: teks terang di atas coral hanya
-        // 3,64:1, di bawah ambang AA untuk label 16px (lihat docs/desain/arah-visual.md).
-        <Text style={{ ...typography.bodyTebal, color: colors.diAtasIsian }}>
-          {label}
-        </Text>
+        <>
+          {ikonTampil ? (
+            <Ionicons name={ikonTampil} size={kecil ? ukuranIkon.mini : ukuranIkon.kecil} color={g.label} />
+          ) : null}
+          <Text style={{ ...teksGaya, color: g.label }}>{label}</Text>
+        </>
       )}
     </Pressable>
   );
 }
 
-/** Tombol bertepi: aksi kedua (batal, coba lagi) yang tidak boleh bersaing dengan aksi utama. */
-export function TombolBertepi({ label, onPress, aksesLabel, nonaktif = false }: Props) {
+type PropsIkon = {
+  ikon: React.ComponentProps<typeof Ionicons>['name'];
+  /** Wajib: tombol ikon tidak punya teks yang bisa dibacakan. */
+  aksesLabel: string;
+  onPress: () => void;
+  /**
+   * `bulat`: lingkaran 44 pt bertepi di atas permukaan (kembali, −/+).
+   * `polos`: ikon 36 pt tanpa latar (tutup sheet, hapus baris), area sentuh 44 pt.
+   */
+  bentuk?: 'bulat' | 'polos';
+  nonaktif?: boolean;
+  warna?: string;
+};
+
+/** Tombol berisi ikon saja. Selalu dengan `aksesLabel`. */
+export function TombolIkon({ ikon, aksesLabel, onPress, bentuk = 'bulat', nonaktif = false, warna }: PropsIkon) {
+  const bulat = bentuk === 'bulat';
+  const ukuran = bulat ? TAP_MIN : KONTROL_RAPAT;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={aksesLabel ?? label}
+      accessibilityLabel={aksesLabel}
       accessibilityState={{ disabled: nonaktif }}
       disabled={nonaktif}
+      hitSlop={bulat ? undefined : sisaSentuh(KONTROL_RAPAT)}
       onPress={() => {
         ketukRingan();
         onPress();
       }}
       style={({ pressed }) => ({
-        minHeight: TAP_MIN,
+        width: ukuran,
+        height: ukuran,
+        borderRadius: radius.pill,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: radius.md,
-        borderWidth: 1,
+        backgroundColor: bulat ? colors.permukaan : 'transparent',
+        borderWidth: bulat ? 1 : 0,
         borderColor: colors.garisKontrol,
         opacity: nonaktif ? 0.45 : pressed ? 0.6 : 1,
       })}
     >
-      <Text style={{ ...typography.bodySedang, color: colors.teks }}>{label}</Text>
+      <Ionicons name={ikon} size={bulat ? ukuranIkon.baris : ukuranIkon.sedang} color={warna ?? (bulat ? colors.teks : colors.teksRedup)} />
     </Pressable>
   );
 }
+
+// --- Nama lama, tetap didukung: pembungkus tipis di atas `Tombol`. ----------
+
+type PropsLama = Pick<Props, 'label' | 'onPress' | 'aksesLabel' | 'nonaktif' | 'memproses'>;
+
+/** Tombol isian utama. `merusak` memakai varian bahaya. Sama dengan `<Tombol varian="utama" />`. */
+export function TombolUtama({ merusak = false, ...props }: PropsLama & { merusak?: boolean }) {
+  return <Tombol {...props} varian={merusak ? 'merusak' : 'utama'} />;
+}
+
+/** Tombol bertepi untuk aksi kedua. Sama dengan `<Tombol varian="bertepi" />`. */
+export function TombolBertepi({ memproses: _abaikan, ...props }: PropsLama) {
+  return <Tombol {...props} varian="bertepi" />;
+}
+

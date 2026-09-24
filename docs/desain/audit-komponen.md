@@ -56,8 +56,10 @@ Diukur dengan menghitung `<Pressable`, `<TextInput`, `<ActivityIndicator`,
 
 ## 6. Rencana (task berikutnya di fitur ini)
 
-1. **Tombol & aksi**: varian ukuran (normal/kecil), tombol teks, tombol ikon,
-   keadaan *tersimpan*; pindahkan 5 tombol simpan buatan sendiri.
+1. **Tombol & aksi** ✓ `Tombol` (varian utama/bertepi/merusak/teks, ukuran
+   normal/kecil, keadaan nonaktif/memproses/berhasil) dan `TombolIkon`;
+   `TombolUtama`/`TombolBertepi` kini pembungkus `Tombol`. Sisa: pindahkan 5
+   tombol simpan buatan sendiri dan tombol kembali di 10 layar.
 2. **Kartu & kontainer**: `Card` bertanda (perhatian/bahaya), `DaftarBaris` +
    `Pemisah` bersama.
 3. **Formulir & input**: satu `Isian` (label, unit, galat, fokus) untuk teks

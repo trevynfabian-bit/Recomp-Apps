@@ -10,7 +10,9 @@ import {
   MacroRow,
   Pill,
   SectionHeader,
+  Tombol,
   TombolBertepi,
+  TombolIkon,
   TombolUtama,
 } from '@/components';
 import { ketukRingan } from '@/lib/haptics';
@@ -82,12 +84,30 @@ export default function PeragaScreen() {
 
       <Bagian judul="Tombol & aksi">
         <Card style={{ gap: spacing.md }}>
-          <TombolUtama label="Utama" onPress={() => undefined} />
-          <TombolUtama label="Utama memproses" memproses onPress={() => undefined} />
-          <TombolUtama label="Utama nonaktif" nonaktif onPress={() => undefined} />
-          <TombolUtama label="Merusak" merusak onPress={() => undefined} />
-          <TombolBertepi label="Bertepi" onPress={() => undefined} />
-          <TombolBertepi label="Bertepi nonaktif" nonaktif onPress={() => undefined} />
+          <Tombol label="Utama" onPress={() => undefined} />
+          <Tombol label="Utama memproses" memproses onPress={() => undefined} />
+          <Tombol label="Tersimpan" berhasil onPress={() => undefined} />
+          <Tombol label="Utama nonaktif" nonaktif onPress={() => undefined} />
+          <Tombol label="Hapus data" varian="merusak" ikon="trash-outline" onPress={() => undefined} />
+          <Tombol label="Bertepi" varian="bertepi" onPress={() => undefined} />
+          <Tombol label="Bertepi nonaktif" varian="bertepi" nonaktif onPress={() => undefined} />
+          <Tombol label="Tautan teks" varian="teks" onPress={() => undefined} />
+        </Card>
+        <Card style={{ gap: spacing.md, marginTop: spacing.md }}>
+          <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>Ukuran kecil</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            <Tombol label="Utama" ukuran="kecil" onPress={() => undefined} />
+            <Tombol label="Bertepi" ukuran="kecil" varian="bertepi" onPress={() => undefined} />
+            <Tombol label="Tambah" ukuran="kecil" varian="bertepi" ikon="add" onPress={() => undefined} />
+            <Tombol label="Hapus" ukuran="kecil" varian="merusak" onPress={() => undefined} />
+          </View>
+          <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>Tombol ikon</Text>
+          <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+            <TombolIkon ikon="chevron-back" aksesLabel="Kembali" onPress={() => undefined} />
+            <TombolIkon ikon="add" aksesLabel="Tambah" onPress={() => undefined} />
+            <TombolIkon ikon="close" aksesLabel="Tutup" bentuk="polos" onPress={() => undefined} />
+            <TombolIkon ikon="add" aksesLabel="Tambah (nonaktif)" nonaktif onPress={() => undefined} />
+          </View>
         </Card>
       </Bagian>
 

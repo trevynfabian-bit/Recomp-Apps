@@ -100,8 +100,13 @@ berubah karena keputusan desain.
 - Satu angka hero per layar data (Hari Ini, Tren, Budget, Ukuran, Latihan,
   Sumber data, Target harian); komponen tidak membawa angka hero sendiri.
 - Judul layar tab dan tumpukan memakai `title` dengan peran header aksesibilitas.
-- Satu set tombol: utama (isian aksen, label tebal), bertepi (aksi kedua),
-  merusak (isian coral, label menyebut tindakannya).
+- Satu komponen tombol (`Tombol`) dengan empat varian: **utama** (isian
+  aksen, satu per kartu/sheet), **bertepi** (aksi kedua), **merusak** (isian
+  bahaya, label menyebut tindakannya), **teks** (tautan aksi di dalam kartu).
+  Dua ukuran: **normal** 44 pt selebar kontainer, **kecil** 36 pt selebar isi
+  dengan area sentuh 44 pt. Keadaan: nonaktif (45%), memproses (spinner),
+  berhasil (isian sukses + centang). Tombol berisi ikon saja memakai
+  `TombolIkon` (bulat 44 pt atau polos 36 pt) dan selalu punya label akses.
 
 ### 8.7 Mode terang & gelap
 
