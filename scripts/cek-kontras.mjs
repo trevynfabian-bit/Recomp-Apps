@@ -1,20 +1,18 @@
 /**
- * Memeriksa kontras teks terhadap latar sesuai WCAG 2.1 AA.
+ * Memeriksa kontras teks terhadap latar sesuai WCAG 2.1 AA, untuk KEDUA mode.
  *
  * Palet di PRD dipilih untuk NUANSA, bukan untuk keterbacaan, dan beberapa
- * aksennya memang tidak lolos sebagai teks kecil — itulah sebabnya tema punya
- * varian `aksenTeks`/`macroTeks` yang terpisah. Aturan mana yang dipakai di mana
- * cuma bisa dijaga kalau diperiksa mesin; dengan mata, aksen 3,5:1 dan 4,6:1 di
- * atas latar gelap terlihat sama-sama "cukup terang".
+ * aksennya memang tidak lolos sebagai teks kecil — itulah sebabnya setiap peran
+ * punya varian `isian` dan `teks` yang terpisah. Aturan mana yang dipakai di
+ * mana cuma bisa dijaga kalau diperiksa mesin; dengan mata, aksen 3,5:1 dan
+ * 4,6:1 di atas latar gelap terlihat sama-sama "cukup terang".
  *
- * Latar bertint (mis. banner `amber + '14'` di atas `bg`) ikut dihitung sebagai
- * WARNA HASIL CAMPURAN, bukan sebagai latar dasarnya — teks di dalam banner
- * berdiri di atas campuran itu, bukan di atas `bg`.
+ * Latar bertint (mis. banner `aksen.isian + '14'` di atas `latar`) ikut
+ * dihitung sebagai WARNA HASIL CAMPURAN, bukan sebagai latar dasarnya — teks di
+ * dalam banner berdiri di atas campuran itu, bukan di atas `latar`.
  *
- * Nama di daftar memakai kunci `colors` di kode; padanannya dengan peran
- * semantik di docs/desain/arah-visual.md bab 1: aksen & peringatan = amber,
- * sukses = jade/aksenTeks.jade, bahaya = coral/aksenTeks.coral,
- * info = macro.karbo/macroTeks.karbo, teksDiAtasIsian = bg.
+ * Kode di sini memakai nama semantik yang sama dengan layar (bab Desain 8.2).
+ * Label "amber"/"coral"/"jade" di daftar hanya untuk dibaca manusia.
  */
 import { copyFileSync, mkdtempSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -75,12 +73,12 @@ const kontras = (a, b) => {
 /** Semua pasangan untuk satu palet `c` (mode gelap atau terang). */
 function pasangan(c) {
 /** Latar bertint yang benar-benar dipakai di layar. */
-const BANNER_AMBER = campur(c.amber, '14', c.bg);
-const BANNER_CORAL = campur(c.coral, '14', c.bg);
-const PILL_AMBER = campur(c.amber, '1A', c.surface);
-const PILIHAN_AMBER = campur(c.amber, '14', c.surface);
+const BANNER_AMBER = campur(c.aksen.isian, '14', c.latar);
+const BANNER_CORAL = campur(c.status.bahaya.isian, '14', c.latar);
+const PILL_AMBER = campur(c.aksen.isian, '1A', c.permukaan);
+const PILIHAN_AMBER = campur(c.aksen.isian, '14', c.permukaan);
 /** Gelembung pesan pengguna: amber 8% di atas latar layar. */
-const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
+const GELEMBUNG_PENGGUNA = campur(c.aksen.isian, '14', c.latar);
 
 /**
  * Pasangan yang benar-benar ada di layar. `besar` berarti teksnya ≥24px atau
@@ -88,48 +86,48 @@ const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
  */
   return [
   // Teks netral di tiap permukaan
-  ['text di bg', c.text, c.bg, false],
-  ['text di surface', c.text, c.surface, false],
-  ['text di surfaceSunken', c.text, c.surfaceSunken, false],
-  ['textMuted di bg', c.textMuted, c.bg, false],
-  ['textMuted di surface', c.textMuted, c.surface, false],
-  ['textMuted di surfaceSunken', c.textMuted, c.surfaceSunken, false],
-  ['textFaint di bg', c.textFaint, c.bg, false],
-  ['textFaint di surface', c.textFaint, c.surface, false],
-  ['textFaint di surfaceSunken', c.textFaint, c.surfaceSunken, false],
+  ['teks di latar', c.teks, c.latar, false],
+  ['teks di permukaan', c.teks, c.permukaan, false],
+  ['teks di permukaanCekung', c.teks, c.permukaanCekung, false],
+  ['teksRedup di latar', c.teksRedup, c.latar, false],
+  ['teksRedup di permukaan', c.teksRedup, c.permukaan, false],
+  ['teksRedup di permukaanCekung', c.teksRedup, c.permukaanCekung, false],
+  ['teksSamar di latar', c.teksSamar, c.latar, false],
+  ['teksSamar di permukaan', c.teksSamar, c.permukaan, false],
+  ['teksSamar di permukaanCekung', c.teksSamar, c.permukaanCekung, false],
 
   // Aksen sebagai TEKS KECIL — di sinilah varian aksenTeks wajib dipakai
-  ['amber di surface', c.amber, c.surface, false],
-  ['amber di surfaceSunken', c.amber, c.surfaceSunken, false],
-  ['amber di bg', c.amber, c.bg, false],
-  ['aksenTeks.coral di surface', c.aksenTeks.coral, c.surface, false],
-  ['aksenTeks.coral di surfaceSunken', c.aksenTeks.coral, c.surfaceSunken, false],
-  ['aksenTeks.jade di surface', c.aksenTeks.jade, c.surface, false],
-  ['aksenTeks.jade di surfaceSunken', c.aksenTeks.jade, c.surfaceSunken, false],
+  ['amber di permukaan', c.aksen.teks, c.permukaan, false],
+  ['amber di permukaanCekung', c.aksen.teks, c.permukaanCekung, false],
+  ['amber di latar', c.aksen.teks, c.latar, false],
+  ['bahaya.teks di permukaan', c.status.bahaya.teks, c.permukaan, false],
+  ['bahaya.teks di permukaanCekung', c.status.bahaya.teks, c.permukaanCekung, false],
+  ['sukses.teks di permukaan', c.status.sukses.teks, c.permukaan, false],
+  ['sukses.teks di permukaanCekung', c.status.sukses.teks, c.permukaanCekung, false],
 
   // Warna makro sebagai teks
-  ['macroTeks.kalori di surface', c.macroTeks.kalori, c.surface, false],
-  ['macroTeks.protein di surface', c.macroTeks.protein, c.surface, false],
-  ['macroTeks.lemak di surface', c.macroTeks.lemak, c.surface, false],
-  ['macroTeks.karbo di surface', c.macroTeks.karbo, c.surface, false],
-  ['macroTeks.satFat di surface', c.macroTeks.satFat, c.surface, false],
-  ['macroTeks.lemak di surfaceSunken', c.macroTeks.lemak, c.surfaceSunken, false],
+  ['macroTeks.kalori di permukaan', c.macroTeks.kalori, c.permukaan, false],
+  ['macroTeks.protein di permukaan', c.macroTeks.protein, c.permukaan, false],
+  ['macroTeks.lemak di permukaan', c.macroTeks.lemak, c.permukaan, false],
+  ['macroTeks.karbo di permukaan', c.macroTeks.karbo, c.permukaan, false],
+  ['macroTeks.satFat di permukaan', c.macroTeks.satFat, c.permukaan, false],
+  ['macroTeks.lemak di permukaanCekung', c.macroTeks.lemak, c.permukaanCekung, false],
 
   // Latar bertint: banner, pill, dan kotak konfirmasi
-  ['amber di banner amber (14 atas bg)', c.amber, BANNER_AMBER, false],
-  ['textFaint di banner amber', c.textFaint, BANNER_AMBER, false],
-  ['aksenTeks.coral di banner coral (14 atas bg)', c.aksenTeks.coral, BANNER_CORAL, false],
-  ['textFaint di banner coral', c.textFaint, BANNER_CORAL, false],
-  ['amber di pill amber (1A atas surface)', c.amber, PILL_AMBER, false],
+  ['amber di banner amber (14 atas latar)', c.aksen.teks, BANNER_AMBER, false],
+  ['teksSamar di banner amber', c.teksSamar, BANNER_AMBER, false],
+  ['bahaya.teks di banner coral (14 atas latar)', c.status.bahaya.teks, BANNER_CORAL, false],
+  ['teksSamar di banner coral', c.teksSamar, BANNER_CORAL, false],
+  ['amber di pill amber (1A atas permukaan)', c.aksen.teks, PILL_AMBER, false],
   // Latar pilihan terpilih (amber 8% di atas surface) — dipakai PemilihFase,
   // PanelRedistribusi, dan pemilih jenis kelamin.
-  ['amber di pilihan terpilih', c.amber, PILIHAN_AMBER, false],
-  ['text di pilihan terpilih', c.text, PILIHAN_AMBER, false],
+  ['amber di pilihan terpilih', c.aksen.teks, PILIHAN_AMBER, false],
+  ['teks di pilihan terpilih', c.teks, PILIHAN_AMBER, false],
   // textFaint SENGAJA tidak ada di daftar ini: di atas latar terpilih ia cuma
   // 3,94:1, jadi sub-label pilihan memakai textMuted. Kalau suatu saat ada yang
   // memasang textFaint di sana lagi, pasangannya harus ditambahkan ke sini dan
   // akan langsung gagal.
-  ['textMuted di pilihan terpilih', c.textMuted, PILIHAN_AMBER, false],
+  ['teksRedup di pilihan terpilih', c.teksRedup, PILIHAN_AMBER, false],
 
   // Peran semantik (bab Desain 8.2): teks tiap peran di tiga permukaan, dan
   // isiannya sebagai mark terhadap track.
@@ -148,41 +146,41 @@ const GELEMBUNG_PENGGUNA = campur(c.amber, '14', c.bg);
   // (tanpa isian), sehingga teksnya berdiri langsung di atas `surface`.
   // Pill bertint di atas surface SENGAJA tidak ada: jade/coral/karbo di sana
   // hanya ~3,9:1.
-  ['sukses: pill jade di bg', c.aksenTeks.jade, campur(c.aksenTeks.jade, '1A', c.bg), false],
-  ['bahaya: pill coral di bg', c.aksenTeks.coral, campur(c.aksenTeks.coral, '1A', c.bg), false],
-  ['info: pill karbo di bg', c.macroTeks.karbo, campur(c.macroTeks.karbo, '1A', c.bg), false],
-  ['peringatan: pill amber di bg', c.amber, campur(c.amber, '1A', c.bg), false],
-  ['pill textMuted di kartu (tanpa isian)', c.textMuted, c.surface, false],
+  ['sukses: pill jade di latar', c.status.sukses.teks, campur(c.status.sukses.teks, '1A', c.latar), false],
+  ['bahaya: pill coral di latar', c.status.bahaya.teks, campur(c.status.bahaya.teks, '1A', c.latar), false],
+  ['info: pill karbo di latar', c.macroTeks.karbo, campur(c.macroTeks.karbo, '1A', c.latar), false],
+  ['peringatan: pill amber di latar', c.aksen.teks, campur(c.aksen.isian, '1A', c.latar), false],
+  ['pill teksRedup di kartu (tanpa isian)', c.teksRedup, c.permukaan, false],
 
-  ['text di gelembung pengguna', c.text, GELEMBUNG_PENGGUNA, false],
-  ['textFaint di gelembung pengguna', c.textFaint, GELEMBUNG_PENGGUNA, false],
+  ['teks di gelembung pengguna', c.teks, GELEMBUNG_PENGGUNA, false],
+  ['teksSamar di gelembung pengguna', c.teksSamar, GELEMBUNG_PENGGUNA, false],
 
   // Warna status `info` (ungu karbo) sebagai teks kecil
-  ['macroTeks.karbo di bg', c.macroTeks.karbo, c.bg, false],
-  ['macroTeks.karbo di surfaceSunken', c.macroTeks.karbo, c.surfaceSunken, false],
-  ['aksenTeks.coral di bg', c.aksenTeks.coral, c.bg, false],
-  ['aksenTeks.jade di bg', c.aksenTeks.jade, c.bg, false],
+  ['macroTeks.karbo di latar', c.macroTeks.karbo, c.latar, false],
+  ['macroTeks.karbo di permukaanCekung', c.macroTeks.karbo, c.permukaanCekung, false],
+  ['bahaya.teks di latar', c.status.bahaya.teks, c.latar, false],
+  ['sukses.teks di latar', c.status.sukses.teks, c.latar, false],
 
   // Label di atas tombol isian penuh. Aturannya: label di atas isian APA PUN
   // memakai `bg`. `text` di atas coral hanya 3,64:1 — pasangan itu dulu
   // dipakai tombol merusak dan sengaja tidak masuk daftar ini.
-  ['diAtasIsian di atas amber', c.diAtasIsian, c.amber, false],
-  ['diAtasIsian di atas jade', c.diAtasIsian, c.jade, false],
-  ['diAtasIsian di atas coral', c.diAtasIsian, c.coral, false],
+  ['diAtasIsian di atas amber', c.diAtasIsian, c.aksen.teks, false],
+  ['diAtasIsian di atas jade', c.diAtasIsian, c.status.sukses.isian, false],
+  ['diAtasIsian di atas coral', c.diAtasIsian, c.status.bahaya.isian, false],
 
   // Mark grafik dan tepi KONTROL — ambang 3:1 (WCAG 1.4.11)
-  ['garis amber di surface (mark)', c.amber, c.surface, true],
+  ['garis amber di permukaan (mark)', c.aksen.teks, c.permukaan, true],
   // Bar makro terhadap TRACK-nya: batas "sudah terpakai" adalah informasi,
   // jadi ia tunduk pada ambang 3:1 untuk objek grafis (WCAG 1.4.11).
   ...['kalori', 'protein', 'lemak', 'karbo', 'satFat'].map((k) => [
     `bar ${k} vs track surfaceSunken`,
     c.macro[k],
-    c.surfaceSunken,
+    c.permukaanCekung,
     true,
   ]),
-  ['borderKuat di surface', c.borderKuat, c.surface, true],
-  ['borderKuat di surfaceSunken', c.borderKuat, c.surfaceSunken, true],
-  ['borderKuat di bg', c.borderKuat, c.bg, true],
+  ['garisKontrol di permukaan', c.garisKontrol, c.permukaan, true],
+  ['garisKontrol di permukaanCekung', c.garisKontrol, c.permukaanCekung, true],
+  ['garisKontrol di latar', c.garisKontrol, c.latar, true],
 ];
 }
 
@@ -210,9 +208,9 @@ for (const [skema, c] of Object.entries(PALET)) {
  */
 console.log('\nGaris pemisah dekoratif harus tetap resesif');
 for (const [skema, c] of Object.entries(PALET)) {
-  const rasioGaris = kontras(c.border, c.surface);
+  const rasioGaris = kontras(c.garis, c.permukaan);
   console.log(
-    `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} [${skema}] border vs surface ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
+    `${rasioGaris < 2 ? '  ok  ' : ' GAGAL'} [${skema}] garis vs permukaan ${rasioGaris.toFixed(2)}:1 (maks 2,0)`,
   );
   if (rasioGaris >= 2) gagal += 1;
 }

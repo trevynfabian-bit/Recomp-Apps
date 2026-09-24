@@ -88,7 +88,7 @@ cek('warna layar & komponen hanya dari src/theme', pelanggar.length === 0, pelan
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
 const bg = /bg: '(#[0-9A-Fa-f]{6})'/.exec(readFileSync('src/theme/colors.ts', 'utf8'))?.[1];
 cek('app.json: userInterfaceStyle mengikuti sistem', app.userInterfaceStyle === 'automatic');
-cek(`app.json: latar = colors.bg (${bg})`, Boolean(bg) && app.backgroundColor === bg && app.splash?.backgroundColor === bg);
+cek(`app.json: latar asli = colors.latar mode gelap (${bg})`, Boolean(bg) && app.backgroundColor === bg && app.splash?.backgroundColor === bg);
 const tataLetak = readFileSync('app/_layout.tsx', 'utf8');
 cek(
   'status bar mengikuti skema (terang di atas gelap, gelap di atas terang)',

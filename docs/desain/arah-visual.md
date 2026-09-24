@@ -109,6 +109,11 @@ palet dasar sehingga setiap heks hanya ditulis sekali:
 | `colors.jade` | `colors.status.sukses.isian` |
 | `colors.aksenTeks.coral` / `.jade` | `colors.status.bahaya.teks` / `colors.status.sukses.teks` |
 
+**Status peralihan:** pemakaian token usang di `app/`, `src/`, dan
+`scripts/` sudah **nol** (layar dipindahkan lewat codemod; `cek-kontras.mjs`
+kini memakai nama semantik yang sama). Token usang hanya tersisa sebagai alias
+di `colors.ts`.
+
 Yang **tetap berlaku**: `diAtasIsian`, `macro.*`, `macroTeks.*` (nama domain,
 bukan nama warna). Token usang dihapus dari palet setelah pemakaian terakhirnya
 di `src/theme` dan `scripts/cek-kontras.mjs` ikut dipindahkan.
