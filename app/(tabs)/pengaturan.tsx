@@ -39,7 +39,7 @@ import { useProfil } from '@/state/profil';
 import { useHasilLab } from '@/state/hasilLab';
 import { useSesi } from '@/state/sesi';
 import { useTarget } from '@/state/target';
-import { colors, KONTROL_SEGMEN, type PilihanTampilan, radius, sisaSentuh, spacing, TAP_MIN, typography, ukuran, ukuranIkon, usePilihanTampilan, useSkema } from '@/theme';
+import { colors, type PilihanTampilan, radius, spacing, typography, ukuran, ukuranIkon, usePilihanTampilan, useSkema } from '@/theme';
 
 type Sheet = 'profil' | 'fase' | 'pinggang' | 'ekspor' | 'keluar' | 'hapus' | null;
 
@@ -123,8 +123,8 @@ export default function PengaturanScreen() {
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
           <View
             style={{
-              width: 52,
-              height: 52,
+              width: ukuran.avatar,
+              height: ukuran.avatar,
               borderRadius: radius.pill,
               backgroundColor: colors.permukaanCekung,
               borderWidth: 1,
@@ -316,6 +316,7 @@ export default function PengaturanScreen() {
           <BarisTautan
             ikon="trash-outline"
             judul="Hapus akun & semua data"
+            nada="bahaya"
             keterangan="Tidak bisa dibatalkan"
             petunjuk="Membuka konfirmasi penghapusan akun"
             onPress={() => setSheet('hapus')}

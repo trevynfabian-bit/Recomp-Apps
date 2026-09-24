@@ -13,6 +13,12 @@ type Props = {
   petunjuk?: string;
   /** Label pembaca layar bila berbeda dari `judul: keterangan`. */
   aksesLabel?: string;
+  /**
+   * `bahaya` untuk baris yang membuka tindakan merusak (hapus akun): ikon dan
+   * judul coral, supaya tidak terbaca setara dengan baris biasa. Tindakannya
+   * sendiri tetap dikonfirmasi di sheet.
+   */
+  nada?: 'bahaya';
   onPress: () => void;
 };
 
@@ -22,7 +28,8 @@ type Props = {
  * baris) atau `Card flat` (satu baris); padding-nya sendiri `lg`, jadi tepi
  * teksnya sejajar dengan isi kartu lain.
  */
-export function BarisTautan({ judul, keterangan, ikon, petunjuk, aksesLabel, onPress }: Props) {
+export function BarisTautan({ judul, keterangan, ikon, petunjuk, aksesLabel, nada, onPress }: Props) {
+  const warnaUtama = nada === 'bahaya' ? colors.status.bahaya.teks : undefined;
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,9 +48,9 @@ export function BarisTautan({ judul, keterangan, ikon, petunjuk, aksesLabel, onP
         opacity: pressed ? 0.6 : 1,
       })}
     >
-      {ikon ? <Ionicons name={ikon} size={ukuranIkon.baris} color={colors.teksRedup} /> : null}
+      {ikon ? <Ionicons name={ikon} size={ukuranIkon.baris} color={warnaUtama ?? colors.teksRedup} /> : null}
       <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text style={{ ...typography.bodySedang, color: colors.teks }}>{judul}</Text>
+        <Text style={{ ...typography.bodySedang, color: warnaUtama ?? colors.teks }}>{judul}</Text>
         {keterangan ? <Text style={{ ...typography.labelBiasa, color: colors.teksSamar }}>{keterangan}</Text> : null}
       </View>
       <Ionicons name="chevron-forward" size={ukuranIkon.kecil} color={colors.teksSamar} />

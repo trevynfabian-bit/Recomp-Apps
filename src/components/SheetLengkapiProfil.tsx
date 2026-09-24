@@ -4,9 +4,11 @@ import { formatMakro } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import type { Profile } from '@/types/domain';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
 import { Isian } from './Isian';
+import { uraiAngka } from './Pemilih';
 
 /** Batas tinggi yang masuk akal; penjaga salah ketik, bukan penilaian. */
 const TINGGI_MIN = 100;
@@ -47,7 +49,7 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
     setStatus('idle');
   }, [terbuka, profil.tinggi_cm, profil.jenis_kelamin]);
 
-  const tinggiAngka = urai(tinggi);
+  const tinggiAngka = uraiAngka(tinggi);
   const tinggiValid =
     tinggiAngka !== null && tinggiAngka >= TINGGI_MIN && tinggiAngka <= TINGGI_MAKS;
   const bisaSimpan = tinggiValid && jenisKelamin !== null;
@@ -70,123 +72,83 @@ export function SheetLengkapiProfil({ terbuka, onTutup, profil, onSimpan }: Prop
   }
 
   return (
-    <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
-        <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
+    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Data untuk estimasi body fat">
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+        Dua data ini dipakai rumus Navy dan disimpan di profil, jadi cukup diisi sekali.
+        Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
+      </Text>
 
-        <View
-          style={{
-            maxHeight: '88%',
-            backgroundColor: colors.permukaan,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            borderTopWidth: 1,
-            borderColor: colors.garis,
-          }}
-        >
-          <View
-            style={{
-              alignItems: 'center',
-              paddingTop: spacing.md,
-              paddingBottom: spacing.md,
-              gap: spacing.sm,
-            }}
-          >
-            <View
-              style={{
-                width: ukuran.pegangan.lebar,
-                height: ukuran.pegangan.tinggi,
-                borderRadius: radius.pill,
-                backgroundColor: colors.garis,
+      {/* Tinggi badan. Sengaja tanpa placeholder angka: angka contoh di
+          kolom kosong terbaca seperti nilai yang sudah terisi. */}
+      <Isian
+        label="Tinggi badan"
+        unit="cm"
+        angka
+        value={tinggi}
+        onChangeText={setTinggi}
+        keyboardType="decimal-pad"
+        inputMode="decimal"
+        selectTextOnFocus
+        aksesLabel="Tinggi badan dalam sentimeter"
+        galat={tinggi !== '' && !tinggiValid ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.` : null}
+        keterangan="Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda."
+      />
+
+      {/* Jenis kelamin */}
+      <View style={{ gap: spacing.xs }}>
+        {/* Label setara label Isian di atasnya: satu form, satu gaya label. */}
+        <Text style={{ ...typography.caption, color: colors.teksRedup }}>Jenis kelamin</Text>
+        <View accessibilityRole="radiogroup" accessibilityLabel="Jenis kelamin" style={{ flexDirection: 'row', gap: spacing.sm }}>
+          {(['pria', 'wanita'] as const).map((nilai) => (
+            <PilihanKelamin
+              key={nilai}
+              label={nilai === 'pria' ? 'Pria' : 'Wanita'}
+              aktif={jenisKelamin === nilai}
+              onPilih={() => {
+                ketukRingan();
+                setJenisKelamin(nilai);
               }}
             />
-            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-              Data untuk estimasi body fat
-            </Text>
-          </View>
-
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
-          >
-            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-              Dua data ini dipakai rumus Navy dan disimpan di profil, jadi cukup diisi sekali.
-              Keduanya tidak dikirim ke mana pun selain database Anda sendiri.
-            </Text>
-
-            {/* Tinggi badan. Sengaja tanpa placeholder angka: angka contoh di
-                kolom kosong terbaca seperti nilai yang sudah terisi. */}
-            <Isian
-              label="Tinggi badan"
-              unit="cm"
-              angka
-              value={tinggi}
-              onChangeText={setTinggi}
-              keyboardType="decimal-pad"
-              inputMode="decimal"
-              selectTextOnFocus
-              aksesLabel="Tinggi badan dalam sentimeter"
-              galat={tinggi !== '' && !tinggiValid ? `Masukkan tinggi antara ${TINGGI_MIN} dan ${TINGGI_MAKS} cm.` : null}
-              keterangan="Rumus Navy membandingkan lingkar pinggang dengan tinggi badan — tanpa tinggi, lingkar yang sama bisa berarti komposisi yang sangat berbeda."
-            />
-
-            {/* Jenis kelamin */}
-            <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.body, color: colors.teks }}>Jenis kelamin</Text>
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                {(['pria', 'wanita'] as const).map((nilai) => (
-                  <PilihanKelamin
-                    key={nilai}
-                    label={nilai === 'pria' ? 'Pria' : 'Wanita'}
-                    aktif={jenisKelamin === nilai}
-                    onPilih={() => {
-                      ketukRingan();
-                      setJenisKelamin(nilai);
-                    }}
-                  />
-                ))}
-              </View>
-              <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                Rumus Navy memakai konstanta yang berbeda untuk pria dan wanita. Versi wanita juga
-                butuh lingkar pinggul, yang belum dicatat app ini — jadi untuk sekarang estimasinya
-                baru bisa dihitung untuk pria.
-              </Text>
-            </View>
-
-            {status === 'gagal' ? (
-              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
-                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-                  Gagal menyimpan
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Isian Anda masih ada di layar ini. Coba lagi.
-                </Text>
-              </Panel>
-            ) : null}
-
-            <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
-              <Tombol
-                label={labelSimpan(status)}
-                onPress={() => void simpan()}
-                nonaktif={!bisaSimpan}
-                memproses={status === 'menyimpan'}
-                berhasil={status === 'tersimpan'}
-              />
-
-              <Tombol
-                varian="teks"
-                ukuran="kecil"
-                nada="netral"
-                label="Nanti saja"
-                nonaktif={terkunci}
-                sejajar="tengah"
-                onPress={onTutup}
-              />
-            </View>
-          </ScrollView>
+          ))}
         </View>
+        <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+          Rumus Navy memakai konstanta yang berbeda untuk pria dan wanita. Versi wanita juga
+          butuh lingkar pinggul, yang belum dicatat app ini — jadi untuk sekarang estimasinya
+          baru bisa dihitung untuk pria.
+        </Text>
       </View>
-    </Modal>
+
+      {status === 'gagal' ? (
+        <Panel nada="bahaya" style={{ gap: spacing.xs }}>
+          <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
+            Gagal menyimpan
+          </Text>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+            Isian Anda masih ada di layar ini. Coba lagi.
+          </Text>
+        </Panel>
+      ) : null}
+
+      <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
+        <Tombol
+          label={labelSimpan(status)}
+          onPress={() => void simpan()}
+          nonaktif={!bisaSimpan}
+          memproses={status === 'menyimpan'}
+          berhasil={status === 'tersimpan'}
+        />
+
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          nada="netral"
+          label="Nanti saja"
+          nonaktif={terkunci}
+          sejajar="tengah"
+          onPress={onTutup}
+        />
+      </View>
+    </KerangkaSheet>
   );
 }
 
@@ -253,12 +215,4 @@ function labelSimpan(status: StatusSimpan): string {
     default:
       return 'Simpan ke profil';
   }
-}
-
-/** Urai input pengguna; menerima koma maupun titik sebagai pemisah desimal. */
-function urai(teks: string): number | null {
-  const bersih = teks.replace(',', '.').trim();
-  if (bersih === '') return null;
-  const n = Number(bersih);
-  return Number.isFinite(n) ? n : null;
 }

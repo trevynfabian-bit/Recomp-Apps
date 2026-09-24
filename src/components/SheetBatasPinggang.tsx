@@ -3,6 +3,7 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { formatDesimal } from '@recomp/logika';
 import { ketukBerhasil, ketukRingan } from '@/lib/haptics';
 import { colors, radius, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
+import { KerangkaSheet } from './KerangkaSheet';
 import { Tombol } from './Tombol';
 import { Panel } from './Card';
 import { PemilihAngka, uraiAngka } from './Pemilih';
@@ -89,163 +90,122 @@ export function SheetBatasPinggang({
   const terkunci = status === 'menyimpan' || status === 'tersimpan';
 
   return (
-    <Modal visible={terbuka} transparent animationType="slide" onRequestClose={onTutup}>
-      <View style={{ flex: 1, backgroundColor: colors.selubung, justifyContent: 'flex-end' }}>
-        <Pressable accessibilityLabel="Tutup" onPress={onTutup} style={{ flex: 1 }} />
+    <KerangkaSheet terbuka={terbuka} onTutup={onTutup} label="Batas pinggang">
+      {/* − 86,0 cm + */}
+      <PemilihAngka
+        nilai={draf}
+        onUbah={(t) => {
+          setDraf(t);
+          if (status === 'gagal') setStatus('idle');
+        }}
+        langkah={LANGKAH_CM}
+        min={BATAS_MIN}
+        maks={BATAS_MAKS}
+        cadangan={angka ?? nilaiAwal}
+        unit="cm"
+        unitAkses="sentimeter"
+        aksesLabel="Batas pinggang dalam sentimeter"
+        galat={valid ? null : `Masukkan batas antara ${BATAS_MIN} dan ${BATAS_MAKS} cm.`}
+      />
 
-        <View
-          style={{
-            maxHeight: '88%',
-            backgroundColor: colors.permukaan,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            borderTopWidth: 1,
-            borderColor: colors.garis,
-          }}
-        >
-          <View
+      {!valid ? null : (
+        /* Jarak ke pinggang sekarang — arti sebenarnya dari angka di atas. */
+        <Panel style={{ gap: spacing.xs, borderWidth: 1, borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent' }}>
+          <Text
             style={{
-              alignItems: 'center',
-              paddingTop: spacing.md,
-              paddingBottom: spacing.md,
-              gap: spacing.sm,
+              ...typography.label,
+              color: sudahLewat ? colors.status.bahaya.teks : colors.teks,
             }}
           >
-            <View
-              style={{
-                width: ukuran.pegangan.lebar,
-                height: ukuran.pegangan.tinggi,
+            {sisa === 0
+              ? 'Pas di batas'
+              : sudahLewat
+                ? `Sudah ${formatDesimal(Math.abs(sisa!))} cm di atas batas ini`
+                : `Sisa ${formatDesimal(sisa!)} cm sampai batas`}
+          </Text>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+            Pinggang terakhir Anda {formatDesimal(pinggangSekarangCm)} cm.
+            {sudahLewat
+              ? ' Menetapkan batas di bawah angka sekarang boleh saja — artinya sinyalnya aktif sejak hari ini.'
+              : ''}
+          </Text>
+        </Panel>
+      )}
+
+      {/* Jangkar siap pakai */}
+      <View style={{ gap: spacing.sm }}>
+        <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
+          Pilih cepat
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          {saran.map((s) => (
+            <Pressable
+              key={s.label}
+              accessibilityRole="button"
+              accessibilityLabel={`Setel batas ke ${formatDesimal(s.nilai)} sentimeter, ${s.label}`}
+              onPress={() => {
+                ketukRingan();
+                setDraf(formatDesimal(s.nilai));
+              }}
+              style={({ pressed }) => ({
+                minHeight: TAP_MIN,
+                justifyContent: 'center',
+                paddingHorizontal: spacing.lg,
                 borderRadius: radius.pill,
-                backgroundColor: colors.garis,
-              }}
-            />
-            <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-              Batas pinggang
-            </Text>
-          </View>
-
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: spacing.xl, gap: spacing.xl }}
-          >
-            {/* − 86,0 cm + */}
-            <PemilihAngka
-              nilai={draf}
-              onUbah={(t) => {
-                setDraf(t);
-                if (status === 'gagal') setStatus('idle');
-              }}
-              langkah={LANGKAH_CM}
-              min={BATAS_MIN}
-              maks={BATAS_MAKS}
-              cadangan={angka ?? nilaiAwal}
-              unit="cm"
-              unitAkses="sentimeter"
-              aksesLabel="Batas pinggang dalam sentimeter"
-              galat={valid ? null : `Masukkan batas antara ${BATAS_MIN} dan ${BATAS_MAKS} cm.`}
-            />
-
-            {!valid ? null : (
-              /* Jarak ke pinggang sekarang — arti sebenarnya dari angka di atas. */
-              <Panel style={{ gap: spacing.xs, borderWidth: 1, borderColor: sudahLewat ? tint(colors.status.bahaya.isian, 'tepi') : 'transparent' }}>
-                <Text
-                  style={{
-                    ...typography.label,
-                    color: sudahLewat ? colors.status.bahaya.teks : colors.teks,
-                  }}
-                >
-                  {sisa === 0
-                    ? 'Pas di batas'
-                    : sudahLewat
-                      ? `Sudah ${formatDesimal(Math.abs(sisa!))} cm di atas batas ini`
-                      : `Sisa ${formatDesimal(sisa!)} cm sampai batas`}
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Pinggang terakhir Anda {formatDesimal(pinggangSekarangCm)} cm.
-                  {sudahLewat
-                    ? ' Menetapkan batas di bawah angka sekarang boleh saja — artinya sinyalnya aktif sejak hari ini.'
-                    : ''}
-                </Text>
-              </Panel>
-            )}
-
-            {/* Jangkar siap pakai */}
-            <View style={{ gap: spacing.sm }}>
-              <Text style={{ ...typography.caption, color: colors.teksSamar, textTransform: 'uppercase' }}>
-                Pilih cepat
+                borderWidth: 1,
+                borderColor: colors.garisKontrol,
+                backgroundColor: colors.permukaanCekung,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ ...typography.label, color: colors.teksRedup }}>
+                {formatDesimal(s.nilai)} · {s.label}
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                {saran.map((s) => (
-                  <Pressable
-                    key={s.label}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Setel batas ke ${formatDesimal(s.nilai)} sentimeter, ${s.label}`}
-                    onPress={() => {
-                      ketukRingan();
-                      setDraf(formatDesimal(s.nilai));
-                    }}
-                    style={({ pressed }) => ({
-                      minHeight: TAP_MIN,
-                      justifyContent: 'center',
-                      paddingHorizontal: spacing.lg,
-                      borderRadius: radius.pill,
-                      borderWidth: 1,
-                      borderColor: colors.garisKontrol,
-                      backgroundColor: colors.permukaanCekung,
-                      opacity: pressed ? 0.7 : 1,
-                    })}
-                  >
-                    <Text style={{ ...typography.label, color: colors.teksRedup }}>
-                      {formatDesimal(s.nilai)} · {s.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {/* Apa arti batas ini, supaya tidak terbaca sebagai target. */}
-            <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-              Batas ini bukan target dan bukan penilaian atas tubuh Anda — ia garis keputusan. Saat
-              Lean Gain, sebagian kenaikan berat memang lemak; yang perlu diputuskan adalah berapa
-              banyak yang masih bersedia Anda terima sebelum beralih ke Cut. Menetapkannya SEKARANG,
-              saat angkanya belum naik, jauh lebih mudah daripada memutuskannya nanti — dan itulah
-              sebabnya keputusan ini hampir selalu tertunda.
-            </Text>
-
-            {status === 'gagal' ? (
-              <Panel nada="bahaya" style={{ gap: spacing.xs }}>
-                <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
-                  Gagal menyimpan
-                </Text>
-                <Text style={{ ...typography.caption, color: colors.teksSamar }}>
-                  Angka Anda masih ada di layar ini. Coba lagi.
-                </Text>
-              </Panel>
-            ) : null}
-
-            <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
-              <Tombol
-                label={labelSimpan(status)}
-                onPress={() => void simpan()}
-                nonaktif={!valid}
-                memproses={status === 'menyimpan'}
-                berhasil={status === 'tersimpan'}
-              />
-
-              <Tombol
-                varian="teks"
-                ukuran="kecil"
-                nada="netral"
-                label="Batal"
-                nonaktif={terkunci}
-                sejajar="tengah"
-                onPress={onTutup}
-              />
-            </View>
-          </ScrollView>
+            </Pressable>
+          ))}
         </View>
       </View>
-    </Modal>
+
+      {/* Apa arti batas ini, supaya tidak terbaca sebagai target. */}
+      <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+        Batas ini bukan target dan bukan penilaian atas tubuh Anda — ia garis keputusan. Saat
+        Lean Gain, sebagian kenaikan berat memang lemak; yang perlu diputuskan adalah berapa
+        banyak yang masih bersedia Anda terima sebelum beralih ke Cut. Menetapkannya SEKARANG,
+        saat angkanya belum naik, jauh lebih mudah daripada memutuskannya nanti — dan itulah
+        sebabnya keputusan ini hampir selalu tertunda.
+      </Text>
+
+      {status === 'gagal' ? (
+        <Panel nada="bahaya" style={{ gap: spacing.xs }}>
+          <Text style={{ ...typography.label, color: colors.status.bahaya.teks }}>
+            Gagal menyimpan
+          </Text>
+          <Text style={{ ...typography.caption, color: colors.teksSamar }}>
+            Angka Anda masih ada di layar ini. Coba lagi.
+          </Text>
+        </Panel>
+      ) : null}
+
+      <View style={{ gap: spacing.md, paddingBottom: spacing.xl }}>
+        <Tombol
+          label={labelSimpan(status)}
+          onPress={() => void simpan()}
+          nonaktif={!valid}
+          memproses={status === 'menyimpan'}
+          berhasil={status === 'tersimpan'}
+        />
+
+        <Tombol
+          varian="teks"
+          ukuran="kecil"
+          nada="netral"
+          label="Batal"
+          nonaktif={terkunci}
+          sejajar="tengah"
+          onPress={onTutup}
+        />
+      </View>
+    </KerangkaSheet>
   );
 }
 
