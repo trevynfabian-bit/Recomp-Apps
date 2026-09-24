@@ -176,6 +176,24 @@ begin
   assert (select count(*) from public.workout_sets) = 0, 'B seharusnya tidak melihat set A';
 end $$;
 
+-- Set milik sesi orang lain ditolak, bahkan dari jalur server: RLS set
+-- memakai user_id-nya sendiri, jadi set ber-user_id B pada sesi milik A
+-- akan tampil di akun B. Dijaga pemicu `workout_sets_sesuai_pemilik` (23514).
+reset role;
+set role service_role;
+do $$
+declare v_kode text; v_workout uuid;
+begin
+  select id into v_workout from public.workouts where user_id = 'c1d1e1f1-0000-0000-0000-000000000001' limit 1;
+  assert v_workout is not null, 'uji butuh satu sesi milik A';
+  begin
+    insert into public.workout_sets (workout_id, user_id, latihan, latihan_ke, set_ke, reps)
+    values (v_workout, 'c2d2e2f2-0000-0000-0000-000000000002', 'Bench Press (Barbell)', 99, 1, 5);
+  exception when others then v_kode := sqlstate;
+  end;
+  assert v_kode = '23514', format('set ber-pemilik lain: %s, seharusnya 23514', coalesce(v_kode, 'diterima'));
+end $$;
+
 reset role;
 reset request.jwt.claim.sub;
 delete from auth.users where id in ('c1d1e1f1-0000-0000-0000-000000000001', 'c2d2e2f2-0000-0000-0000-000000000002');
