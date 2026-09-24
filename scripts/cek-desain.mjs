@@ -44,41 +44,66 @@ function berkasTsx(dir) {
 
 console.log('Satu angka utama per layar');
 const layar = berkasTsx('app');
-// `KartuHero` membungkus tepat satu `HeroNumber`, jadi dihitung sebagai satu angka utama.
-const hitung = (p) => (readFileSync(p, 'utf8').match(/<(HeroNumber|KartuHero)\b/g) ?? []).length;
-for (const p of layar) {
-  const n = hitung(p);
-  if (n > 0) cek(`${p}: ${n} angka utama`, n === 1, 'lebih dari satu');
+
+/**
+ * Jumlah ELEMEN JSX angka utama di berkas (AST, bukan teks): komentar dan
+ * string yang menyebut `<HeroNumber` tidak ikut terhitung. Cabang alternatif
+ * yang tidak menampilkan angka memakai `KartuHero pengganti`, bukan hero kedua.
+ */
+function hitungElemen(berkas, nama) {
+  const sf = ts.createSourceFile(berkas, readFileSync(berkas, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let n = 0;
+  (function kunjungi(node) {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && nama.includes(node.tagName.getText(sf))) n += 1;
+    ts.forEachChild(node, kunjungi);
+  })(sf);
+  return n;
 }
-cek('tidak ada layar dengan lebih dari satu angka utama', layar.every((p) => hitung(p) <= 1));
-// Layar data: angka yang menjawab "berapa" untuk layar itu.
-const LAYAR_DATA = [
-  'app/(tabs)/index.tsx', // sisa kalori hari ini
-  'app/(tabs)/tren.tsx', // rata-rata 7 hari
-  'app/(tabs)/budget.tsx', // sisa jatah minggu ini
-  'app/ukuran.tsx', // pinggang
-  'app/latihan.tsx',
-  'app/sumber-data.tsx',
-  'app/target-harian.tsx', // target kalori hari ini
-];
-for (const p of LAYAR_DATA) cek(`layar data ${p} punya angka utama`, hitung(p) === 1, `${hitung(p)} angka utama`);
-// Keputusan Fase 4 (docs/desain/bab-desain-prd.md 8.6): aturan dipertahankan
-// dan dipertegas. Angka utama hanya di layar data (plus dua layar acuan), dan
-// selalu lewat KartuHero supaya bingkainya sama di semua layar.
-const HERO_BOLEH = [...LAYAR_DATA, 'app/arah-visual.tsx', 'app/peraga.tsx'];
-const heroLiar = layar.filter((p) => hitung(p) > 0 && !HERO_BOLEH.includes(p));
+const hitung = (p) => hitungElemen(p, ['HeroNumber', 'KartuHero']);
+
+/**
+ * Layar yang WAJIB punya tepat satu angka utama, masing-masing dengan angka
+ * yang dijawabnya. Layar acuan (arah-visual, peraga) boleh punya satu untuk
+ * memperagakannya. Semua layar lain tidak boleh punya.
+ */
+const LAYAR_DATA = {
+  'app/(tabs)/index.tsx': 'sisa kalori hari ini',
+  'app/(tabs)/tren.tsx': 'rata-rata berat 7 hari',
+  'app/(tabs)/budget.tsx': 'sisa jatah minggu ini',
+  'app/ukuran.tsx': 'lingkar pinggang terakhir',
+  'app/latihan.tsx': 'jumlah sesi pekan ini',
+  'app/sumber-data.tsx': 'sumber aktif',
+  'app/target-harian.tsx': 'target kalori hari ini',
+};
+const LAYAR_ACUAN = {
+  'app/arah-visual.tsx': 'memperagakan komposisi hero',
+  'app/peraga.tsx': 'memperagakan KartuHero',
+};
+const terdaftar = [...Object.keys(LAYAR_DATA), ...Object.keys(LAYAR_ACUAN)];
+const basi = terdaftar.filter((p) => !layar.includes(p));
+cek('daftar layar hero tidak basi (semua berkasnya ada)', basi.length === 0, basi.join(', '));
+
+for (const [p, angka] of Object.entries(LAYAR_DATA)) {
+  if (layar.includes(p)) cek(`${p}: satu angka utama (${angka})`, hitung(p) === 1, `${hitung(p)} angka utama`);
+}
+for (const p of Object.keys(LAYAR_ACUAN)) {
+  if (layar.includes(p)) cek(`${p}: paling banyak satu angka utama`, hitung(p) <= 1, `${hitung(p)}`);
+}
+// Keputusan Fase 4 (bab Desain 8.6): angka utama hanya di layar data dan
+// layar acuan, dan selalu lewat KartuHero supaya bingkainya sama.
+const heroLiar = layar.filter((p) => hitung(p) > 0 && !terdaftar.includes(p));
 cek('angka utama hanya di layar data (dan layar acuan)', heroLiar.length === 0, heroLiar.join(', '));
-const heroTelanjang = layar.filter((p) => /<HeroNumber\b/.test(readFileSync(p, 'utf8')));
+const heroTelanjang = layar.filter((p) => hitungElemen(p, ['HeroNumber']) > 0);
 cek('layar memakai KartuHero, bukan HeroNumber telanjang', heroTelanjang.length === 0, heroTelanjang.join(', '));
+const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumber.tsx') && !p.endsWith('KartuHero.tsx'));
+const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
+cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
 // Angka hero rakitan sendiri: gaya `hero` di luar komponen angka utama & PemilihAngka.
 const HERO_GAYA_BOLEH = ['HeroNumber.tsx', 'KartuHero.tsx', 'Pemilih.tsx'];
 const heroRakitan = [...layar, ...berkasTsx('src/components')]
   .filter((p) => !HERO_GAYA_BOLEH.some((b) => p.endsWith(b)))
   .flatMap((p) => cariBaris(p, /typography\.hero\b/));
 cek('tidak ada angka hero rakitan sendiri (typography.hero)', heroRakitan.length === 0, heroRakitan.join(' | '));
-const komponen = berkasTsx('src/components').filter((p) => !p.endsWith('HeroNumber.tsx') && !p.endsWith('KartuHero.tsx'));
-const komponenBerhero = komponen.filter((p) => hitung(p) > 0);
-cek('komponen tidak membawa angka utama sendiri', komponenBerhero.length === 0, komponenBerhero.join(', '));
 
 console.log('\nDua mode dari satu palet');
 const app = JSON.parse(readFileSync('app.json', 'utf8')).expo;
