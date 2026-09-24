@@ -20,6 +20,7 @@ import { SUMBER_HASIL_LAB } from '@/lib/sumber';
 import { useHasilLab } from '@/state/hasilLab';
 import { colors, KONTROL_RAPAT, radius, sisaSentuh, spacing, typography, ukuranIkon } from '@/theme';
 import { useJagaKeluar } from '@/lib/jagaKeluar';
+import { useKembali } from '@/lib/kembali';
 
 type GalatLab = Extract<HasilPeriksaLab, { sah: false }>['galat'];
 
@@ -52,6 +53,7 @@ function hariIniTertulis(): string {
 export default function TambahHasilLabScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const kembaliSatuLangkah = useKembali();
   const { riwayat, status: statusMuat, tambah, ubah: ubahEntri } = useHasilLab();
   // Dengan `id`: mengubah entri yang ada; tanpa: menambah yang baru.
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -109,7 +111,7 @@ export default function TambahHasilLabScreen() {
       if (asal) await ubahEntri(asal.id, hasil.hasil);
       else await tambah(hasil.hasil);
       ketukBerhasil();
-      router.back();
+      kembaliSatuLangkah();
     } catch (e) {
       setPesanGagal(e instanceof KesalahanHasilLab ? e.message : 'Belum tersimpan. Periksa koneksi, lalu coba lagi; isian Anda masih di sini.');
       setStatus('gagal');
@@ -118,7 +120,7 @@ export default function TambahHasilLabScreen() {
 
   function kembali() {
     if (berisi) setKonfirmasiBatal(true);
-    else router.back();
+    else kembaliSatuLangkah();
   }
   // Geser-kembali dan tombol kembali Android juga melewati konfirmasi yang sama.
   useJagaKeluar(berisi, () => setKonfirmasiBatal(true));
@@ -140,7 +142,7 @@ export default function TambahHasilLabScreen() {
         <Text style={{ ...typography.body, color: colors.teksRedup }}>
           Mungkin sudah dihapus. Riwayat hasil lab lainnya tidak berubah.
         </Text>
-        <TombolBertepi label="Kembali ke riwayat" onPress={() => router.back()} />
+        <TombolBertepi label="Kembali ke riwayat" onPress={() => kembaliSatuLangkah()} />
       </View>
     );
   }
@@ -281,7 +283,7 @@ export default function TambahHasilLabScreen() {
             label="Buang & kembali"
             onPress={() => {
               setKonfirmasiBatal(false);
-              router.back();
+              kembaliSatuLangkah();
             }}
           />
         </View>

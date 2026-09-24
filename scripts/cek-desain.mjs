@@ -193,6 +193,13 @@ const ruteTumpukan = readdirSync('app')
   .map((n) => n.replace('.tsx', ''));
 const tanpaTransisi = ruteTumpukan.filter((r) => !tabelRute.includes(r));
 cek('setiap rute tumpukan punya pola transisi (dorong/modal)', tanpaTransisi.length === 0, tanpaTransisi.join(', '));
+const kembaliMentah = [...berkasTs('app'), ...berkasTs('src')]
+  .filter((p) => !p.endsWith(join('lib', 'kembali.ts')))
+  .flatMap((p) => cariBaris(p, /router\.back\(\)/));
+cek('kembali lewat useKembali (satu langkah, ada induk bila tanpa riwayat)', kembaliMentah.length === 0, kembaliMentah.join(' | '));
+const indukTeks = readFileSync(join('src', 'lib', 'kembali.ts'), 'utf8');
+const tanpaInduk = ruteTumpukan.filter((r) => !indukTeks.includes(`'/${r}':`));
+cek('setiap rute tumpukan punya induk untuk kembali tanpa riwayat', tanpaInduk.length === 0, tanpaInduk.join(', '));
 const tanpaHeader = layar
   .filter((p) => !/_layout\.tsx$|masuk\.tsx$/.test(p))
   .filter((p) => (readFileSync(p, 'utf8').match(/<HeaderLayar\b/g) ?? []).length === 0);

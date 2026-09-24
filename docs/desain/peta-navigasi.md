@@ -161,3 +161,24 @@ Menyelesaikan N7: dulu `tambah-hasil-lab` naik dari bawah tetapi tetap
 memakai `‹` dan geser-kanan, jadi animasi, gestur, dan tombolnya tidak sepakat.
 `HeaderLayar jenisKembali="tutup"` memberi `✕`. `cek:desain` menolak rute
 tumpukan yang tidak ada di tabel.
+
+## 9. Kembali satu langkah
+
+`useKembali()` (`src/lib/kembali.ts`) adalah satu-satunya cara kembali:
+ke layar sebelumnya bila ada riwayat, atau naik ke **induk logis** layar itu
+bila tidak ada (tautan langsung, URL di web, rute yang dipulihkan setelah skema
+berganti). Dulu `router.back()` tanpa riwayat tidak melakukan apa-apa.
+
+| Layar | Induk |
+|---|---|
+| Ukuran | Tren |
+| Latihan | Sumber data |
+| Tambah/Ubah hasil lab | Hasil lab |
+| Sumber data, Impor riwayat, Widget & pengingat, Target harian, Privasi, Hasil lab, Arah visual, Peraga | Setelan |
+
+Dipakai `HeaderLayar` dan setiap aksi "selesai lalu kembali" (simpan, hapus,
+batal). Diuji di web: `/ukuran`, `/tambah-hasil-lab`, `/latihan` dibuka
+langsung lalu kembali → `/tren`, `/hasil-lab`, `/sumber-data`; dengan riwayat,
+Tren → Ukuran → kembali → Tren. Tombol kembali Android di tab mengikuti
+perilaku bawaan tab (ke tab pertama, lalu keluar). `cek:desain` menolak
+`router.back()` langsung dan rute tumpukan tanpa induk.

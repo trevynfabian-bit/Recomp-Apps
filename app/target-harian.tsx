@@ -25,6 +25,7 @@ import { useTarget, type PerubahanTarget } from '@/state/target';
 import { bobot, colors, KONTROL_RAPAT, KONTROL_SEGMEN, radius, sisaSentuh, spacing, TAP_MIN, tint, typography, ukuran } from '@/theme';
 import type { DayType } from '@/types/domain';
 import { useJagaKeluar } from '@/lib/jagaKeluar';
+import { useKembali } from '@/lib/kembali';
 
 const FASE: Fase[] = ['Maintenance', 'Lean Gain', 'Cut'];
 
@@ -78,6 +79,7 @@ const PESAN_GAGAL_SIMPAN = 'Belum tersimpan. Periksa koneksi, lalu coba lagi; is
 export default function TargetHarianScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const kembaliSatuLangkah = useKembali();
   const { profil, riwayatFase } = useProfil();
   const { tipeHari, target, cariTarget, simpanTarget } = useTarget();
   const [fase, setFase] = useState<Fase>(profil.fase_aktif);
@@ -187,7 +189,7 @@ export default function TargetHarianScreen() {
 
   function kembali() {
     if (menyunting && berubah.length > 0) setKonfirmasiKeluar(true);
-    else router.back();
+    else kembaliSatuLangkah();
   }
   // Geser-kembali dan tombol kembali Android juga melewati konfirmasi yang sama.
   useJagaKeluar(menyunting && berubah.length > 0, () => setKonfirmasiKeluar(true));
@@ -428,7 +430,7 @@ export default function TargetHarianScreen() {
             onPress={() => {
               setKonfirmasiKeluar(false);
               buangSemua();
-              router.back();
+              kembaliSatuLangkah();
             }}
           />
         </View>

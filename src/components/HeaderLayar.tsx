@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useKembali } from '@/lib/kembali';
 import { colors, spacing, typography } from '@/theme';
 import { TombolIkon } from './Tombol';
 
@@ -34,14 +34,14 @@ type Props = {
  * setiap layar. Jarak di bawahnya diatur kerangka layar (`gap: xl`), bukan di sini.
  */
 export function HeaderLayar({ judul, subjudul, kembali, jenisKembali = 'kembali', aksi, bawah }: Props) {
-  const router = useRouter();
+  const kembaliSatuLangkah = useKembali();
   return (
     <View style={{ flexDirection: 'row', alignItems: kembali ? 'center' : 'flex-start', gap: spacing.md }}>
       {kembali ? (
         <TombolIkon
           ikon={jenisKembali === 'tutup' ? 'close' : 'chevron-back'}
           aksesLabel={jenisKembali === 'tutup' ? 'Tutup' : 'Kembali'}
-          onPress={typeof kembali === 'function' ? kembali : () => router.back()}
+          onPress={typeof kembali === 'function' ? kembali : kembaliSatuLangkah}
         />
       ) : null}
       <View style={{ flex: 1, gap: spacing.xxs }}>
